@@ -5,143 +5,135 @@ namespace FF
 {
     public class AutoShooter : MonoBehaviour
     {
-        Weapon weaponSO;
-        Transform muzzle;
-        PlayerStats stats;
-        AudioSource audioSource;
-        Rigidbody2D playerBody;
+        private Weapon _weapon;
+        private Transform _muzzle;
+        private PlayerStats _stats;
+        private AudioSource _audioSource;
+        private Rigidbody2D _playerBody;
 
-        float timer;
-        bool fireHeld;     
-        bool firePressed;  // For semi-auto detecting click
+        private float _fireTimer;
+        private bool _isFireHeld;
+        private bool _isFirePressed;
 
-        float recoilTimer;
-        float currentSpread;
-        float currentRecoil;  // visual recoil
-        Vector3 baseLocalPos;
-        Transform gunPivot;
+        private float _recoilTimer;
+        private float _currentSpread;
+        private float _currentRecoil;
+        private Vector3 _baseLocalPosition;
+        private Transform _gunPivot;
 
-        void Awake()
+        private void Awake()
         {
-            stats = GetComponentInParent<PlayerStats>();
-            audioSource = GetComponent<AudioSource>();
-            playerBody = GetComponentInParent<Rigidbody2D>();
+            _stats = GetComponentInParent<PlayerStats>();
+            _audioSource = GetComponent<AudioSource>();
+            _playerBody = GetComponentInParent<Rigidbody2D>();
         }
 
         public void InitializeRecoil(Transform gunPivotTransform)
         {
-            gunPivot = gunPivotTransform;
+            _gunPivot = gunPivotTransform;
         }
 
-        public void SetWeapon(Weapon so, Transform muzzleTransform)
+        public void SetWeapon(Weapon weapon, Transform muzzleTransform)
         {
-            weaponSO = so;
-            muzzle = muzzleTransform;
-            currentSpread = weaponSO.baseSpread;
+            _weapon = weapon;
+            _muzzle = muzzleTransform;
+            _currentSpread = _weapon.baseSpread;
 
-            baseLocalPos = gunPivot.localPosition;  // good
-            currentRecoil = 0f;                     // reset recoil
-            recoilTimer = 0f;                       // reset recovery curve
-            gunPivot.localPosition = baseLocalPos;  // reset drift
-        }
-
-        // Input System call from PlayerController
-        public void OnFire(InputValue v)
-        {
-            float val = v.Get<float>();
-
-            firePressed = val > 0.5f && !fireHeld; // true ONLY on first press
-            fireHeld = val > 0.5f;
-        }
-
-        void Update()
-        {
-            if (weaponSO == null || muzzle == null) return;
-
-            timer += Time.deltaTime;
-
-            float interval = 60f / (weaponSO.rpm * stats.FireRateMult);
-
-            bool canShoot = timer >= interval;
-
-            if (canShoot)
+            if (_gunPivot)
             {
-                // Semi-auto: shoot only on press
-                if (!weaponSO.isAuto && firePressed)
+                _baseLocalPosition = _gunPivot.localPosition;
+                _currentRecoil = 0f;
+                _recoilTimer = 0f;
+                _gunPivot.localPosition = _baseLocalPosition;
+            }
+        }
+
+        public void OnFire(InputValue value)
+        {
+            float inputValue = value.Get<float>();
+
+            _isFirePressed = inputValue > 0.5f && !_isFireHeld;
+            _isFireHeld = inputValue > 0.5f;
+        }
+
+        private void Update()
+        {
+            if (_weapon == null || _muzzle == null || _stats == null)
+                return;
+
+            _fireTimer += Time.deltaTime;
+
+            float rpm = Mathf.Max(_weapon.rpm * _stats.FireRateMult, 0.01f);
+            float interval = 60f / rpm;
+
+            if (_fireTimer >= interval)
+            {
+                if (!_weapon.isAuto && _isFirePressed)
                 {
-                    timer = 0f;
-                    firePressed = false; 
+                    _fireTimer = 0f;
+                    _isFirePressed = false;
                     Shoot();
                 }
 
-                // Auto: shoot while holding
-                if (weaponSO.isAuto && fireHeld)
+                if (_weapon.isAuto && _isFireHeld)
                 {
-                    timer = 0f;
+                    _fireTimer = 0f;
                     Shoot();
                 }
             }
 
-            float movementSpeed = playerBody ? playerBody.linearVelocity.magnitude : 0f;
+            float movementSpeed = _playerBody ? _playerBody.velocity.magnitude : 0f;
             bool isMoving = movementSpeed > 0.1f;
 
-            float targetSpread = weaponSO.baseSpread * (isMoving ? stats.MovementAccuracyPenalty : 1f);
-            currentSpread = Mathf.Lerp(currentSpread, targetSpread, Time.deltaTime * weaponSO.spreadRecoverySpeed);
+            float targetSpread = _weapon.baseSpread * (isMoving ? _stats.MovementAccuracyPenalty : 1f);
+            _currentSpread = Mathf.Lerp(_currentSpread, targetSpread, Time.deltaTime * _weapon.spreadRecoverySpeed);
 
             UpdateRecoil();
         }
 
-        void Shoot()
+        private void Shoot()
         {
-            currentSpread += weaponSO.spreadIncreasePerShot;
-            float maxSpread = weaponSO.maxSpread * (playerBody && playerBody.linearVelocity.magnitude > 0.1f ? stats.MovementAccuracyPenalty : 1f);
-            currentSpread = Mathf.Clamp(currentSpread, weaponSO.baseSpread, maxSpread);
+            _currentSpread += _weapon.spreadIncreasePerShot;
 
-            // Get random angle inside cone
-            float angleOffset = Random.Range(-currentSpread, currentSpread);
+            bool isMoving = _playerBody && _playerBody.velocity.magnitude > 0.1f;
+            float maxSpread = _weapon.maxSpread * (isMoving ? _stats.MovementAccuracyPenalty : 1f);
+            _currentSpread = Mathf.Clamp(_currentSpread, _weapon.baseSpread, maxSpread);
 
-            // Convert to quaternion
-            Quaternion spreadRot = muzzle.rotation * Quaternion.AngleAxis(angleOffset, Vector3.forward);
+            float angleOffset = Random.Range(-_currentSpread, _currentSpread);
+            Quaternion spreadRotation = _muzzle.rotation * Quaternion.AngleAxis(angleOffset, Vector3.forward);
 
-            GameObject b = Instantiate(weaponSO.bulletPrefab, muzzle.position, spreadRot);
+            GameObject bulletInstance = Instantiate(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
 
-            if (b.TryGetComponent<Bullet>(out var bullet))
-                bullet.SetDamage(Mathf.RoundToInt(weaponSO.damage * stats.DamageMult));
+            if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
+                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * _stats.DamageMult));
 
-            if (weaponSO.fireSFX)
-                audioSource.PlayOneShot(weaponSO.fireSFX);
+            if (_weapon.fireSFX && _audioSource)
+                _audioSource.PlayOneShot(_weapon.fireSFX);
 
-            if (weaponSO.muzzleFlash)
-                Instantiate(weaponSO.muzzleFlash, muzzle.position, muzzle.rotation);
+            if (_weapon.muzzleFlash)
+                Instantiate(_weapon.muzzleFlash, _muzzle.position, _muzzle.rotation);
 
-            currentRecoil = weaponSO.recoilAmount;
-            recoilTimer = 0f;
+            _currentRecoil = _weapon.recoilAmount;
+            _recoilTimer = 0f;
         }
 
-
-        void UpdateRecoil()
+        private void UpdateRecoil()
         {
-            if (!gunPivot) return;
+            if (!_gunPivot)
+                return;
 
-            // Always reset to base position
-            gunPivot.localPosition = baseLocalPos;
+            _gunPivot.localPosition = _baseLocalPosition;
 
-            // Smooth recoil push
-            recoilTimer += Time.deltaTime * 10f;
-            float kick = Mathf.Lerp(currentRecoil, 0f, recoilTimer);
+            _recoilTimer += Time.deltaTime * 10f;
+            float kick = Mathf.Lerp(_currentRecoil, 0f, _recoilTimer);
 
-            // Recoil in world direction
-            Vector3 recoilDir = -gunPivot.right * (kick * 0.1f);
+            Vector3 recoilDirection = -_gunPivot.right * (kick * 0.1f);
+            Transform pivotParent = _gunPivot.parent;
+            Vector3 localRecoil = pivotParent ? pivotParent.InverseTransformDirection(recoilDirection) : recoilDirection;
 
-            // Convert recoil direction to local space so it works even when flipping left/right
-            Vector3 localRecoil = gunPivot.parent.InverseTransformDirection(recoilDir);
+            _gunPivot.localPosition = _baseLocalPosition + localRecoil;
 
-            // Apply full local offset
-            gunPivot.localPosition = baseLocalPos + localRecoil;
-
-            // Smoothly return recoil to zero
-            currentRecoil = Mathf.Lerp(currentRecoil, 0f, Time.deltaTime * weaponSO.recoilRecoverySpeed);
+            _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, Time.deltaTime * _weapon.recoilRecoverySpeed);
         }
-
     }
 }
