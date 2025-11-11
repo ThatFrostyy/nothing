@@ -7,7 +7,7 @@ namespace FF
     {
         private Weapon _weapon;
         private Transform _muzzle;
-        private PlayerStats _stats;
+        private ICombatStats _stats;
         private AudioSource _audioSource;
         private Rigidbody2D _playerBody;
 
@@ -16,7 +16,7 @@ namespace FF
         private bool _isFirePressed;
 
         private float sustainedFireTime;
-        [SerializeField] float maxSustainedShake = 0.35f; 
+        [SerializeField] float maxSustainedShake = 0.35f;
 
         private float _recoilTimer;
         private float _currentSpread;
@@ -26,9 +26,14 @@ namespace FF
 
         private void Awake()
         {
-            _stats = GetComponentInParent<PlayerStats>();
+            _stats = GetComponentInParent<ICombatStats>();
             _audioSource = GetComponent<AudioSource>();
             _playerBody = GetComponentInParent<Rigidbody2D>();
+        }
+
+        public void SetStatsProvider(ICombatStats stats)
+        {
+            _stats = stats;
         }
 
         public void InitializeRecoil(Transform gunPivotTransform)
@@ -51,17 +56,29 @@ namespace FF
             }
         }
 
+        public void SetFireHeld(bool isHeld)
+        {
+            if (isHeld)
+            {
+                if (!_isFireHeld)
+                    _isFirePressed = true;
+            }
+            else
+            {
+                _isFirePressed = false;
+            }
+
+            _isFireHeld = isHeld;
+        }
+
         public void OnFire(InputValue value)
         {
-            float inputValue = value.Get<float>();
-
-            _isFirePressed = inputValue > 0.5f && !_isFireHeld;
-            _isFireHeld = inputValue > 0.5f;
+            SetFireHeld(value.Get<float>() > 0.5f);
         }
 
         private void Update()
         {
-            if (_weapon == null || _muzzle == null || _stats == null)
+            if (_weapon == null || _muzzle == null)
                 return;
 
             if (_isFireHeld && _weapon.isAuto)
@@ -77,7 +94,8 @@ namespace FF
 
             _fireTimer += Time.deltaTime;
 
-            float rpm = Mathf.Max(_weapon.rpm * _stats.FireRateMult, 0.01f);
+            float rpmMultiplier = _stats?.GetFireRateMultiplier() ?? 1f;
+            float rpm = Mathf.Max(_weapon.rpm * rpmMultiplier, 0.01f);
             float interval = 60f / rpm;
 
             if (_fireTimer >= interval)
@@ -99,7 +117,8 @@ namespace FF
             float movementSpeed = _playerBody ? _playerBody.linearVelocity.magnitude : 0f;
             bool isMoving = movementSpeed > 0.1f;
 
-            float targetSpread = _weapon.baseSpread * (isMoving ? _stats.MovementAccuracyPenalty : 1f);
+            float movementPenalty = _stats?.GetMovementAccuracyPenalty() ?? 1f;
+            float targetSpread = _weapon.baseSpread * (isMoving ? movementPenalty : 1f);
             _currentSpread = Mathf.Lerp(_currentSpread, targetSpread, Time.deltaTime * _weapon.spreadRecoverySpeed);
 
             UpdateRecoil();
@@ -110,7 +129,8 @@ namespace FF
             _currentSpread += _weapon.spreadIncreasePerShot;
 
             bool isMoving = _playerBody && _playerBody.linearVelocity.magnitude > 0.1f;
-            float maxSpread = _weapon.maxSpread * (isMoving ? _stats.MovementAccuracyPenalty : 1f);
+            float movementPenalty = _stats?.GetMovementAccuracyPenalty() ?? 1f;
+            float maxSpread = _weapon.maxSpread * (isMoving ? movementPenalty : 1f);
             _currentSpread = Mathf.Clamp(_currentSpread, _weapon.baseSpread, maxSpread);
 
             float angleOffset = Random.Range(-_currentSpread, _currentSpread);
@@ -119,7 +139,10 @@ namespace FF
             GameObject bulletInstance = Instantiate(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
 
             if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
-                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * _stats.DamageMult));
+            {
+                float damageMultiplier = _stats?.GetDamageMultiplier() ?? 1f;
+                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier));
+            }
 
             if (_weapon.fireSFX && _audioSource)
                 _audioSource.PlayOneShot(_weapon.fireSFX);

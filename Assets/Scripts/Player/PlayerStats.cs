@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FF
 {
-    public class PlayerStats : MonoBehaviour
+    public class PlayerStats : MonoBehaviour, ICombatStats
     {
         [Header("Base Stats")]
         public float MoveSpeed = 6f;
@@ -20,5 +20,9 @@ namespace FF
         public float GetMoveSpeed() => MoveSpeed * MoveMult;
         public float GetRPM() => FireRateRPM * FireRateMult;
         public int GetDamageInt() => Mathf.RoundToInt(Damage * DamageMult);
+
+        public float GetDamageMultiplier() => DamageMult;
+        public float GetFireRateMultiplier() => FireRateMult;
+        public float GetMovementAccuracyPenalty() => MovementAccuracyPenalty;
     }
 }
