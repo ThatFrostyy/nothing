@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 namespace FF
 {
     public class EnemySpawner : MonoBehaviour
@@ -9,7 +8,6 @@ namespace FF
         [SerializeField] Transform player;
         [SerializeField] float spawnRadius = 16f;
         [SerializeField] AnimationCurve countByWave = AnimationCurve.Linear(1, 6, 20, 60);
-
 
         public void SpawnWave(int wave)
         {
@@ -21,7 +19,11 @@ namespace FF
             {
                 float a = Random.value * Mathf.PI * 2f;
                 Vector2 pos = (Vector2)player.position + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * spawnRadius;
-                Instantiate(enemyPrefab, pos, Quaternion.identity);
+                var enemyInstance = Instantiate(enemyPrefab, pos, Quaternion.identity);
+                if (enemyInstance.TryGetComponent<Enemy>(out var enemy))
+                {
+                    enemy.Initialize(player);
+                }
             }
         }
     }

@@ -11,6 +11,9 @@ namespace FF
         GameObject currentWeaponInstance;
         Transform muzzle;
 
+        public Transform GunPivot => gunPivot;
+        public AutoShooter Shooter => shooter;
+
         public void Equip(Weapon newWeapon)
         {
             if (currentWeaponInstance != null)
