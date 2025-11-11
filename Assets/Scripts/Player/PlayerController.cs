@@ -1,122 +1,96 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 namespace FF
 {
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
-        [SerializeField] Camera cam;
-        [SerializeField] AutoShooter autoShooter;
-        [SerializeField] Transform gunPivot;
-        [SerializeField] Transform playerVisual;
+        [SerializeField] private Camera _camera;
+        [SerializeField] private AutoShooter _autoShooter;
+        [SerializeField] private Transform _gunPivot;
+        [SerializeField] private Transform _playerVisual;
 
-        [SerializeField] float acceleration = 0.18f;
-        [SerializeField] float bodyTiltDegrees = 15f;
+        [SerializeField] private float _acceleration = 0.18f;
+        [SerializeField] private float _bodyTiltDegrees = 15f;
 
-        Rigidbody2D rb;
-        PlayerStats stats;
-        Vector2 moveInput;
+        private Rigidbody2D _rigidbody;
+        private PlayerStats _stats;
+        private Vector2 _moveInput;
 
-        void Awake()
+        private void Awake()
         {
-            rb = GetComponent<Rigidbody2D>();
-            stats = GetComponent<PlayerStats>();
-            if (!cam) cam = Camera.main;
+            _rigidbody = GetComponent<Rigidbody2D>();
+            _stats = GetComponent<PlayerStats>();
+            _camera = _camera ? _camera : Camera.main;
         }
 
-        void Update()
+        private void Update()
         {
-            AimGunAtMouse();
+            AimGunAtPointer();
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
-            float targetSpeed = stats.GetMoveSpeed();
-            Vector2 targetVelocity = moveInput.normalized * targetSpeed;
+            float targetSpeed = _stats.GetMoveSpeed();
+            Vector2 targetVelocity = _moveInput.normalized * targetSpeed;
 
-            // Smooth acceleration/deceleration
-            rb.linearVelocity = Vector2.Lerp(
-                rb.linearVelocity,
+            _rigidbody.velocity = Vector2.Lerp(
+                _rigidbody.velocity,
                 targetVelocity,
-                acceleration  
+                _acceleration
             );
 
-            HandleBodyTilt();
+            UpdateBodyTilt();
         }
 
-        void HandleBodyTilt()
+        private void UpdateBodyTilt()
         {
-            if (!playerVisual) return;
+            if (!_playerVisual)
+                return;
 
-            float speed = rb.linearVelocity.magnitude;
-            float maxSpeed = stats.GetMoveSpeed();
+            float speed = _rigidbody.velocity.magnitude;
+            float maxSpeed = Mathf.Max(_stats.GetMoveSpeed(), Mathf.Epsilon);
+            float normalizedSpeed = speed / maxSpeed;
 
-            float normalized = speed / maxSpeed; // 0 to 1
-
-            float targetTilt;
-
-            // Logic for tilt behavior
-            if (speed > 0.1f)
-            {
-                // If accelerating, tilt backward
-                targetTilt = -bodyTiltDegrees * normalized;
-            }
-            else
-            {
-                // When stopping, tilt forward slightly before settling
-                targetTilt = bodyTiltDegrees * 0.3f;
-            }
-
-            float horizontal = moveInput.x;
-
-            // Lean left/right slightly based on horizontal movement
-            float sideTilt = horizontal * (bodyTiltDegrees * 0.5f);
-
+            float targetTilt = speed > 0.1f ? -_bodyTiltDegrees * normalizedSpeed : _bodyTiltDegrees * 0.3f;
+            float sideTilt = _moveInput.x * (_bodyTiltDegrees * 0.5f);
             targetTilt += sideTilt;
 
-            // Current rotation angle (in degrees)
-            float currentZ = playerVisual.localEulerAngles.z;
-
-            // Convert range 0-360 to -180 to 180
+            float currentZ = _playerVisual.localEulerAngles.z;
             if (currentZ > 180f)
                 currentZ -= 360f;
 
-            // Smooth transition
             float newZ = Mathf.Lerp(currentZ, targetTilt, 0.15f);
-            playerVisual.localRotation = Quaternion.Euler(0, 0, newZ);
+            _playerVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
         }
 
-        void AimGunAtMouse()
+        private void AimGunAtPointer()
         {
-            if (!gunPivot) return;
+            if (!_gunPivot || _camera == null)
+                return;
 
-            Vector3 mousePos = cam.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            Vector2 dir = mousePos - gunPivot.position;
+            Vector2 mousePosition = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
+            Vector3 worldMouse = _camera.ScreenToWorldPoint(mousePosition);
+            Vector2 direction = worldMouse - _gunPivot.position;
 
-            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            gunPivot.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            _gunPivot.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
-            // Flip gun sprite if aiming left
-            if (dir.x < 0)
-            {
-                gunPivot.localScale = new Vector3(1, -1, 1);
-                playerVisual.localScale = new Vector3(-1, 1, 1);
-            }
-            else
-            {
-                gunPivot.localScale = new Vector3(1, 1, 1);
-                playerVisual.localScale = new Vector3(1, 1, 1);
-            }
+            bool isAimingLeft = direction.x < 0f;
+            _gunPivot.localScale = isAimingLeft ? new Vector3(1f, -1f, 1f) : Vector3.one;
+            if (_playerVisual)
+                _playerVisual.localScale = isAimingLeft ? new Vector3(-1f, 1f, 1f) : Vector3.one;
         }
 
-        public void OnMove(InputValue v) => moveInput = v.Get<Vector2>();
-
-        public void OnAttack(InputValue v)
+        public void OnMove(InputValue value)
         {
-            autoShooter.OnFire(v);
+            _moveInput = value.Get<Vector2>();
         }
 
+        public void OnAttack(InputValue value)
+        {
+            _autoShooter.OnFire(value);
+        }
     }
 }
