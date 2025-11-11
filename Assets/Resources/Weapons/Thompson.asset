@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
+  m_Name: Thompson
+  m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
+  weaponName: Thompson
+  fireSFX: {fileID: 8300000, guid: 81d8f59cbe58c564c8aed1141384d4a5, type: 3}
+  muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
+  recoilAmount: 6
+  recoilRecoverySpeed: 10
+  bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
+  weaponPrefab: {fileID: 7922939727332240829, guid: 88b3a3721e66f0e4894347f48bdb0069, type: 3}
+  rpm: 450
+  damage: 10
+  recoilKick: 4
+  isAuto: 1
+  fireCooldown: 0.1
+  baseSpread: 1.5
+  maxSpread: 6
+  spreadIncreasePerShot: 0.5
+  spreadRecoverySpeed: 2
