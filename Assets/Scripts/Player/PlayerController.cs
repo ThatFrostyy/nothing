@@ -35,8 +35,8 @@ namespace FF
             float targetSpeed = _stats.GetMoveSpeed();
             Vector2 targetVelocity = _moveInput.normalized * targetSpeed;
 
-            _rigidbody.velocity = Vector2.Lerp(
-                _rigidbody.velocity,
+            _rigidbody.linearVelocity = Vector2.Lerp(
+                _rigidbody.linearVelocity,
                 targetVelocity,
                 _acceleration
             );
@@ -44,12 +44,13 @@ namespace FF
             UpdateBodyTilt();
         }
 
+        #region Private Methods
         private void UpdateBodyTilt()
         {
             if (!_playerVisual)
                 return;
 
-            float speed = _rigidbody.velocity.magnitude;
+            float speed = _rigidbody.linearVelocity.magnitude;
             float maxSpeed = Mathf.Max(_stats.GetMoveSpeed(), Mathf.Epsilon);
             float normalizedSpeed = speed / maxSpeed;
 
@@ -82,7 +83,9 @@ namespace FF
             if (_playerVisual)
                 _playerVisual.localScale = isAimingLeft ? new Vector3(-1f, 1f, 1f) : Vector3.one;
         }
+        #endregion Private Methods
 
+        #region Input System Callbacks
         public void OnMove(InputValue value)
         {
             _moveInput = value.Get<Vector2>();
@@ -92,5 +95,6 @@ namespace FF
         {
             _autoShooter.OnFire(value);
         }
+        #endregion Input System Callbacks
     }
 }

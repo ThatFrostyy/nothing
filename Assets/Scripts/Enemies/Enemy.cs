@@ -14,7 +14,16 @@ namespace FF
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
-            _player = GameObject.FindWithTag("Player")?.transform;
+
+            var playerObject = GameObject.FindWithTag("Player");
+            if (playerObject != null)
+            {
+                _player = playerObject.transform;
+            }
+            else
+            {
+                _player = null;
+            }
         }
 
         private void FixedUpdate()
@@ -23,7 +32,7 @@ namespace FF
                 return;
 
             Vector2 direction = (_player.position - transform.position).normalized;
-            _rigidbody.velocity = direction * _moveSpeed;
+            _rigidbody.linearVelocity = direction * _moveSpeed;
             transform.right = direction;
         }
 

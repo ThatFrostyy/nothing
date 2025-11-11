@@ -15,6 +15,9 @@ namespace FF
         private bool _isFireHeld;
         private bool _isFirePressed;
 
+        private float sustainedFireTime;
+        [SerializeField] float maxSustainedShake = 0.35f; 
+
         private float _recoilTimer;
         private float _currentSpread;
         private float _currentRecoil;
@@ -61,6 +64,17 @@ namespace FF
             if (_weapon == null || _muzzle == null || _stats == null)
                 return;
 
+            if (_isFireHeld && _weapon.isAuto)
+            {
+                sustainedFireTime += Time.deltaTime;
+                sustainedFireTime = Mathf.Clamp(sustainedFireTime, 0f, 1f);
+            }
+            else
+            {
+                sustainedFireTime -= Time.deltaTime * 1.5f;
+                sustainedFireTime = Mathf.Clamp(sustainedFireTime, 0f, 1f);
+            }
+
             _fireTimer += Time.deltaTime;
 
             float rpm = Mathf.Max(_weapon.rpm * _stats.FireRateMult, 0.01f);
@@ -82,7 +96,7 @@ namespace FF
                 }
             }
 
-            float movementSpeed = _playerBody ? _playerBody.velocity.magnitude : 0f;
+            float movementSpeed = _playerBody ? _playerBody.linearVelocity.magnitude : 0f;
             bool isMoving = movementSpeed > 0.1f;
 
             float targetSpread = _weapon.baseSpread * (isMoving ? _stats.MovementAccuracyPenalty : 1f);
@@ -95,7 +109,7 @@ namespace FF
         {
             _currentSpread += _weapon.spreadIncreasePerShot;
 
-            bool isMoving = _playerBody && _playerBody.velocity.magnitude > 0.1f;
+            bool isMoving = _playerBody && _playerBody.linearVelocity.magnitude > 0.1f;
             float maxSpread = _weapon.maxSpread * (isMoving ? _stats.MovementAccuracyPenalty : 1f);
             _currentSpread = Mathf.Clamp(_currentSpread, _weapon.baseSpread, maxSpread);
 
@@ -112,6 +126,9 @@ namespace FF
 
             if (_weapon.muzzleFlash)
                 Instantiate(_weapon.muzzleFlash, _muzzle.position, _muzzle.rotation);
+
+            float shakeStrength = Mathf.Lerp(0.05f, maxSustainedShake, sustainedFireTime);
+            CameraShake.Shake(shakeStrength, shakeStrength);
 
             _currentRecoil = _weapon.recoilAmount;
             _recoilTimer = 0f;

@@ -116,7 +116,7 @@ MonoBehaviour:
   pickupShrinkSpeed: 12
   pickupFadeSpeed: 8
   shakeDuration: 0.1
-  shakeMagnitude: 0.15
+  shakeMagnitude: 0.25
 --- !u!70 &1813864897909599878
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

@@ -51,22 +51,19 @@ namespace FF
         {
             timer += Time.deltaTime;
 
-            // Hover effect
             float yOffset = Mathf.Sin(timer * hoverSpeed) * hoverAmplitude;
             transform.localPosition = startPos + new Vector3(0, yOffset, 0);
 
-            // Gentle rotation / tilt
             float zRot = Mathf.Sin(timer * rotationSpeed) * rotationAmplitude;
             transform.localRotation = Quaternion.Euler(0, 0, zRot);
 
-            // Pulse scale
             float scalePulse = 1f + Mathf.Sin(timer * pulseSpeed) * pulseAmplitude;
             transform.localScale = startScale * scalePulse;
         }
 
-        void PickupAnimation()
+        #region Pickup
+        private void PickupAnimation()
         {
-            // Shrink toward zero
             transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, Time.deltaTime * pickupShrinkSpeed);
 
             if (sr)
@@ -82,25 +79,31 @@ namespace FF
                 Destroy(gameObject);
         }
 
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (other.TryGetComponent<WeaponManager>(out var wm))
-            {
-                wm.Equip(weaponData);
-                PlayPickupSound();
-                TriggerPickupAnimation();
-            }
-        }
-
-        void TriggerPickupAnimation()
+        private void TriggerPickupAnimation()
         {
             isPickedUp = true;
         }
 
-        void PlayPickupSound()
+        private void PlayPickupSound()
         {
             if (pickupSound == null) return;
             AudioSource.PlayClipAtPoint(pickupSound, transform.position);
+        }
+#endregion Pickup
+
+        void OnTriggerEnter2D(Collider2D other)
+        {
+            if (isPickedUp) return;
+
+            if (other.TryGetComponent<WeaponManager>(out var wm))
+            {
+                wm.Equip(weaponData);
+
+
+                isPickedUp = true;
+                PlayPickupSound();
+                TriggerPickupAnimation();       
+            }
         }
     }
 }

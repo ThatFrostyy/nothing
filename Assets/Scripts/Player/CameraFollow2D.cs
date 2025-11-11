@@ -31,10 +31,9 @@ namespace FF
             Vector3 desiredPos = basePos +
                                  dirToMouse * mouseInfluence;
 
-            // Smooth movement
             Vector3 smoothed = Vector3.SmoothDamp(transform.position, desiredPos, ref velocity, 1f / followSpeed);
 
-            smoothed.z = -10f; // camera depth
+            smoothed.z = -10f; 
             transform.position = smoothed;
         }
     }

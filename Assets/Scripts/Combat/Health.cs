@@ -18,8 +18,7 @@ namespace FF
             if (hp <= 0) Die();
         }
 
-
-        void Die()
+        private void Die()
         {
             OnDeath?.Invoke();
             Destroy(gameObject);
