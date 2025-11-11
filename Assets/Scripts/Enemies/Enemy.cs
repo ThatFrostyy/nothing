@@ -47,10 +47,26 @@ namespace FF
             if (!gunPivot && weaponManager)
                 gunPivot = weaponManager.GunPivot;
 
+            if (!enemyVisual)
+            {
+                Transform visualTransform = transform.Find("Visual");
+                if (visualTransform)
+                {
+                    enemyVisual = visualTransform;
+                }
+                else
+                {
+                    var spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+                    if (spriteRenderer)
+                        enemyVisual = spriteRenderer.transform;
+                }
+            }
+
             if (autoShooter)
             {
                 autoShooter.SetStatsProvider(_stats);
                 autoShooter.SetFireHeld(false);
+                autoShooter.SetCameraShakeEnabled(false);
             }
 
             EnsurePlayerReference();

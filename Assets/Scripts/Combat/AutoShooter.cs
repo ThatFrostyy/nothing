@@ -15,6 +15,8 @@ namespace FF
         private bool _isFireHeld;
         private bool _isFirePressed;
 
+        [SerializeField] private bool _cameraShakeEnabled = true;
+
         private float sustainedFireTime;
         [SerializeField] float maxSustainedShake = 0.35f;
 
@@ -69,6 +71,11 @@ namespace FF
             }
 
             _isFireHeld = isHeld;
+        }
+
+        public void SetCameraShakeEnabled(bool enabled)
+        {
+            _cameraShakeEnabled = enabled;
         }
 
         public void OnFire(InputValue value)
@@ -150,8 +157,11 @@ namespace FF
             if (_weapon.muzzleFlash)
                 Instantiate(_weapon.muzzleFlash, _muzzle.position, _muzzle.rotation);
 
-            float shakeStrength = Mathf.Lerp(0.05f, maxSustainedShake, sustainedFireTime);
-            CameraShake.Shake(shakeStrength, shakeStrength);
+            if (_cameraShakeEnabled)
+            {
+                float shakeStrength = Mathf.Lerp(0.05f, maxSustainedShake, sustainedFireTime);
+                CameraShake.Shake(shakeStrength, shakeStrength);
+            }
 
             _currentRecoil = _weapon.recoilAmount;
             _recoilTimer = 0f;
