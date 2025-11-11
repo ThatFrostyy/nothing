@@ -9,6 +9,7 @@ namespace FF
         Transform muzzle;
         PlayerStats stats;
         AudioSource audioSource;
+        Rigidbody2D playerBody;
 
         float timer;
         bool fireHeld;     
@@ -24,6 +25,7 @@ namespace FF
         {
             stats = GetComponentInParent<PlayerStats>();
             audioSource = GetComponent<AudioSource>();
+            playerBody = GetComponentInParent<Rigidbody2D>();
         }
 
         public void InitializeRecoil(Transform gunPivotTransform)
@@ -80,9 +82,11 @@ namespace FF
                 }
             }
 
-            currentSpread = Mathf.Lerp(currentSpread, weaponSO.baseSpread, Time.deltaTime * weaponSO.spreadRecoverySpeed);
-            float movementPenalty = stats.GetMoveSpeed() > 0.1f ? stats.MovementAccuracyPenalty : 1f;
-            currentSpread *= movementPenalty;
+            float movementSpeed = playerBody ? playerBody.linearVelocity.magnitude : 0f;
+            bool isMoving = movementSpeed > 0.1f;
+
+            float targetSpread = weaponSO.baseSpread * (isMoving ? stats.MovementAccuracyPenalty : 1f);
+            currentSpread = Mathf.Lerp(currentSpread, targetSpread, Time.deltaTime * weaponSO.spreadRecoverySpeed);
 
             UpdateRecoil();
         }
@@ -90,7 +94,8 @@ namespace FF
         void Shoot()
         {
             currentSpread += weaponSO.spreadIncreasePerShot;
-            currentSpread = Mathf.Clamp(currentSpread, weaponSO.baseSpread, weaponSO.maxSpread);
+            float maxSpread = weaponSO.maxSpread * (playerBody && playerBody.linearVelocity.magnitude > 0.1f ? stats.MovementAccuracyPenalty : 1f);
+            currentSpread = Mathf.Clamp(currentSpread, weaponSO.baseSpread, maxSpread);
 
             // Get random angle inside cone
             float angleOffset = Random.Range(-currentSpread, currentSpread);
