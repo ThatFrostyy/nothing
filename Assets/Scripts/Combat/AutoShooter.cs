@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -26,6 +27,12 @@ namespace FF
         private Vector3 _baseLocalPosition;
         private Transform _gunPivot;
 
+        private float _currentCooldownProgress = 1f;
+
+        public event Action<float> OnCooldownChanged;
+
+        public float CooldownProgress => _currentCooldownProgress;
+
         private void Awake()
         {
             _stats = GetComponentInParent<ICombatStats>();
@@ -49,6 +56,8 @@ namespace FF
             _muzzle = muzzleTransform;
             _currentSpread = _weapon.baseSpread;
 
+            SetCooldownProgress(1f);
+
             if (_gunPivot)
             {
                 _baseLocalPosition = _gunPivot.localPosition;
@@ -56,6 +65,8 @@ namespace FF
                 _recoilTimer = 0f;
                 _gunPivot.localPosition = _baseLocalPosition;
             }
+
+            OnCooldownChanged?.Invoke(_currentCooldownProgress);
         }
 
         public void SetFireHeld(bool isHeld)
@@ -86,7 +97,10 @@ namespace FF
         private void Update()
         {
             if (_weapon == null || _muzzle == null)
+            {
+                SetCooldownProgress(1f);
                 return;
+            }
 
             if (_isFireHeld && _weapon.isAuto)
             {
@@ -120,6 +134,9 @@ namespace FF
                     Shoot();
                 }
             }
+
+            float cooldownFraction = Mathf.Clamp01(_fireTimer / interval);
+            SetCooldownProgress(cooldownFraction);
 
             float movementSpeed = _playerBody ? _playerBody.linearVelocity.magnitude : 0f;
             bool isMoving = movementSpeed > 0.1f;
@@ -165,6 +182,7 @@ namespace FF
 
             _currentRecoil = _weapon.recoilAmount;
             _recoilTimer = 0f;
+            SetCooldownProgress(0f);
         }
 
         private void UpdateRecoil()
@@ -184,6 +202,17 @@ namespace FF
             _gunPivot.localPosition = _baseLocalPosition + localRecoil;
 
             _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, Time.deltaTime * _weapon.recoilRecoverySpeed);
+        }
+
+        private void SetCooldownProgress(float value)
+        {
+            value = Mathf.Clamp01(value);
+
+            if (Mathf.Approximately(_currentCooldownProgress, value))
+                return;
+
+            _currentCooldownProgress = value;
+            OnCooldownChanged?.Invoke(_currentCooldownProgress);
         }
     }
 }
