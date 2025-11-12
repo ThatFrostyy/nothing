@@ -15,12 +15,21 @@ namespace FF
         [Header("Visuals")]
         [SerializeField] private Transform gunPivot;
         [SerializeField] private Transform enemyVisual;
+        [SerializeField] private float walkBobFrequency = 6f;
+        [SerializeField] private float walkBobAmplitude = 0.12f;
+        [SerializeField] private float walkSquashAmount = 0.08f;
+        [SerializeField] private float idleSwayFrequency = 1.5f;
+        [SerializeField] private float idleSwayAmplitude = 3f;
 
         private Rigidbody2D _rigidbody;
         private EnemyStats _stats;
         private Health _health;
         private Transform _player;
         private Vector2 _desiredVelocity;
+        private Vector3 _baseVisualLocalPosition;
+        private Vector3 _baseVisualLocalScale = Vector3.one;
+        private float _bobTimer;
+        private bool _isFacingLeft;
 
         public void Initialize(Transform player)
         {
@@ -60,6 +69,13 @@ namespace FF
                     if (spriteRenderer)
                         enemyVisual = spriteRenderer.transform;
                 }
+            }
+
+            if (enemyVisual)
+            {
+                _baseVisualLocalPosition = enemyVisual.localPosition;
+                _baseVisualLocalScale = enemyVisual.localScale;
+                _isFacingLeft = enemyVisual.localScale.x < 0f;
             }
 
             if (autoShooter)
@@ -152,12 +168,17 @@ namespace FF
                 targetTilt += side * (bodyTiltDegrees * 0.5f);
             }
 
+            if (normalizedSpeed < 0.05f)
+                targetTilt += Mathf.Sin(Time.time * idleSwayFrequency) * idleSwayAmplitude;
+
             float currentZ = enemyVisual.localEulerAngles.z;
             if (currentZ > 180f)
                 currentZ -= 360f;
 
             float newZ = Mathf.Lerp(currentZ, targetTilt, 0.15f);
             enemyVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
+
+            UpdateWalkCycle(normalizedSpeed);
         }
 
         private void AimAtPlayer()
@@ -174,9 +195,7 @@ namespace FF
 
             bool isAimingLeft = direction.x < 0f;
             gunPivot.localScale = isAimingLeft ? new Vector3(1f, -1f, 1f) : Vector3.one;
-
-            if (enemyVisual)
-                enemyVisual.localScale = isAimingLeft ? new Vector3(-1f, 1f, 1f) : Vector3.one;
+            _isFacingLeft = isAimingLeft;
         }
 
         private void HandleFiring()
@@ -196,6 +215,33 @@ namespace FF
 
             bool inRange = distance <= shootDistance + buffer;
             autoShooter.SetFireHeld(inRange);
+        }
+
+        private void UpdateWalkCycle(float normalizedSpeed)
+        {
+            if (!enemyVisual)
+                return;
+
+            float absBaseScaleX = Mathf.Approximately(_baseVisualLocalScale.x, 0f) ? 1f : Mathf.Abs(_baseVisualLocalScale.x);
+            float baseScaleY = Mathf.Approximately(_baseVisualLocalScale.y, 0f) ? 1f : _baseVisualLocalScale.y;
+            float baseScaleZ = Mathf.Approximately(_baseVisualLocalScale.z, 0f) ? 1f : _baseVisualLocalScale.z;
+
+            float bobSpeed = Mathf.Lerp(0.6f, 1.4f, Mathf.Clamp01(normalizedSpeed));
+            _bobTimer += Time.deltaTime * walkBobFrequency * bobSpeed;
+
+            float bobOffset = Mathf.Sin(_bobTimer) * walkBobAmplitude * normalizedSpeed;
+            Vector3 targetLocalPosition = _baseVisualLocalPosition + new Vector3(0f, bobOffset, 0f);
+            enemyVisual.localPosition = Vector3.Lerp(enemyVisual.localPosition, targetLocalPosition, 0.2f);
+
+            float squashAmount = Mathf.Sin(_bobTimer) * walkSquashAmount * normalizedSpeed;
+
+            Vector3 targetScale = new Vector3(
+                absBaseScaleX * (_isFacingLeft ? -1f : 1f) * (1f - squashAmount),
+                baseScaleY * (1f + squashAmount),
+                baseScaleZ
+            );
+
+            enemyVisual.localScale = Vector3.Lerp(enemyVisual.localScale, targetScale, 0.25f);
         }
 
         private void EnsurePlayerReference()
