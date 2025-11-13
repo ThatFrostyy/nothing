@@ -23,7 +23,7 @@ namespace FF
 
         [Header("Audio & FX")]
         [SerializeField] private AudioSource audioSource;
-        [SerializeField] private AudioClip hitSound;
+        [SerializeField] private AudioClip []hitSound;
         [SerializeField] private AudioClip deathSound;
         [SerializeField] private GameObject deathFX;
 
@@ -45,6 +45,7 @@ namespace FF
         private ContactFilter2D _avoidanceFilter;
         private AudioSource _audioSource;
         private const int AvoidanceBufferCeiling = 256;
+        private int lastIndex = -1;
 
         public void Initialize(Transform player)
         {
@@ -58,7 +59,7 @@ namespace FF
             _health = GetComponent<Health>();
 
             _audioSource = audioSource ? audioSource : GetComponent<AudioSource>();
-            if (!_audioSource && hitSound)
+            if (!_audioSource)
             {
                 _audioSource = gameObject.AddComponent<AudioSource>();
             }
@@ -464,16 +465,22 @@ namespace FF
 
         private void PlayHitSound()
         {
-            if (!hitSound)
-            {
-                return;
-            }
-
             if (_audioSource)
             {
-                _audioSource.PlayOneShot(hitSound);
+                PlayRandom();
             }
+        }
 
+        public void PlayRandom()
+        {
+            if (hitSound == null || hitSound.Length == 0) return;
+
+            int index;
+            do { index = Random.Range(0, hitSound.Length); }
+            while (index == lastIndex && hitSound.Length > 1);
+            lastIndex = index;
+
+            audioSource.PlayOneShot(hitSound[index]);
         }
 
         private void PlayDeathSound()
@@ -483,7 +490,12 @@ namespace FF
                 return;
             }
 
-            AudioSource.PlayClipAtPoint(deathSound, transform.position);
+            if (_audioSource)
+            {
+                _audioSource.PlayOneShot(deathSound);
+                return;
+            }
+
         }
 
         private void SpawnDeathFx()
