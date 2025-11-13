@@ -107,7 +107,7 @@ namespace FF
             _avoidanceFilter = new ContactFilter2D
             {
                 useLayerMask = true,
-                useTriggers = false
+                useTriggers = true
             };
             _avoidanceFilter.SetLayerMask(avoidanceLayers);
 

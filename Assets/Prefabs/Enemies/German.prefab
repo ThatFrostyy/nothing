@@ -277,6 +277,10 @@ MonoBehaviour:
   fireRateMultiplier: 1
   damageMultiplier: 1
   movementAccuracyPenalty: 1.3
+  avoidanceRadius: 0.85
+  avoidancePush: 6
+  avoidanceResponsiveness: 0.35
+  avoidanceWeight: 0.75
 --- !u!114 &2329570480403992263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -312,6 +316,10 @@ MonoBehaviour:
   walkSquashAmount: 0.08
   idleSwayFrequency: 1.5
   idleSwayAmplitude: 5
+  avoidanceLayers:
+    serializedVersion: 2
+    m_Bits: 128
+  maxAvoidanceChecks: 16
 --- !u!70 &8420919759142757581
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
