@@ -8,10 +8,19 @@ namespace FF
         [SerializeField] int maxHP = 50;
 
         int hp;
+
         public System.Action<int> OnDamaged;
         public System.Action OnDeath;
+        public System.Action<int, int> OnHealthChanged;
 
-        void Awake() => hp = maxHP;
+        public int MaxHP => maxHP;
+        public int CurrentHP => hp;
+
+        void Awake()
+        {
+            hp = maxHP;
+            OnHealthChanged?.Invoke(hp, maxHP);
+        }
 
         public void Damage(int amount)
         {
@@ -25,6 +34,8 @@ namespace FF
             {
                 OnDamaged?.Invoke(damageApplied);
             }
+
+            OnHealthChanged?.Invoke(hp, maxHP);
 
             if (hp <= 0) Die();
         }
