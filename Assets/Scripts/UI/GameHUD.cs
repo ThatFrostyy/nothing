@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace FF
 {
@@ -12,10 +13,10 @@ namespace FF
         [SerializeField] private XPWallet wallet;
 
         [Header("UI References")]
-        [SerializeField] private Text healthText;
-        [SerializeField] private Text waveText;
-        [SerializeField] private Text timeText;
-        [SerializeField] private Text xpText;
+        [SerializeField] private TMP_Text healthText;
+        [SerializeField] private TMP_Text waveText;
+        [SerializeField] private TMP_Text timeText;
+        [SerializeField] private TMP_Text xpText;
         [SerializeField] private Image xpFillImage;
 
         [SerializeField] private string timeFormat = "mm\\:ss";
@@ -134,7 +135,7 @@ namespace FF
             }
 
             TimeSpan span = TimeSpan.FromSeconds(Time.timeSinceLevelLoad);
-            timeText.text = $"Time: {span.ToString(timeFormat)}";
+            timeText.text = $"{span.ToString(timeFormat)}";
         }
     }
 }
