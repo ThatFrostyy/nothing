@@ -21,15 +21,22 @@ namespace FF
         [SerializeField] private float idleSwayFrequency = 1.5f;
         [SerializeField] private float idleSwayAmplitude = 3f;
 
+        [Header("Avoidance")]
+        [SerializeField] private LayerMask avoidanceLayers = ~0;
+        [SerializeField, Range(4, 64)] private int maxAvoidanceChecks = 16;
+
         private Rigidbody2D _rigidbody;
         private EnemyStats _stats;
         private Health _health;
         private Transform _player;
         private Vector2 _desiredVelocity;
+        private Vector2 _smoothedSeparation;
         private Vector3 _baseVisualLocalPosition;
         private Vector3 _baseVisualLocalScale = Vector3.one;
         private float _bobTimer;
         private bool _isFacingLeft;
+        private Collider2D[] _avoidanceResults;
+        private ContactFilter2D _avoidanceFilter;
 
         public void Initialize(Transform player)
         {
@@ -95,6 +102,15 @@ namespace FF
                 autoShooter.SetCameraShakeEnabled(false);
             }
 
+            int bufferSize = Mathf.Clamp(maxAvoidanceChecks, 4, 64);
+            _avoidanceResults = new Collider2D[bufferSize];
+            _avoidanceFilter = new ContactFilter2D
+            {
+                useLayerMask = true,
+                useTriggers = false
+            };
+            _avoidanceFilter.SetLayerMask(avoidanceLayers);
+
             EnsurePlayerReference();
         }
 
@@ -140,6 +156,8 @@ namespace FF
         private void UpdateMovement()
         {
             Vector2 targetVelocity = Vector2.zero;
+            float moveSpeed = _stats ? _stats.MoveSpeed : 3f;
+            float retreatMultiplier = _stats ? _stats.RetreatSpeedMultiplier : 0.6f;
 
             if (_player)
             {
@@ -149,8 +167,6 @@ namespace FF
 
                 float buffer = _stats ? _stats.DistanceBuffer : 1f;
                 float shootDistance = _stats ? _stats.ShootingDistance : 8f;
-                float moveSpeed = _stats ? _stats.MoveSpeed : 3f;
-                float retreatMultiplier = _stats ? _stats.RetreatSpeedMultiplier : 0.6f;
 
                 if (distance > shootDistance + buffer)
                 {
@@ -162,10 +178,90 @@ namespace FF
                 }
             }
 
+            if (_stats)
+            {
+                Vector2 separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);
+                float responsiveness = _stats.AvoidanceResponsiveness;
+                _smoothedSeparation = responsiveness > 0f
+                    ? Vector2.Lerp(_smoothedSeparation, separationForce, responsiveness)
+                    : separationForce;
+
+                targetVelocity += _smoothedSeparation * _stats.AvoidanceWeight;
+            }
+            else
+            {
+                _smoothedSeparation = Vector2.zero;
+            }
+
+            targetVelocity = Vector2.ClampMagnitude(targetVelocity, moveSpeed);
             _desiredVelocity = targetVelocity;
 
             float acceleration = _stats ? _stats.Acceleration : 0.2f;
             _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
+        }
+
+        private Vector2 CalculateSeparationForce(float radius, float pushStrength)
+        {
+            if (radius <= 0f || pushStrength <= 0f || _avoidanceResults == null)
+            {
+                return Vector2.zero;
+            }
+
+            Vector2 origin = _rigidbody ? _rigidbody.position : (Vector2)transform.position;
+            int hitCount = Physics2D.OverlapCircle(origin, radius, _avoidanceFilter, _avoidanceResults);
+
+            if (hitCount <= 0)
+            {
+                return Vector2.zero;
+            }
+
+            Vector2 separation = Vector2.zero;
+            int contributions = 0;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                Collider2D neighbor = _avoidanceResults[i];
+                if (!neighbor)
+                {
+                    continue;
+                }
+
+                if (neighbor.attachedRigidbody == _rigidbody)
+                {
+                    continue;
+                }
+
+                Vector2 neighborPoint = neighbor.ClosestPoint(origin);
+                Vector2 offset = origin - neighborPoint;
+                float sqrMagnitude = offset.sqrMagnitude;
+
+                if (sqrMagnitude < 0.0001f)
+                {
+                    offset = origin - (Vector2)neighbor.transform.position;
+                    sqrMagnitude = offset.sqrMagnitude;
+                    if (sqrMagnitude < 0.0001f)
+                    {
+                        continue;
+                    }
+                }
+
+                float distance = Mathf.Sqrt(sqrMagnitude);
+                float weight = Mathf.InverseLerp(radius, 0f, distance);
+                Vector2 direction = offset / distance;
+
+                separation += direction * weight;
+                contributions++;
+            }
+
+            if (contributions == 0)
+            {
+                return Vector2.zero;
+            }
+
+            separation /= contributions;
+            separation *= pushStrength;
+
+            return Vector2.ClampMagnitude(separation, pushStrength);
         }
 
         private void AimAtPlayer()
