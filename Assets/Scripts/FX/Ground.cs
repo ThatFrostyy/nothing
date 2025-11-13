@@ -19,6 +19,9 @@ public class Ground : MonoBehaviour
         }
 
         Instance = this;
+
+        if (!_spriteRenderer) _spriteRenderer = GetComponent<SpriteRenderer>();
+        if (!_boundsCollider) _boundsCollider = GetComponent<Collider2D>();
         CacheBounds();
     }
 
@@ -35,14 +38,6 @@ public class Ground : MonoBehaviour
         }
     }
 
-    void OnValidate()
-    {
-        if (!_spriteRenderer) _spriteRenderer = GetComponent<SpriteRenderer>();
-        if (!_boundsCollider) _boundsCollider = GetComponent<Collider2D>();
-
-        CacheBounds();
-    }
-
     public Vector2 ClampPoint(Vector2 worldPoint, Vector2 padding)
     {
         if (_worldBounds.size == Vector3.zero)
@@ -55,8 +50,8 @@ public class Ground : MonoBehaviour
         Vector3 min3 = _worldBounds.min;
         Vector3 max3 = _worldBounds.max;
 
-        Vector2 min = new Vector2(min3.x, min3.y);
-        Vector2 max = new Vector2(max3.x, max3.y);
+        Vector2 min = (Vector2)min3;
+        Vector2 max = (Vector2)max3;
 
         min.x += padding.x;
         min.y += padding.y;
