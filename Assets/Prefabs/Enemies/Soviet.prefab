@@ -411,7 +411,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 51c41712bc32b5a4db2aeb54da68baab, type: 3}
   - {fileID: 8300000, guid: 4675a14c0671bb240bbeb34ee7869d26, type: 3}
   - {fileID: 8300000, guid: ab9a9327dff658549ace2a131d4347e3, type: 3}
-  deathSound: {fileID: 8300000, guid: 87cc47b86096d4f42a608755861381ba, type: 3}
+  deathSound:
+  - {fileID: 8300000, guid: 87cc47b86096d4f42a608755861381ba, type: 3}
+  - {fileID: 8300000, guid: 9cc73fc29d43b1f4ab8add98d2b5e409, type: 3}
+  - {fileID: 8300000, guid: f21a622b54414bc469acdf3900a56f43, type: 3}
   deathFX: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
   avoidanceLayers:
     serializedVersion: 2

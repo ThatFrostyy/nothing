@@ -24,7 +24,7 @@ namespace FF
         [Header("Audio & FX")]
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip []hitSound;
-        [SerializeField] private AudioClip deathSound;
+        [SerializeField] private AudioClip []deathSound;
         [SerializeField] private GameObject deathFX;
 
         [Header("Avoidance")]
@@ -463,32 +463,33 @@ namespace FF
             Gizmos.DrawWireSphere(transform.position, shootDistance);
         }
 
-        private void PlayHitSound()
+        private AudioClip GetRandomClip(AudioClip[] clips)
         {
-            if (_audioSource)
-            {
-                PlayRandom();
-            }
-        }
-
-        public void PlayRandom()
-        {
-            if (hitSound == null || hitSound.Length == 0) return;
+            if (clips == null || clips.Length == 0) return null;
 
             int index;
-            do { index = Random.Range(0, hitSound.Length); }
-            while (index == lastIndex && hitSound.Length > 1);
+            do { index = Random.Range(0, clips.Length); }
+            while (index == lastIndex && clips.Length > 1);
             lastIndex = index;
 
-            audioSource.PlayOneShot(hitSound[index]);
+            return clips[index];
+        }
+
+        private void PlayHitSound()
+        {
+            if (!_audioSource) return;
+
+            AudioClip clip = GetRandomClip(hitSound);
+            if (clip)
+            {
+                _audioSource.PlayOneShot(clip);
+            }
         }
 
         private void PlayDeathSound()
         {
-            if (!deathSound)
-            {
-                return;
-            }
+            AudioClip clip = GetRandomClip(deathSound);
+            if (!clip) return;
 
             float volume = _audioSource ? _audioSource.volume : 1f;
             float pitch = _audioSource ? _audioSource.pitch : 1f;
@@ -499,15 +500,16 @@ namespace FF
             audioObject.transform.position = transform.position;
 
             var tempSource = audioObject.AddComponent<AudioSource>();
-            tempSource.clip = deathSound;
+            tempSource.clip = clip;
             tempSource.volume = volume;
             tempSource.pitch = pitch;
             tempSource.spatialBlend = spatialBlend;
             tempSource.outputAudioMixerGroup = mixerGroup;
             tempSource.Play();
 
-            Destroy(audioObject, deathSound.length / Mathf.Max(tempSource.pitch, 0.01f));
+            Destroy(audioObject, clip.length / Mathf.Max(tempSource.pitch, 0.01f));
         }
+
 
         private void SpawnDeathFx()
         {
