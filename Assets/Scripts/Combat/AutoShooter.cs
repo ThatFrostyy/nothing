@@ -33,6 +33,7 @@ namespace FF
 
         public float CooldownProgress => _currentCooldownProgress;
 
+        #region Initialization
         private void Awake()
         {
             _stats = GetComponentInParent<ICombatStats>();
@@ -88,6 +89,7 @@ namespace FF
         {
             _cameraShakeEnabled = enabled;
         }
+        #endregion Initialization
 
         public void OnFire(InputValue value)
         {
@@ -148,6 +150,7 @@ namespace FF
             UpdateRecoil();
         }
 
+        #region Recoil & Shooting
         private void Shoot()
         {
             _currentSpread += _weapon.spreadIncreasePerShot;
@@ -157,7 +160,7 @@ namespace FF
             float maxSpread = _weapon.maxSpread * (isMoving ? movementPenalty : 1f);
             _currentSpread = Mathf.Clamp(_currentSpread, _weapon.baseSpread, maxSpread);
 
-            float angleOffset = Random.Range(-_currentSpread, _currentSpread);
+            float angleOffset = UnityEngine.Random.Range(-_currentSpread, _currentSpread);
             Quaternion spreadRotation = _muzzle.rotation * Quaternion.AngleAxis(angleOffset, Vector3.forward);
 
             GameObject bulletInstance = Instantiate(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
@@ -166,13 +169,18 @@ namespace FF
             {
                 float damageMultiplier = _stats?.GetDamageMultiplier() ?? 1f;
                 bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier));
+                bullet.SetOwner(transform.root.tag);
             }
 
             if (_weapon.fireSFX && _audioSource)
+            {
                 _audioSource.PlayOneShot(_weapon.fireSFX);
+            }
 
             if (_weapon.muzzleFlash)
+            {
                 Instantiate(_weapon.muzzleFlash, _muzzle.position, _muzzle.rotation);
+            }
 
             if (_cameraShakeEnabled)
             {
@@ -188,7 +196,9 @@ namespace FF
         private void UpdateRecoil()
         {
             if (!_gunPivot)
+            {
                 return;
+            }
 
             _gunPivot.localPosition = _baseLocalPosition;
 
@@ -203,13 +213,16 @@ namespace FF
 
             _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, Time.deltaTime * _weapon.recoilRecoverySpeed);
         }
+#endregion Recoil & Shooting
 
         private void SetCooldownProgress(float value)
         {
             value = Mathf.Clamp01(value);
 
             if (Mathf.Approximately(_currentCooldownProgress, value))
+            {
                 return;
+            }
 
             _currentCooldownProgress = value;
             OnCooldownChanged?.Invoke(_currentCooldownProgress);

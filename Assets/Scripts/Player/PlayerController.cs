@@ -44,32 +44,9 @@ namespace FF
             UpdateBodyTilt();
         }
 
-        #region Private Methods
-        private void UpdateBodyTilt()
-        {
-            if (!_playerVisual)
-                return;
-
-            float speed = _rigidbody.linearVelocity.magnitude;
-            float maxSpeed = Mathf.Max(_stats.GetMoveSpeed(), Mathf.Epsilon);
-            float normalizedSpeed = speed / maxSpeed;
-
-            float targetTilt = speed > 0.1f ? -_bodyTiltDegrees * normalizedSpeed : _bodyTiltDegrees * 0.3f;
-            float sideTilt = _moveInput.x * (_bodyTiltDegrees * 0.5f);
-            targetTilt += sideTilt;
-
-            float currentZ = _playerVisual.localEulerAngles.z;
-            if (currentZ > 180f)
-                currentZ -= 360f;
-
-            float newZ = Mathf.Lerp(currentZ, targetTilt, 0.15f);
-            _playerVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
-        }
-
         private void AimGunAtPointer()
         {
-            if (!_gunPivot || _camera == null)
-                return;
+            if (!_gunPivot || _camera == null) return;
 
             Vector2 mousePosition = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
             Vector3 worldMouse = _camera.ScreenToWorldPoint(mousePosition);
@@ -81,9 +58,34 @@ namespace FF
             bool isAimingLeft = direction.x < 0f;
             _gunPivot.localScale = isAimingLeft ? new Vector3(1f, -1f, 1f) : Vector3.one;
             if (_playerVisual)
+            {
                 _playerVisual.localScale = isAimingLeft ? new Vector3(-1f, 1f, 1f) : Vector3.one;
+            }
         }
-        #endregion Private Methods
+
+        #region Animations
+        private void UpdateBodyTilt()
+        {
+            if (!_playerVisual) return;
+
+            float speed = _rigidbody.linearVelocity.magnitude;
+            float maxSpeed = Mathf.Max(_stats.GetMoveSpeed(), Mathf.Epsilon);
+            float normalizedSpeed = speed / maxSpeed;
+
+            float targetTilt = speed > 0.1f ? -_bodyTiltDegrees * normalizedSpeed : _bodyTiltDegrees * 0.3f;
+            float sideTilt = _moveInput.x * (_bodyTiltDegrees * 0.5f);
+            targetTilt += sideTilt;
+
+            float currentZ = _playerVisual.localEulerAngles.z;
+            if (currentZ > 180f)
+            {
+                currentZ -= 360f;
+            }
+
+            float newZ = Mathf.Lerp(currentZ, targetTilt, 0.15f);
+            _playerVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
+        }
+        #endregion Animations
 
         #region Input System Callbacks
         public void OnMove(InputValue value)

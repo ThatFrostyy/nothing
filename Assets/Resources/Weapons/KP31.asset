@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
   m_Name: KP31
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: PPSH41
+  weaponName: Suomi KP/-31
   fireSFX: {fileID: 8300000, guid: fcb31cc8c008cab418eb56ce8f221836, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
-  recoilAmount: 10
+  recoilAmount: 9
   recoilRecoverySpeed: 10
-  bulletPrefab: {fileID: 4190097093711428713, guid: 9e9b4387d11248b4b80c0f1c6e1171b7, type: 3}
-  weaponPrefab: {fileID: 5438212806331402233, guid: ce9c25ec2834cfb42a574511610672d0, type: 3}
-  rpm: 500
-  damage: 5
-  recoilKick: 5
+  bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
+  weaponPrefab: {fileID: 3752265850316741010, guid: 29ebbb06e81f07c4485e0e1d00f2c13f, type: 3}
+  rpm: 480
+  damage: 7
+  recoilKick: 5.5
   isAuto: 1
   fireCooldown: 0.1
   baseSpread: 2

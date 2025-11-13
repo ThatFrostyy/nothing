@@ -10,25 +10,26 @@ namespace FF
         [SerializeField] XPWallet wallet;
         [SerializeField] UpgradeUI ui;
 
+        Upgrade RandomUpgrade() => all[Random.Range(0, all.Length)];
+
         void Awake()
         {
             wallet.OnLevelUp += OnLevel;
         }
 
-
         void OnLevel(int lvl)
         {
-            ui?.Show(RandomUpgrade(), RandomUpgrade(), RandomUpgrade(), Pick);
+            if (ui == null) return;
+
+            ui.Show(RandomUpgrade(), RandomUpgrade(), RandomUpgrade(), Pick);
         }
-
-
-        Upgrade RandomUpgrade() => all[Random.Range(0, all.Length)];
-
 
         void Pick(Upgrade u)
         {
+            if (ui == null) return;
+
             u.Apply(stats);
-            ui?.Hide();
+            ui.Hide();
         }
     }
 }

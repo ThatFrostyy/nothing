@@ -47,6 +47,7 @@ namespace FF
             }
         }
 
+        #region Animations
         void IdleAnimation()
         {
             timer += Time.deltaTime;
@@ -61,7 +62,6 @@ namespace FF
             transform.localScale = startScale * scalePulse;
         }
 
-        #region Pickup
         private void PickupAnimation()
         {
             transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, Time.deltaTime * pickupShrinkSpeed);
@@ -76,20 +76,22 @@ namespace FF
             CameraShake.Shake(shakeDuration, shakeMagnitude);
 
             if (transform.localScale.magnitude < 0.05f)
+            {
                 Destroy(gameObject);
+            }
         }
 
         private void TriggerPickupAnimation()
         {
             isPickedUp = true;
         }
+        #endregion Animations
 
         private void PlayPickupSound()
         {
             if (pickupSound == null) return;
             AudioSource.PlayClipAtPoint(pickupSound, transform.position);
         }
-#endregion Pickup
 
         void OnTriggerEnter2D(Collider2D other)
         {

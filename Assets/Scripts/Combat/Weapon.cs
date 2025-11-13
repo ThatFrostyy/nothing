@@ -23,7 +23,7 @@ namespace FF
         public int damage = 10;
         public float recoilKick = 4f;
         public bool isAuto = true;
-        public float fireCooldown = 0.1f; // used for semi-auto
+        public float fireCooldown = 0.1f; // for semi-auto
 
         [Header("Accuracy / Spread")]
         public float baseSpread = 1.5f;           // degrees

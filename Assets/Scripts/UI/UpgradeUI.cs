@@ -13,6 +13,9 @@ namespace FF
         System.Action<Upgrade> callback;
         Upgrade a, b, c;
 
+        public void Hide() { panel.SetActive(false); Time.timeScale = 1f; }
+        void Pick(Upgrade u) => callback?.Invoke(u);
+
         public void Show(Upgrade A, Upgrade B, Upgrade C, System.Action<Upgrade> onPick)
         {
             a = A; b = B; c = C; callback = onPick;
@@ -26,11 +29,7 @@ namespace FF
             aBtn.onClick.AddListener(() => Pick(a));
             bBtn.onClick.AddListener(() => Pick(b));
             cBtn.onClick.AddListener(() => Pick(c));
-            Time.timeScale = 0f; // pause while choosing
+            Time.timeScale = 0f; 
         }
-
-
-        public void Hide() { panel.SetActive(false); Time.timeScale = 1f; }
-        void Pick(Upgrade u) => callback?.Invoke(u);
     }
 }

@@ -28,8 +28,7 @@ namespace FF
             Vector3 dirToMouse = (mouseWorld - basePos);
             dirToMouse.z = 0;
 
-            Vector3 desiredPos = basePos +
-                                 dirToMouse * mouseInfluence;
+            Vector3 desiredPos = basePos + dirToMouse * mouseInfluence;
 
             Vector3 smoothed = Vector3.SmoothDamp(transform.position, desiredPos, ref velocity, 1f / followSpeed);
 

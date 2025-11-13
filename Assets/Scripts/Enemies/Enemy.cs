@@ -43,18 +43,26 @@ namespace FF
             _health = GetComponent<Health>();
 
             if (!weaponManager)
+            {
                 weaponManager = GetComponentInChildren<WeaponManager>();
+            }
 
             if (!autoShooter)
             {
                 if (weaponManager && weaponManager.Shooter)
+                {
                     autoShooter = weaponManager.Shooter;
+                }
                 else
+                {
                     autoShooter = GetComponentInChildren<AutoShooter>();
+                }
             }
 
             if (!gunPivot && weaponManager)
+            {
                 gunPivot = weaponManager.GunPivot;
+            }
 
             if (!enemyVisual)
             {
@@ -67,7 +75,9 @@ namespace FF
                 {
                     var spriteRenderer = GetComponentInChildren<SpriteRenderer>();
                     if (spriteRenderer)
+                    {
                         enemyVisual = spriteRenderer.transform;
+                    }
                 }
             }
 
@@ -88,22 +98,13 @@ namespace FF
             EnsurePlayerReference();
         }
 
-        private void OnEnable()
-        {
-            if (_health != null)
-                _health.OnDeath += HandleDeath;
-        }
 
         private void Start()
         {
             if (weaponManager && startingWeapon)
+            {
                 weaponManager.Equip(startingWeapon);
-        }
-
-        private void OnDisable()
-        {
-            if (_health != null)
-                _health.OnDeath -= HandleDeath;
+            }
         }
 
         private void Update()
@@ -119,6 +120,23 @@ namespace FF
             UpdateBodyTilt();
         }
 
+        private void OnEnable()
+        {
+            if (_health != null)
+            {
+                _health.OnDeath += HandleDeath;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_health != null)
+            {
+                _health.OnDeath -= HandleDeath;
+            }
+        }
+
+        #region Movement
         private void UpdateMovement()
         {
             Vector2 targetVelocity = Vector2.zero;
@@ -150,10 +168,26 @@ namespace FF
             _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
         }
 
+        private void AimAtPlayer()
+        {
+            if (!gunPivot || !_player) return;
+
+            Vector2 direction = _player.position - gunPivot.position;
+            if (direction.sqrMagnitude < 0.001f) return;
+
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            gunPivot.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+            bool isAimingLeft = direction.x < 0f;
+            gunPivot.localScale = isAimingLeft ? new Vector3(1f, -1f, 1f) : Vector3.one;
+            _isFacingLeft = isAimingLeft;
+        }
+#endregion Movement
+
+        #region Animations
         private void UpdateBodyTilt()
         {
-            if (!enemyVisual)
-                return;
+            if (!enemyVisual) return;
 
             float bodyTiltDegrees = _stats ? _stats.BodyTiltDegrees : 12f;
             float speed = _rigidbody.linearVelocity.magnitude;
@@ -169,11 +203,15 @@ namespace FF
             }
 
             if (normalizedSpeed < 0.05f)
+            {
                 targetTilt += Mathf.Sin(Time.time * idleSwayFrequency) * idleSwayAmplitude;
+            }
 
             float currentZ = enemyVisual.localEulerAngles.z;
             if (currentZ > 180f)
+            {
                 currentZ -= 360f;
+            }
 
             float newZ = Mathf.Lerp(currentZ, targetTilt, 0.15f);
             enemyVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
@@ -181,27 +219,40 @@ namespace FF
             UpdateWalkCycle(normalizedSpeed);
         }
 
-        private void AimAtPlayer()
+        private void UpdateWalkCycle(float normalizedSpeed)
         {
-            if (!gunPivot || !_player)
+            if (!enemyVisual)
+            {
                 return;
+            }
 
-            Vector2 direction = _player.position - gunPivot.position;
-            if (direction.sqrMagnitude < 0.001f)
-                return;
+            float absBaseScaleX = Mathf.Approximately(_baseVisualLocalScale.x, 0f) ? 1f : Mathf.Abs(_baseVisualLocalScale.x);
+            float baseScaleY = Mathf.Approximately(_baseVisualLocalScale.y, 0f) ? 1f : _baseVisualLocalScale.y;
+            float baseScaleZ = Mathf.Approximately(_baseVisualLocalScale.z, 0f) ? 1f : _baseVisualLocalScale.z;
 
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            gunPivot.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            float bobSpeed = Mathf.Lerp(0.6f, 1.4f, Mathf.Clamp01(normalizedSpeed));
+            _bobTimer += Time.deltaTime * walkBobFrequency * bobSpeed;
 
-            bool isAimingLeft = direction.x < 0f;
-            gunPivot.localScale = isAimingLeft ? new Vector3(1f, -1f, 1f) : Vector3.one;
-            _isFacingLeft = isAimingLeft;
+            float bobOffset = Mathf.Sin(_bobTimer) * walkBobAmplitude * normalizedSpeed;
+            Vector3 targetLocalPosition = _baseVisualLocalPosition + new Vector3(0f, bobOffset, 0f);
+            enemyVisual.localPosition = Vector3.Lerp(enemyVisual.localPosition, targetLocalPosition, 0.2f);
+
+            float squashAmount = Mathf.Sin(_bobTimer) * walkSquashAmount * normalizedSpeed;
+
+            Vector3 targetScale = new(
+                absBaseScaleX * (_isFacingLeft ? -1f : 1f) * (1f - squashAmount),
+                baseScaleY * (1f + squashAmount),
+                baseScaleZ
+            );
+
+            enemyVisual.localScale = Vector3.Lerp(enemyVisual.localScale, targetScale, 0.25f);
         }
+        #endregion Animations
 
+        #region Handlers
         private void HandleFiring()
         {
-            if (!autoShooter)
-                return;
+            if (!autoShooter) return;
 
             if (!_player)
             {
@@ -217,53 +268,32 @@ namespace FF
             autoShooter.SetFireHeld(inRange);
         }
 
-        private void UpdateWalkCycle(float normalizedSpeed)
-        {
-            if (!enemyVisual)
-                return;
-
-            float absBaseScaleX = Mathf.Approximately(_baseVisualLocalScale.x, 0f) ? 1f : Mathf.Abs(_baseVisualLocalScale.x);
-            float baseScaleY = Mathf.Approximately(_baseVisualLocalScale.y, 0f) ? 1f : _baseVisualLocalScale.y;
-            float baseScaleZ = Mathf.Approximately(_baseVisualLocalScale.z, 0f) ? 1f : _baseVisualLocalScale.z;
-
-            float bobSpeed = Mathf.Lerp(0.6f, 1.4f, Mathf.Clamp01(normalizedSpeed));
-            _bobTimer += Time.deltaTime * walkBobFrequency * bobSpeed;
-
-            float bobOffset = Mathf.Sin(_bobTimer) * walkBobAmplitude * normalizedSpeed;
-            Vector3 targetLocalPosition = _baseVisualLocalPosition + new Vector3(0f, bobOffset, 0f);
-            enemyVisual.localPosition = Vector3.Lerp(enemyVisual.localPosition, targetLocalPosition, 0.2f);
-
-            float squashAmount = Mathf.Sin(_bobTimer) * walkSquashAmount * normalizedSpeed;
-
-            Vector3 targetScale = new Vector3(
-                absBaseScaleX * (_isFacingLeft ? -1f : 1f) * (1f - squashAmount),
-                baseScaleY * (1f + squashAmount),
-                baseScaleZ
-            );
-
-            enemyVisual.localScale = Vector3.Lerp(enemyVisual.localScale, targetScale, 0.25f);
-        }
-
-        private void EnsurePlayerReference()
-        {
-            if (_player)
-                return;
-
-            var playerObject = GameObject.FindWithTag("Player");
-            if (playerObject)
-                _player = playerObject.transform;
-        }
-
         private void HandleDeath()
         {
             if (autoShooter)
+            {
                 autoShooter.SetFireHeld(false);
+            }
+        }
+        #endregion Handlers
+
+        private void EnsurePlayerReference()
+        {
+            if (_player) return;
+
+            var playerObject = GameObject.FindWithTag("Player");
+            if (playerObject)
+            {
+                _player = playerObject.transform;
+            }
         }
 
         private void OnDrawGizmosSelected()
         {
             if (!_stats)
+            {
                 _stats = GetComponent<EnemyStats>();
+            }
 
             float shootDistance = _stats ? _stats.ShootingDistance : 8f;
             Gizmos.color = Color.red;

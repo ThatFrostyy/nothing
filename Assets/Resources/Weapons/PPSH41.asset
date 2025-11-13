@@ -17,7 +17,7 @@ MonoBehaviour:
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
   recoilAmount: 10
   recoilRecoverySpeed: 10
-  bulletPrefab: {fileID: 4190097093711428713, guid: 9e9b4387d11248b4b80c0f1c6e1171b7, type: 3}
+  bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
   weaponPrefab: {fileID: 5438212806331402233, guid: ce9c25ec2834cfb42a574511610672d0, type: 3}
   rpm: 500
   damage: 5

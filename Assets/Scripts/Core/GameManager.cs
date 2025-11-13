@@ -27,7 +27,10 @@ namespace FF
             {
                 timer = 0f;
                 Wave++;
-                if (spawner) spawner.SpawnWave(Wave);
+                if (spawner)
+                {
+                    spawner.SpawnWave(Wave);
+                }
             }
         }
     }

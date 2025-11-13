@@ -17,7 +17,9 @@ namespace FF
         public void Equip(Weapon newWeapon)
         {
             if (currentWeaponInstance != null)
+            {
                 Destroy(currentWeaponInstance);
+            }
 
             currentSO = newWeapon;
 
@@ -27,7 +29,9 @@ namespace FF
             muzzle = currentWeaponInstance.transform.Find("Muzzle");
 
             if (!muzzle)
+            {
                 Debug.LogError("Weapon prefab missing child named 'Muzzle'");
+            }
 
             shooter.InitializeRecoil(gunPivot);
             shooter.SetWeapon(newWeapon, muzzle);
