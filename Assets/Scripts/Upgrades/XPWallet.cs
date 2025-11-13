@@ -10,16 +10,32 @@ namespace FF
         public int Next => 5 + (Level * 3);
 
         public System.Action<int> OnLevelUp;
-
+        public System.Action<int, int, int> OnXPChanged;
 
         public void Add(int v)
         {
-            XP += v;
-            if (XP >= Next)
+            if (v <= 0)
             {
-                XP -= Next; Level++;
+                return;
+            }
+
+            XP += v;
+
+            while (XP >= Next)
+            {
+                XP -= Next;
+                Level++;
                 OnLevelUp?.Invoke(Level);
             }
+
+            OnXPChanged?.Invoke(Level, XP, Next);
+        }
+
+        public void ResetLevels(int level = 1)
+        {
+            Level = Mathf.Max(1, level);
+            XP = 0;
+            OnXPChanged?.Invoke(Level, XP, Next);
         }
     }
 }
