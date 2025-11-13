@@ -14,15 +14,19 @@ namespace FF
         [SerializeField] private float _acceleration = 0.18f;
         [SerializeField] private float _bodyTiltDegrees = 15f;
 
+        [SerializeField] private float _boundsPadding = 0.05f;
+
         private Rigidbody2D _rigidbody;
         private PlayerStats _stats;
         private Vector2 _moveInput;
+        private Collider2D _collider;
 
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
             _stats = GetComponent<PlayerStats>();
             _camera = _camera ? _camera : Camera.main;
+            _collider = GetComponent<Collider2D>();
         }
 
         private void Update()
@@ -42,6 +46,43 @@ namespace FF
             );
 
             UpdateBodyTilt();
+            ConstrainToGroundBounds();
+        }
+
+        private void ConstrainToGroundBounds()
+        {
+            if (!Ground.Instance)
+            {
+                return;
+            }
+
+            Vector2 padding = Vector2.one * _boundsPadding;
+            if (_collider)
+            {
+                Vector2 extents = _collider.bounds.extents;
+                padding = extents + padding;
+            }
+
+            Vector2 currentPosition = _rigidbody.position;
+            Vector2 clampedPosition = Ground.Instance.ClampPoint(currentPosition, padding);
+
+            if (currentPosition != clampedPosition)
+            {
+                Vector2 velocity = _rigidbody.linearVelocity;
+
+                if (!Mathf.Approximately(currentPosition.x, clampedPosition.x))
+                {
+                    velocity.x = 0f;
+                }
+
+                if (!Mathf.Approximately(currentPosition.y, clampedPosition.y))
+                {
+                    velocity.y = 0f;
+                }
+
+                _rigidbody.linearVelocity = velocity;
+                _rigidbody.position = clampedPosition;
+            }
         }
 
         private void AimGunAtPointer()

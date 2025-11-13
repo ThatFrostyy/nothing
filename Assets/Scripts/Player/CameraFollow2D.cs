@@ -32,7 +32,20 @@ namespace FF
 
             Vector3 smoothed = Vector3.SmoothDamp(transform.position, desiredPos, ref velocity, 1f / followSpeed);
 
-            smoothed.z = -10f; 
+            Vector2 padding = Vector2.zero;
+            if (cam && cam.orthographic)
+            {
+                float halfHeight = cam.orthographicSize;
+                float halfWidth = halfHeight * cam.aspect;
+                padding = new Vector2(halfWidth, halfHeight);
+            }
+
+            if (Ground.Instance)
+            {
+                smoothed = Ground.Instance.ClampPoint(smoothed, padding);
+            }
+
+            smoothed.z = -10f;
             transform.position = smoothed;
         }
     }
