@@ -24,11 +24,8 @@ namespace FF
         [Header("Audio & FX")]
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip hitSound;
-        [SerializeField, Range(0f, 1f)] private float hitSoundVolume = 0.75f;
         [SerializeField] private AudioClip deathSound;
-        [SerializeField, Range(0f, 1f)] private float deathSoundVolume = 1f;
         [SerializeField] private GameObject deathFX;
-        [SerializeField, Min(0f)] private float deathFxLifetime = 4f;
 
         [Header("Avoidance")]
         [SerializeField] private LayerMask avoidanceLayers = ~0;
@@ -474,12 +471,9 @@ namespace FF
 
             if (_audioSource)
             {
-                _audioSource.PlayOneShot(hitSound, hitSoundVolume);
+                _audioSource.PlayOneShot(hitSound);
             }
-            else
-            {
-                AudioSource.PlayClipAtPoint(hitSound, transform.position, hitSoundVolume);
-            }
+
         }
 
         private void PlayDeathSound()
@@ -489,7 +483,7 @@ namespace FF
                 return;
             }
 
-            AudioSource.PlayClipAtPoint(deathSound, transform.position, deathSoundVolume);
+            AudioSource.PlayClipAtPoint(deathSound, transform.position);
         }
 
         private void SpawnDeathFx()
@@ -500,10 +494,6 @@ namespace FF
             }
 
             GameObject spawned = Instantiate(deathFX, transform.position, Quaternion.identity);
-            if (deathFxLifetime > 0f)
-            {
-                Destroy(spawned, deathFxLifetime);
-            }
         }
     }
 }
