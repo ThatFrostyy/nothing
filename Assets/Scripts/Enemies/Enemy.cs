@@ -490,12 +490,23 @@ namespace FF
                 return;
             }
 
-            if (_audioSource)
-            {
-                _audioSource.PlayOneShot(deathSound);
-                return;
-            }
+            float volume = _audioSource ? _audioSource.volume : 1f;
+            float pitch = _audioSource ? _audioSource.pitch : 1f;
+            float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
+            var mixerGroup = _audioSource ? _audioSource.outputAudioMixerGroup : null;
 
+            GameObject audioObject = new GameObject("EnemyDeathSound");
+            audioObject.transform.position = transform.position;
+
+            var tempSource = audioObject.AddComponent<AudioSource>();
+            tempSource.clip = deathSound;
+            tempSource.volume = volume;
+            tempSource.pitch = pitch;
+            tempSource.spatialBlend = spatialBlend;
+            tempSource.outputAudioMixerGroup = mixerGroup;
+            tempSource.Play();
+
+            Destroy(audioObject, deathSound.length / Mathf.Max(tempSource.pitch, 0.01f));
         }
 
         private void SpawnDeathFx()
