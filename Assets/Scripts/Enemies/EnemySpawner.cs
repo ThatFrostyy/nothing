@@ -4,13 +4,17 @@ namespace FF
 {
     public class EnemySpawner : MonoBehaviour
     {
-        [SerializeField] GameObject enemyPrefab;
+        [SerializeField] GameObject[] enemyPrefabs;
+        [SerializeField] GameObject[] bossPrefabs;
         [SerializeField] Transform player;
         [SerializeField] float spawnRadius = 16f;
         [SerializeField] float spawnBuffer = 2f;
         [SerializeField] int maxSpawnAttempts = 8;
         [SerializeField] Camera spawnCamera;
         [SerializeField] AnimationCurve countByWave = AnimationCurve.Linear(1, 6, 20, 60);
+        [SerializeField, Min(1)] int bossWaveInterval = 5;
+        [SerializeField] AnimationCurve bossCountByWave = AnimationCurve.Linear(1, 1, 10, 3);
+        [SerializeField] bool spawnRegularsDuringBossWave = true;
 
         void Awake()
         {
@@ -22,18 +26,48 @@ namespace FF
 
         public void SpawnWave(int wave)
         {
-            if (!enemyPrefab || !player) return;
+            if (!player) return;
 
-            int count = Mathf.RoundToInt(countByWave.Evaluate(wave));
+            bool hasRegularPrefabs = enemyPrefabs != null && enemyPrefabs.Length > 0;
+            bool hasBossPrefabs = bossPrefabs != null && bossPrefabs.Length > 0;
+
+            bool isBossWave = hasBossPrefabs && bossWaveInterval > 0 && wave > 0 && wave % bossWaveInterval == 0;
+
             float radius = GetSpawnRadius();
+
+            if (hasRegularPrefabs && (!isBossWave || spawnRegularsDuringBossWave))
+            {
+                int regularCount = Mathf.Max(0, Mathf.RoundToInt(countByWave.Evaluate(wave)));
+                SpawnGroup(regularCount, radius, enemyPrefabs);
+            }
+
+            if (isBossWave)
+            {
+                int bossCount = Mathf.Max(1, Mathf.RoundToInt(bossCountByWave.Evaluate(wave)));
+                SpawnGroup(bossCount, radius, bossPrefabs);
+            }
+        }
+
+        void SpawnGroup(int count, float radius, GameObject[] prefabs)
+        {
+            if (prefabs == null || prefabs.Length == 0)
+            {
+                return;
+            }
 
             for (int i = 0; i < count; i++)
             {
+                var prefab = prefabs[Random.Range(0, prefabs.Length)];
+                if (!prefab)
+                {
+                    continue;
+                }
+
                 float a = Random.value * Mathf.PI * 2f;
                 Vector2 direction = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
                 Vector2 pos = FindSpawnPosition(direction, radius);
 
-                var enemyInstance = Instantiate(enemyPrefab, pos, Quaternion.identity);
+                var enemyInstance = Instantiate(prefab, pos, Quaternion.identity);
                 if (enemyInstance.TryGetComponent<Enemy>(out var enemy))
                 {
                     enemy.Initialize(player);
