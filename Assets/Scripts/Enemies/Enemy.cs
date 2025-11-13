@@ -21,9 +21,18 @@ namespace FF
         [SerializeField] private float idleSwayFrequency = 1.5f;
         [SerializeField] private float idleSwayAmplitude = 3f;
 
+        [Header("Audio & FX")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip hitSound;
+        [SerializeField, Range(0f, 1f)] private float hitSoundVolume = 0.75f;
+        [SerializeField] private AudioClip deathSound;
+        [SerializeField, Range(0f, 1f)] private float deathSoundVolume = 1f;
+        [SerializeField] private GameObject deathFX;
+        [SerializeField, Min(0f)] private float deathFxLifetime = 4f;
+
         [Header("Avoidance")]
         [SerializeField] private LayerMask avoidanceLayers = ~0;
-        [SerializeField, Range(4, 64)] private int maxAvoidanceChecks = 16;
+        [SerializeField, Range(4, 128)] private int maxAvoidanceChecks = 32;
 
         private Rigidbody2D _rigidbody;
         private EnemyStats _stats;
@@ -37,6 +46,8 @@ namespace FF
         private bool _isFacingLeft;
         private Collider2D[] _avoidanceResults;
         private ContactFilter2D _avoidanceFilter;
+        private AudioSource _audioSource;
+        private const int AvoidanceBufferCeiling = 256;
 
         public void Initialize(Transform player)
         {
@@ -48,6 +59,19 @@ namespace FF
             _rigidbody = GetComponent<Rigidbody2D>();
             _stats = GetComponent<EnemyStats>();
             _health = GetComponent<Health>();
+
+            _audioSource = audioSource ? audioSource : GetComponent<AudioSource>();
+            if (!_audioSource && hitSound)
+            {
+                _audioSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            if (_audioSource)
+            {
+                _audioSource.playOnAwake = false;
+                _audioSource.loop = false;
+                _audioSource.spatialBlend = 0f;
+            }
 
             if (!weaponManager)
             {
@@ -102,7 +126,7 @@ namespace FF
                 autoShooter.SetCameraShakeEnabled(false);
             }
 
-            int bufferSize = Mathf.Clamp(maxAvoidanceChecks, 4, 64);
+            int bufferSize = Mathf.Clamp(maxAvoidanceChecks, 4, AvoidanceBufferCeiling);
             _avoidanceResults = new Collider2D[bufferSize];
             _avoidanceFilter = new ContactFilter2D
             {
@@ -141,6 +165,7 @@ namespace FF
             if (_health != null)
             {
                 _health.OnDeath += HandleDeath;
+                _health.OnDamaged += HandleDamaged;
             }
         }
 
@@ -149,6 +174,7 @@ namespace FF
             if (_health != null)
             {
                 _health.OnDeath -= HandleDeath;
+                _health.OnDamaged -= HandleDamaged;
             }
         }
 
@@ -202,13 +228,28 @@ namespace FF
 
         private Vector2 CalculateSeparationForce(float radius, float pushStrength)
         {
-            if (radius <= 0f || pushStrength <= 0f || _avoidanceResults == null)
+            if (radius <= 0f || pushStrength <= 0f)
             {
                 return Vector2.zero;
             }
 
             Vector2 origin = _rigidbody ? _rigidbody.position : (Vector2)transform.position;
+            if (_avoidanceResults == null || _avoidanceResults.Length == 0)
+            {
+                int initialSize = Mathf.Clamp(maxAvoidanceChecks, 4, AvoidanceBufferCeiling);
+                _avoidanceResults = new Collider2D[initialSize];
+            }
+
             int hitCount = Physics2D.OverlapCircle(origin, radius, _avoidanceFilter, _avoidanceResults);
+            int currentCapacity = _avoidanceResults.Length;
+
+            while (hitCount >= currentCapacity && currentCapacity < AvoidanceBufferCeiling)
+            {
+                int newCapacity = Mathf.Min(currentCapacity * 2, AvoidanceBufferCeiling);
+                System.Array.Resize(ref _avoidanceResults, newCapacity);
+                currentCapacity = _avoidanceResults.Length;
+                hitCount = Physics2D.OverlapCircle(origin, radius, _avoidanceFilter, _avoidanceResults);
+            }
 
             if (hitCount <= 0)
             {
@@ -216,6 +257,7 @@ namespace FF
             }
 
             Vector2 separation = Vector2.zero;
+            float totalWeight = 0f;
             int contributions = 0;
 
             for (int i = 0; i < hitCount; i++)
@@ -241,7 +283,14 @@ namespace FF
                     sqrMagnitude = offset.sqrMagnitude;
                     if (sqrMagnitude < 0.0001f)
                     {
-                        continue;
+                        int hash = neighbor.GetInstanceID() ^ GetInstanceID();
+                        float angle = (hash & 1023) * Mathf.Deg2Rad;
+                        offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 0.1f;
+                        sqrMagnitude = offset.sqrMagnitude;
+                        if (sqrMagnitude < 0.0001f)
+                        {
+                            continue;
+                        }
                     }
                 }
 
@@ -250,18 +299,25 @@ namespace FF
                 Vector2 direction = offset / distance;
 
                 separation += direction * weight;
+                totalWeight += weight;
                 contributions++;
             }
 
-            if (contributions == 0)
+            if (contributions == 0 || totalWeight <= 0f)
             {
                 return Vector2.zero;
             }
 
-            separation /= contributions;
-            separation *= pushStrength;
+            if (separation.sqrMagnitude < 0.0001f)
+            {
+                return Vector2.zero;
+            }
 
-            return Vector2.ClampMagnitude(separation, pushStrength);
+            Vector2 separationDirection = separation.normalized;
+            float crowdingStrength = Mathf.Clamp(totalWeight, 0.25f, 1f);
+            Vector2 force = separationDirection * pushStrength * crowdingStrength;
+
+            return Vector2.ClampMagnitude(force, pushStrength);
         }
 
         private void AimAtPlayer()
@@ -364,12 +420,25 @@ namespace FF
             autoShooter.SetFireHeld(inRange);
         }
 
+        private void HandleDamaged(int damage)
+        {
+            if (damage <= 0)
+            {
+                return;
+            }
+
+            PlayHitSound();
+        }
+
         private void HandleDeath()
         {
             if (autoShooter)
             {
                 autoShooter.SetFireHeld(false);
             }
+
+            PlayDeathSound();
+            SpawnDeathFx();
         }
         #endregion Handlers
 
@@ -394,6 +463,47 @@ namespace FF
             float shootDistance = _stats ? _stats.ShootingDistance : 8f;
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, shootDistance);
+        }
+
+        private void PlayHitSound()
+        {
+            if (!hitSound)
+            {
+                return;
+            }
+
+            if (_audioSource)
+            {
+                _audioSource.PlayOneShot(hitSound, hitSoundVolume);
+            }
+            else
+            {
+                AudioSource.PlayClipAtPoint(hitSound, transform.position, hitSoundVolume);
+            }
+        }
+
+        private void PlayDeathSound()
+        {
+            if (!deathSound)
+            {
+                return;
+            }
+
+            AudioSource.PlayClipAtPoint(deathSound, transform.position, deathSoundVolume);
+        }
+
+        private void SpawnDeathFx()
+        {
+            if (!deathFX)
+            {
+                return;
+            }
+
+            GameObject spawned = Instantiate(deathFX, transform.position, Quaternion.identity);
+            if (deathFxLifetime > 0f)
+            {
+                Destroy(spawned, deathFxLifetime);
+            }
         }
     }
 }
