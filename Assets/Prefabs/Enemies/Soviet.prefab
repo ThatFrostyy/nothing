@@ -396,7 +396,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f67e22903008e4e8c6c8f3c6ec685b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
-  startingWeapon: {fileID: 0}
+  startingWeapon: {fileID: 11400000, guid: 114277bbf605c4d4d94800c0bdf3f124, type: 2}
   weaponManager: {fileID: 3840448485114925120}
   autoShooter: {fileID: 7022077151718605472}
   gunPivot: {fileID: 5465275306066438890}
@@ -408,13 +408,11 @@ MonoBehaviour:
   idleSwayAmplitude: 5
   audioSource: {fileID: 5733240435511067292}
   hitSound:
+  - {fileID: 8300000, guid: e375acb7908dc354b88d454e6f37f804, type: 3}
+  deathSound:
   - {fileID: 8300000, guid: 51c41712bc32b5a4db2aeb54da68baab, type: 3}
   - {fileID: 8300000, guid: 4675a14c0671bb240bbeb34ee7869d26, type: 3}
   - {fileID: 8300000, guid: ab9a9327dff658549ace2a131d4347e3, type: 3}
-  deathSound:
-  - {fileID: 8300000, guid: 87cc47b86096d4f42a608755861381ba, type: 3}
-  - {fileID: 8300000, guid: 9cc73fc29d43b1f4ab8add98d2b5e409, type: 3}
-  - {fileID: 8300000, guid: f21a622b54414bc469acdf3900a56f43, type: 3}
   deathFX: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
   avoidanceLayers:
     serializedVersion: 2
