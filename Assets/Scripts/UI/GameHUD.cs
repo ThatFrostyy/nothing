@@ -11,9 +11,13 @@ namespace FF
         [SerializeField] private GameManager gameManager;
         [SerializeField] private Health playerHealth;
         [SerializeField] private XPWallet wallet;
+        [SerializeField] private WeaponManager weaponManager;
 
         [Header("UI References")]
-        [SerializeField] private TMP_Text healthText;
+        [SerializeField] private TMP_Text healthValueText;
+        [SerializeField] private Image healthFillImage;
+        [SerializeField] private TMP_Text killCountText;
+        [SerializeField] private TMP_Text weaponNameText;
         [SerializeField] private TMP_Text waveText;
         [SerializeField] private TMP_Text timeText;
         [SerializeField] private TMP_Text xpText;
@@ -34,12 +38,21 @@ namespace FF
                 if (playerObject)
                 {
                     playerHealth = playerObject.GetComponent<Health>();
+                    if (!weaponManager)
+                    {
+                        weaponManager = playerObject.GetComponentInChildren<WeaponManager>();
+                    }
                 }
             }
 
             if (!wallet && playerHealth)
             {
                 wallet = playerHealth.GetComponent<XPWallet>();
+            }
+
+            if (!weaponManager && playerHealth)
+            {
+                weaponManager = playerHealth.GetComponent<WeaponManager>();
             }
         }
 
@@ -53,6 +66,16 @@ namespace FF
             if (wallet != null)
             {
                 wallet.OnXPChanged += HandleXPChanged;
+            }
+
+            if (gameManager != null)
+            {
+                gameManager.OnKillCountChanged += HandleKillCountChanged;
+            }
+
+            if (weaponManager != null)
+            {
+                weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
             }
 
             RefreshAll();
@@ -69,6 +92,16 @@ namespace FF
             {
                 wallet.OnXPChanged -= HandleXPChanged;
             }
+
+            if (gameManager != null)
+            {
+                gameManager.OnKillCountChanged -= HandleKillCountChanged;
+            }
+
+            if (weaponManager != null)
+            {
+                weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+            }
         }
 
         void Update()
@@ -81,24 +114,45 @@ namespace FF
         {
             HandleHealthChanged(playerHealth ? playerHealth.CurrentHP : 0, playerHealth ? playerHealth.MaxHP : 0);
             HandleXPChanged(wallet ? wallet.Level : 1, wallet ? wallet.XP : 0, wallet ? wallet.Next : 1);
+            HandleKillCountChanged(gameManager ? gameManager.KillCount : 0);
+            UpdateWeaponDisplay();
             UpdateWaveDisplay();
             UpdateTimeDisplay();
         }
 
         void HandleHealthChanged(int current, int max)
         {
-            if (!healthText)
+            if (!healthValueText && !healthFillImage)
             {
                 return;
             }
 
             if (max <= 0)
             {
-                healthText.text = "HP: --";
+                if (healthValueText)
+                {
+                    healthValueText.text = "HP: --";
+                }
+
+                if (healthFillImage)
+                {
+                    healthFillImage.fillAmount = 0f;
+                }
             }
             else
             {
-                healthText.text = $"HP: {Mathf.Clamp(current, 0, max)}/{max}";
+                int clamped = Mathf.Clamp(current, 0, max);
+
+                if (healthValueText)
+                {
+                    healthValueText.text = $"HP: {clamped}/{max}";
+                }
+
+                if (healthFillImage)
+                {
+                    float fill = Mathf.Clamp01((float)clamped / max);
+                    healthFillImage.fillAmount = fill;
+                }
             }
         }
 
@@ -114,6 +168,36 @@ namespace FF
                 float fill = next <= 0 ? 0f : Mathf.Clamp01((float)current / next);
                 xpFillImage.fillAmount = fill;
             }
+        }
+
+        void HandleKillCountChanged(int kills)
+        {
+            if (!killCountText)
+            {
+                return;
+            }
+
+            killCountText.text = $"Kills: {Mathf.Max(0, kills)}";
+        }
+
+        void HandleWeaponEquipped(Weapon weapon)
+        {
+            UpdateWeaponDisplay(weapon);
+        }
+
+        void UpdateWeaponDisplay(Weapon weaponOverride = null)
+        {
+            if (!weaponNameText)
+            {
+                return;
+            }
+
+            Weapon weaponToShow = weaponOverride ? weaponOverride : weaponManager ? weaponManager.CurrentWeapon : null;
+            string weaponLabel = weaponToShow && !string.IsNullOrEmpty(weaponToShow.weaponName)
+                ? weaponToShow.weaponName
+                : "--";
+
+            weaponNameText.text = $"Weapon: {weaponLabel}";
         }
 
         void UpdateWaveDisplay()

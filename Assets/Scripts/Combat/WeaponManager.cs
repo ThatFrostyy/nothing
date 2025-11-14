@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace FF
@@ -13,9 +14,17 @@ namespace FF
 
         public Transform GunPivot => gunPivot;
         public AutoShooter Shooter => shooter;
+        public Weapon CurrentWeapon => currentSO;
+
+        public event Action<Weapon> OnWeaponEquipped;
 
         public void Equip(Weapon newWeapon)
         {
+            if (!newWeapon)
+            {
+                return;
+            }
+
             if (currentWeaponInstance != null)
             {
                 Destroy(currentWeaponInstance);
@@ -35,6 +44,8 @@ namespace FF
 
             shooter.InitializeRecoil(gunPivot);
             shooter.SetWeapon(newWeapon, muzzle);
+
+            OnWeaponEquipped?.Invoke(currentSO);
         }
     }
 }

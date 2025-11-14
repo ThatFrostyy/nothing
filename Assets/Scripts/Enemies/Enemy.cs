@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace FF
@@ -7,6 +8,8 @@ namespace FF
     [RequireComponent(typeof(Health))]
     public class Enemy : MonoBehaviour
     {
+        public static event Action<Enemy> OnAnyEnemyKilled;
+
         [Header("Combat Setup")]
         [SerializeField] private Weapon startingWeapon;
         [SerializeField] private WeaponManager weaponManager;
@@ -434,6 +437,8 @@ namespace FF
             {
                 autoShooter.SetFireHeld(false);
             }
+
+            OnAnyEnemyKilled?.Invoke(this);
 
             PlayDeathSound();
             SpawnDeathFx();
