@@ -160,7 +160,7 @@ namespace FF
         {
             if (xpText)
             {
-                xpText.text = $"Level {level} – XP: {current}/{Mathf.Max(1, next)}";
+                xpText.text = $"LVL: {level} – XP: {current}/{Mathf.Max(1, next)}";
             }
 
             if (xpFillImage)

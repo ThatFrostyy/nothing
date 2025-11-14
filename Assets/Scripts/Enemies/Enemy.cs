@@ -473,7 +473,7 @@ namespace FF
             if (clips == null || clips.Length == 0) return null;
 
             int index;
-            do { index = Random.Range(0, clips.Length); }
+            do { index = UnityEngine.Random.Range(0, clips.Length); }
             while (index == lastIndex && clips.Length > 1);
             lastIndex = index;
 
