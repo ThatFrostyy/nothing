@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98be82d2fe4824c4fae56dac9cacea6b, type: 3}
+  m_Name: Combat Sprint
+  m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
+  Title: Combat Sprint
+  Description: '"<b>You move <color=#0060BC>+15%</color> faster.</b>"'
+  Type: 2
+  Magnitude: 0.15
