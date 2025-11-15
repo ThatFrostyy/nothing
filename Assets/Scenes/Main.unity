@@ -588,19 +588,19 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0.59419376
-      outSlope: 0.59419376
+      time: -0.15416718
+      value: 0.49761963
+      inSlope: 0.43527523
+      outSlope: 0.43527523
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 1.0121765
-      value: 0.601429
-      inSlope: 0.59419376
-      outSlope: 0.59419376
+      time: 1
+      value: 1
+      inSlope: 0.43527523
+      outSlope: 0.43527523
       tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
@@ -1365,7 +1365,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -3005,7 +3005,7 @@ MonoBehaviour:
   hitSound: {fileID: 8300000, guid: e375acb7908dc354b88d454e6f37f804, type: 3}
   hitShakeDuration: 0.15
   hitShakeIntensity: 0.25
-  levelUpSound: {fileID: 8300000, guid: 517d5e1cd502fd14e862f1363c41e1e3, type: 3}
+  levelUpSound: {fileID: 8300000, guid: a045c4a2a7b9e9245ae825a051516d62, type: 3}
   levelUpParticles: {fileID: 1676495797548180, guid: 706a714971ebbb24f9f49085982f3649, type: 3}
 --- !u!114 &1207903165
 MonoBehaviour:
@@ -4614,7 +4614,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.GameManager
   <Wave>k__BackingField: 0
   spawner: {fileID: 322110423}
-  initialTimeBetweenWaves: 8
+  initialTimeBetweenWaves: 30
   waveIntervalIncrease: 2
   maximumTimeBetweenWaves: 60
 --- !u!4 &1885342133
