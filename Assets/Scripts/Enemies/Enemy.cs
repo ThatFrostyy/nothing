@@ -36,6 +36,8 @@ namespace FF
         [SerializeField, Min(1)] private int xpOrbCount = 1;
         [SerializeField, Range(0f, 2f)] private float xpOrbSpreadRadius = 0.35f;
 
+        private int _baseXpOrbValue;
+
         [Header("Avoidance")]
         [SerializeField] private LayerMask avoidanceLayers = ~0;
         [SerializeField, Range(4, 128)] private int maxAvoidanceChecks = 32;
@@ -67,11 +69,36 @@ namespace FF
             _player = player;
         }
 
+        public void ApplyWaveModifiers(EnemyWaveModifiers modifiers)
+        {
+            if (_health != null && modifiers.HealthMultiplier > 0f)
+            {
+                _health.ScaleMaxHP(modifiers.HealthMultiplier, true);
+            }
+
+            if (_stats != null)
+            {
+                _stats.ApplyWaveMultipliers(
+                    modifiers.MoveSpeedMultiplier,
+                    modifiers.FireRateMultiplier,
+                    modifiers.DamageMultiplier,
+                    1f);
+            }
+
+            if (modifiers.XpValueMultiplier > 0f)
+            {
+                int scaledValue = Mathf.Max(1, Mathf.RoundToInt(_baseXpOrbValue * modifiers.XpValueMultiplier));
+                xpOrbValue = scaledValue;
+            }
+        }
+
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
             _stats = GetComponent<EnemyStats>();
             _health = GetComponent<Health>();
+
+            _baseXpOrbValue = Mathf.Max(1, xpOrbValue);
 
             _audioSource = audioSource ? audioSource : GetComponent<AudioSource>();
             if (!_audioSource)

@@ -8,6 +8,7 @@ namespace FF
         [SerializeField] int maxHP = 50;
 
         int hp;
+        int baseMaxHP;
 
         public System.Action<int> OnDamaged;
         public System.Action OnDeath;
@@ -18,12 +19,8 @@ namespace FF
 
         void Awake()
         {
-            hp = maxHP;
-            var healthChanged = OnHealthChanged;
-            if (healthChanged != null)
-            {
-                healthChanged(hp, maxHP);
-            }
+            CacheBaseValues();
+            ResetHealth(true);
         }
 
         public void Damage(int amount)
@@ -52,6 +49,76 @@ namespace FF
             if (hp <= 0) Die();
         }
 
+        public void SetMaxHP(int amount, bool refill = true)
+        {
+            amount = Mathf.Max(1, amount);
+            maxHP = amount;
+            if (refill)
+            {
+                hp = maxHP;
+            }
+            else
+            {
+                hp = Mathf.Clamp(hp, 0, maxHP);
+            }
+
+            var healthChanged = OnHealthChanged;
+            if (healthChanged != null)
+            {
+                healthChanged(hp, maxHP);
+            }
+        }
+
+        public void ScaleMaxHP(float multiplier, bool refill = true)
+        {
+            if (multiplier <= 0f)
+            {
+                return;
+            }
+
+            if (baseMaxHP <= 0)
+            {
+                CacheBaseValues();
+            }
+
+            int scaled = Mathf.Max(1, Mathf.RoundToInt(baseMaxHP * multiplier));
+            SetMaxHP(scaled, refill);
+        }
+
+        public void ResetToBase()
+        {
+            CacheBaseValues();
+            SetMaxHP(baseMaxHP, true);
+        }
+
+        void CacheBaseValues()
+        {
+            baseMaxHP = Mathf.Max(1, maxHP);
+        }
+
+        void ResetHealth(bool refill)
+        {
+            if (baseMaxHP <= 0)
+            {
+                CacheBaseValues();
+            }
+
+            if (refill)
+            {
+                hp = Mathf.Max(1, baseMaxHP);
+            }
+            else
+            {
+                hp = Mathf.Clamp(hp, 0, baseMaxHP);
+            }
+
+            var healthChanged = OnHealthChanged;
+            if (healthChanged != null)
+            {
+                healthChanged(hp, baseMaxHP);
+            }
+        }
+
         private void Die()
         {
             var deathHandler = OnDeath;
@@ -60,6 +127,15 @@ namespace FF
                 deathHandler();
             }
             Destroy(gameObject);
+        }
+
+        void OnValidate()
+        {
+            maxHP = Mathf.Max(1, maxHP);
+            if (!Application.isPlaying)
+            {
+                baseMaxHP = maxHP;
+            }
         }
     }
 }
