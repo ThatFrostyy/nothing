@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
   m_Name: PPSH41
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: PPSH41
-  fireSFX: {fileID: 8300000, guid: ff2acc364fb4b8f41bc9f56d5799c22a, type: 3}
+  weaponName: PPSH-41
+  fireSFX: {fileID: 8300000, guid: de8337e6fb5ac6341a84a45afc8e08ca, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
   ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
   recoilAmount: 10

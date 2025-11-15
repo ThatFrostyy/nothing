@@ -334,7 +334,7 @@ MonoBehaviour:
   moveSpeed: 3.2
   acceleration: 0.18
   retreatSpeedMultiplier: 0.6
-  bodyTiltDegrees: 8
+  bodyTiltDegrees: 10
   shootingDistance: 5
   distanceBuffer: 1.5
   fireRateMultiplier: 1

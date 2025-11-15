@@ -277,7 +277,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0, b: 0, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -588,22 +588,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: -0.15416718
-      value: 0.49761963
-      inSlope: 0.43527523
-      outSlope: 0.43527523
+      time: 0
+      value: 0
+      inSlope: 1
+      outSlope: 1
       tangentMode: 34
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.33333334
+      outWeight: 0
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 0.43527523
-      outSlope: 0.43527523
+      inSlope: 1
+      outSlope: 1
       tangentMode: 34
       weightedMode: 0
-      inWeight: 0.33333334
+      inWeight: 0
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -2768,7 +2768,7 @@ MonoBehaviour:
   _gunPivot: {fileID: 125305192}
   _playerVisual: {fileID: 507405423}
   _acceleration: 0.18
-  _bodyTiltDegrees: 7
+  _bodyTiltDegrees: 10
   _boundsPadding: 0.05
 --- !u!70 &1207903157
 CapsuleCollider2D:
@@ -3681,7 +3681,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ButtonUI
   hoverScale: 1.1
   scaleSpeed: 10
-  clickSound: {fileID: 8300000, guid: 9d9d1f969fea050449b734e7c1fd340f, type: 3}
+  clickSound: {fileID: 8300000, guid: eebe123a83b6b8440a197b6ef9f59b6d, type: 3}
   clickVolume: 1
   clickPitchRange: {x: 1, y: 1}
   normalOutlineColor: {r: 0, g: 0, b: 0, a: 1}
@@ -4103,7 +4103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ButtonUI
   hoverScale: 1.1
   scaleSpeed: 10
-  clickSound: {fileID: 8300000, guid: 9d9d1f969fea050449b734e7c1fd340f, type: 3}
+  clickSound: {fileID: 8300000, guid: eebe123a83b6b8440a197b6ef9f59b6d, type: 3}
   clickVolume: 1
   clickPitchRange: {x: 1, y: 1}
   normalOutlineColor: {r: 0, g: 0, b: 0, a: 1}
@@ -4614,7 +4614,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.GameManager
   <Wave>k__BackingField: 0
   spawner: {fileID: 322110423}
-  initialTimeBetweenWaves: 30
+  initialTimeBetweenWaves: 8
   waveIntervalIncrease: 2
   maximumTimeBetweenWaves: 60
 --- !u!4 &1885342133
@@ -4801,7 +4801,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ButtonUI
   hoverScale: 1.1
   scaleSpeed: 10
-  clickSound: {fileID: 8300000, guid: 9d9d1f969fea050449b734e7c1fd340f, type: 3}
+  clickSound: {fileID: 8300000, guid: eebe123a83b6b8440a197b6ef9f59b6d, type: 3}
   clickVolume: 1
   clickPitchRange: {x: 1, y: 1}
   normalOutlineColor: {r: 0, g: 0, b: 0, a: 1}

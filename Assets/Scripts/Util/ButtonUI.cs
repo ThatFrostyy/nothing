@@ -106,7 +106,6 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void OnClick()
     {
-        Debug.Log("Button clicked: " + gameObject.name);
         _targetScale = 0.95f;
         if (clickSound)
         {
@@ -160,8 +159,6 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         float volumeScale = Mathf.Clamp01(clickVolume);
         playbackSource.PlayOneShot(clickSound, volumeScale);
         playbackSource.pitch = previousPitch;
-
-        Debug.Log($"Playing sound: {clickSound.name}, volume={volumeScale}");
     }
 
     static AudioSource GetSharedAudioSource()

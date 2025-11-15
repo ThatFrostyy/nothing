@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
   m_Name: MP38
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: MP38
-  fireSFX: {fileID: 8300000, guid: ff2acc364fb4b8f41bc9f56d5799c22a, type: 3}
+  weaponName: MP-38
+  fireSFX: {fileID: 8300000, guid: a8649ea53b40f4e43a061e5aa1dec97f, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
   ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
   recoilAmount: 8
