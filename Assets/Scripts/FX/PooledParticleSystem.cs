@@ -40,7 +40,10 @@ namespace FF
             }
 
             _isPlaying = false;
-            _poolToken?.Release();
+            if (_poolToken != null)
+            {
+                _poolToken.Release();
+            }
         }
 
         public void OnTakenFromPool()

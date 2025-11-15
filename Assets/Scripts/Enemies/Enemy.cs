@@ -475,7 +475,11 @@ namespace FF
 
             SpawnXPOrbs();
 
-            OnAnyEnemyKilled?.Invoke(this);
+            var handler = OnAnyEnemyKilled;
+            if (handler != null)
+            {
+                handler(this);
+            }
 
             PlayDeathSound();
             SpawnDeathFx();

@@ -31,9 +31,9 @@ namespace FF
         {
             transform.Translate(speed * Time.deltaTime * Vector3.right, Space.Self);
             t += Time.deltaTime;
-            if (t > lifetime)
+            if (t > lifetime && poolToken != null)
             {
-                poolToken?.Release();
+                poolToken.Release();
             }
         }
 
@@ -57,7 +57,10 @@ namespace FF
                 }
 
                 CameraShake.Shake(0.05f, 0.05f);
-                poolToken?.Release();
+                if (poolToken != null)
+                {
+                    poolToken.Release();
+                }
             }
         }
 

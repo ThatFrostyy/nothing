@@ -1,7 +1,9 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(Button))]
 public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("Scale Settings")]
@@ -23,6 +25,8 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private Color _targetOutlineColor;
     private float _originalRotationZ;
     private AudioSource _audioSource;
+    private Button _button;
+    private Coroutine _resetScaleRoutine;
 
     void Awake()
     {
@@ -57,6 +61,34 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         _outline.effectColor = normalOutlineColor;
         _targetOutlineColor = normalOutlineColor;
+
+        _button = GetComponent<Button>();
+    }
+
+    void OnEnable()
+    {
+        if (_button != null)
+        {
+            _button.onClick.AddListener(OnClick);
+        }
+    }
+
+    void OnDisable()
+    {
+        if (_button != null)
+        {
+            _button.onClick.RemoveListener(OnClick);
+        }
+
+        if (_resetScaleRoutine != null)
+        {
+            StopCoroutine(_resetScaleRoutine);
+            _resetScaleRoutine = null;
+        }
+
+        transform.localScale = _initialScale;
+        _targetScale = 1f;
+        _targetOutlineColor = normalOutlineColor;
     }
 
     void Update()
@@ -88,7 +120,19 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         {
             _audioSource.PlayOneShot(clickSound);
         }
-        Invoke(nameof(ResetScale), 0.05f);
+        if (_resetScaleRoutine != null)
+        {
+            StopCoroutine(_resetScaleRoutine);
+        }
+
+        _resetScaleRoutine = StartCoroutine(ResetScaleRoutine());
+    }
+
+    IEnumerator ResetScaleRoutine()
+    {
+        yield return new WaitForSecondsRealtime(0.05f);
+        ResetScale();
+        _resetScaleRoutine = null;
     }
 
     void ResetScale() => _targetScale = 1f;

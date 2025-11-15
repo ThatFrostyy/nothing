@@ -43,7 +43,11 @@ namespace FF
             {
                 timer = 0f;
                 Wave++;
-                OnWaveStarted?.Invoke(Wave);
+                var waveHandler = OnWaveStarted;
+                if (waveHandler != null)
+                {
+                    waveHandler(Wave);
+                }
                 if (spawner)
                 {
                     spawner.SpawnWave(Wave);
@@ -54,7 +58,11 @@ namespace FF
         void HandleEnemyKilled(Enemy enemy)
         {
             KillCount++;
-            OnKillCountChanged?.Invoke(KillCount);
+            var killHandler = OnKillCountChanged;
+            if (killHandler != null)
+            {
+                killHandler(KillCount);
+            }
         }
     }
 }

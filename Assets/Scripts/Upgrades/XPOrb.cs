@@ -59,7 +59,10 @@ namespace FF
 
             wallet.Add(value);
             PlayPickupSound();
-            poolToken?.Release();
+            if (poolToken != null)
+            {
+                poolToken.Release();
+            }
         }
 
         public void SetValue(int amount)

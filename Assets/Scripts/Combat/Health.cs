@@ -19,7 +19,11 @@ namespace FF
         void Awake()
         {
             hp = maxHP;
-            OnHealthChanged?.Invoke(hp, maxHP);
+            var healthChanged = OnHealthChanged;
+            if (healthChanged != null)
+            {
+                healthChanged(hp, maxHP);
+            }
         }
 
         public void Damage(int amount)
@@ -32,17 +36,29 @@ namespace FF
             int damageApplied = Mathf.Min(amount, previousHp);
             if (damageApplied > 0)
             {
-                OnDamaged?.Invoke(damageApplied);
+                var damagedHandler = OnDamaged;
+                if (damagedHandler != null)
+                {
+                    damagedHandler(damageApplied);
+                }
             }
 
-            OnHealthChanged?.Invoke(hp, maxHP);
+            var healthChanged = OnHealthChanged;
+            if (healthChanged != null)
+            {
+                healthChanged(hp, maxHP);
+            }
 
             if (hp <= 0) Die();
         }
 
         private void Die()
         {
-            OnDeath?.Invoke();
+            var deathHandler = OnDeath;
+            if (deathHandler != null)
+            {
+                deathHandler();
+            }
             Destroy(gameObject);
         }
     }

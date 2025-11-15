@@ -23,10 +23,20 @@ namespace FF
             if (IsShowing)
             {
                 IsShowing = false;
-                OnVisibilityChanged?.Invoke(false);
+                var handler = OnVisibilityChanged;
+                if (handler != null)
+                {
+                    handler(false);
+                }
             }
         }
-        void Pick(Upgrade u) => callback?.Invoke(u);
+        void Pick(Upgrade u)
+        {
+            if (callback != null)
+            {
+                callback(u);
+            }
+        }
 
         public void Show(Upgrade A, Upgrade B, Upgrade C, System.Action<Upgrade> onPick)
         {
@@ -45,7 +55,11 @@ namespace FF
             if (!IsShowing)
             {
                 IsShowing = true;
-                OnVisibilityChanged?.Invoke(true);
+                var handler = OnVisibilityChanged;
+                if (handler != null)
+                {
+                    handler(true);
+                }
             }
         }
     }
