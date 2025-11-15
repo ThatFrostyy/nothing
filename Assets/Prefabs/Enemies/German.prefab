@@ -327,7 +327,7 @@ MonoBehaviour:
   xpOrbPrefab: {fileID: 5860978669140793186, guid: 6a3eb14e9abcb124ca084a235e022790, type: 3}
   xpOrbValue: 1
   xpOrbCount: 3
-  xpOrbSpreadRadius: 0.5
+  xpOrbSpreadRadius: 1
   avoidanceLayers:
     serializedVersion: 2
     m_Bits: 128

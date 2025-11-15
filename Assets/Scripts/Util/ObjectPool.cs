@@ -49,7 +49,23 @@ namespace FF
 
         public GameObject Get(Vector3 position, Quaternion rotation)
         {
-            GameObject instance = _available.Count > 0 ? _available.Pop() : CreateInstance();
+            GameObject instance = null;
+
+            while (_available.Count > 0)
+            {
+                var candidate = _available.Pop();
+                if (candidate != null) 
+                {
+                    instance = candidate;
+                    break;
+                }
+            }
+
+            if (instance == null)
+            {
+                instance = CreateInstance();
+            }
+
             EnsureToken(instance);
 
             Transform t = instance.transform;
@@ -90,7 +106,7 @@ namespace FF
             PoolToken token = instance.GetComponent<PoolToken>();
             if (!token || token.Owner != this)
             {
-                Object.Destroy(instance);
+                GameObject.Destroy(instance);
                 return;
             }
 
@@ -121,9 +137,27 @@ namespace FF
             }
         }
 
+        internal void ClearDestroyedEntries()
+        {
+            if (_available.Count == 0) return;
+
+            var valid = new Stack<GameObject>(_available.Count);
+            foreach (var go in _available)
+            {
+                if (go != null)
+                    valid.Push(go);
+            }
+            _available.Clear();
+            foreach (var go in valid)
+            {
+                _available.Push(go);
+            }
+        }
+
+
         private GameObject CreateInstance()
         {
-            GameObject instance = Object.Instantiate(_prefab, _parent);
+            GameObject instance = GameObject.Instantiate(_prefab, _parent);
             EnsureToken(instance);
             return instance;
         }
@@ -213,8 +247,29 @@ namespace FF
             }
             else
             {
-                Object.Destroy(instance);
+                GameObject.Destroy(instance);
             }
         }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void OnDomainReload()
+        {
+            Pools.Clear();
+        }
+
+        static PoolManager()
+        {
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += _ => ClearAll();
+        }
+
+        public static void ClearAll()
+        {
+            foreach (var kvp in Pools)
+            {
+                kvp.Value.ClearDestroyedEntries();
+            }
+            Pools.Clear();
+        }
+
     }
 }

@@ -78,7 +78,7 @@ namespace FF
                 rotation = Quaternion.AngleAxis(angle, Vector3.forward);
             }
 
-            if (!moveEffectPool && moveEffectPrefab)
+            if (moveEffectPrefab)
             {
                 moveEffectPool = PoolManager.GetPool(moveEffectPrefab, poolPrewarmCount, transform);
             }
