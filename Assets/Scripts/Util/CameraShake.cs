@@ -19,7 +19,7 @@ namespace FF
         {
             if (time < duration)
             {
-                time += Time.deltaTime;
+                time += Time.unscaledDeltaTime;
                 float t = 1f - (time / duration);
                 Vector2 rnd = intensity * t * Random.insideUnitCircle;
                 transform.localPosition = basePos + (Vector3)rnd;

@@ -25,17 +25,29 @@ namespace FF
             {
                 XP -= Next;
                 Level++;
-                OnLevelUp?.Invoke(Level);
+                var levelUpHandler = OnLevelUp;
+                if (levelUpHandler != null)
+                {
+                    levelUpHandler(Level);
+                }
             }
 
-            OnXPChanged?.Invoke(Level, XP, Next);
+            var xpChangedHandler = OnXPChanged;
+            if (xpChangedHandler != null)
+            {
+                xpChangedHandler(Level, XP, Next);
+            }
         }
 
         public void ResetLevels(int level = 1)
         {
             Level = Mathf.Max(1, level);
             XP = 0;
-            OnXPChanged?.Invoke(Level, XP, Next);
+            var xpChangedHandler = OnXPChanged;
+            if (xpChangedHandler != null)
+            {
+                xpChangedHandler(Level, XP, Next);
+            }
         }
     }
 }

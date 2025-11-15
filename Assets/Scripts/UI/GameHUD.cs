@@ -102,10 +102,7 @@ namespace FF
                 weaponManager = playerHealth.GetComponent<WeaponManager>();
             }
 
-            if (!healthPulseTarget && healthFillImage)
-            {
-                healthPulseTarget = healthFillImage.rectTransform;
-            }
+            healthPulseTarget = ResolveHealthPulseTarget();
 
             if (!xpPulseTarget && xpFillImage)
             {
@@ -191,14 +188,15 @@ namespace FF
         void Update()
         {
             float deltaTime = Time.deltaTime;
+            float unscaledDeltaTime = Time.unscaledDeltaTime;
             UpdateWaveDisplay();
             UpdateTimeDisplay();
             UpdateHealthFill(deltaTime);
             UpdateXPFill(deltaTime);
             UpdateHealthPulse(deltaTime);
             UpdateXPPulse(deltaTime);
-            UpdateHeartbeatTimer(deltaTime);
-            UpdateWaveBanner(deltaTime);
+            UpdateHeartbeatTimer(unscaledDeltaTime);
+            UpdateWaveBanner(unscaledDeltaTime);
         }
 
         void RefreshAll()
@@ -296,14 +294,14 @@ namespace FF
 
         void HandleWaveStarted(int wave)
         {
+            int displayWave = Mathf.Max(1, wave);
             if (waveBannerText)
             {
-                int displayWave = Mathf.Max(1, wave);
                 waveBannerText.text = $"Wave {displayWave}";
-                waveBannerTimer = waveBannerDuration;
-                SetWaveBannerVisible(1f);
             }
 
+            waveBannerTimer = waveBannerDuration;
+            SetWaveBannerVisible(1f);
             PlayWaveStartSound();
         }
 
@@ -478,7 +476,7 @@ namespace FF
 
         void UpdateWaveBanner(float deltaTime)
         {
-            if (!waveBannerText)
+            if (!waveBannerText && !waveBannerGroup)
             {
                 return;
             }
@@ -652,15 +650,39 @@ namespace FF
             healthPulseAmplitude = Mathf.Clamp01(healthPulseAmplitude);
             xpPulseAmplitude = Mathf.Clamp01(xpPulseAmplitude);
 
-            if (!healthPulseTarget && healthFillImage)
-            {
-                healthPulseTarget = healthFillImage.rectTransform;
-            }
+            healthPulseTarget = ResolveHealthPulseTarget();
 
             if (!xpPulseTarget && xpFillImage)
             {
                 xpPulseTarget = xpFillImage.rectTransform;
             }
+        }
+
+        RectTransform ResolveHealthPulseTarget()
+        {
+            if (healthPulseTarget)
+            {
+                return healthPulseTarget;
+            }
+
+            if (!healthFillImage)
+            {
+                return null;
+            }
+
+            RectTransform fillRect = healthFillImage.rectTransform;
+            if (fillRect != null)
+            {
+                RectTransform parentRect = fillRect.parent as RectTransform;
+                if (parentRect != null)
+                {
+                    return parentRect;
+                }
+
+                return fillRect;
+            }
+
+            return null;
         }
     }
 }

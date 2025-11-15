@@ -178,7 +178,11 @@ namespace FF
             FillPoolableCache(instance);
             for (int i = 0; i < PoolableCache.Count; i++)
             {
-                PoolableCache[i]?.OnTakenFromPool();
+                IPoolable poolable = PoolableCache[i];
+                if (poolable != null)
+                {
+                    poolable.OnTakenFromPool();
+                }
             }
         }
 
@@ -187,7 +191,11 @@ namespace FF
             FillPoolableCache(instance);
             for (int i = 0; i < PoolableCache.Count; i++)
             {
-                PoolableCache[i]?.OnReturnedToPool();
+                IPoolable poolable = PoolableCache[i];
+                if (poolable != null)
+                {
+                    poolable.OnReturnedToPool();
+                }
             }
         }
 
@@ -241,7 +249,7 @@ namespace FF
             }
 
             PoolToken token = instance.GetComponent<PoolToken>();
-            if (token?.Owner != null)
+            if (token != null && token.Owner != null)
             {
                 token.Owner.Release(instance);
             }

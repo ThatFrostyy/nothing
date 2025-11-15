@@ -51,7 +51,11 @@ namespace FF
             shooter.InitializeRecoil(gunPivot);
             shooter.SetWeapon(newWeapon, muzzle, eject);
 
-            OnWeaponEquipped?.Invoke(currentSO);
+            var handler = OnWeaponEquipped;
+            if (handler != null)
+            {
+                handler(currentSO);
+            }
         }
     }
 }

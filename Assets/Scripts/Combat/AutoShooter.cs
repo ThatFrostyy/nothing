@@ -69,7 +69,7 @@ namespace FF
                 _gunPivot.localPosition = _baseLocalPosition;
             }
 
-            OnCooldownChanged?.Invoke(_currentCooldownProgress);
+            NotifyCooldownChanged();
         }
 
         public void SetFireHeld(bool isHeld)
@@ -119,7 +119,11 @@ namespace FF
 
             _fireTimer += Time.deltaTime;
 
-            float rpmMultiplier = _stats?.GetFireRateMultiplier() ?? 1f;
+            float rpmMultiplier = 1f;
+            if (_stats != null)
+            {
+                rpmMultiplier = _stats.GetFireRateMultiplier();
+            }
             float rpm = Mathf.Max(_weapon.rpm * rpmMultiplier, 0.01f);
             float interval = 60f / rpm;
 
@@ -145,7 +149,11 @@ namespace FF
             float movementSpeed = _playerBody ? _playerBody.linearVelocity.magnitude : 0f;
             bool isMoving = movementSpeed > 0.1f;
 
-            float movementPenalty = _stats?.GetMovementAccuracyPenalty() ?? 1f;
+            float movementPenalty = 1f;
+            if (_stats != null)
+            {
+                movementPenalty = _stats.GetMovementAccuracyPenalty();
+            }
             float targetSpread = _weapon.baseSpread * (isMoving ? movementPenalty : 1f);
             _currentSpread = Mathf.Lerp(_currentSpread, targetSpread, Time.deltaTime * _weapon.spreadRecoverySpeed);
 
@@ -158,7 +166,11 @@ namespace FF
             _currentSpread += _weapon.spreadIncreasePerShot;
 
             bool isMoving = _playerBody && _playerBody.linearVelocity.magnitude > 0.1f;
-            float movementPenalty = _stats?.GetMovementAccuracyPenalty() ?? 1f;
+            float movementPenalty = 1f;
+            if (_stats != null)
+            {
+                movementPenalty = _stats.GetMovementAccuracyPenalty();
+            }
             float maxSpread = _weapon.maxSpread * (isMoving ? movementPenalty : 1f);
             _currentSpread = Mathf.Clamp(_currentSpread, _weapon.baseSpread, maxSpread);
 
@@ -179,7 +191,11 @@ namespace FF
 
             if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
             {
-                float damageMultiplier = _stats?.GetDamageMultiplier() ?? 1f;
+                float damageMultiplier = 1f;
+                if (_stats != null)
+                {
+                    damageMultiplier = _stats.GetDamageMultiplier();
+                }
                 bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier));
                 bullet.SetOwner(transform.root.tag);
             }
@@ -242,7 +258,16 @@ namespace FF
             }
 
             _currentCooldownProgress = value;
-            OnCooldownChanged?.Invoke(_currentCooldownProgress);
+            NotifyCooldownChanged();
+        }
+
+        void NotifyCooldownChanged()
+        {
+            var handler = OnCooldownChanged;
+            if (handler != null)
+            {
+                handler(_currentCooldownProgress);
+            }
         }
     }
 }
