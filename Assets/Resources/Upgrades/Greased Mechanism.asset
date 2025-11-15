@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Greased Mechanism
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Greased Mechanism
-  Description: '"<b>Your weapons fire rate is increased by <color=#D17A22>+10%</color></b>"'
+  Description: <b>Your weapons fire rate is increased by <color=#D17A22>+10%</color></b>
   Type: 1
   Magnitude: 0.1

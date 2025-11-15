@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: Lead Storm
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Lead Storm
-  Description: '"<b>Your weapons deal <color=#FF4040>+15%</color> more damage.</b>"'
+  Description: <b>Your weapons deal <color=#FF4040>+10%</color> more damage.</b>
   Type: 0
-  Magnitude: 0.15
+  Magnitude: 0.1

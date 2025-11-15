@@ -64,22 +64,8 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
         _button = GetComponent<Button>();
     }
-
-    void OnEnable()
-    {
-        if (_button != null)
-        {
-            _button.onClick.AddListener(OnClick);
-        }
-    }
-
     void OnDisable()
     {
-        if (_button != null)
-        {
-            _button.onClick.RemoveListener(OnClick);
-        }
-
         if (_resetScaleRoutine != null)
         {
             StopCoroutine(_resetScaleRoutine);
@@ -115,10 +101,13 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void OnClick()
     {
+        Debug.Log("Button clicked: " + gameObject.name);
         _targetScale = 0.95f;
         if (_audioSource && clickSound)
         {
+            AudioListener.pause = false;
             _audioSource.PlayOneShot(clickSound);
+            Debug.Log($"Playing sound: {clickSound.name}, volume={_audioSource.volume}");
         }
         if (_resetScaleRoutine != null)
         {

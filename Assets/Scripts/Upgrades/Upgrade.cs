@@ -17,9 +17,9 @@ namespace FF
         {
             switch (Type)
             {
-                case Kind.DamageMult: stats.DamageMult *= 1f + Magnitude; break;
-                case Kind.FireRateMult: stats.FireRateMult *= 1f + Magnitude; break;
-                case Kind.MoveMult: stats.MoveMult *= 1f + Magnitude; break;
+                case Kind.DamageMult: stats.DamageMult += Magnitude; break;
+                case Kind.FireRateMult: stats.FireRateMult += Magnitude; break;
+                case Kind.MoveMult: stats.MoveMult += Magnitude; break;
             }
         }
     }

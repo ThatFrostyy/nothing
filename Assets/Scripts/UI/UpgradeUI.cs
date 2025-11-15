@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 namespace FF
 {
@@ -10,11 +11,48 @@ namespace FF
         [SerializeField] Button aBtn, bBtn, cBtn;
         [SerializeField] TMPro.TMP_Text aTxt, bTxt, cTxt;
 
-        System.Action<Upgrade> callback;
+        Action<Upgrade> callback;
         Upgrade a, b, c;
 
         public static event Action<bool> OnVisibilityChanged;
         public static bool IsShowing { get; private set; }
+
+        UnityAction aListener, bListener, cListener;
+
+        void Pick(Upgrade u)
+        {
+            callback?.Invoke(u);
+        }
+
+        public void Show(Upgrade A, Upgrade B, Upgrade C, Action<Upgrade> onPick)
+        {
+            a = A; b = B; c = C; callback = onPick;
+            aTxt.text = $"{A.Title}\n{A.Description}";
+            bTxt.text = $"{B.Title}\n{B.Description}";
+            cTxt.text = $"{C.Title}\n{C.Description}";
+            panel.SetActive(true);
+
+            if (aListener != null) aBtn.onClick.RemoveListener(aListener);
+            if (bListener != null) bBtn.onClick.RemoveListener(bListener);
+            if (cListener != null) cBtn.onClick.RemoveListener(cListener);
+
+            aListener = () => Pick(a);
+            bListener = () => Pick(b);
+            cListener = () => Pick(c);
+
+            aBtn.onClick.AddListener(aListener);
+            bBtn.onClick.AddListener(bListener);
+            cBtn.onClick.AddListener(cListener);
+
+
+            Time.timeScale = 0f;
+
+            if (!IsShowing)
+            {
+                IsShowing = true;
+                OnVisibilityChanged?.Invoke(true);
+            }
+        }
 
         public void Hide()
         {
@@ -23,43 +61,7 @@ namespace FF
             if (IsShowing)
             {
                 IsShowing = false;
-                var handler = OnVisibilityChanged;
-                if (handler != null)
-                {
-                    handler(false);
-                }
-            }
-        }
-        void Pick(Upgrade u)
-        {
-            if (callback != null)
-            {
-                callback(u);
-            }
-        }
-
-        public void Show(Upgrade A, Upgrade B, Upgrade C, System.Action<Upgrade> onPick)
-        {
-            a = A; b = B; c = C; callback = onPick;
-            aTxt.text = $"{A.Title}\n{A.Description}";
-            bTxt.text = $"{B.Title}\n{B.Description}";
-            cTxt.text = $"{C.Title}\n{C.Description}";
-            panel.SetActive(true);
-            aBtn.onClick.RemoveAllListeners();
-            bBtn.onClick.RemoveAllListeners();
-            cBtn.onClick.RemoveAllListeners();
-            aBtn.onClick.AddListener(() => Pick(a));
-            bBtn.onClick.AddListener(() => Pick(b));
-            cBtn.onClick.AddListener(() => Pick(c));
-            Time.timeScale = 0f;
-            if (!IsShowing)
-            {
-                IsShowing = true;
-                var handler = OnVisibilityChanged;
-                if (handler != null)
-                {
-                    handler(true);
-                }
+                OnVisibilityChanged?.Invoke(false);
             }
         }
     }

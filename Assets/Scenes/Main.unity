@@ -2270,7 +2270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98d3a625de20a5a4e964bb3d8eb1c036, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Health
-  maxHP: 50
+  maxHP: 325
 --- !u!114 &1207903154
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2977,8 +2977,8 @@ MonoBehaviour:
   xpText: {fileID: 1269021521}
   xpFillImage: {fileID: 658359175}
   timeFormat: mm\:ss
-  healthPulseTarget: {fileID: 2001000201}
-  xpPulseTarget: {fileID: 658359174}
+  healthPulseTarget: {fileID: 2001000101}
+  xpPulseTarget: {fileID: 1358656901}
   lowHealthThreshold: 0.25
   healthFillSpeed: 2
   xpFillSpeed: 2.5
@@ -3267,7 +3267,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1463559511}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1463559508}
+        m_TargetAssemblyTypeName: ButtonUI, Assembly-CSharp
+        m_MethodName: OnClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1463559511
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3675,7 +3687,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1699251681}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1699251678}
+        m_TargetAssemblyTypeName: ButtonUI, Assembly-CSharp
+        m_MethodName: OnClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1699251681
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4357,7 +4381,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1952578688}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1952578685}
+        m_TargetAssemblyTypeName: ButtonUI, Assembly-CSharp
+        m_MethodName: OnClick
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1952578688
 MonoBehaviour:
   m_ObjectHideFlags: 0
