@@ -13,8 +13,11 @@ namespace FF
         [SerializeField, Min(0f)] private float minSpeedForEffect = 0.5f;
         [SerializeField, Min(0f)] private float spawnInterval = 0.18f;
         [SerializeField] private bool alignToVelocity = true;
+        [SerializeField, Min(0f)] private float backOffset = 0.35f;
+        [SerializeField, Min(0)] private int poolPrewarmCount = 6;
 
         private float spawnTimer;
+        private GameObjectPool moveEffectPool;
 
         private void Awake()
         {
@@ -26,6 +29,11 @@ namespace FF
             if (!spawnPoint)
             {
                 spawnPoint = transform;
+            }
+
+            if (moveEffectPrefab)
+            {
+                moveEffectPool = PoolManager.GetPool(moveEffectPrefab, poolPrewarmCount, transform);
             }
         }
 
@@ -57,6 +65,12 @@ namespace FF
         private void SpawnEffect(Vector2 velocity)
         {
             Vector3 position = spawnPoint ? spawnPoint.position : transform.position;
+            if (velocity.sqrMagnitude > 0.0001f && backOffset > 0f)
+            {
+                Vector3 backward = (Vector3)velocity.normalized * backOffset;
+                position -= backward;
+            }
+
             Quaternion rotation = Quaternion.identity;
             if (alignToVelocity && velocity.sqrMagnitude > 0.0001f)
             {
@@ -64,7 +78,23 @@ namespace FF
                 rotation = Quaternion.AngleAxis(angle, Vector3.forward);
             }
 
-            var instance = Object.Instantiate(moveEffectPrefab, position, rotation);
+            if (!moveEffectPool && moveEffectPrefab)
+            {
+                moveEffectPool = PoolManager.GetPool(moveEffectPrefab, poolPrewarmCount, transform);
+            }
+
+            if (moveEffectPool != null)
+            {
+                GameObject instance = moveEffectPool.Get(position, rotation);
+                if (instance)
+                {
+                    if (!instance.TryGetComponent<PooledParticleSystem>(out var pooled))
+                    {
+                        pooled = instance.AddComponent<PooledParticleSystem>();
+                        pooled.OnTakenFromPool();
+                    }
+                }
+            }
 
             spawnTimer = spawnInterval;
         }

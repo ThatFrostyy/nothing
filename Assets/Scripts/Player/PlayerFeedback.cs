@@ -82,22 +82,17 @@ namespace FF
         {
             if (levelUpParticles)
             {
-                var spawned = Instantiate(levelUpParticles, transform.position, Quaternion.identity);
+                GameObject spawned = PoolManager.Get(levelUpParticles, transform.position, Quaternion.identity);
                 spawned.transform.SetParent(transform, true);
 
-                float lifetime = 0f;
-                var particleSystems = spawned.GetComponentsInChildren<ParticleSystem>();
-                foreach (var ps in particleSystems)
+                if (!spawned.TryGetComponent<PooledParticleSystem>(out var pooled))
                 {
-                    var main = ps.main;
-                    float estimated = main.duration + main.startLifetime.constantMax;
-                    lifetime = Mathf.Max(lifetime, estimated);
+                    pooled = spawned.AddComponent<PooledParticleSystem>();
+                    pooled.OnTakenFromPool();
                 }
-
-                Destroy(spawned, lifetime > 0f ? lifetime : 5f);
             }
 
-           audioSource.PlayOneShot(levelUpSound);
+            audioSource.PlayOneShot(levelUpSound);
         }
     }
 }
