@@ -43,6 +43,15 @@ namespace FF
         [SerializeField, Min(0f)] private float waveBannerDuration = 2.5f;
         [SerializeField, Min(0f)] private float waveBannerFadeTime = 0.5f;
 
+        [Header("Wave Effects")]
+        [SerializeField] private Image waveFlashImage;
+        [SerializeField] private Color waveFlashColor = new Color(1f, 0f, 0f, 0.45f);
+        [SerializeField, Min(0f)] private float waveFlashDuration = 0.6f;
+        [SerializeField] private AnimationCurve waveFlashAlphaCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
+        [SerializeField] private AudioClip waveMilestoneClip;
+        [SerializeField, Min(1)] private int waveMilestoneInterval = 5;
+        [SerializeField, Min(1)] private int waveMilestoneStartingWave = 5;
+
         [Header("Audio")]
         [SerializeField] private AudioClip waveStartClip;
         [SerializeField] private AudioClip heartbeatClip;
@@ -64,6 +73,8 @@ namespace FF
         private bool xpIsFilling;
 
         private float waveBannerTimer;
+        private float waveFlashElapsed = float.PositiveInfinity;
+        private float waveFlashBaseAlpha = 1f;
 
         private Vector3 healthPulseBaseScale = Vector3.one;
         private Vector3 xpPulseBaseScale = Vector3.one;
@@ -122,6 +133,7 @@ namespace FF
 
             InitializeAudio();
             SetWaveBannerVisible(0f);
+            InitializeWaveFlash();
         }
 
         void OnEnable()
@@ -183,6 +195,8 @@ namespace FF
             ResetXPPulse();
             waveBannerTimer = 0f;
             SetWaveBannerVisible(0f);
+            waveFlashElapsed = float.PositiveInfinity;
+            SetWaveFlashAlpha(0f);
         }
 
         void Update()
@@ -197,6 +211,7 @@ namespace FF
             UpdateXPPulse(deltaTime);
             UpdateHeartbeatTimer(unscaledDeltaTime);
             UpdateWaveBanner(unscaledDeltaTime);
+            UpdateWaveFlash(unscaledDeltaTime);
         }
 
         void RefreshAll()
@@ -302,7 +317,8 @@ namespace FF
 
             waveBannerTimer = waveBannerDuration;
             SetWaveBannerVisible(1f);
-            PlayWaveStartSound();
+            TriggerWaveFlash();
+            PlayWaveStartSound(wave);
         }
 
         void UpdateWeaponDisplay(Weapon weaponOverride = null)
@@ -499,6 +515,69 @@ namespace FF
             }
         }
 
+        void InitializeWaveFlash()
+        {
+            waveFlashBaseAlpha = Mathf.Clamp01(waveFlashColor.a);
+            waveFlashElapsed = float.PositiveInfinity;
+            SetWaveFlashAlpha(0f);
+        }
+
+        void TriggerWaveFlash()
+        {
+            if (!waveFlashImage || waveFlashDuration <= 0f)
+            {
+                return;
+            }
+
+            waveFlashElapsed = 0f;
+            SetWaveFlashAlpha(EvaluateWaveFlashAlpha(0f));
+        }
+
+        void UpdateWaveFlash(float deltaTime)
+        {
+            if (!waveFlashImage || waveFlashDuration <= 0f || float.IsPositiveInfinity(waveFlashElapsed))
+            {
+                return;
+            }
+
+            waveFlashElapsed += deltaTime;
+
+            if (waveFlashElapsed >= waveFlashDuration)
+            {
+                waveFlashElapsed = float.PositiveInfinity;
+                SetWaveFlashAlpha(0f);
+                return;
+            }
+
+            float normalized = Mathf.Clamp01(waveFlashElapsed / Mathf.Max(0.0001f, waveFlashDuration));
+            SetWaveFlashAlpha(EvaluateWaveFlashAlpha(normalized));
+        }
+
+        float EvaluateWaveFlashAlpha(float normalizedTime)
+        {
+            normalizedTime = Mathf.Clamp01(normalizedTime);
+
+            if (waveFlashAlphaCurve != null && waveFlashAlphaCurve.length > 0)
+            {
+                return Mathf.Clamp01(waveFlashAlphaCurve.Evaluate(normalizedTime));
+            }
+
+            return 1f - normalizedTime;
+        }
+
+        void SetWaveFlashAlpha(float normalizedAlpha)
+        {
+            if (!waveFlashImage)
+            {
+                return;
+            }
+
+            float alpha = Mathf.Clamp01(normalizedAlpha) * waveFlashBaseAlpha;
+            Color color = waveFlashColor;
+            color.a = alpha;
+            waveFlashImage.color = color;
+        }
+
         void InitializeAudio()
         {
             if (!uiAudioSource)
@@ -581,14 +660,30 @@ namespace FF
             }
         }
 
-        void PlayWaveStartSound()
+        void PlayWaveStartSound(int wave)
         {
-            if (!waveStartClip || !uiAudioSource)
+            if (uiAudioSource && waveStartClip)
+            {
+                uiAudioSource.PlayOneShot(waveStartClip);
+            }
+
+            if (!uiAudioSource || !waveMilestoneClip)
             {
                 return;
             }
 
-            uiAudioSource.PlayOneShot(waveStartClip);
+            int startWave = Mathf.Max(1, waveMilestoneStartingWave);
+            int interval = Mathf.Max(1, waveMilestoneInterval);
+
+            if (wave < startWave)
+            {
+                return;
+            }
+
+            if ((wave - startWave) % interval == 0)
+            {
+                uiAudioSource.PlayOneShot(waveMilestoneClip);
+            }
         }
 
         void ResetHealthPulse()
@@ -649,6 +744,15 @@ namespace FF
             lowHealthThreshold = Mathf.Clamp01(lowHealthThreshold);
             healthPulseAmplitude = Mathf.Clamp01(healthPulseAmplitude);
             xpPulseAmplitude = Mathf.Clamp01(xpPulseAmplitude);
+            waveFlashDuration = Mathf.Max(0f, waveFlashDuration);
+            waveMilestoneInterval = Mathf.Max(1, waveMilestoneInterval);
+            waveMilestoneStartingWave = Mathf.Max(1, waveMilestoneStartingWave);
+            waveFlashBaseAlpha = Mathf.Clamp01(waveFlashColor.a);
+            waveFlashElapsed = float.PositiveInfinity;
+            if (waveFlashImage)
+            {
+                SetWaveFlashAlpha(0f);
+            }
 
             healthPulseTarget = ResolveHealthPulseTarget();
 
