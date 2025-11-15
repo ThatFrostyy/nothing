@@ -12,7 +12,6 @@ namespace FF
         [Header("Behaviour")]
         [SerializeField, Min(0f)] private float minSpeedForEffect = 0.5f;
         [SerializeField, Min(0f)] private float spawnInterval = 0.18f;
-        [SerializeField, Min(0f)] private float effectLifetime = 2.5f;
         [SerializeField] private bool alignToVelocity = true;
 
         private float spawnTimer;
@@ -66,11 +65,6 @@ namespace FF
             }
 
             var instance = Object.Instantiate(moveEffectPrefab, position, rotation);
-
-            if (effectLifetime > 0f)
-            {
-                Object.Destroy(instance, effectLifetime);
-            }
 
             spawnTimer = spawnInterval;
         }
