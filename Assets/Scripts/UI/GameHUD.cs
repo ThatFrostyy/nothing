@@ -46,8 +46,6 @@ namespace FF
         [SerializeField] private AudioClip waveStartClip;
         [SerializeField] private AudioClip heartbeatClip;
         [SerializeField] private AudioClip xpFillLoopClip;
-        [SerializeField, Range(0f, 1f)] private float heartbeatVolume = 0.85f;
-        [SerializeField, Range(0f, 1f)] private float xpFillVolume = 0.7f;
 
         private AudioSource uiAudioSource;
         private AudioSource heartbeatSource;
@@ -458,7 +456,6 @@ namespace FF
             heartbeatSource.playOnAwake = false;
             heartbeatSource.loop = true;
             heartbeatSource.spatialBlend = 0f;
-            heartbeatSource.volume = heartbeatVolume;
 
             if (!xpFillSource)
             {
@@ -468,7 +465,6 @@ namespace FF
             xpFillSource.playOnAwake = false;
             xpFillSource.loop = true;
             xpFillSource.spatialBlend = 0f;
-            xpFillSource.volume = xpFillVolume;
         }
 
         void SetHeartbeatActive(bool active)
@@ -478,7 +474,6 @@ namespace FF
                 return;
             }
 
-            heartbeatSource.volume = heartbeatVolume;
 
             if (active)
             {
@@ -501,7 +496,6 @@ namespace FF
                 return;
             }
 
-            xpFillSource.volume = xpFillVolume;
 
             if (active)
             {
@@ -581,8 +575,6 @@ namespace FF
             lowHealthThreshold = Mathf.Clamp01(lowHealthThreshold);
             healthPulseAmplitude = Mathf.Clamp01(healthPulseAmplitude);
             xpPulseAmplitude = Mathf.Clamp01(xpPulseAmplitude);
-            heartbeatVolume = Mathf.Clamp01(heartbeatVolume);
-            xpFillVolume = Mathf.Clamp01(xpFillVolume);
 
             if (!healthPulseTarget && healthFillImage)
             {

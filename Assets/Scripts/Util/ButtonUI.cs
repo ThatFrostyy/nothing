@@ -22,20 +22,20 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private Outline _outline;
     private Color _targetOutlineColor;
     private float _originalRotationZ;
+    private AudioSource _audioSource;
 
     void Awake()
     {
         _initialScale = transform.localScale;
         _targetScale = 1f;
 
-        // Cache the original rotation (for hover reset)
         _originalRotationZ = transform.localEulerAngles.z;
 
-        // Randomize rotation slightly on start
+        _audioSource = GetComponent<AudioSource>();
+
         float randomAngle = Random.Range(-maxRotationOffset, maxRotationOffset);
         transform.localRotation = Quaternion.Euler(0, 0, _originalRotationZ + randomAngle);
 
-        // Ensure Outline exists
         _outline = GetComponent<Outline>();
         if (_outline == null)
         {
@@ -49,12 +49,12 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     void Update()
     {
-        // Smooth scale interpolation
         transform.localScale = Vector3.Lerp(transform.localScale, _initialScale * _targetScale, Time.unscaledDeltaTime * scaleSpeed);
 
-        // Smooth outline color transition
         if (_outline != null)
+        {
             _outline.effectColor = Color.Lerp(_outline.effectColor, _targetOutlineColor, Time.unscaledDeltaTime * outlineLerpSpeed);
+        }
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -72,6 +72,7 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnClick()
     {
         _targetScale = 0.95f;
+        _audioSource.PlayOneShot(clickSound);
         Invoke(nameof(ResetScale), 0.05f);
     }
 

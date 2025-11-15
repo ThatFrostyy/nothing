@@ -13,7 +13,6 @@ namespace FF
         [SerializeField, Min(0f)] private float moveSpeed = 10f;
         [SerializeField, Min(0f)] private float acceleration = 18f;
         [SerializeField] private AudioClip pickupSound;
-        [SerializeField, Range(0f, 1f)] private float pickupSoundVolume = 1f;
 
         private Transform followTarget;
         private float currentSpeed;
@@ -101,7 +100,7 @@ namespace FF
 
             Vector3 direction = toTarget / distance;
             currentSpeed = Mathf.MoveTowards(currentSpeed, moveSpeed, acceleration * deltaTime);
-            transform.position += direction * currentSpeed * deltaTime;
+            transform.position += currentSpeed * deltaTime * direction;
         }
 
         bool TryGetWallet(Collider2D other, out XPWallet wallet)
@@ -122,7 +121,7 @@ namespace FF
                 return;
             }
 
-            AudioSource.PlayClipAtPoint(pickupSound, transform.position, pickupSoundVolume);
+            AudioSource.PlayClipAtPoint(pickupSound, transform.position);
         }
 
         void OnValidate()
@@ -131,7 +130,6 @@ namespace FF
             attractionRadius = Mathf.Max(0f, attractionRadius);
             moveSpeed = Mathf.Max(0f, moveSpeed);
             acceleration = Mathf.Max(0f, acceleration);
-            pickupSoundVolume = Mathf.Clamp01(pickupSoundVolume);
         }
     }
 }

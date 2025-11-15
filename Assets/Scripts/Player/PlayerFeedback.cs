@@ -12,13 +12,11 @@ namespace FF
 
         [Header("Hit Feedback")]
         [SerializeField] private AudioClip hitSound;
-        [SerializeField, Range(0f, 1f)] private float hitSoundVolume = 1f;
         [SerializeField, Min(0f)] private float hitShakeDuration = 0.18f;
         [SerializeField, Min(0f)] private float hitShakeIntensity = 0.18f;
 
         [Header("Level Up Feedback")]
         [SerializeField] private AudioClip levelUpSound;
-        [SerializeField, Range(0f, 1f)] private float levelUpSoundVolume = 1f;
         [SerializeField] private GameObject levelUpParticles;
 
         void Awake()
@@ -77,7 +75,7 @@ namespace FF
                 CameraShake.Shake(hitShakeDuration, hitShakeIntensity);
             }
 
-            PlayClip(hitSound, hitSoundVolume);
+            audioSource.PlayOneShot(hitSound);
         }
 
         void HandleLevelUp(int level)
@@ -99,24 +97,7 @@ namespace FF
                 Destroy(spawned, lifetime > 0f ? lifetime : 5f);
             }
 
-            PlayClip(levelUpSound, levelUpSoundVolume);
-        }
-
-        void PlayClip(AudioClip clip, float volume)
-        {
-            if (!clip)
-            {
-                return;
-            }
-
-            if (audioSource)
-            {
-                audioSource.PlayOneShot(clip, Mathf.Clamp01(volume));
-            }
-            else
-            {
-                AudioSource.PlayClipAtPoint(clip, transform.position, Mathf.Clamp01(volume));
-            }
+           audioSource.PlayOneShot(levelUpSound);
         }
     }
 }

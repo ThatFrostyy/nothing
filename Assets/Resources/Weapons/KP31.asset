@@ -15,6 +15,7 @@ MonoBehaviour:
   weaponName: Suomi KP/-31
   fireSFX: {fileID: 8300000, guid: ff2acc364fb4b8f41bc9f56d5799c22a, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
+  ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
   recoilAmount: 9
   recoilRecoverySpeed: 10
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}

@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
+using System.Collections;
 
 namespace FF
 {
@@ -21,10 +23,12 @@ namespace FF
         [SerializeField] float pickupFadeSpeed = 8f;
         [SerializeField] float shakeDuration = 0.1f;
         [SerializeField] float shakeMagnitude = 0.15f;
+        [SerializeField] float lightFadeDuration = 0.2f; // fade duration for the glow
 
         Vector3 startPos;
         Vector3 startScale;
         SpriteRenderer sr;
+        Light2D glow; 
         bool isPickedUp = false;
         float timer = 0f;
 
@@ -33,6 +37,7 @@ namespace FF
             startPos = transform.localPosition;
             startScale = transform.localScale;
             sr = GetComponent<SpriteRenderer>();
+            glow = GetComponentInChildren<Light2D>();
         }
 
         void Update()
@@ -84,6 +89,7 @@ namespace FF
         private void TriggerPickupAnimation()
         {
             isPickedUp = true;
+            if (glow) StartCoroutine(FadeLight2D(glow));
         }
         #endregion Animations
 
@@ -100,12 +106,26 @@ namespace FF
             if (other.TryGetComponent<WeaponManager>(out var wm))
             {
                 wm.Equip(weaponData);
-
-
                 isPickedUp = true;
                 PlayPickupSound();
-                TriggerPickupAnimation();       
+                TriggerPickupAnimation();
             }
         }
+
+        #region Light Fade
+        IEnumerator FadeLight2D(Light2D light)
+        {
+            float start = light.intensity;
+            float t = 0f;
+            while (t < lightFadeDuration)
+            {
+                t += Time.deltaTime;
+                light.intensity = Mathf.Lerp(start, 0f, t / lightFadeDuration);
+                yield return null;
+            }
+            light.intensity = 0f;
+            light.enabled = false;
+        }
+        #endregion Light Fade
     }
 }

@@ -414,6 +414,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 4675a14c0671bb240bbeb34ee7869d26, type: 3}
   - {fileID: 8300000, guid: ab9a9327dff658549ace2a131d4347e3, type: 3}
   deathFX: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
+  xpOrbPrefab: {fileID: 5860978669140793186, guid: 6a3eb14e9abcb124ca084a235e022790, type: 3}
+  xpOrbValue: 1
+  xpOrbCount: 3
+  xpOrbSpreadRadius: 0.5
   avoidanceLayers:
     serializedVersion: 2
     m_Bits: 128

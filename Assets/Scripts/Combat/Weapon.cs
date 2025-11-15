@@ -11,6 +11,7 @@ namespace FF
         [Header("Audio & Visual")]
         public AudioClip fireSFX;
         public GameObject muzzleFlash;
+        public GameObject ejectParticles;
         public float recoilAmount = 6f; 
         public float recoilRecoverySpeed = 10f;
 

@@ -8,6 +8,7 @@ namespace FF
     {
         private Weapon _weapon;
         private Transform _muzzle;
+        private Transform _ejectPos;
         private ICombatStats _stats;
         private AudioSource _audioSource;
         private Rigidbody2D _playerBody;
@@ -51,10 +52,11 @@ namespace FF
             _gunPivot = gunPivotTransform;
         }
 
-        public void SetWeapon(Weapon weapon, Transform muzzleTransform)
+        public void SetWeapon(Weapon weapon, Transform muzzleTransform, Transform eject)
         {
             _weapon = weapon;
             _muzzle = muzzleTransform;
+            _ejectPos = eject;
             _currentSpread = _weapon.baseSpread;
 
             SetCooldownProgress(1f);
@@ -162,6 +164,11 @@ namespace FF
 
             float angleOffset = UnityEngine.Random.Range(-_currentSpread, _currentSpread);
             Quaternion spreadRotation = _muzzle.rotation * Quaternion.AngleAxis(angleOffset, Vector3.forward);
+
+            if (_weapon.ejectParticles)
+            {
+                Instantiate(_weapon.ejectParticles, _ejectPos.position, _ejectPos.rotation);
+            }
 
             GameObject bulletInstance = Instantiate(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
 

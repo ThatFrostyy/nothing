@@ -11,6 +11,7 @@ namespace FF
         Weapon currentSO;
         GameObject currentWeaponInstance;
         Transform muzzle;
+        Transform eject;
 
         public Transform GunPivot => gunPivot;
         public AutoShooter Shooter => shooter;
@@ -36,14 +37,19 @@ namespace FF
             currentWeaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             muzzle = currentWeaponInstance.transform.Find("Muzzle");
-
             if (!muzzle)
             {
                 Debug.LogError("Weapon prefab missing child named 'Muzzle'");
             }
 
+            eject = currentWeaponInstance.transform.Find("Eject");
+            if (!eject)
+            {
+                Debug.LogError("Weapon prefab missing child named 'Eject'");
+            }
+
             shooter.InitializeRecoil(gunPivot);
-            shooter.SetWeapon(newWeapon, muzzle);
+            shooter.SetWeapon(newWeapon, muzzle, eject);
 
             OnWeaponEquipped?.Invoke(currentSO);
         }
