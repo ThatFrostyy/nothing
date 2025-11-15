@@ -32,6 +32,18 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         _originalRotationZ = transform.localEulerAngles.z;
 
         _audioSource = GetComponent<AudioSource>();
+        if (!_audioSource)
+        {
+            _audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        if (_audioSource)
+        {
+            _audioSource.playOnAwake = false;
+            _audioSource.loop = false;
+            _audioSource.spatialBlend = 0f;
+            _audioSource.ignoreListenerPause = true;
+        }
 
         float randomAngle = Random.Range(-maxRotationOffset, maxRotationOffset);
         transform.localRotation = Quaternion.Euler(0, 0, _originalRotationZ + randomAngle);
@@ -72,7 +84,10 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnClick()
     {
         _targetScale = 0.95f;
-        _audioSource.PlayOneShot(clickSound);
+        if (_audioSource && clickSound)
+        {
+            _audioSource.PlayOneShot(clickSound);
+        }
         Invoke(nameof(ResetScale), 0.05f);
     }
 

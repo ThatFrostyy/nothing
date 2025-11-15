@@ -55,6 +55,12 @@ namespace FF
         private AudioSource _audioSource;
         private const int AvoidanceBufferCeiling = 256;
         private int lastIndex = -1;
+        private Vector3 _visualPositionVelocity;
+        private Vector3 _visualScaleVelocity;
+        private float _tiltVelocity;
+        private float _bobStrength;
+        private float _facingBlend = 1f;
+        private float _facingVelocity;
 
         public void Initialize(Transform player)
         {
@@ -124,6 +130,9 @@ namespace FF
                 _baseVisualLocalPosition = enemyVisual.localPosition;
                 _baseVisualLocalScale = enemyVisual.localScale;
                 _isFacingLeft = enemyVisual.localScale.x < 0f;
+                _facingBlend = Mathf.Approximately(enemyVisual.localScale.x, 0f)
+                    ? 1f
+                    : Mathf.Sign(enemyVisual.localScale.x);
             }
 
             if (autoShooter)
@@ -361,18 +370,18 @@ namespace FF
                 targetTilt += side * (bodyTiltDegrees * 0.5f);
             }
 
-            if (normalizedSpeed < 0.05f)
+            float idleBlend = 1f - Mathf.Clamp01(normalizedSpeed * 3f);
+            if (idleBlend > 0f)
             {
-                targetTilt += Mathf.Sin(Time.time * idleSwayFrequency) * idleSwayAmplitude;
+                targetTilt += Mathf.Sin(Time.time * idleSwayFrequency) * idleSwayAmplitude * idleBlend;
             }
 
-            float currentZ = enemyVisual.localEulerAngles.z;
-            if (currentZ > 180f)
-            {
-                currentZ -= 360f;
-            }
-
-            float newZ = Mathf.Lerp(currentZ, targetTilt, 0.15f);
+            float newZ = Mathf.SmoothDampAngle(
+                enemyVisual.localEulerAngles.z,
+                targetTilt,
+                ref _tiltVelocity,
+                0.12f
+            );
             enemyVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
 
             UpdateWalkCycle(normalizedSpeed);
@@ -389,22 +398,42 @@ namespace FF
             float baseScaleY = Mathf.Approximately(_baseVisualLocalScale.y, 0f) ? 1f : _baseVisualLocalScale.y;
             float baseScaleZ = Mathf.Approximately(_baseVisualLocalScale.z, 0f) ? 1f : _baseVisualLocalScale.z;
 
-            float bobSpeed = Mathf.Lerp(0.6f, 1.4f, Mathf.Clamp01(normalizedSpeed));
+            float targetStrength = Mathf.Clamp01(normalizedSpeed);
+            _bobStrength = Mathf.Lerp(_bobStrength, targetStrength, Time.deltaTime * 10f);
+
+            float bobSpeed = Mathf.Lerp(0.6f, 1.4f, _bobStrength);
             _bobTimer += Time.deltaTime * walkBobFrequency * bobSpeed;
 
-            float bobOffset = Mathf.Sin(_bobTimer) * walkBobAmplitude * normalizedSpeed;
+            float bobOffset = Mathf.Sin(_bobTimer) * walkBobAmplitude * _bobStrength;
             Vector3 targetLocalPosition = _baseVisualLocalPosition + new Vector3(0f, bobOffset, 0f);
-            enemyVisual.localPosition = Vector3.Lerp(enemyVisual.localPosition, targetLocalPosition, 0.2f);
+            enemyVisual.localPosition = Vector3.SmoothDamp(
+                enemyVisual.localPosition,
+                targetLocalPosition,
+                ref _visualPositionVelocity,
+                0.08f,
+                Mathf.Infinity,
+                Time.deltaTime
+            );
 
-            float squashAmount = Mathf.Sin(_bobTimer) * walkSquashAmount * normalizedSpeed;
+            float squashAmount = Mathf.Sin(_bobTimer) * walkSquashAmount * _bobStrength;
+
+            float desiredFacing = _isFacingLeft ? -1f : 1f;
+            _facingBlend = Mathf.SmoothDamp(_facingBlend, desiredFacing, ref _facingVelocity, 0.1f, Mathf.Infinity, Time.deltaTime);
 
             Vector3 targetScale = new(
-                absBaseScaleX * (_isFacingLeft ? -1f : 1f) * (1f - squashAmount),
-                baseScaleY * (1f + squashAmount),
+                absBaseScaleX * Mathf.Clamp(_facingBlend, -1f, 1f) * (1f - squashAmount),
+                baseScaleY * (1f + squashAmount * 0.75f),
                 baseScaleZ
             );
 
-            enemyVisual.localScale = Vector3.Lerp(enemyVisual.localScale, targetScale, 0.25f);
+            enemyVisual.localScale = Vector3.SmoothDamp(
+                enemyVisual.localScale,
+                targetScale,
+                ref _visualScaleVelocity,
+                0.08f,
+                Mathf.Infinity,
+                Time.deltaTime
+            );
         }
         #endregion Animations
 

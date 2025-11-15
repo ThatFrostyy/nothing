@@ -35,6 +35,7 @@ namespace FF
         [SerializeField, Range(0f, 1f)] private float healthPulseAmplitude = 0.09f;
         [SerializeField, Min(0f)] private float xpPulseSpeed = 10f;
         [SerializeField, Range(0f, 1f)] private float xpPulseAmplitude = 0.06f;
+        [SerializeField, Min(0f)] private float lowHealthHeartbeatDuration = 4f;
 
         [Header("Wave Banner")]
         [SerializeField] private TMP_Text waveBannerText;
@@ -55,6 +56,7 @@ namespace FF
         private float healthFillCurrent;
         private float healthPulseTimer;
         private bool lowHealthPulseActive;
+        private float lowHealthHeartbeatTimer;
 
         private float xpFillTarget;
         private float xpFillCurrent;
@@ -65,6 +67,10 @@ namespace FF
 
         private Vector3 healthPulseBaseScale = Vector3.one;
         private Vector3 xpPulseBaseScale = Vector3.one;
+        private Vector2 healthPulseBaseAnchoredPosition = Vector2.zero;
+        private Vector2 xpPulseBaseAnchoredPosition = Vector2.zero;
+        private Vector3 healthPulseScaleVelocity = Vector3.zero;
+        private Vector3 xpPulseScaleVelocity = Vector3.zero;
 
         void Awake()
         {
@@ -108,6 +114,8 @@ namespace FF
 
             healthPulseBaseScale = healthPulseTarget ? healthPulseTarget.localScale : Vector3.one;
             xpPulseBaseScale = xpPulseTarget ? xpPulseTarget.localScale : Vector3.one;
+            healthPulseBaseAnchoredPosition = healthPulseTarget ? healthPulseTarget.anchoredPosition : Vector2.zero;
+            xpPulseBaseAnchoredPosition = xpPulseTarget ? xpPulseTarget.anchoredPosition : Vector2.zero;
 
             healthFillCurrent = healthFillImage ? healthFillImage.fillAmount : 0f;
             healthFillTarget = healthFillCurrent;
@@ -173,6 +181,7 @@ namespace FF
             SetXPFillSoundActive(false);
             lowHealthPulseActive = false;
             xpIsFilling = false;
+            lowHealthHeartbeatTimer = 0f;
             ResetHealthPulse();
             ResetXPPulse();
             waveBannerTimer = 0f;
@@ -188,6 +197,7 @@ namespace FF
             UpdateXPFill(deltaTime);
             UpdateHealthPulse(deltaTime);
             UpdateXPPulse(deltaTime);
+            UpdateHeartbeatTimer(deltaTime);
             UpdateWaveBanner(deltaTime);
         }
 
@@ -231,16 +241,20 @@ namespace FF
                 healthFillTarget = Mathf.Clamp01((float)clamped / max);
             }
 
+            bool wasPulsing = lowHealthPulseActive;
             bool shouldPulse = max > 0 && healthFillTarget <= lowHealthThreshold;
-            if (shouldPulse != lowHealthPulseActive)
-            {
-                lowHealthPulseActive = shouldPulse;
-                if (!shouldPulse)
-                {
-                    ResetHealthPulse();
-                }
+            lowHealthPulseActive = shouldPulse;
 
-                SetHeartbeatActive(lowHealthPulseActive);
+            if (!shouldPulse)
+            {
+                ResetHealthPulse();
+                lowHealthHeartbeatTimer = 0f;
+                SetHeartbeatActive(false);
+            }
+            else if (!wasPulsing)
+            {
+                lowHealthHeartbeatTimer = lowHealthHeartbeatDuration;
+                SetHeartbeatActive(true);
             }
         }
 
@@ -377,14 +391,35 @@ namespace FF
             if (lowHealthPulseActive)
             {
                 healthPulseTimer += deltaTime * healthPulseSpeed;
-                float pulseScale = 1f + Mathf.Sin(healthPulseTimer) * healthPulseAmplitude;
-                Vector3 targetScale = healthPulseBaseScale * pulseScale;
-                healthPulseTarget.localScale = Vector3.Lerp(healthPulseTarget.localScale, targetScale, deltaTime * 10f);
+                float sine = (Mathf.Sin(healthPulseTimer) + 1f) * 0.5f;
+                float pulseScale = Mathf.Lerp(1f - healthPulseAmplitude, 1f + healthPulseAmplitude, sine);
+                Vector3 targetScale = new Vector3(
+                    healthPulseBaseScale.x * pulseScale,
+                    healthPulseBaseScale.y * pulseScale,
+                    healthPulseBaseScale.z
+                );
+                healthPulseTarget.localScale = Vector3.SmoothDamp(
+                    healthPulseTarget.localScale,
+                    targetScale,
+                    ref healthPulseScaleVelocity,
+                    0.08f,
+                    Mathf.Infinity,
+                    deltaTime
+                );
             }
             else
             {
-                healthPulseTarget.localScale = Vector3.Lerp(healthPulseTarget.localScale, healthPulseBaseScale, deltaTime * 10f);
+                healthPulseTarget.localScale = Vector3.SmoothDamp(
+                    healthPulseTarget.localScale,
+                    healthPulseBaseScale,
+                    ref healthPulseScaleVelocity,
+                    0.08f,
+                    Mathf.Infinity,
+                    deltaTime
+                );
             }
+
+            healthPulseTarget.anchoredPosition = healthPulseBaseAnchoredPosition;
         }
 
         void UpdateXPPulse(float deltaTime)
@@ -398,12 +433,46 @@ namespace FF
             {
                 xpPulseTimer += deltaTime * xpPulseSpeed;
                 float pulseScale = 1f + Mathf.Sin(xpPulseTimer) * xpPulseAmplitude;
-                Vector3 targetScale = xpPulseBaseScale * pulseScale;
-                xpPulseTarget.localScale = Vector3.Lerp(xpPulseTarget.localScale, targetScale, deltaTime * 12f);
+                Vector3 targetScale = new Vector3(
+                    xpPulseBaseScale.x * pulseScale,
+                    xpPulseBaseScale.y * pulseScale,
+                    xpPulseBaseScale.z
+                );
+                xpPulseTarget.localScale = Vector3.SmoothDamp(
+                    xpPulseTarget.localScale,
+                    targetScale,
+                    ref xpPulseScaleVelocity,
+                    0.06f,
+                    Mathf.Infinity,
+                    deltaTime
+                );
             }
             else
             {
-                xpPulseTarget.localScale = Vector3.Lerp(xpPulseTarget.localScale, xpPulseBaseScale, deltaTime * 12f);
+                xpPulseTarget.localScale = Vector3.SmoothDamp(
+                    xpPulseTarget.localScale,
+                    xpPulseBaseScale,
+                    ref xpPulseScaleVelocity,
+                    0.06f,
+                    Mathf.Infinity,
+                    deltaTime
+                );
+            }
+
+            xpPulseTarget.anchoredPosition = xpPulseBaseAnchoredPosition;
+        }
+
+        void UpdateHeartbeatTimer(float deltaTime)
+        {
+            if (lowHealthHeartbeatTimer <= 0f)
+            {
+                return;
+            }
+
+            lowHealthHeartbeatTimer = Mathf.Max(0f, lowHealthHeartbeatTimer - deltaTime);
+            if (lowHealthHeartbeatTimer <= 0f)
+            {
+                SetHeartbeatActive(false);
             }
         }
 
@@ -447,6 +516,7 @@ namespace FF
             uiAudioSource.playOnAwake = false;
             uiAudioSource.loop = false;
             uiAudioSource.spatialBlend = 0f;
+            uiAudioSource.ignoreListenerPause = true;
 
             if (!heartbeatSource)
             {
@@ -456,6 +526,7 @@ namespace FF
             heartbeatSource.playOnAwake = false;
             heartbeatSource.loop = true;
             heartbeatSource.spatialBlend = 0f;
+            heartbeatSource.ignoreListenerPause = true;
 
             if (!xpFillSource)
             {
@@ -465,6 +536,7 @@ namespace FF
             xpFillSource.playOnAwake = false;
             xpFillSource.loop = true;
             xpFillSource.spatialBlend = 0f;
+            xpFillSource.ignoreListenerPause = true;
         }
 
         void SetHeartbeatActive(bool active)
@@ -524,18 +596,22 @@ namespace FF
         void ResetHealthPulse()
         {
             healthPulseTimer = 0f;
+            healthPulseScaleVelocity = Vector3.zero;
             if (healthPulseTarget)
             {
                 healthPulseTarget.localScale = healthPulseBaseScale;
+                healthPulseTarget.anchoredPosition = healthPulseBaseAnchoredPosition;
             }
         }
 
         void ResetXPPulse()
         {
             xpPulseTimer = 0f;
+            xpPulseScaleVelocity = Vector3.zero;
             if (xpPulseTarget)
             {
                 xpPulseTarget.localScale = xpPulseBaseScale;
+                xpPulseTarget.anchoredPosition = xpPulseBaseAnchoredPosition;
             }
         }
 
