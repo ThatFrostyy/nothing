@@ -167,10 +167,15 @@ namespace FF
 
             if (_weapon.ejectParticles)
             {
-                Instantiate(_weapon.ejectParticles, _ejectPos.position, _ejectPos.rotation);
+                GameObject ejectInstance = PoolManager.Get(_weapon.ejectParticles, _ejectPos.position, _ejectPos.rotation);
+                if (ejectInstance && !ejectInstance.TryGetComponent<PooledParticleSystem>(out var ejectPooled))
+                {
+                    ejectPooled = ejectInstance.AddComponent<PooledParticleSystem>();
+                    ejectPooled.OnTakenFromPool();
+                }
             }
 
-            GameObject bulletInstance = Instantiate(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
+            GameObject bulletInstance = PoolManager.Get(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
 
             if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
             {
@@ -186,7 +191,12 @@ namespace FF
 
             if (_weapon.muzzleFlash)
             {
-                Instantiate(_weapon.muzzleFlash, _muzzle.position, _muzzle.rotation);
+                GameObject flashInstance = PoolManager.Get(_weapon.muzzleFlash, _muzzle.position, _muzzle.rotation);
+                if (flashInstance && !flashInstance.TryGetComponent<PooledParticleSystem>(out var flashPooled))
+                {
+                    flashPooled = flashInstance.AddComponent<PooledParticleSystem>();
+                    flashPooled.OnTakenFromPool();
+                }
             }
 
             if (_cameraShakeEnabled)

@@ -560,7 +560,12 @@ namespace FF
                 return;
             }
 
-            GameObject spawned = Instantiate(deathFX, transform.position, Quaternion.identity);
+            GameObject spawned = PoolManager.Get(deathFX, transform.position, Quaternion.identity);
+            if (spawned && !spawned.TryGetComponent<PooledParticleSystem>(out var pooled))
+            {
+                pooled = spawned.AddComponent<PooledParticleSystem>();
+                pooled.OnTakenFromPool();
+            }
         }
 
         private void SpawnXPOrbs()
@@ -575,6 +580,7 @@ namespace FF
                 return;
             }
 
+            GameObjectPool orbPool = PoolManager.GetPool(xpOrbPrefab.gameObject, xpOrbCount);
             for (int i = 0; i < xpOrbCount; i++)
             {
                 Vector3 spawnPosition = transform.position;
@@ -584,7 +590,7 @@ namespace FF
                     spawnPosition += new Vector3(offset.x, offset.y, 0f);
                 }
 
-                XPOrb orb = Instantiate(xpOrbPrefab, spawnPosition, Quaternion.identity);
+                XPOrb orb = orbPool.GetComponent<XPOrb>(spawnPosition, Quaternion.identity);
                 if (orb)
                 {
                     orb.SetValue(xpOrbValue);
