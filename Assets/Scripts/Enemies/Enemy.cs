@@ -30,6 +30,12 @@ namespace FF
         [SerializeField] private AudioClip []deathSound;
         [SerializeField] private GameObject deathFX;
 
+        [Header("Rewards")]
+        [SerializeField] private XPOrb xpOrbPrefab;
+        [SerializeField, Min(0)] private int xpOrbValue = 1;
+        [SerializeField, Min(1)] private int xpOrbCount = 1;
+        [SerializeField, Range(0f, 2f)] private float xpOrbSpreadRadius = 0.35f;
+
         [Header("Avoidance")]
         [SerializeField] private LayerMask avoidanceLayers = ~0;
         [SerializeField, Range(4, 128)] private int maxAvoidanceChecks = 32;
@@ -438,6 +444,8 @@ namespace FF
                 autoShooter.SetFireHeld(false);
             }
 
+            SpawnXPOrbs();
+
             OnAnyEnemyKilled?.Invoke(this);
 
             PlayDeathSound();
@@ -524,6 +532,35 @@ namespace FF
             }
 
             GameObject spawned = Instantiate(deathFX, transform.position, Quaternion.identity);
+        }
+
+        private void SpawnXPOrbs()
+        {
+            if (!xpOrbPrefab)
+            {
+                return;
+            }
+
+            if (xpOrbValue <= 0 || xpOrbCount <= 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < xpOrbCount; i++)
+            {
+                Vector3 spawnPosition = transform.position;
+                if (xpOrbSpreadRadius > 0f)
+                {
+                    Vector2 offset = UnityEngine.Random.insideUnitCircle * xpOrbSpreadRadius;
+                    spawnPosition += new Vector3(offset.x, offset.y, 0f);
+                }
+
+                XPOrb orb = Instantiate(xpOrbPrefab, spawnPosition, Quaternion.identity);
+                if (orb)
+                {
+                    orb.SetValue(xpOrbValue);
+                }
+            }
         }
     }
 }

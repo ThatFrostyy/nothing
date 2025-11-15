@@ -16,6 +16,7 @@ namespace FF
         float timer;
 
         public event Action<int> OnKillCountChanged;
+        public event Action<int> OnWaveStarted;
 
         void Awake()
         {
@@ -42,6 +43,7 @@ namespace FF
             {
                 timer = 0f;
                 Wave++;
+                OnWaveStarted?.Invoke(Wave);
                 if (spawner)
                 {
                     spawner.SpawnWave(Wave);
