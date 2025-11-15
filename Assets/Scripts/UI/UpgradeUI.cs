@@ -1,6 +1,6 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
-
 
 namespace FF
 {
@@ -13,7 +13,19 @@ namespace FF
         System.Action<Upgrade> callback;
         Upgrade a, b, c;
 
-        public void Hide() { panel.SetActive(false); Time.timeScale = 1f; }
+        public static event Action<bool> OnVisibilityChanged;
+        public static bool IsShowing { get; private set; }
+
+        public void Hide()
+        {
+            panel.SetActive(false);
+            Time.timeScale = 1f;
+            if (IsShowing)
+            {
+                IsShowing = false;
+                OnVisibilityChanged?.Invoke(false);
+            }
+        }
         void Pick(Upgrade u) => callback?.Invoke(u);
 
         public void Show(Upgrade A, Upgrade B, Upgrade C, System.Action<Upgrade> onPick)
@@ -29,7 +41,12 @@ namespace FF
             aBtn.onClick.AddListener(() => Pick(a));
             bBtn.onClick.AddListener(() => Pick(b));
             cBtn.onClick.AddListener(() => Pick(c));
-            Time.timeScale = 0f; 
+            Time.timeScale = 0f;
+            if (!IsShowing)
+            {
+                IsShowing = true;
+                OnVisibilityChanged?.Invoke(true);
+            }
         }
     }
 }

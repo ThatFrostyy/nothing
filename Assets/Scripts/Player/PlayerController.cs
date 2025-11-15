@@ -20,6 +20,7 @@ namespace FF
         private PlayerStats _stats;
         private Vector2 _moveInput;
         private Collider2D _collider;
+        private bool _upgradeMenuOpen;
 
         private void Awake()
         {
@@ -27,6 +28,16 @@ namespace FF
             _stats = GetComponent<PlayerStats>();
             _camera = _camera ? _camera : Camera.main;
             _collider = GetComponent<Collider2D>();
+        }
+
+        private void OnEnable()
+        {
+            UpgradeUI.OnVisibilityChanged += HandleUpgradeVisibilityChanged;
+        }
+
+        private void OnDisable()
+        {
+            UpgradeUI.OnVisibilityChanged -= HandleUpgradeVisibilityChanged;
         }
 
         private void Update()
@@ -136,8 +147,28 @@ namespace FF
 
         public void OnAttack(InputValue value)
         {
+            if (_autoShooter == null)
+            {
+                return;
+            }
+
+            if (_upgradeMenuOpen)
+            {
+                _autoShooter.SetFireHeld(false);
+                return;
+            }
+
             _autoShooter.OnFire(value);
         }
         #endregion Input System Callbacks
+
+        private void HandleUpgradeVisibilityChanged(bool isVisible)
+        {
+            _upgradeMenuOpen = isVisible;
+            if (isVisible && _autoShooter != null)
+            {
+                _autoShooter.SetFireHeld(false);
+            }
+        }
     }
 }
