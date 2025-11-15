@@ -10,6 +10,8 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     [SerializeField] private float hoverScale = 1.1f;
     [SerializeField] private float scaleSpeed = 10f;
     [SerializeField] private AudioClip clickSound;
+    [SerializeField, Range(0f, 1f)] private float clickVolume = 1f;
+    [SerializeField] private Vector2 clickPitchRange = new(1f, 1f);
 
     [Header("Outline Settings")]
     [SerializeField] private Color normalOutlineColor = new(0, 0, 0, 1f);
@@ -27,6 +29,9 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private AudioSource _audioSource;
     private Button _button;
     private Coroutine _resetScaleRoutine;
+
+    private static AudioSource s_SharedAudioSource;
+    private static GameObject s_SharedAudioHost;
 
     void Awake()
     {
@@ -103,11 +108,10 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         Debug.Log("Button clicked: " + gameObject.name);
         _targetScale = 0.95f;
-        if (_audioSource && clickSound)
+        if (clickSound)
         {
             AudioListener.pause = false;
-            _audioSource.PlayOneShot(clickSound);
-            Debug.Log($"Playing sound: {clickSound.name}, volume={_audioSource.volume}");
+            PlayClickAudio();
         }
         if (_resetScaleRoutine != null)
         {
@@ -125,4 +129,65 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     }
 
     void ResetScale() => _targetScale = 1f;
+
+    void PlayClickAudio()
+    {
+        if (!clickSound)
+        {
+            return;
+        }
+
+        AudioSource playbackSource = GetSharedAudioSource();
+        if (_audioSource)
+        {
+            playbackSource.outputAudioMixerGroup = _audioSource.outputAudioMixerGroup;
+            playbackSource.panStereo = _audioSource.panStereo;
+            playbackSource.reverbZoneMix = _audioSource.reverbZoneMix;
+        }
+        else
+        {
+            playbackSource.outputAudioMixerGroup = null;
+            playbackSource.panStereo = 0f;
+            playbackSource.reverbZoneMix = 1f;
+        }
+
+        float minPitch = Mathf.Min(clickPitchRange.x, clickPitchRange.y);
+        float maxPitch = Mathf.Max(clickPitchRange.x, clickPitchRange.y);
+        float targetPitch = Mathf.Approximately(minPitch, maxPitch) ? minPitch : Random.Range(minPitch, maxPitch);
+        float previousPitch = playbackSource.pitch;
+        playbackSource.pitch = targetPitch;
+
+        float volumeScale = Mathf.Clamp01(clickVolume);
+        playbackSource.PlayOneShot(clickSound, volumeScale);
+        playbackSource.pitch = previousPitch;
+
+        Debug.Log($"Playing sound: {clickSound.name}, volume={volumeScale}");
+    }
+
+    static AudioSource GetSharedAudioSource()
+    {
+        if (s_SharedAudioSource && s_SharedAudioHost)
+        {
+            return s_SharedAudioSource;
+        }
+
+        if (!s_SharedAudioHost)
+        {
+            s_SharedAudioHost = new GameObject("ButtonUI_AudioHost");
+            s_SharedAudioHost.hideFlags = HideFlags.HideAndDontSave;
+            Object.DontDestroyOnLoad(s_SharedAudioHost);
+        }
+
+        if (!s_SharedAudioSource)
+        {
+            s_SharedAudioSource = s_SharedAudioHost.AddComponent<AudioSource>();
+            s_SharedAudioSource.playOnAwake = false;
+            s_SharedAudioSource.loop = false;
+            s_SharedAudioSource.spatialBlend = 0f;
+            s_SharedAudioSource.ignoreListenerPause = true;
+            s_SharedAudioSource.hideFlags = HideFlags.HideAndDontSave;
+        }
+
+        return s_SharedAudioSource;
+    }
 }

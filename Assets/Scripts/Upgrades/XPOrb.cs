@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 
@@ -13,6 +14,7 @@ namespace FF
         [SerializeField, Min(0f)] private float moveSpeed = 10f;
         [SerializeField, Min(0f)] private float acceleration = 18f;
         [SerializeField] private AudioClip pickupSound;
+        [SerializeField] private AudioSource pickupAudioSource;
         [SerializeField] private Vector2 pulseScaleRange = new Vector2(0.9f, 1.1f);
         [SerializeField, Min(0f)] private float pulseSpeed = 4f;
         [SerializeField] private bool randomizePulseOffset = true;
@@ -24,13 +26,17 @@ namespace FF
         private float pulseTimer;
         private static Transform cachedPlayerTransform;
         private static XPWallet cachedWallet;
+        private Collider2D orbCollider;
+        private Renderer[] cachedRenderers;
+        private bool collected;
+        private Coroutine releaseRoutine;
 
         void Awake()
         {
-            Collider2D collider = GetComponent<Collider2D>();
-            if (collider)
+            orbCollider = GetComponent<Collider2D>();
+            if (orbCollider)
             {
-                collider.isTrigger = true;
+                orbCollider.isTrigger = true;
             }
 
             poolToken = GetComponent<PoolToken>();
@@ -39,12 +45,36 @@ namespace FF
                 poolToken = gameObject.AddComponent<PoolToken>();
             }
 
+            if (!pickupAudioSource)
+            {
+                pickupAudioSource = GetComponent<AudioSource>();
+            }
+
+            if (!pickupAudioSource)
+            {
+                pickupAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            if (pickupAudioSource)
+            {
+                pickupAudioSource.playOnAwake = false;
+                pickupAudioSource.loop = false;
+                pickupAudioSource.spatialBlend = 0f;
+                pickupAudioSource.ignoreListenerPause = true;
+            }
+
             baseScale = transform.localScale;
             ResetPulseTimer();
+            CacheRenderers();
         }
 
         void Update()
         {
+            if (collected)
+            {
+                return;
+            }
+
             AcquireTarget();
             MoveTowardsTarget(Time.deltaTime);
             AnimatePulse(Time.deltaTime);
@@ -58,11 +88,7 @@ namespace FF
             }
 
             wallet.Add(value);
-            PlayPickupSound();
-            if (poolToken != null)
-            {
-                poolToken.Release();
-            }
+            HandleCollected();
         }
 
         public void SetValue(int amount)
@@ -72,17 +98,12 @@ namespace FF
 
         public void OnTakenFromPool()
         {
-            followTarget = null;
-            currentSpeed = 0f;
-            transform.localScale = baseScale;
-            ResetPulseTimer();
+            ResetOrbState();
         }
 
         public void OnReturnedToPool()
         {
-            followTarget = null;
-            currentSpeed = 0f;
-            transform.localScale = baseScale;
+            ResetOrbState();
         }
 
         void AcquireTarget()
@@ -177,14 +198,21 @@ namespace FF
             return wallet != null;
         }
 
-        void PlayPickupSound()
+        float PlayPickupSound()
         {
             if (!pickupSound)
             {
-                return;
+                return 0f;
+            }
+
+            if (pickupAudioSource)
+            {
+                pickupAudioSource.PlayOneShot(pickupSound);
+                return pickupSound.length / Mathf.Max(0.01f, pickupAudioSource.pitch);
             }
 
             AudioSource.PlayClipAtPoint(pickupSound, transform.position);
+            return pickupSound.length;
         }
 
         void OnValidate()
@@ -206,6 +234,97 @@ namespace FF
             else
             {
                 pulseTimer = 0f;
+            }
+        }
+
+        void HandleCollected()
+        {
+            if (collected)
+            {
+                return;
+            }
+
+            collected = true;
+            followTarget = null;
+            currentSpeed = 0f;
+
+            if (orbCollider)
+            {
+                orbCollider.enabled = false;
+            }
+
+            SetRenderersEnabled(false);
+
+            if (releaseRoutine != null)
+            {
+                StopCoroutine(releaseRoutine);
+            }
+
+            releaseRoutine = StartCoroutine(ReleaseAfterPickup());
+        }
+
+        IEnumerator ReleaseAfterPickup()
+        {
+            float wait = PlayPickupSound();
+            if (wait > 0f)
+            {
+                yield return new WaitForSecondsRealtime(wait);
+            }
+
+            if (poolToken != null)
+            {
+                poolToken.Release();
+            }
+
+            releaseRoutine = null;
+        }
+
+        void ResetOrbState()
+        {
+            if (releaseRoutine != null)
+            {
+                StopCoroutine(releaseRoutine);
+                releaseRoutine = null;
+            }
+
+            collected = false;
+            followTarget = null;
+            currentSpeed = 0f;
+
+            if (pickupAudioSource)
+            {
+                pickupAudioSource.Stop();
+            }
+
+            if (orbCollider)
+            {
+                orbCollider.enabled = true;
+            }
+
+            SetRenderersEnabled(true);
+            transform.localScale = baseScale;
+            ResetPulseTimer();
+        }
+
+        void CacheRenderers()
+        {
+            cachedRenderers = GetComponentsInChildren<Renderer>(true);
+        }
+
+        void SetRenderersEnabled(bool enabled)
+        {
+            if (cachedRenderers == null || cachedRenderers.Length == 0)
+            {
+                CacheRenderers();
+            }
+
+            for (int i = 0; i < (cachedRenderers?.Length ?? 0); i++)
+            {
+                var renderer = cachedRenderers[i];
+                if (renderer)
+                {
+                    renderer.enabled = enabled;
+                }
             }
         }
 

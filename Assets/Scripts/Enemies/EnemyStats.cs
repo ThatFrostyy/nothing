@@ -23,7 +23,23 @@ namespace FF
         [SerializeField, Range(0f, 1f)] private float avoidanceResponsiveness = 0.35f;
         [SerializeField, Range(0f, 2f)] private float avoidanceWeight = 0.75f;
 
-        public float MoveSpeed => moveSpeed;
+        float baseMoveSpeed;
+        float baseFireRateMultiplier;
+        float baseDamageMultiplier;
+        float baseMovementAccuracyPenalty;
+
+        float currentMoveSpeed;
+        float currentFireRateMultiplier;
+        float currentDamageMultiplier;
+        float currentMovementAccuracyPenalty;
+
+        void Awake()
+        {
+            CacheBaseValues();
+            ResetRuntimeValues();
+        }
+
+        public float MoveSpeed => currentMoveSpeed;
         public float Acceleration => Mathf.Clamp01(acceleration);
         public float RetreatSpeedMultiplier => Mathf.Clamp01(retreatSpeedMultiplier);
         public float BodyTiltDegrees => bodyTiltDegrees;
@@ -34,8 +50,48 @@ namespace FF
         public float AvoidanceResponsiveness => Mathf.Clamp01(avoidanceResponsiveness);
         public float AvoidanceWeight => Mathf.Max(0f, avoidanceWeight);
 
-        public float GetDamageMultiplier() => damageMultiplier;
-        public float GetFireRateMultiplier() => fireRateMultiplier;
-        public float GetMovementAccuracyPenalty() => movementAccuracyPenalty;
+        public float GetDamageMultiplier() => currentDamageMultiplier;
+        public float GetFireRateMultiplier() => currentFireRateMultiplier;
+        public float GetMovementAccuracyPenalty() => currentMovementAccuracyPenalty;
+
+        public void ApplyWaveMultipliers(float moveSpeedMultiplier, float fireRateMultiplierMultiplier, float damageMultiplierMultiplier, float accuracyPenaltyMultiplier)
+        {
+            CacheBaseValues();
+            currentMoveSpeed = Mathf.Max(0f, baseMoveSpeed * Mathf.Max(0f, moveSpeedMultiplier));
+            currentFireRateMultiplier = Mathf.Max(0f, baseFireRateMultiplier * Mathf.Max(0f, fireRateMultiplierMultiplier));
+            currentDamageMultiplier = Mathf.Max(0f, baseDamageMultiplier * Mathf.Max(0f, damageMultiplierMultiplier));
+            currentMovementAccuracyPenalty = Mathf.Max(0f, baseMovementAccuracyPenalty * Mathf.Max(0f, accuracyPenaltyMultiplier));
+        }
+
+        public void ResetRuntimeValues()
+        {
+            CacheBaseValues();
+            currentMoveSpeed = baseMoveSpeed;
+            currentFireRateMultiplier = baseFireRateMultiplier;
+            currentDamageMultiplier = baseDamageMultiplier;
+            currentMovementAccuracyPenalty = baseMovementAccuracyPenalty;
+        }
+
+        void CacheBaseValues()
+        {
+            baseMoveSpeed = Mathf.Max(0f, moveSpeed);
+            baseFireRateMultiplier = Mathf.Max(0f, fireRateMultiplier);
+            baseDamageMultiplier = Mathf.Max(0f, damageMultiplier);
+            baseMovementAccuracyPenalty = Mathf.Max(0f, movementAccuracyPenalty);
+        }
+
+        void OnValidate()
+        {
+            moveSpeed = Mathf.Max(0f, moveSpeed);
+            fireRateMultiplier = Mathf.Max(0f, fireRateMultiplier);
+            damageMultiplier = Mathf.Max(0f, damageMultiplier);
+            movementAccuracyPenalty = Mathf.Max(0f, movementAccuracyPenalty);
+
+            if (!Application.isPlaying)
+            {
+                CacheBaseValues();
+                ResetRuntimeValues();
+            }
+        }
     }
 }
