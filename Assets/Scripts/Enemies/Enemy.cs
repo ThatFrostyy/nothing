@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 namespace FF
@@ -30,6 +31,15 @@ namespace FF
         [SerializeField] private AudioClip []deathSound;
         [SerializeField] private GameObject deathFX;
 
+        [Header("Dog Behaviour")]
+        [SerializeField] private bool isDog;
+        [SerializeField, Min(0f)] private float dogAttackRange = 1.25f;
+        [SerializeField, Min(0f)] private float dogAttackCooldown = 1.1f;
+        [SerializeField, Min(0)] private int dogAttackDamage = 8;
+        [SerializeField, Min(0f)] private float dogLeapHeight = 0.4f;
+        [SerializeField, Min(0f)] private float dogLeapDuration = 0.3f;
+        [SerializeField] private AudioClip dogAttackSound;
+
         [Header("Rewards")]
         [SerializeField] private XPOrb xpOrbPrefab;
         [SerializeField, Min(0)] private int xpOrbValue = 1;
@@ -46,6 +56,7 @@ namespace FF
         private EnemyStats _stats;
         private Health _health;
         private Transform _player;
+        private Health _playerHealth;
         private Vector2 _desiredVelocity;
         private Vector2 _smoothedSeparation;
         private Vector3 _baseVisualLocalPosition;
@@ -63,10 +74,14 @@ namespace FF
         private float _bobStrength;
         private float _facingBlend = 1f;
         private float _facingVelocity;
+        private float _dogAttackCooldownTimer;
+        private Coroutine _dogJumpRoutine;
+        private Vector3 _dogAttackOffset = Vector3.zero;
 
         public void Initialize(Transform player)
         {
             _player = player;
+            CachePlayerHealth();
         }
 
         public void ApplyWaveModifiers(EnemyWaveModifiers modifiers)
@@ -130,6 +145,13 @@ namespace FF
                 }
             }
 
+            if (isDog && autoShooter)
+            {
+                autoShooter.SetFireHeld(false);
+                autoShooter.enabled = false;
+                autoShooter = null;
+            }
+
             if (!gunPivot && weaponManager)
             {
                 gunPivot = weaponManager.GunPivot;
@@ -184,7 +206,7 @@ namespace FF
 
         private void Start()
         {
-            if (weaponManager && startingWeapon)
+            if (!isDog && weaponManager && startingWeapon)
             {
                 weaponManager.Equip(startingWeapon);
             }
@@ -194,7 +216,14 @@ namespace FF
         {
             EnsurePlayerReference();
             AimAtPlayer();
-            HandleFiring();
+            if (isDog)
+            {
+                UpdateDogBehaviour(Time.deltaTime);
+            }
+            else
+            {
+                HandleFiring();
+            }
         }
 
         private void FixedUpdate()
@@ -210,6 +239,15 @@ namespace FF
                 _health.OnDeath += HandleDeath;
                 _health.OnDamaged += HandleDamaged;
             }
+
+            if (_dogJumpRoutine != null)
+            {
+                StopCoroutine(_dogJumpRoutine);
+                _dogJumpRoutine = null;
+            }
+
+            _dogAttackCooldownTimer = 0f;
+            _dogAttackOffset = Vector3.zero;
         }
 
         private void OnDisable()
@@ -219,11 +257,25 @@ namespace FF
                 _health.OnDeath -= HandleDeath;
                 _health.OnDamaged -= HandleDamaged;
             }
+
+            if (_dogJumpRoutine != null)
+            {
+                StopCoroutine(_dogJumpRoutine);
+                _dogJumpRoutine = null;
+            }
+
+            _dogAttackOffset = Vector3.zero;
         }
 
         #region Movement
         private void UpdateMovement()
         {
+            if (isDog)
+            {
+                UpdateDogMovement();
+                return;
+            }
+
             Vector2 targetVelocity = Vector2.zero;
             float moveSpeed = _stats ? _stats.MoveSpeed : 3f;
             float retreatMultiplier = _stats ? _stats.RetreatSpeedMultiplier : 0.6f;
@@ -244,6 +296,45 @@ namespace FF
                 else if (distance < shootDistance - buffer)
                 {
                     targetVelocity = -direction * moveSpeed * retreatMultiplier;
+                }
+            }
+
+            if (_stats)
+            {
+                Vector2 separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);
+                float responsiveness = _stats.AvoidanceResponsiveness;
+                _smoothedSeparation = responsiveness > 0f
+                    ? Vector2.Lerp(_smoothedSeparation, separationForce, responsiveness)
+                    : separationForce;
+
+                targetVelocity += _smoothedSeparation * _stats.AvoidanceWeight;
+            }
+            else
+            {
+                _smoothedSeparation = Vector2.zero;
+            }
+
+            targetVelocity = Vector2.ClampMagnitude(targetVelocity, moveSpeed);
+            _desiredVelocity = targetVelocity;
+
+            float acceleration = _stats ? _stats.Acceleration : 0.2f;
+            _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
+        }
+
+        private void UpdateDogMovement()
+        {
+            Vector2 targetVelocity = Vector2.zero;
+            float moveSpeed = _stats ? _stats.MoveSpeed : 3f;
+
+            if (_player)
+            {
+                Vector2 toPlayer = _player.position - transform.position;
+                float distance = toPlayer.magnitude;
+                if (distance > 0.001f)
+                {
+                    Vector2 direction = toPlayer / distance;
+                    targetVelocity = direction * moveSpeed;
+                    _isFacingLeft = direction.x < 0f;
                 }
             }
 
@@ -363,6 +454,101 @@ namespace FF
             return Vector2.ClampMagnitude(force, pushStrength);
         }
 
+        private void UpdateDogBehaviour(float deltaTime)
+        {
+            if (_dogAttackCooldownTimer > 0f)
+            {
+                _dogAttackCooldownTimer = Mathf.Max(0f, _dogAttackCooldownTimer - deltaTime);
+            }
+
+            if (!_player)
+            {
+                return;
+            }
+
+            if (dogAttackRange <= 0f)
+            {
+                return;
+            }
+
+            float distance = Vector2.Distance(transform.position, _player.position);
+            if (distance <= dogAttackRange && _dogAttackCooldownTimer <= 0f)
+            {
+                PerformDogAttack();
+            }
+        }
+
+        private void PerformDogAttack()
+        {
+            _dogAttackCooldownTimer = Mathf.Max(0f, dogAttackCooldown);
+
+            int damage = GetDogAttackDamage();
+            if (damage > 0 && _playerHealth)
+            {
+                _playerHealth.Damage(damage);
+            }
+
+            PlayDogAttackSound();
+            StartDogJumpAnimation();
+        }
+
+        private int GetDogAttackDamage()
+        {
+            float baseDamage = Mathf.Max(0, dogAttackDamage);
+            float multiplier = _stats ? _stats.GetDamageMultiplier() : 1f;
+            int scaled = Mathf.RoundToInt(baseDamage * Mathf.Max(0f, multiplier));
+            return Mathf.Max(0, scaled);
+        }
+
+        private void StartDogJumpAnimation()
+        {
+            if (!enemyVisual)
+            {
+                return;
+            }
+
+            if (_dogJumpRoutine != null)
+            {
+                StopCoroutine(_dogJumpRoutine);
+            }
+
+            _dogJumpRoutine = StartCoroutine(DogJumpRoutine());
+        }
+
+        private IEnumerator DogJumpRoutine()
+        {
+            float duration = Mathf.Max(0.05f, dogLeapDuration);
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                float normalized = duration > 0f ? elapsed / duration : 1f;
+                float height = Mathf.Sin(normalized * Mathf.PI) * dogLeapHeight;
+                _dogAttackOffset = new Vector3(0f, height, 0f);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            _dogAttackOffset = Vector3.zero;
+            _dogJumpRoutine = null;
+        }
+
+        private void PlayDogAttackSound()
+        {
+            if (!dogAttackSound)
+            {
+                return;
+            }
+
+            if (_audioSource)
+            {
+                _audioSource.PlayOneShot(dogAttackSound);
+                return;
+            }
+
+            AudioSource.PlayClipAtPoint(dogAttackSound, transform.position);
+        }
+
         private void AimAtPlayer()
         {
             if (!gunPivot || !_player) return;
@@ -432,7 +618,7 @@ namespace FF
             _bobTimer += Time.deltaTime * walkBobFrequency * bobSpeed;
 
             float bobOffset = Mathf.Sin(_bobTimer) * walkBobAmplitude * _bobStrength;
-            Vector3 targetLocalPosition = _baseVisualLocalPosition + new Vector3(0f, bobOffset, 0f);
+            Vector3 targetLocalPosition = _baseVisualLocalPosition + _dogAttackOffset + new Vector3(0f, bobOffset, 0f);
             enemyVisual.localPosition = Vector3.SmoothDamp(
                 enemyVisual.localPosition,
                 targetLocalPosition,
@@ -467,6 +653,15 @@ namespace FF
         #region Handlers
         private void HandleFiring()
         {
+            if (isDog)
+            {
+                if (autoShooter)
+                {
+                    autoShooter.SetFireHeld(false);
+                }
+                return;
+            }
+
             if (!autoShooter) return;
 
             if (!_player)
@@ -502,6 +697,8 @@ namespace FF
 
             SpawnXPOrbs();
 
+            _dogAttackOffset = Vector3.zero;
+
             var handler = OnAnyEnemyKilled;
             if (handler != null)
             {
@@ -515,12 +712,42 @@ namespace FF
 
         private void EnsurePlayerReference()
         {
-            if (_player) return;
+            if (_player)
+            {
+                if (!_playerHealth)
+                {
+                    CachePlayerHealth();
+                }
+                return;
+            }
 
             var playerObject = GameObject.FindWithTag("Player");
             if (playerObject)
             {
                 _player = playerObject.transform;
+                CachePlayerHealth();
+            }
+        }
+
+        private void CachePlayerHealth()
+        {
+            _playerHealth = null;
+
+            if (!_player)
+            {
+                return;
+            }
+
+            if (_player.TryGetComponent(out Health directHealth))
+            {
+                _playerHealth = directHealth;
+                return;
+            }
+
+            _playerHealth = _player.GetComponentInParent<Health>();
+            if (!_playerHealth)
+            {
+                _playerHealth = _player.GetComponentInChildren<Health>();
             }
         }
 
@@ -534,6 +761,15 @@ namespace FF
             float shootDistance = _stats ? _stats.ShootingDistance : 8f;
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(transform.position, shootDistance);
+        }
+
+        void OnValidate()
+        {
+            dogAttackRange = Mathf.Max(0f, dogAttackRange);
+            dogAttackCooldown = Mathf.Max(0f, dogAttackCooldown);
+            dogAttackDamage = Mathf.Max(0, dogAttackDamage);
+            dogLeapHeight = Mathf.Max(0f, dogLeapHeight);
+            dogLeapDuration = Mathf.Max(0f, dogLeapDuration);
         }
 
         private AudioClip GetRandomClip(AudioClip[] clips)
