@@ -299,7 +299,7 @@ namespace FF
                 return;
             }
 
-            killCountText.text = $"Kills: {Mathf.Max(0, kills)}";
+            killCountText.text = $"{Mathf.Max(0, kills)}";
         }
 
         void HandleWeaponEquipped(Weapon weapon)

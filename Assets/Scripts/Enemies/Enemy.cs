@@ -318,7 +318,11 @@ namespace FF
             _desiredVelocity = targetVelocity;
 
             float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
+            _rigidbody.linearVelocity = Vector2.MoveTowards(
+                _rigidbody.linearVelocity,
+                targetVelocity,
+                acceleration * 10f * Time.fixedDeltaTime
+            );
         }
 
         private void UpdateDogMovement()
@@ -805,7 +809,7 @@ namespace FF
             float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
             var mixerGroup = _audioSource ? _audioSource.outputAudioMixerGroup : null;
 
-            GameObject audioObject = new GameObject("EnemyDeathSound");
+            GameObject audioObject = new("EnemyDeathSound");
             audioObject.transform.position = transform.position;
 
             var tempSource = audioObject.AddComponent<AudioSource>();
@@ -854,7 +858,7 @@ namespace FF
                 if (xpOrbSpreadRadius > 0f)
                 {
                     Vector2 offset = UnityEngine.Random.insideUnitCircle * xpOrbSpreadRadius;
-                    spawnPosition += new Vector3(offset.x, offset.y, 0f);
+                    spawnPosition += (Vector3)offset;
                 }
 
                 XPOrb orb = orbPool.GetComponent<XPOrb>(spawnPosition, Quaternion.identity);

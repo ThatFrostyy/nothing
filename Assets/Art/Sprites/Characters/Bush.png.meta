@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 365aa60d0f48e284abafb2e10807d3e1
+guid: 0b82d0be685ba6b439b5d6330fc8b11b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6176478647619575713
-    second: GermanWinter_0
+      213: 4296193443984631328
+    second: Bush_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: GermanWinter_0
+      name: Bush_0
       rect:
         serializedVersion: 2
-        x: 59
-        y: 39
-        width: 133
-        height: 171
+        x: 31
+        y: 32
+        width: 196
+        height: 168
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1af562a0b9247b550800000000000000
-      internalID: 6176478647619575713
+      spriteID: 026e013dc252f9b30800000000000000
+      internalID: 4296193443984631328
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      GermanWinter_0: 6176478647619575713
+      Bush_0: 4296193443984631328
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

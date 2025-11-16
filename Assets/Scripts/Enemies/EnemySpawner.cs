@@ -126,6 +126,7 @@ namespace FF
                     }
                 }
             }
+            Debug.Log($"Wave {wave}: regular={EvaluateCount(countByWave, wave, 0)}, boss={EvaluateCount(bossCountByWave, wave, 1)}");
         }
 
         IList<GameObject> GetPrefabSelection(GameObject[] prefabs, int maxUnique, List<GameObject> selection)
