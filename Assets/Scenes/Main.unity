@@ -3209,7 +3209,7 @@ MonoBehaviour:
   hitShakeDuration: 0.15
   hitShakeIntensity: 0.25
   levelUpSound: {fileID: 8300000, guid: a045c4a2a7b9e9245ae825a051516d62, type: 3}
-  levelUpParticles: {fileID: 1676495797548180, guid: 706a714971ebbb24f9f49085982f3649, type: 3}
+  levelUpParticles: {fileID: 9157105887711914197, guid: c4f829cb7dd4b864caf8832ec5b1ee55, type: 3}
 --- !u!114 &1207903165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3698,6 +3698,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.ActivePickupDisplay
   container: {fileID: 216756781}
   entryPrefab: {fileID: 6389205550379095160, guid: fa8b825f1b64a7a43aa961399f36679b, type: 3}
+  maxActiveEntries: 3
 --- !u!1 &1358656900
 GameObject:
   m_ObjectHideFlags: 0

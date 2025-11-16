@@ -155,6 +155,7 @@ MonoBehaviour:
   lightFadeDuration: 0.2
   shakeDuration: 0.1
   shakeMagnitude: 0.15
+  pickupFx: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2, type: 3}
   effect: {fileID: 11400000, guid: df5d5c89484846138d232bcfae377e32, type: 2}
 --- !u!114 &2139274892160190764
 MonoBehaviour:
