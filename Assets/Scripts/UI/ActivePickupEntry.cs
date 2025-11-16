@@ -10,7 +10,7 @@ namespace FF
         [SerializeField] private Image iconImage;
         [SerializeField] private TMP_Text multiplierText;
         [SerializeField] private TMP_Text timerText;
-        [SerializeField] private string timeFormat = "m\:ss";
+        [SerializeField] private string timeFormat = "m\\:ss";
 
         private float startTime;
         private float duration;
