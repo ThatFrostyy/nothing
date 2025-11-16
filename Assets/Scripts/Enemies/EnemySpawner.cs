@@ -4,70 +4,26 @@ using Random = UnityEngine.Random;
 
 namespace FF
 {
-    [System.Serializable]
-    public class WaveAttributeScaling
-    {
-        public AnimationCurve healthMultiplierByWave = AnimationCurve.Linear(1f, 1f, 20f, 4f);
-        public AnimationCurve moveSpeedMultiplierByWave = AnimationCurve.Linear(1f, 1f, 20f, 1.6f);
-        public AnimationCurve fireRateMultiplierByWave = AnimationCurve.Linear(1f, 1f, 20f, 1.5f);
-        public AnimationCurve damageMultiplierByWave = AnimationCurve.Linear(1f, 1f, 20f, 2.2f);
-        public AnimationCurve xpMultiplierByWave = AnimationCurve.Linear(1f, 1f, 20f, 2.5f);
-
-        public EnemyWaveModifiers CreateModifiers(int wave)
-        {
-            return new EnemyWaveModifiers(
-                Evaluate(healthMultiplierByWave, wave, 1f),
-                Evaluate(moveSpeedMultiplierByWave, wave, 1f),
-                Evaluate(fireRateMultiplierByWave, wave, 1f),
-                Evaluate(damageMultiplierByWave, wave, 1f),
-                Evaluate(xpMultiplierByWave, wave, 1f));
-        }
-
-        static float Evaluate(AnimationCurve curve, int wave, float fallback)
-        {
-            if (curve == null || curve.length == 0)
-            {
-                return fallback;
-            }
-
-            return Mathf.Max(0.01f, curve.Evaluate(Mathf.Max(1, wave)));
-        }
-    }
-
     public class EnemySpawner : MonoBehaviour
     {
-        [SerializeField] GameObject[] enemyPrefabs;
-        [SerializeField] GameObject[] bossPrefabs;
-        [SerializeField] GameObject[] dogPrefabs;
-        [SerializeField] Transform player;
-        [SerializeField] float spawnRadius = 16f;
-        [SerializeField] float spawnBuffer = 2f;
-        [SerializeField] int maxSpawnAttempts = 8;
-        [SerializeField] Camera spawnCamera;
-        [SerializeField] AnimationCurve countByWave = AnimationCurve.Linear(1, 6, 20, 60);
-        [SerializeField, Min(1)] int bossWaveInterval = 5;
-        [SerializeField] AnimationCurve bossCountByWave = AnimationCurve.Linear(1, 1, 10, 3);
-        [SerializeField] bool spawnRegularsDuringBossWave = true;
-        [SerializeField, Min(0)] int maxUniqueRegularPrefabs = 0;
-        [SerializeField, Min(0)] int maxUniqueBossPrefabs = 0;
-        [SerializeField, Min(0)] int maxUniqueDogPrefabs = 0;
-        [SerializeField] Vector2Int dogSpawnCountRange = new Vector2Int(1, 3);
-        [SerializeField, Min(0)] int dogWaveStart = 5;
-        [SerializeField, Min(1)] int dogWaveInterval = 3;
-        [SerializeField, Range(0f, 1f)] float dogSpawnChance = 0.65f;
-        [SerializeField] WaveAttributeScaling regularScaling = new WaveAttributeScaling();
-        [SerializeField] WaveAttributeScaling bossScaling = new WaveAttributeScaling();
-        [SerializeField] WaveAttributeScaling dogScaling = new WaveAttributeScaling();
+        [Header("Player & Spawn Area")]
+        [SerializeField] private Transform player;
+        [SerializeField, Min(1f)] private float spawnRadius = 16f;
+        [SerializeField, Min(0f)] private float spawnBuffer = 2f;
+        [SerializeField, Min(1)] private int maxSpawnAttempts = 8;
+        [SerializeField] private Camera spawnCamera;
+
+        [Header("Waves")]
+        [SerializeField, Min(1)] private int bossWaveInterval = 5;
+        [SerializeField] private bool spawnNonBossDefinitionsDuringBossWave = true;
+        [SerializeField] private WaveAttributeScaling defaultScaling = new WaveAttributeScaling();
+        [SerializeField] private List<EnemySpawnDefinition> spawnDefinitions = new List<EnemySpawnDefinition>();
+
         [Header("Audio")]
-        [SerializeField] AudioSource audioSource;
-        [SerializeField] AudioClip dogSpawnClip;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip fallbackSpawnClip;
 
-        readonly List<GameObject> regularSelection = new List<GameObject>();
-        readonly List<GameObject> bossSelection = new List<GameObject>();
-        readonly List<GameObject> dogSelection = new List<GameObject>();
-        readonly List<GameObject> scratchList = new List<GameObject>();
-
-        void Awake()
+        private void Awake()
         {
             if (!spawnCamera)
             {
@@ -79,132 +35,77 @@ namespace FF
 
         public void SpawnWave(int wave)
         {
-            if (!player) return;
+            if (!player)
+            {
+                return;
+            }
 
             EnsureAudioSource();
-
-            bool hasRegularPrefabs = enemyPrefabs != null && enemyPrefabs.Length > 0;
-            bool hasBossPrefabs = bossPrefabs != null && bossPrefabs.Length > 0;
-            bool hasDogPrefabs = dogPrefabs != null && dogPrefabs.Length > 0;
-
-            bool isBossWave = hasBossPrefabs && bossWaveInterval > 0 && wave > 0 && wave % bossWaveInterval == 0;
-
+            bool isBossWave = bossWaveInterval > 0 && wave > 0 && wave % bossWaveInterval == 0;
             float radius = GetSpawnRadius();
 
-            if (hasRegularPrefabs && (!isBossWave || spawnRegularsDuringBossWave))
+            for (int i = 0; i < spawnDefinitions.Count; i++)
             {
-                int regularCount = EvaluateCount(countByWave, wave, 0);
-                if (regularCount > 0)
+                EnemySpawnDefinition definition = spawnDefinitions[i];
+                if (!definition || !definition.Prefab)
                 {
-                    var prefabsToUse = GetPrefabSelection(enemyPrefabs, maxUniqueRegularPrefabs, regularSelection);
-                    SpawnGroup(regularCount, radius, prefabsToUse, GetModifiers(regularScaling, wave));
+                    continue;
                 }
-            }
 
-            if (isBossWave)
-            {
-                int bossCount = EvaluateCount(bossCountByWave, wave, 1);
-                if (bossCount > 0)
+                if (!DefinitionIsActive(definition, wave, isBossWave))
                 {
-                    var prefabsToUse = GetPrefabSelection(bossPrefabs, maxUniqueBossPrefabs, bossSelection);
-                    SpawnGroup(bossCount, radius, prefabsToUse, GetModifiers(bossScaling, wave));
+                    continue;
                 }
-            }
 
-            if (hasDogPrefabs && ShouldSpawnDogs(wave))
-            {
-                int minDogs = Mathf.Max(0, Mathf.Min(dogSpawnCountRange.x, dogSpawnCountRange.y));
-                int maxDogs = Mathf.Max(minDogs, Mathf.Max(dogSpawnCountRange.x, dogSpawnCountRange.y));
-                int dogCount = Random.Range(minDogs, maxDogs + 1);
-                if (dogCount > 0)
+                int count = definition.EvaluateSpawnCount(wave);
+                if (count <= 0)
                 {
-                    var prefabsToUse = GetPrefabSelection(dogPrefabs, maxUniqueDogPrefabs, dogSelection);
-                    int spawnedDogs = SpawnGroup(dogCount, radius, prefabsToUse, GetModifiers(dogScaling, wave));
-                    if (spawnedDogs > 0)
-                    {
-                        PlayDogSpawnCue();
-                    }
+                    continue;
+                }
+
+                EnemyWaveModifiers modifiers = definition.GetWaveModifiers(wave, defaultScaling);
+                int spawned = SpawnDefinition(definition, count, radius, modifiers);
+                if (spawned > 0)
+                {
+                    PlaySpawnCue(definition.SpawnCue);
                 }
             }
-            Debug.Log($"Wave {wave}: regular={EvaluateCount(countByWave, wave, 0)}, boss={EvaluateCount(bossCountByWave, wave, 1)}");
         }
 
-        IList<GameObject> GetPrefabSelection(GameObject[] prefabs, int maxUnique, List<GameObject> selection)
+        private bool DefinitionIsActive(EnemySpawnDefinition definition, int wave, bool isBossWave)
         {
-            selection.Clear();
-            scratchList.Clear();
-
-            if (prefabs == null || prefabs.Length == 0)
-            {
-                return selection;
-            }
-
-            for (int i = 0; i < prefabs.Length; i++)
-            {
-                var candidate = prefabs[i];
-                if (candidate)
-                {
-                    scratchList.Add(candidate);
-                }
-            }
-
-            if (scratchList.Count == 0)
-            {
-                return selection;
-            }
-
-            if (maxUnique <= 0 || maxUnique >= scratchList.Count)
-            {
-                selection.AddRange(scratchList);
-            }
-            else
-            {
-                int selectionCount = Mathf.Clamp(maxUnique, 1, scratchList.Count);
-                for (int i = 0; i < selectionCount; i++)
-                {
-                    int index = Random.Range(0, scratchList.Count);
-                    selection.Add(scratchList[index]);
-                    scratchList.RemoveAt(index);
-                }
-            }
-
-            return selection;
-        }
-
-        EnemyWaveModifiers GetModifiers(WaveAttributeScaling scaling, int wave)
-        {
-            return scaling != null ? scaling.CreateModifiers(wave) : EnemyWaveModifiers.Identity;
-        }
-
-        int EvaluateCount(AnimationCurve curve, int wave, int minimum)
-        {
-            if (curve == null || curve.length == 0)
-            {
-                return Mathf.Max(0, minimum);
-            }
-
-            int evaluated = Mathf.CeilToInt(curve.Evaluate(Mathf.Max(1, wave)));
-            return Mathf.Max(minimum, evaluated);
-        }
-
-        bool ShouldSpawnDogs(int wave)
-        {
-            if (dogWaveInterval <= 0)
+            int startWave = definition.StartWave;
+            if (wave < startWave)
             {
                 return false;
             }
 
-            if (wave <= dogWaveStart)
+            if (definition.EndWave > 0 && wave > definition.EndWave)
             {
                 return false;
             }
 
-            if (((wave - dogWaveStart) % dogWaveInterval) != 0)
+            if (definition.SpawnOnlyOnBossWaves)
+            {
+                if (!isBossWave)
+                {
+                    return false;
+                }
+            }
+            else if (isBossWave && !spawnNonBossDefinitionsDuringBossWave)
             {
                 return false;
             }
 
-            if (dogSpawnChance < 1f && Random.value > Mathf.Clamp01(dogSpawnChance))
+            int interval = Mathf.Max(1, definition.SpawnInterval);
+            int relativeWave = wave - startWave;
+            if (relativeWave < 0 || relativeWave % interval != 0)
+            {
+                return false;
+            }
+
+            float chance = definition.SpawnChance;
+            if (chance < 1f && Random.value > Mathf.Clamp01(chance))
             {
                 return false;
             }
@@ -212,43 +113,73 @@ namespace FF
             return true;
         }
 
-        int SpawnGroup(int count, float radius, IList<GameObject> prefabs, EnemyWaveModifiers modifiers)
+        private int SpawnDefinition(EnemySpawnDefinition definition, int count, float radius, EnemyWaveModifiers modifiers)
         {
             if (count <= 0)
             {
                 return 0;
             }
 
-            if (prefabs == null || prefabs.Count == 0)
+            if (!definition.Prefab)
             {
                 return 0;
             }
 
             int spawned = 0;
-            for (int i = 0; i < count; i++)
+            if (definition.SpawnInPacks)
             {
-                var prefab = prefabs[Random.Range(0, prefabs.Count)];
-                if (!prefab)
+                Vector2 baseDirection = Random.insideUnitCircle.normalized;
+                if (baseDirection.sqrMagnitude < Mathf.Epsilon)
                 {
-                    continue;
+                    baseDirection = Vector2.right;
                 }
 
-                float a = Random.value * Mathf.PI * 2f;
-                Vector2 direction = new Vector2(Mathf.Cos(a), Mathf.Sin(a));
-                Vector2 pos = FindSpawnPosition(direction, radius);
-
-                var enemyInstance = Instantiate(prefab, pos, Quaternion.identity);
-                if (enemyInstance.TryGetComponent<Enemy>(out var enemy))
+                Vector2 anchor = FindSpawnPosition(baseDirection, radius);
+                for (int i = 0; i < count; i++)
                 {
-                    enemy.Initialize(player);
-                    enemy.ApplyWaveModifiers(modifiers);
+                    Vector2 offset = Random.insideUnitCircle * definition.PackRadius;
+                    Vector2 spawnPosition = anchor + offset;
+                    if (SpawnEnemy(definition.Prefab, spawnPosition, modifiers))
+                    {
+                        spawned++;
+                    }
                 }
-                spawned++;
             }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    float angle = Random.value * Mathf.PI * 2f;
+                    Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    Vector2 spawnPosition = FindSpawnPosition(direction, radius);
+                    if (SpawnEnemy(definition.Prefab, spawnPosition, modifiers))
+                    {
+                        spawned++;
+                    }
+                }
+            }
+
             return spawned;
         }
 
-        float GetSpawnRadius()
+        private bool SpawnEnemy(GameObject prefab, Vector2 position, EnemyWaveModifiers modifiers)
+        {
+            var enemyInstance = Instantiate(prefab, position, Quaternion.identity);
+            if (!enemyInstance)
+            {
+                return false;
+            }
+
+            if (enemyInstance.TryGetComponent(out Enemy enemy))
+            {
+                enemy.Initialize(player);
+                enemy.ApplyWaveModifiers(modifiers);
+            }
+
+            return true;
+        }
+
+        private float GetSpawnRadius()
         {
             float radius = spawnRadius;
             float cameraRadius = GetCameraViewRadius();
@@ -260,7 +191,7 @@ namespace FF
             return radius;
         }
 
-        Vector2 FindSpawnPosition(Vector2 direction, float baseRadius)
+        private Vector2 FindSpawnPosition(Vector2 direction, float baseRadius)
         {
             Vector2 origin = player ? (Vector2)player.position : Vector2.zero;
             float currentRadius = baseRadius;
@@ -290,7 +221,7 @@ namespace FF
             return candidate;
         }
 
-        bool IsPointVisible(Vector2 worldPosition)
+        private bool IsPointVisible(Vector2 worldPosition)
         {
             if (!spawnCamera)
             {
@@ -309,7 +240,7 @@ namespace FF
                    viewportPoint.y > -edgeTolerance && viewportPoint.y < 1f + edgeTolerance;
         }
 
-        float GetCameraViewRadius()
+        private float GetCameraViewRadius()
         {
             if (!spawnCamera || !spawnCamera.orthographic)
             {
@@ -321,21 +252,16 @@ namespace FF
             return Mathf.Sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
         }
 
-        void OnValidate()
+        private void OnValidate()
         {
-            dogSpawnCountRange.x = Mathf.Max(0, dogSpawnCountRange.x);
-            dogSpawnCountRange.y = Mathf.Max(dogSpawnCountRange.x, dogSpawnCountRange.y);
-
-            dogWaveInterval = Mathf.Max(1, dogWaveInterval);
-            dogWaveStart = Mathf.Max(0, dogWaveStart);
-            dogSpawnChance = Mathf.Clamp01(dogSpawnChance);
-            maxUniqueRegularPrefabs = Mathf.Max(0, maxUniqueRegularPrefabs);
-            maxUniqueBossPrefabs = Mathf.Max(0, maxUniqueBossPrefabs);
-            maxUniqueDogPrefabs = Mathf.Max(0, maxUniqueDogPrefabs);
+            spawnRadius = Mathf.Max(1f, spawnRadius);
+            spawnBuffer = Mathf.Max(0f, spawnBuffer);
+            maxSpawnAttempts = Mathf.Max(1, maxSpawnAttempts);
+            bossWaveInterval = Mathf.Max(1, bossWaveInterval);
             EnsureAudioSource();
         }
 
-        void EnsureAudioSource()
+        private void EnsureAudioSource()
         {
             if (audioSource)
             {
@@ -353,14 +279,15 @@ namespace FF
             audioSource.spatialBlend = 0f;
         }
 
-        void PlayDogSpawnCue()
+        private void PlaySpawnCue(AudioClip clip)
         {
-            if (!dogSpawnClip || !audioSource)
+            AudioClip finalClip = clip ? clip : fallbackSpawnClip;
+            if (!finalClip || !audioSource)
             {
                 return;
             }
 
-            audioSource.PlayOneShot(dogSpawnClip);
+            audioSource.PlayOneShot(finalClip);
         }
     }
 }
