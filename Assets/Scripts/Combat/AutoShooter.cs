@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 
 namespace FF
@@ -200,9 +201,11 @@ namespace FF
                 bullet.SetOwner(transform.root.tag);
             }
 
-            if (_weapon.fireSFX && _audioSource)
+            if (_weapon.fireSFX)
             {
-                _audioSource.PlayOneShot(_weapon.fireSFX);
+                AudioMixerGroup mixer = _audioSource ? _audioSource.outputAudioMixerGroup : null;
+                float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
+                AudioPlaybackPool.PlayOneShot(_weapon.fireSFX, _muzzle.position, mixer, spatialBlend, _audioSource ? _audioSource.volume : 1f, _audioSource ? _audioSource.pitch : 1f);
             }
 
             if (_weapon.muzzleFlash)
