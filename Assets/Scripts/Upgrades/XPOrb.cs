@@ -18,6 +18,9 @@ namespace FF
         [SerializeField] private Vector2 pulseScaleRange = new Vector2(0.9f, 1.1f);
         [SerializeField, Min(0f)] private float pulseSpeed = 4f;
         [SerializeField] private bool randomizePulseOffset = true;
+        [Header("Lifetime")]
+        [SerializeField, Min(0f)] private float lifetime = 20f;
+        [SerializeField, Min(0f)] private float lifetimeVariance = 0f;
 
         private Transform followTarget;
         private float currentSpeed;
@@ -30,6 +33,8 @@ namespace FF
         private Renderer[] cachedRenderers;
         private bool collected;
         private Coroutine releaseRoutine;
+        private float lifetimeTimer;
+        private float currentLifetime;
 
         void Awake()
         {
@@ -75,6 +80,11 @@ namespace FF
                 return;
             }
 
+            UpdateLifetime(Time.deltaTime);
+            if (collected)
+            {
+                return;
+            }
             AcquireTarget();
             MoveTowardsTarget(Time.deltaTime);
             AnimatePulse(Time.deltaTime);
@@ -223,6 +233,8 @@ namespace FF
             acceleration = Mathf.Max(0f, acceleration);
             pulseScaleRange.x = Mathf.Max(0f, pulseScaleRange.x);
             pulseScaleRange.y = Mathf.Max(0f, pulseScaleRange.y);
+            lifetime = Mathf.Max(0f, lifetime);
+            lifetimeVariance = Mathf.Max(0f, lifetimeVariance);
         }
 
         void ResetPulseTimer()
@@ -244,39 +256,21 @@ namespace FF
                 return;
             }
 
-            collected = true;
-            followTarget = null;
-            currentSpeed = 0f;
+            PrepareForRelease(false);
 
-            if (orbCollider)
-            {
-                orbCollider.enabled = false;
-            }
-
-            SetRenderersEnabled(false);
-
-            if (releaseRoutine != null)
-            {
-                StopCoroutine(releaseRoutine);
-            }
-
-            releaseRoutine = StartCoroutine(ReleaseAfterPickup());
+            float wait = PlayPickupSound();
+            BeginRelease(wait);
         }
 
-        IEnumerator ReleaseAfterPickup()
+        void HandleExpired()
         {
-            float wait = PlayPickupSound();
-            if (wait > 0f)
+            if (collected)
             {
-                yield return new WaitForSecondsRealtime(wait);
+                return;
             }
 
-            if (poolToken != null)
-            {
-                poolToken.Release();
-            }
-
-            releaseRoutine = null;
+            PrepareForRelease(true);
+            BeginRelease(0f);
         }
 
         void ResetOrbState()
@@ -304,6 +298,83 @@ namespace FF
             SetRenderersEnabled(true);
             transform.localScale = baseScale;
             ResetPulseTimer();
+            lifetimeTimer = 0f;
+            currentLifetime = GetLifetimeDuration();
+        }
+
+        void UpdateLifetime(float deltaTime)
+        {
+            if (collected)
+            {
+                return;
+            }
+
+            if (currentLifetime <= 0f)
+            {
+                return;
+            }
+
+            lifetimeTimer += deltaTime;
+            if (lifetimeTimer >= currentLifetime)
+            {
+                HandleExpired();
+            }
+        }
+
+        float GetLifetimeDuration()
+        {
+            if (lifetime <= 0f)
+            {
+                return 0f;
+            }
+
+            float variance = lifetimeVariance > 0f ? Random.Range(-lifetimeVariance, lifetimeVariance) : 0f;
+            float duration = lifetime + variance;
+            return Mathf.Max(0f, duration);
+        }
+
+        void PrepareForRelease(bool stopAudio)
+        {
+            collected = true;
+            followTarget = null;
+            currentSpeed = 0f;
+
+            if (stopAudio && pickupAudioSource)
+            {
+                pickupAudioSource.Stop();
+            }
+
+            if (orbCollider)
+            {
+                orbCollider.enabled = false;
+            }
+
+            SetRenderersEnabled(false);
+        }
+
+        void BeginRelease(float delay)
+        {
+            if (releaseRoutine != null)
+            {
+                StopCoroutine(releaseRoutine);
+            }
+
+            releaseRoutine = StartCoroutine(ReleaseAfterDelay(delay));
+        }
+
+        IEnumerator ReleaseAfterDelay(float delay)
+        {
+            if (delay > 0f)
+            {
+                yield return new WaitForSecondsRealtime(delay);
+            }
+
+            if (poolToken != null)
+            {
+                poolToken.Release();
+            }
+
+            releaseRoutine = null;
         }
 
         void CacheRenderers()

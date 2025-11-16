@@ -5,12 +5,24 @@ namespace FF
 {
     public class XPWallet : MonoBehaviour
     {
+        [Header("Level Progression")]
+        [SerializeField, Min(1)] int startingLevel = 1;
+        [SerializeField, Min(0)] int startingXP = 0;
+        [SerializeField, Min(1)] int baseXPRequirement = 5;
+        [SerializeField, Min(0f)] float xpPerLevel = 3f;
+        [SerializeField] AnimationCurve xpRequirementCurve;
+
         public int Level { get; private set; } = 1;
         public int XP { get; private set; } = 0;
-        public int Next => 5 + (Level * 3);
+        public int Next => GetXPRequirementForLevel(Level);
 
         public System.Action<int> OnLevelUp;
         public System.Action<int, int, int> OnXPChanged;
+
+        void Awake()
+        {
+            ResetLevels(startingLevel, startingXP, false);
+        }
 
         public void Add(int v)
         {
@@ -21,17 +33,64 @@ namespace FF
 
             XP += v;
 
+            ProcessPendingLevels(true);
+
+            NotifyXPChanged();
+        }
+
+        public int GetXPRequirementForLevel(int level)
+        {
+            level = Mathf.Max(1, level);
+
+            if (xpRequirementCurve != null && xpRequirementCurve.length > 0)
+            {
+                float evaluated = xpRequirementCurve.Evaluate(level);
+                if (evaluated > 0f)
+                {
+                    return Mathf.Max(1, Mathf.RoundToInt(evaluated));
+                }
+            }
+
+            float requirement = baseXPRequirement + (level - 1) * xpPerLevel;
+            return Mathf.Max(1, Mathf.RoundToInt(requirement));
+        }
+
+        public void ResetLevels(int level = 1, int xp = 0, bool clampXP = true)
+        {
+            Level = Mathf.Max(1, level);
+            if (clampXP)
+            {
+                XP = Mathf.Clamp(xp, 0, Mathf.Max(0, Next - 1));
+            }
+            else
+            {
+                XP = Mathf.Max(0, xp);
+                ProcessPendingLevels(false);
+            }
+
+            NotifyXPChanged();
+        }
+
+        void ProcessPendingLevels(bool raiseEvents)
+        {
             while (XP >= Next)
             {
                 XP -= Next;
                 Level++;
-                var levelUpHandler = OnLevelUp;
-                if (levelUpHandler != null)
+
+                if (raiseEvents)
                 {
-                    levelUpHandler(Level);
+                    var levelUpHandler = OnLevelUp;
+                    if (levelUpHandler != null)
+                    {
+                        levelUpHandler(Level);
+                    }
                 }
             }
+        }
 
+        void NotifyXPChanged()
+        {
             var xpChangedHandler = OnXPChanged;
             if (xpChangedHandler != null)
             {
@@ -39,15 +98,13 @@ namespace FF
             }
         }
 
-        public void ResetLevels(int level = 1)
+        void OnValidate()
         {
-            Level = Mathf.Max(1, level);
-            XP = 0;
-            var xpChangedHandler = OnXPChanged;
-            if (xpChangedHandler != null)
-            {
-                xpChangedHandler(Level, XP, Next);
-            }
+            startingLevel = Mathf.Max(1, startingLevel);
+            startingXP = Mathf.Max(0, startingXP);
+            baseXPRequirement = Mathf.Max(1, baseXPRequirement);
+            xpPerLevel = Mathf.Max(0f, xpPerLevel);
         }
     }
+}
 }
