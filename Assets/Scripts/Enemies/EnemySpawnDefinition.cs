@@ -6,7 +6,7 @@ namespace FF
     public class EnemySpawnDefinition : ScriptableObject
     {
         [Header("Prefab")]
-        [SerializeField] private GameObject prefab;
+        [SerializeField] private GameObject[] prefabs;
 
         [Header("Wave Timing")]
         [SerializeField, Min(1)] private int startWave = 1;
@@ -26,7 +26,7 @@ namespace FF
         [Header("Optional Audio")]
         [SerializeField] private AudioClip spawnCue;
 
-        public GameObject Prefab => prefab;
+        public GameObject[] Prefabs => prefabs;
         public int StartWave => Mathf.Max(1, startWave);
         public int EndWave => endWave;
         public int SpawnInterval => Mathf.Max(1, spawnInterval);
@@ -49,7 +49,7 @@ namespace FF
 
         public EnemyWaveModifiers GetWaveModifiers(int wave, WaveAttributeScaling fallback)
         {
-            WaveAttributeScaling scaling = attributeScalingOverride ? attributeScalingOverride : fallback;
+            WaveAttributeScaling scaling = attributeScalingOverride ?? fallback;
             return scaling != null ? scaling.CreateModifiers(wave) : EnemyWaveModifiers.Identity;
         }
     }

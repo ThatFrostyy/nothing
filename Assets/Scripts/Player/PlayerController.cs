@@ -6,14 +6,17 @@ namespace FF
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
+        [Header("References")]
         [SerializeField] private Camera _camera;
         [SerializeField] private AutoShooter _autoShooter;
         [SerializeField] private Transform _gunPivot;
         [SerializeField] private Transform _playerVisual;
 
+        [Header("Movement Settings")]
         [SerializeField] private float _acceleration = 0.18f;
         [SerializeField] private float _bodyTiltDegrees = 15f;
 
+        [Header("Bounds Settings")]
         [SerializeField] private float _boundsPadding = 0.05f;
 
         private Rigidbody2D _rigidbody;

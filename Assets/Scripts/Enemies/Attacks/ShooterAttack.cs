@@ -5,6 +5,7 @@ namespace FF
     [AddComponentMenu("FF/Enemies/Attacks/Shooter Attack")]
     public class ShooterAttack : MonoBehaviour, IEnemyAttack
     {
+        [Header("Shooting Settings")]
         [SerializeField, Min(0.1f)] private float bufferDistance = 1f;
         [SerializeField] private bool fireWhenCloserThanPreferred = true;
 

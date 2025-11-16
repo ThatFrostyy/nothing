@@ -5,9 +5,11 @@ namespace FF
     [AddComponentMenu("FF/Enemies/Movement/Zig Zag Movement")]
     public class ZigZagMovement : MonoBehaviour, IEnemyMovement
     {
+        [Header("Zig Zag Settings")]
         [SerializeField, Min(0.1f)] private float speedMultiplier = 1f;
         [SerializeField, Min(0.1f)] private float zigZagFrequency = 2f;
         [SerializeField, Min(0f)] private float zigZagAmplitude = 2.5f;
+
         private float _phaseOffset;
 
         void Awake()
@@ -31,9 +33,9 @@ namespace FF
             }
 
             Vector2 forward = toPlayer / Mathf.Max(distance, 0.001f);
-            Vector2 right = new Vector2(-forward.y, forward.x);
+            Vector2 right = new(-forward.y, forward.x);
             float wave = Mathf.Sin(Time.time * zigZagFrequency + _phaseOffset);
-            Vector2 zigzag = forward + right * wave * zigZagAmplitude * 0.1f;
+            Vector2 zigzag = forward + 0.1f * wave * zigZagAmplitude * right;
             return zigzag.normalized * speed;
         }
     }

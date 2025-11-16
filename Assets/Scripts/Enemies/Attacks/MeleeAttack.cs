@@ -5,9 +5,12 @@ namespace FF
     [AddComponentMenu("FF/Enemies/Attacks/Melee Attack")]
     public class MeleeAttack : MonoBehaviour, IEnemyAttack
     {
+        [Header("Attack Settings")]
         [SerializeField, Min(0f)] private float attackRange = 1.25f;
         [SerializeField, Min(0.05f)] private float cooldown = 1f;
         [SerializeField, Min(0)] private int damage = 8;
+
+        [Header("Audio & Visuals")]
         [SerializeField] private AudioClip attackClip;
         [SerializeField] private AnimationCurve leapHeightByTime = AnimationCurve.EaseInOut(0f, 0f, 1f, 0.4f);
         [SerializeField] private Transform visualRoot;

@@ -5,6 +5,7 @@ namespace FF
 {
     public class WeaponManager : MonoBehaviour
     {
+        [Header("References")]
         [SerializeField] Transform gunPivot;
         [SerializeField] AutoShooter shooter;
 
@@ -51,11 +52,7 @@ namespace FF
             shooter.InitializeRecoil(gunPivot);
             shooter.SetWeapon(newWeapon, muzzle, eject);
 
-            var handler = OnWeaponEquipped;
-            if (handler != null)
-            {
-                handler(currentSO);
-            }
+            OnWeaponEquipped?.Invoke(currentSO);
         }
     }
 }

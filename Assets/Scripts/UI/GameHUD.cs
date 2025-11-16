@@ -45,7 +45,7 @@ namespace FF
 
         [Header("Wave Effects")]
         [SerializeField] private Image waveFlashImage;
-        [SerializeField] private Color waveFlashColor = new Color(1f, 0f, 0f, 0.45f);
+        [SerializeField] private Color waveFlashColor = new(1f, 0f, 0f, 0.45f);
         [SerializeField, Min(0f)] private float waveFlashDuration = 0.6f;
         [SerializeField] private AnimationCurve waveFlashAlphaCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
         [SerializeField] private AudioClip waveMilestoneClip;

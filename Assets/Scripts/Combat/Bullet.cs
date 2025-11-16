@@ -5,6 +5,7 @@ namespace FF
 {
     public class Bullet : MonoBehaviour, IPoolable
     {
+        [Header("Bullet Settings")]
         [SerializeField] float speed = 26f;
         [SerializeField] float lifetime = 2f;
         [SerializeField] GameObject bloodFX;
@@ -64,6 +65,7 @@ namespace FF
             }
         }
 
+        #region Pooling
         public void OnTakenFromPool()
         {
             t = 0f;
@@ -75,5 +77,6 @@ namespace FF
             damage = 0;
             teamTag = null;
         }
+        #endregion Pooling
     }
 }

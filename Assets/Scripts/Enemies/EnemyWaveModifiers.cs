@@ -2,12 +2,9 @@ using UnityEngine;
 
 namespace FF
 {
-    /// <summary>
-    /// Runtime multipliers applied to enemies as waves progress.
-    /// </summary>
     public struct EnemyWaveModifiers
     {
-        public static readonly EnemyWaveModifiers Identity = new EnemyWaveModifiers(1f, 1f, 1f, 1f, 1f);
+        public static readonly EnemyWaveModifiers Identity = new(1f, 1f, 1f, 1f, 1f);
 
         public float HealthMultiplier;
         public float MoveSpeedMultiplier;

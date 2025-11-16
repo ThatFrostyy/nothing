@@ -11,7 +11,7 @@ namespace FF
     {
         public static event Action<Enemy> OnAnyEnemyKilled;
 
-        [Header("Combat Setup")]
+        [Header("References")]
         [SerializeField] private Weapon startingWeapon;
         [SerializeField] private WeaponManager weaponManager;
         [SerializeField] private AutoShooter autoShooter;
@@ -210,7 +210,6 @@ namespace FF
             EnsurePlayerReference();
         }
 
-
         private void Start()
         {
             if (!isDog && weaponManager && startingWeapon)
@@ -340,7 +339,7 @@ namespace FF
                 }
                 else if (distance < shootDistance - buffer)
                 {
-                    targetVelocity = -direction * moveSpeed * retreatMultiplier;
+                    targetVelocity = moveSpeed * retreatMultiplier * -direction;
                 }
             }
 
@@ -469,7 +468,7 @@ namespace FF
 
             Vector2 separationDirection = separation.normalized;
             float crowdingStrength = Mathf.Clamp(totalWeight, 0.25f, 1f);
-            Vector2 force = separationDirection * pushStrength * crowdingStrength;
+            Vector2 force = crowdingStrength * pushStrength * separationDirection;
 
             return Vector2.ClampMagnitude(force, pushStrength);
         }
@@ -520,21 +519,6 @@ namespace FF
             return Mathf.Max(0, scaled);
         }
 
-        private void StartDogJumpAnimation()
-        {
-            if (!enemyVisual)
-            {
-                return;
-            }
-
-            if (_dogJumpRoutine != null)
-            {
-                StopCoroutine(_dogJumpRoutine);
-            }
-
-            _dogJumpRoutine = StartCoroutine(DogJumpRoutine());
-        }
-
         private IEnumerator DogJumpRoutine()
         {
             float duration = Mathf.Max(0.05f, dogLeapDuration);
@@ -551,22 +535,6 @@ namespace FF
 
             _dogAttackOffset = Vector3.zero;
             _dogJumpRoutine = null;
-        }
-
-        private void PlayDogAttackSound()
-        {
-            if (!dogAttackSound)
-            {
-                return;
-            }
-
-            if (_audioSource)
-            {
-                _audioSource.PlayOneShot(dogAttackSound);
-                return;
-            }
-
-            AudioSource.PlayClipAtPoint(dogAttackSound, transform.position);
         }
 
         private void AimAtPlayer()
@@ -667,6 +635,21 @@ namespace FF
                 Mathf.Infinity,
                 Time.deltaTime
             );
+        }
+
+        private void StartDogJumpAnimation()
+        {
+            if (!enemyVisual)
+            {
+                return;
+            }
+
+            if (_dogJumpRoutine != null)
+            {
+                StopCoroutine(_dogJumpRoutine);
+            }
+
+            _dogJumpRoutine = StartCoroutine(DogJumpRoutine());
         }
         #endregion Animations
 
@@ -792,6 +775,7 @@ namespace FF
             dogLeapDuration = Mathf.Max(0f, dogLeapDuration);
         }
 
+        #region Audio
         private AudioClip GetRandomClip(AudioClip[] clips)
         {
             if (clips == null || clips.Length == 0) return null;
@@ -839,6 +823,22 @@ namespace FF
             Destroy(audioObject, clip.length / Mathf.Max(tempSource.pitch, 0.01f));
         }
 
+        private void PlayDogAttackSound()
+        {
+            if (!dogAttackSound)
+            {
+                return;
+            }
+
+            if (_audioSource)
+            {
+                _audioSource.PlayOneShot(dogAttackSound);
+                return;
+            }
+
+            AudioSource.PlayClipAtPoint(dogAttackSound, transform.position);
+        }
+        #endregion Audio
 
         private void SpawnDeathFx()
         {

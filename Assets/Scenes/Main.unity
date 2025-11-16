@@ -574,130 +574,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7e66d14a923b5647a74ad45d1ae9101, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawner
-  enemyPrefabs:
-  - {fileID: 8500711371696030824, guid: 4e21cabceb3548147a5a4182e8715b88, type: 3}
-  - {fileID: 7386967301448027551, guid: 3d5045b0b6d64fb45bdb17def63bb84a, type: 3}
-  - {fileID: 6954183349728851308, guid: 973105a2c0733364a87c67780b357682, type: 3}
-  bossPrefabs: []
-  dogPrefabs:
-  - {fileID: 3282402498340923105, guid: 943a250ae05bb894eb865c90f38fa653, type: 3}
   player: {fileID: 1207903152}
   spawnRadius: 24
   spawnBuffer: 2
   maxSpawnAttempts: 8
   spawnCamera: {fileID: 1147590089}
-  countByWave:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 1
-      value: 3
-      inSlope: 1.25
-      outSlope: 1.25
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 5
-      value: 8
-      inSlope: 1.8392857
-      outSlope: 1.8392857
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 12
-      value: 25
-      inSlope: 3.1373625
-      outSlope: 3.1373625
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 25
-      value: 75
-      inSlope: 3.8461537
-      outSlope: 3.8461537
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
   bossWaveInterval: 5
-  bossCountByWave:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 5
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 10
-      value: 2
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 15
-      value: 3
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 22
-      value: 4
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 30
-      value: 5
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spawnRegularsDuringBossWave: 1
-  maxUniqueRegularPrefabs: 0
-  maxUniqueBossPrefabs: 0
-  maxUniqueDogPrefabs: 0
-  dogSpawnCountRange: {x: 1, y: 3}
-  dogWaveStart: 1
-  dogWaveInterval: 1
-  dogSpawnChance: 1
-  regularScaling:
+  spawnNonBossDefinitionsDuringBossWave: 1
+  defaultScaling:
     healthMultiplierByWave:
       serializedVersion: 2
       m_Curve:
@@ -705,15 +589,33 @@ MonoBehaviour:
         time: 1
         value: 1
         inSlope: 0
-        outSlope: 0.15789473
+        outSlope: 0
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
       - serializedVersion: 3
-        time: 20
-        value: 4
+        time: 10
+        value: 2
         inSlope: 0.15789473
+        outSlope: 0.15789473
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 20
+        value: 3
+        inSlope: 0.19231495
+        outSlope: 0.19231495
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 30
+        value: 4
+        inSlope: 0
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
@@ -729,6 +631,15 @@ MonoBehaviour:
         time: 1
         value: 1
         inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 10
+        value: 1.2
+        inSlope: 0.031578947
         outSlope: 0.031578947
         tangentMode: 0
         weightedMode: 0
@@ -736,8 +647,17 @@ MonoBehaviour:
         outWeight: 0
       - serializedVersion: 3
         time: 20
+        value: 1.4
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 30
         value: 1.6
-        inSlope: 0.031578947
+        inSlope: 0
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
@@ -751,8 +671,17 @@ MonoBehaviour:
       m_Curve:
       - serializedVersion: 3
         time: 1
-        value: 1
+        value: 0.8
         inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 10
+        value: 1.1
+        inSlope: 0.02631579
         outSlope: 0.02631579
         tangentMode: 0
         weightedMode: 0
@@ -760,8 +689,17 @@ MonoBehaviour:
         outWeight: 0
       - serializedVersion: 3
         time: 20
-        value: 1.5
-        inSlope: 0.02631579
+        value: 1.4
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 30
+        value: 1.7
+        inSlope: 0
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
@@ -775,8 +713,17 @@ MonoBehaviour:
       m_Curve:
       - serializedVersion: 3
         time: 1
-        value: 1
+        value: 0.25
         inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 10
+        value: 0.4
+        inSlope: 0.06315789
         outSlope: 0.06315789
         tangentMode: 0
         weightedMode: 0
@@ -784,8 +731,17 @@ MonoBehaviour:
         outWeight: 0
       - serializedVersion: 3
         time: 20
-        value: 2.2
-        inSlope: 0.06315789
+        value: 0.6
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 30
+        value: 0.8
+        inSlope: 0
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
@@ -801,104 +757,16 @@ MonoBehaviour:
         time: 1
         value: 1
         inSlope: 0
-        outSlope: 0.078947365
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 2.5
-        inSlope: 0.078947365
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-  bossScaling:
-    healthMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
       - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0.15789473
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 4
-        inSlope: 0.15789473
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    moveSpeedMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0.031578947
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
+        time: 10
         value: 1.6
-        inSlope: 0.031578947
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    fireRateMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0.02631579
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 1.5
-        inSlope: 0.02631579
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    damageMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0.06315789
+        inSlope: 0.078947365
+        outSlope: 0.078947365
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
@@ -906,56 +774,16 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 20
         value: 2.2
-        inSlope: 0.06315789
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    xpMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 1
-        value: 1
         inSlope: 0
-        outSlope: 0.078947365
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 2.5
-        inSlope: 0.078947365
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
         inWeight: 0
         outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-  dogScaling:
-    healthMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
       - serializedVersion: 3
-        time: 1
-        value: 1
+        time: 30
+        value: 3
         inSlope: 0
-        outSlope: 0.15789473
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 4
-        inSlope: 0.15789473
         outSlope: 0
         tangentMode: 0
         weightedMode: 0
@@ -964,104 +792,11 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    moveSpeedMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0.031578947
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 1.6
-        inSlope: 0.031578947
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    fireRateMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0.02631579
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 1.5
-        inSlope: 0.02631579
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    damageMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0.06315789
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 2.2
-        inSlope: 0.06315789
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
-    xpMultiplierByWave:
-      serializedVersion: 2
-      m_Curve:
-      - serializedVersion: 3
-        time: 1
-        value: 1
-        inSlope: 0
-        outSlope: 0.078947365
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      - serializedVersion: 3
-        time: 20
-        value: 2.5
-        inSlope: 0.078947365
-        outSlope: 0
-        tangentMode: 0
-        weightedMode: 0
-        inWeight: 0
-        outWeight: 0
-      m_PreInfinity: 2
-      m_PostInfinity: 2
-      m_RotationOrder: 4
+  spawnDefinitions:
+  - {fileID: 11400000, guid: 4174eb15d6631e248a2c394c3b45ff15, type: 2}
+  - {fileID: 11400000, guid: 76838362ef8b6be45ba745a92506de76, type: 2}
   audioSource: {fileID: 322110425}
-  dogSpawnClip: {fileID: 8300000, guid: b9f5e84a6174dfc47a27702105cac7ed, type: 3}
+  fallbackSpawnClip: {fileID: 0}
 --- !u!4 &322110424
 Transform:
   m_ObjectHideFlags: 0
@@ -3025,7 +2760,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &1207903160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4857,7 +4592,6 @@ GameObject:
   - component: {fileID: 1885342133}
   - component: {fileID: 1885342132}
   - component: {fileID: 1885342134}
-  - component: {fileID: 1885342135}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -4877,7 +4611,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b949374cced92845ad478938eea683d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.GameManager
-  <Wave>k__BackingField: 0
   spawner: {fileID: 322110423}
   initialTimeBetweenWaves: 8
   waveIntervalIncrease: 2
@@ -4916,19 +4649,6 @@ MonoBehaviour:
   stats: {fileID: 1207903155}
   wallet: {fileID: 1207903163}
   ui: {fileID: 1333906377}
---- !u!114 &1885342135
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1885342131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a1a5361f327b844d986c56ecd3126ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FF.PooledParticleSystem
-  includeChildren: 1
 --- !u!1001 &1910549644
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -5,6 +5,7 @@ namespace FF
 {
     public class Health : MonoBehaviour
     {
+        [Header("Health Settings")]
         [SerializeField] int maxHP = 50;
 
         int hp;
@@ -33,22 +34,21 @@ namespace FF
             int damageApplied = Mathf.Min(amount, previousHp);
             if (damageApplied > 0)
             {
-                var damagedHandler = OnDamaged;
-                if (damagedHandler != null)
-                {
-                    damagedHandler(damageApplied);
-                }
+                OnDamaged?.Invoke(damageApplied);
             }
 
-            var healthChanged = OnHealthChanged;
-            if (healthChanged != null)
-            {
-                healthChanged(hp, maxHP);
-            }
+            OnHealthChanged?.Invoke(hp, maxHP);
 
             if (hp <= 0) Die();
         }
 
+        private void Die()
+        {
+            OnDeath?.Invoke();
+            Destroy(gameObject);
+        }
+
+        #region Max HP Management
         public void SetMaxHP(int amount, bool refill = true)
         {
             amount = Mathf.Max(1, amount);
@@ -61,12 +61,7 @@ namespace FF
             {
                 hp = Mathf.Clamp(hp, 0, maxHP);
             }
-
-            var healthChanged = OnHealthChanged;
-            if (healthChanged != null)
-            {
-                healthChanged(hp, maxHP);
-            }
+            OnHealthChanged?.Invoke(hp, maxHP);
         }
 
         public void ScaleMaxHP(float multiplier, bool refill = true)
@@ -84,16 +79,18 @@ namespace FF
             int scaled = Mathf.Max(1, Mathf.RoundToInt(baseMaxHP * multiplier));
             SetMaxHP(scaled, refill);
         }
+        #endregion Max HP Management
+
+        #region Resetting
+        void CacheBaseValues()
+        {
+            baseMaxHP = Mathf.Max(1, maxHP);
+        }
 
         public void ResetToBase()
         {
             CacheBaseValues();
             SetMaxHP(baseMaxHP, true);
-        }
-
-        void CacheBaseValues()
-        {
-            baseMaxHP = Mathf.Max(1, maxHP);
         }
 
         void ResetHealth(bool refill)
@@ -111,23 +108,9 @@ namespace FF
             {
                 hp = Mathf.Clamp(hp, 0, baseMaxHP);
             }
-
-            var healthChanged = OnHealthChanged;
-            if (healthChanged != null)
-            {
-                healthChanged(hp, baseMaxHP);
-            }
+            OnHealthChanged?.Invoke(hp, baseMaxHP);
         }
-
-        private void Die()
-        {
-            var deathHandler = OnDeath;
-            if (deathHandler != null)
-            {
-                deathHandler();
-            }
-            Destroy(gameObject);
-        }
+        #endregion Resetting
 
         void OnValidate()
         {

@@ -5,6 +5,7 @@ namespace FF
     [AddComponentMenu("FF/Enemies/Movement/Charger Movement")]
     public class ChargerMovement : MonoBehaviour, IEnemyMovement
     {
+        [Header("Charger Settings")]
         [SerializeField, Min(0.1f)] private float windupDuration = 1.5f;
         [SerializeField, Min(0.1f)] private float chargeDuration = 0.8f;
         [SerializeField, Min(0.1f)] private float chargeSpeedMultiplier = 2.5f;
@@ -33,7 +34,7 @@ namespace FF
             switch (_state)
             {
                 case State.Charging:
-                    return _chargeDirection * baseSpeed * chargeSpeedMultiplier;
+                    return baseSpeed * chargeSpeedMultiplier * _chargeDirection;
                 case State.Cooldown:
                     return Vector2.zero;
                 default:

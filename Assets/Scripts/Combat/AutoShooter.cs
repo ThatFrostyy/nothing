@@ -17,8 +17,8 @@ namespace FF
         private bool _isFireHeld;
         private bool _isFirePressed;
 
+        [Header("Camera Shake")]
         [SerializeField] private bool _cameraShakeEnabled = true;
-
         private float sustainedFireTime;
         [SerializeField] float maxSustainedShake = 0.35f;
 
@@ -246,8 +246,9 @@ namespace FF
 
             _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, Time.deltaTime * _weapon.recoilRecoverySpeed);
         }
-#endregion Recoil & Shooting
+        #endregion Recoil & Shooting
 
+        #region Cooldown
         private void SetCooldownProgress(float value)
         {
             value = Mathf.Clamp01(value);
@@ -263,11 +264,8 @@ namespace FF
 
         void NotifyCooldownChanged()
         {
-            var handler = OnCooldownChanged;
-            if (handler != null)
-            {
-                handler(_currentCooldownProgress);
-            }
+            OnCooldownChanged?.Invoke(_currentCooldownProgress);
         }
+        #endregion Cooldown
     }
 }

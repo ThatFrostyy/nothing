@@ -6,6 +6,7 @@ namespace FF
     [CreateAssetMenu(menuName = "FF/Weapon", fileName = "Weapon_")]
     public class Weapon : ScriptableObject
     {
+        [Header("Name")]
         public string weaponName;
 
         [Header("Audio & Visual")]

@@ -9,15 +9,19 @@ namespace FF
     {
         private const float DistanceEpsilon = 0.0001f;
 
+        [Header("Orb Settings")]
         [SerializeField, Min(1)] private int value = 1;
         [SerializeField, Min(0f)] private float attractionRadius = 4f;
         [SerializeField, Min(0f)] private float moveSpeed = 10f;
         [SerializeField, Min(0f)] private float acceleration = 18f;
+
+        [Header("Audio & Visual")]
         [SerializeField] private AudioClip pickupSound;
         [SerializeField] private AudioSource pickupAudioSource;
-        [SerializeField] private Vector2 pulseScaleRange = new Vector2(0.9f, 1.1f);
+        [SerializeField] private Vector2 pulseScaleRange = new(0.9f, 1.1f);
         [SerializeField, Min(0f)] private float pulseSpeed = 4f;
         [SerializeField] private bool randomizePulseOffset = true;
+
         [Header("Lifetime")]
         [SerializeField, Min(0f)] private float lifetime = 20f;
         [SerializeField, Min(0f)] private float lifetimeVariance = 0f;

@@ -9,27 +9,37 @@ namespace FF
     {
         public static GameManager I;
 
-        [field: SerializeField] public int Wave { get; private set; } = 0;
-        public int KillCount { get; private set; } = 0;
         public float CurrentWaveInterval => currentWaveInterval;
-        [SerializeField] EnemySpawner spawner;
+
+        [SerializeField] private EnemySpawner spawner;
         [FormerlySerializedAs("timeBetweenWaves")]
-        [SerializeField, Min(0f)] float initialTimeBetweenWaves = 30f;
-        [SerializeField, Min(0f)] float waveIntervalIncrease = 5f;
-        [SerializeField, Min(0f)] float maximumTimeBetweenWaves = 60f;
+        [SerializeField, Min(0f)] private float initialTimeBetweenWaves = 30f;
+        [SerializeField, Min(0f)] private float waveIntervalIncrease = 5f;
+        [SerializeField, Min(0f)] private float maximumTimeBetweenWaves = 60f;
 
         float timer;
         float currentWaveInterval;
+
+        public int Wave { get; private set; } = 0;
+        public int KillCount { get; private set; } = 0;
 
         public event Action<int> OnKillCountChanged;
         public event Action<int> OnWaveStarted;
 
         void Awake()
         {
-            if (I != null) { Destroy(gameObject); return; }
+            if (I != null)
+            {
+                Destroy(gameObject); 
+                return;
+            }
+
             I = this;
-            Application.targetFrameRate = 120;
+
+            Application.targetFrameRate = 144;
+
             KillCount = 0;
+
             float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
             currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
         }
@@ -53,11 +63,9 @@ namespace FF
             {
                 timer = 0f;
                 Wave++;
-                var waveHandler = OnWaveStarted;
-                if (waveHandler != null)
-                {
-                    waveHandler(Wave);
-                }
+
+                OnWaveStarted?.Invoke(Wave);
+
                 if (spawner)
                 {
                     spawner.SpawnWave(Wave);
@@ -70,11 +78,7 @@ namespace FF
         void HandleEnemyKilled(Enemy enemy)
         {
             KillCount++;
-            var killHandler = OnKillCountChanged;
-            if (killHandler != null)
-            {
-                killHandler(KillCount);
-            }
+            OnKillCountChanged?.Invoke(KillCount);
         }
 
         void AdvanceWaveInterval()

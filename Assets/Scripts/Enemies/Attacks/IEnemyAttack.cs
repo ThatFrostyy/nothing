@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace FF
 {
     public interface IEnemyAttack

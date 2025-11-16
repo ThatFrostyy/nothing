@@ -80,22 +80,14 @@ namespace FF
 
                 if (raiseEvents)
                 {
-                    var levelUpHandler = OnLevelUp;
-                    if (levelUpHandler != null)
-                    {
-                        levelUpHandler(Level);
-                    }
+                    OnLevelUp?.Invoke(Level);
                 }
             }
         }
 
         void NotifyXPChanged()
         {
-            var xpChangedHandler = OnXPChanged;
-            if (xpChangedHandler != null)
-            {
-                xpChangedHandler(Level, XP, Next);
-            }
+            OnXPChanged?.Invoke(Level, XP, Next);
         }
 
         void OnValidate()

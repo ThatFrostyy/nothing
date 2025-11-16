@@ -5,6 +5,7 @@ namespace FF
 {
     public class CameraFollow2D : MonoBehaviour
     {
+        [Header("Camera Follow Settings")]
         [SerializeField] Transform target;
         [SerializeField] Camera cam;
         [SerializeField, Range(0f, 20f)] float followSpeed = 10f;

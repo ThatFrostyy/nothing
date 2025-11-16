@@ -16,8 +16,8 @@ namespace FF
         [Header("Waves")]
         [SerializeField, Min(1)] private int bossWaveInterval = 5;
         [SerializeField] private bool spawnNonBossDefinitionsDuringBossWave = true;
-        [SerializeField] private WaveAttributeScaling defaultScaling = new WaveAttributeScaling();
-        [SerializeField] private List<EnemySpawnDefinition> spawnDefinitions = new List<EnemySpawnDefinition>();
+        [SerializeField] private WaveAttributeScaling defaultScaling = new();
+        [SerializeField] private List<EnemySpawnDefinition> spawnDefinitions = new();
 
         [Header("Audio")]
         [SerializeField] private AudioSource audioSource;
@@ -47,7 +47,7 @@ namespace FF
             for (int i = 0; i < spawnDefinitions.Count; i++)
             {
                 EnemySpawnDefinition definition = spawnDefinitions[i];
-                if (!definition || !definition.Prefab)
+                if (definition == null || definition.Prefabs == null || definition.Prefabs.Length == 0)
                 {
                     continue;
                 }
@@ -120,11 +120,6 @@ namespace FF
                 return 0;
             }
 
-            if (!definition.Prefab)
-            {
-                return 0;
-            }
-
             int spawned = 0;
             if (definition.SpawnInPacks)
             {
@@ -139,7 +134,7 @@ namespace FF
                 {
                     Vector2 offset = Random.insideUnitCircle * definition.PackRadius;
                     Vector2 spawnPosition = anchor + offset;
-                    if (SpawnEnemy(definition.Prefab, spawnPosition, modifiers))
+                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers))
                     {
                         spawned++;
                     }
@@ -150,9 +145,9 @@ namespace FF
                 for (int i = 0; i < count; i++)
                 {
                     float angle = Random.value * Mathf.PI * 2f;
-                    Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    Vector2 direction = new(Mathf.Cos(angle), Mathf.Sin(angle));
                     Vector2 spawnPosition = FindSpawnPosition(direction, radius);
-                    if (SpawnEnemy(definition.Prefab, spawnPosition, modifiers))
+                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers))
                     {
                         spawned++;
                     }
@@ -160,6 +155,15 @@ namespace FF
             }
 
             return spawned;
+        }
+
+        private GameObject ChooseRandomPrefab(EnemySpawnDefinition def)
+        {
+            if (def.Prefabs == null || def.Prefabs.Length == 0)
+                return null;
+
+            int index = Random.Range(0, def.Prefabs.Length);
+            return def.Prefabs[index];
         }
 
         private bool SpawnEnemy(GameObject prefab, Vector2 position, EnemyWaveModifiers modifiers)
@@ -261,6 +265,7 @@ namespace FF
             EnsureAudioSource();
         }
 
+        #region Audio
         private void EnsureAudioSource()
         {
             if (audioSource)
@@ -289,5 +294,6 @@ namespace FF
 
             audioSource.PlayOneShot(finalClip);
         }
+        #endregion Audio
     }
 }

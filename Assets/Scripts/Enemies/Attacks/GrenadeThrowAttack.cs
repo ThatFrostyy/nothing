@@ -5,7 +5,10 @@ namespace FF
     [AddComponentMenu("FF/Enemies/Attacks/Grenade Throw Attack")]
     public class GrenadeThrowAttack : MonoBehaviour, IEnemyAttack
     {
+        [Header("Grenade Settings")]
         [SerializeField] private GameObject grenadePrefab;
+
+        [Header("Throw Settings")]
         [SerializeField, Min(0.1f)] private float cooldown = 3f;
         [SerializeField, Min(0.1f)] private float throwForce = 10f;
         [SerializeField, Min(0f)] private float arcHeight = 1.5f;

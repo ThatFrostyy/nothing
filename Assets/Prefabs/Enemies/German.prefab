@@ -255,7 +255,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &5705564791498569716
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -293,7 +293,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98d3a625de20a5a4e964bb3d8eb1c036, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Health
-  maxHP: 30
+  maxHP: 25
 --- !u!114 &6719414553482591076
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -306,7 +306,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f67e22903008e4e8c6c8f3c6ec685b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
-  startingWeapon: {fileID: 11400000, guid: 59004b20c34904b499fe859f8e5fc176, type: 2}
+  startingWeapon: {fileID: 11400000, guid: 93a8e85db9419b74b82edb2b6d3797bb, type: 2}
   weaponManager: {fileID: 5985841820440995128}
   autoShooter: {fileID: 3905552623909107986}
   gunPivot: {fileID: 3650370905618874034}
@@ -315,7 +315,7 @@ MonoBehaviour:
   walkBobAmplitude: 0.12
   walkSquashAmount: 0.08
   idleSwayFrequency: 1.5
-  idleSwayAmplitude: 5
+  idleSwayAmplitude: 6
   audioSource: {fileID: 4092019642368032325}
   hitSound:
   - {fileID: 8300000, guid: e375acb7908dc354b88d454e6f37f804, type: 3}
@@ -324,6 +324,13 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 4675a14c0671bb240bbeb34ee7869d26, type: 3}
   - {fileID: 8300000, guid: ab9a9327dff658549ace2a131d4347e3, type: 3}
   deathFX: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
+  isDog: 0
+  dogAttackRange: 1.25
+  dogAttackCooldown: 1.1
+  dogAttackDamage: 8
+  dogLeapHeight: 0.4
+  dogLeapDuration: 0.3
+  dogAttackSound: {fileID: 0}
   xpOrbPrefab: {fileID: 5860978669140793186, guid: 6a3eb14e9abcb124ca084a235e022790, type: 3}
   xpOrbValue: 1
   xpOrbCount: 3

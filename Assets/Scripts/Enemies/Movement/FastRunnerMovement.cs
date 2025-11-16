@@ -5,6 +5,7 @@ namespace FF
     [AddComponentMenu("FF/Enemies/Movement/Fast Runner Movement")]
     public class FastRunnerMovement : MonoBehaviour, IEnemyMovement
     {
+        [Header("Fast Runner Settings")]
         [SerializeField, Min(0.1f)] private float speedMultiplier = 1.4f;
         [SerializeField, Min(0f)] private float minimumChaseDistance = 0f;
 
@@ -23,7 +24,7 @@ namespace FF
             }
 
             Vector2 direction = toPlayer.sqrMagnitude > Mathf.Epsilon ? toPlayer.normalized : Vector2.zero;
-            return direction * baseSpeed * speedMultiplier;
+            return baseSpeed * speedMultiplier * direction;
         }
     }
 }

@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Ground : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private Collider2D _boundsCollider;
 

@@ -64,7 +64,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &3085546745859592996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79,7 +79,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemyStats
   moveSpeed: 7
   acceleration: 0.2
-  retreatSpeedMultiplier: 0.6
+  retreatSpeedMultiplier: 0.7
   bodyTiltDegrees: 10
   shootingDistance: 6
   distanceBuffer: 1.5
@@ -115,7 +115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f67e22903008e4e8c6c8f3c6ec685b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
-  startingWeapon: {fileID: 11400000, guid: 59004b20c34904b499fe859f8e5fc176, type: 2}
+  startingWeapon: {fileID: 0}
   weaponManager: {fileID: 0}
   autoShooter: {fileID: 0}
   gunPivot: {fileID: 0}
@@ -142,7 +142,7 @@ MonoBehaviour:
   dogAttackSound: {fileID: 8300000, guid: 75f8c44e53e509147a559e6d7cbbbc8f, type: 3}
   xpOrbPrefab: {fileID: 5860978669140793186, guid: 6a3eb14e9abcb124ca084a235e022790, type: 3}
   xpOrbValue: 2
-  xpOrbCount: 5
+  xpOrbCount: 3
   xpOrbSpreadRadius: 1
   avoidanceLayers:
     serializedVersion: 2

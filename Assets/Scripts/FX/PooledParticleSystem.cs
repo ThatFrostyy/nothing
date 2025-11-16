@@ -5,6 +5,7 @@ namespace FF
     [DisallowMultipleComponent]
     public sealed class PooledParticleSystem : MonoBehaviour, IPoolable
     {
+        [Header("Settings")]
         [SerializeField] private bool includeChildren = true;
 
         private ParticleSystem[] _particleSystems;
