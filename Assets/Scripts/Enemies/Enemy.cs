@@ -27,12 +27,14 @@ namespace FF
 
         [Header("Audio & FX")]
         [SerializeField] private AudioSource audioSource;
-        [SerializeField] private AudioClip []hitSound;
-        [SerializeField] private AudioClip []deathSound;
+        [SerializeField] private AudioClip[] hitSound;
+        [SerializeField] private AudioClip[] deathSound;
         [SerializeField] private GameObject deathFX;
 
-        [Header("Dog Behaviour")]
+        [Header("Behaviour Flags")]
         [SerializeField] private bool isDog;
+        [Space]
+        [Header("Dog Behaviour")]
         [SerializeField, Min(0f)] private float dogAttackRange = 1.25f;
         [SerializeField, Min(0f)] private float dogAttackCooldown = 1.1f;
         [SerializeField, Min(0)] private int dogAttackDamage = 8;
@@ -58,6 +60,8 @@ namespace FF
         private Transform _player;
         private Health _playerHealth;
         private Vector2 _desiredVelocity;
+        private IEnemyMovement _movementBehaviour;
+        private IEnemyAttack _attackBehaviour;
         private Vector2 _smoothedSeparation;
         private Vector3 _baseVisualLocalPosition;
         private Vector3 _baseVisualLocalScale = Vector3.one;
@@ -200,6 +204,9 @@ namespace FF
             };
             _avoidanceFilter.SetLayerMask(avoidanceLayers);
 
+            _movementBehaviour = GetComponent<IEnemyMovement>();
+            _attackBehaviour = GetComponent<IEnemyAttack>();
+
             EnsurePlayerReference();
         }
 
@@ -216,9 +223,14 @@ namespace FF
         {
             EnsurePlayerReference();
             AimAtPlayer();
-            if (isDog)
+            float deltaTime = Time.deltaTime;
+            if (_attackBehaviour != null)
             {
-                UpdateDogBehaviour(Time.deltaTime);
+                _attackBehaviour.TickAttack(this, _player, _stats, autoShooter, deltaTime);
+            }
+            else if (isDog)
+            {
+                UpdateDogBehaviour(deltaTime);
             }
             else
             {
@@ -270,15 +282,48 @@ namespace FF
         #region Movement
         private void UpdateMovement()
         {
-            if (isDog)
+            if (isDog && _movementBehaviour == null)
             {
                 UpdateDogMovement();
                 return;
             }
-
-            Vector2 targetVelocity = Vector2.zero;
             float moveSpeed = _stats ? _stats.MoveSpeed : 3f;
             float retreatMultiplier = _stats ? _stats.RetreatSpeedMultiplier : 0.6f;
+            bool clampToStats = _movementBehaviour == null;
+            Vector2 targetVelocity = _movementBehaviour != null
+                ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, _rigidbody, Time.fixedDeltaTime)
+                : CalculateDefaultDesiredVelocity(moveSpeed, retreatMultiplier);
+
+            ApplyDesiredVelocity(targetVelocity, moveSpeed, clampToStats);
+        }
+
+        private void UpdateDogMovement()
+        {
+            Vector2 targetVelocity = Vector2.zero;
+            float moveSpeed = _stats ? _stats.MoveSpeed : 3f;
+
+            if (_player)
+            {
+                Vector2 toPlayer = _player.position - transform.position;
+                float distance = toPlayer.magnitude;
+                if (distance > 0.001f)
+                {
+                    Vector2 direction = toPlayer / distance;
+                    targetVelocity = direction * moveSpeed;
+                    _isFacingLeft = direction.x < 0f;
+                }
+            }
+
+            targetVelocity = ApplySeparationAndClamp(targetVelocity, moveSpeed, true);
+            _desiredVelocity = targetVelocity;
+
+            float acceleration = _stats ? _stats.Acceleration : 0.2f;
+            _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
+        }
+
+        private Vector2 CalculateDefaultDesiredVelocity(float moveSpeed, float retreatMultiplier)
+        {
+            Vector2 targetVelocity = Vector2.zero;
 
             if (_player)
             {
@@ -299,22 +344,12 @@ namespace FF
                 }
             }
 
-            if (_stats)
-            {
-                Vector2 separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);
-                float responsiveness = _stats.AvoidanceResponsiveness;
-                _smoothedSeparation = responsiveness > 0f
-                    ? Vector2.Lerp(_smoothedSeparation, separationForce, responsiveness)
-                    : separationForce;
+            return targetVelocity;
+        }
 
-                targetVelocity += _smoothedSeparation * _stats.AvoidanceWeight;
-            }
-            else
-            {
-                _smoothedSeparation = Vector2.zero;
-            }
-
-            targetVelocity = Vector2.ClampMagnitude(targetVelocity, moveSpeed);
+        private void ApplyDesiredVelocity(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
+        {
+            targetVelocity = ApplySeparationAndClamp(targetVelocity, moveSpeed, clampToStats);
             _desiredVelocity = targetVelocity;
 
             float acceleration = _stats ? _stats.Acceleration : 0.2f;
@@ -325,23 +360,8 @@ namespace FF
             );
         }
 
-        private void UpdateDogMovement()
+        private Vector2 ApplySeparationAndClamp(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
         {
-            Vector2 targetVelocity = Vector2.zero;
-            float moveSpeed = _stats ? _stats.MoveSpeed : 3f;
-
-            if (_player)
-            {
-                Vector2 toPlayer = _player.position - transform.position;
-                float distance = toPlayer.magnitude;
-                if (distance > 0.001f)
-                {
-                    Vector2 direction = toPlayer / distance;
-                    targetVelocity = direction * moveSpeed;
-                    _isFacingLeft = direction.x < 0f;
-                }
-            }
-
             if (_stats)
             {
                 Vector2 separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);
@@ -357,11 +377,7 @@ namespace FF
                 _smoothedSeparation = Vector2.zero;
             }
 
-            targetVelocity = Vector2.ClampMagnitude(targetVelocity, moveSpeed);
-            _desiredVelocity = targetVelocity;
-
-            float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
+            return clampToStats ? Vector2.ClampMagnitude(targetVelocity, moveSpeed) : targetVelocity;
         }
 
         private Vector2 CalculateSeparationForce(float radius, float pushStrength)
