@@ -8,7 +8,6 @@ namespace FF
         [Header("References")]
         [SerializeField] private Health health;
         [SerializeField] private XPWallet wallet;
-        [SerializeField] private AudioSource audioSource;
 
         [Header("Hit Feedback")]
         [SerializeField] private AudioClip hitSound;
@@ -31,10 +30,6 @@ namespace FF
                 wallet = GetComponent<XPWallet>();
             }
 
-            if (!audioSource)
-            {
-                audioSource = GetComponent<AudioSource>();
-            }
         }
 
         void OnEnable()
@@ -75,7 +70,7 @@ namespace FF
                 CameraShake.Shake(hitShakeDuration, hitShakeIntensity);
             }
 
-            audioSource.PlayOneShot(hitSound);
+            SoundManager.PlaySfx(hitSound);
         }
 
         void HandleLevelUp(int level)
@@ -92,7 +87,7 @@ namespace FF
                 }
             }
 
-            audioSource.PlayOneShot(levelUpSound);
+            SoundManager.PlaySfx(levelUpSound);
         }
     }
 }

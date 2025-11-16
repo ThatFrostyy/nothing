@@ -26,7 +26,6 @@ namespace FF
         [SerializeField] private float idleSwayAmplitude = 3f;
 
         [Header("Audio & FX")]
-        [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip[] hitSound;
         [SerializeField] private AudioClip[] deathSound;
         [SerializeField] private GameObject deathFX;
@@ -69,7 +68,6 @@ namespace FF
         private bool _isFacingLeft;
         private Collider2D[] _avoidanceResults;
         private ContactFilter2D _avoidanceFilter;
-        private AudioSource _audioSource;
         private const int AvoidanceBufferCeiling = 256;
         private int lastIndex = -1;
         private Vector3 _visualPositionVelocity;
@@ -118,19 +116,6 @@ namespace FF
             _health = GetComponent<Health>();
 
             _baseXpOrbValue = Mathf.Max(1, xpOrbValue);
-
-            _audioSource = audioSource ? audioSource : GetComponent<AudioSource>();
-            if (!_audioSource)
-            {
-                _audioSource = gameObject.AddComponent<AudioSource>();
-            }
-
-            if (_audioSource)
-            {
-                _audioSource.playOnAwake = false;
-                _audioSource.loop = false;
-                _audioSource.spatialBlend = 0f;
-            }
 
             if (!weaponManager)
             {
@@ -790,13 +775,8 @@ namespace FF
 
         private void PlayHitSound()
         {
-            if (!_audioSource) return;
-
             AudioClip clip = GetRandomClip(hitSound);
-            if (clip)
-            {
-                _audioSource.PlayOneShot(clip);
-            }
+            SoundManager.PlaySfx(clip);
         }
 
         private void PlayDeathSound()
@@ -804,23 +784,7 @@ namespace FF
             AudioClip clip = GetRandomClip(deathSound);
             if (!clip) return;
 
-            float volume = _audioSource ? _audioSource.volume : 1f;
-            float pitch = _audioSource ? _audioSource.pitch : 1f;
-            float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
-            var mixerGroup = _audioSource ? _audioSource.outputAudioMixerGroup : null;
-
-            GameObject audioObject = new("EnemyDeathSound");
-            audioObject.transform.position = transform.position;
-
-            var tempSource = audioObject.AddComponent<AudioSource>();
-            tempSource.clip = clip;
-            tempSource.volume = volume;
-            tempSource.pitch = pitch;
-            tempSource.spatialBlend = spatialBlend;
-            tempSource.outputAudioMixerGroup = mixerGroup;
-            tempSource.Play();
-
-            Destroy(audioObject, clip.length / Mathf.Max(tempSource.pitch, 0.01f));
+            SoundManager.PlaySfx(clip);
         }
 
         private void PlayDogAttackSound()
@@ -830,13 +794,7 @@ namespace FF
                 return;
             }
 
-            if (_audioSource)
-            {
-                _audioSource.PlayOneShot(dogAttackSound);
-                return;
-            }
-
-            AudioSource.PlayClipAtPoint(dogAttackSound, transform.position);
+            SoundManager.PlaySfx(dogAttackSound);
         }
         #endregion Audio
 

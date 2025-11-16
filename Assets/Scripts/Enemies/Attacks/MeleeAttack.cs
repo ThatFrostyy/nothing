@@ -16,12 +16,6 @@ namespace FF
         [SerializeField] private Transform visualRoot;
 
         private float _cooldownTimer;
-        private AudioSource _audioSource;
-
-        void Awake()
-        {
-            _audioSource = GetComponent<AudioSource>();
-        }
 
         public void TickAttack(Enemy enemy, Transform player, EnemyStats stats, AutoShooter shooter, float deltaTime)
         {
@@ -55,10 +49,7 @@ namespace FF
                 health.Damage(finalDamage);
             }
 
-            if (attackClip && _audioSource)
-            {
-                _audioSource.PlayOneShot(attackClip);
-            }
+            SoundManager.PlaySfx(attackClip);
 
             _cooldownTimer = cooldown;
             if (enemy.isActiveAndEnabled)

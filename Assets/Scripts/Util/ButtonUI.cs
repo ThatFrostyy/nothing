@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using FF;
 
 [RequireComponent(typeof(Button))]
 public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -26,12 +27,8 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private Outline _outline;
     private Color _targetOutlineColor;
     private float _originalRotationZ;
-    private AudioSource _audioSource;
     private Button _button;
     private Coroutine _resetScaleRoutine;
-
-    private static AudioSource s_SharedAudioSource;
-    private static GameObject s_SharedAudioHost;
 
     void Awake()
     {
@@ -39,20 +36,6 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         _targetScale = 1f;
 
         _originalRotationZ = transform.localEulerAngles.z;
-
-        _audioSource = GetComponent<AudioSource>();
-        if (!_audioSource)
-        {
-            _audioSource = gameObject.AddComponent<AudioSource>();
-        }
-
-        if (_audioSource)
-        {
-            _audioSource.playOnAwake = false;
-            _audioSource.loop = false;
-            _audioSource.spatialBlend = 0f;
-            _audioSource.ignoreListenerPause = true;
-        }
 
         float randomAngle = Random.Range(-maxRotationOffset, maxRotationOffset);
         transform.localRotation = Quaternion.Euler(0, 0, _originalRotationZ + randomAngle);
@@ -136,55 +119,10 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             return;
         }
 
-        AudioSource playbackSource = GetSharedAudioSource();
-        if (_audioSource)
-        {
-            playbackSource.outputAudioMixerGroup = _audioSource.outputAudioMixerGroup;
-            playbackSource.panStereo = _audioSource.panStereo;
-            playbackSource.reverbZoneMix = _audioSource.reverbZoneMix;
-        }
-        else
-        {
-            playbackSource.outputAudioMixerGroup = null;
-            playbackSource.panStereo = 0f;
-            playbackSource.reverbZoneMix = 1f;
-        }
-
         float minPitch = Mathf.Min(clickPitchRange.x, clickPitchRange.y);
         float maxPitch = Mathf.Max(clickPitchRange.x, clickPitchRange.y);
         float targetPitch = Mathf.Approximately(minPitch, maxPitch) ? minPitch : Random.Range(minPitch, maxPitch);
-        float previousPitch = playbackSource.pitch;
-        playbackSource.pitch = targetPitch;
-
         float volumeScale = Mathf.Clamp01(clickVolume);
-        playbackSource.PlayOneShot(clickSound, volumeScale);
-        playbackSource.pitch = previousPitch;
-    }
-
-    static AudioSource GetSharedAudioSource()
-    {
-        if (s_SharedAudioSource && s_SharedAudioHost)
-        {
-            return s_SharedAudioSource;
-        }
-
-        if (!s_SharedAudioHost)
-        {
-            s_SharedAudioHost = new GameObject("ButtonUI_AudioHost");
-            s_SharedAudioHost.hideFlags = HideFlags.HideAndDontSave;
-            Object.DontDestroyOnLoad(s_SharedAudioHost);
-        }
-
-        if (!s_SharedAudioSource)
-        {
-            s_SharedAudioSource = s_SharedAudioHost.AddComponent<AudioSource>();
-            s_SharedAudioSource.playOnAwake = false;
-            s_SharedAudioSource.loop = false;
-            s_SharedAudioSource.spatialBlend = 0f;
-            s_SharedAudioSource.ignoreListenerPause = true;
-            s_SharedAudioSource.hideFlags = HideFlags.HideAndDontSave;
-        }
-
-        return s_SharedAudioSource;
+        SoundManager.PlaySfx(clickSound, volumeScale, targetPitch);
     }
 }

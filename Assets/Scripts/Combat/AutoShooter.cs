@@ -10,7 +10,6 @@ namespace FF
         private Transform _muzzle;
         private Transform _ejectPos;
         private ICombatStats _stats;
-        private AudioSource _audioSource;
         private Rigidbody2D _playerBody;
 
         private float _fireTimer;
@@ -38,7 +37,6 @@ namespace FF
         private void Awake()
         {
             _stats = GetComponentInParent<ICombatStats>();
-            _audioSource = GetComponent<AudioSource>();
             _playerBody = GetComponentInParent<Rigidbody2D>();
         }
 
@@ -200,9 +198,9 @@ namespace FF
                 bullet.SetOwner(transform.root.tag);
             }
 
-            if (_weapon.fireSFX && _audioSource)
+            if (_weapon.fireSFX)
             {
-                _audioSource.PlayOneShot(_weapon.fireSFX);
+                SoundManager.PlaySfx(_weapon.fireSFX);
             }
 
             if (_weapon.muzzleFlash)

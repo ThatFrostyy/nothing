@@ -20,7 +20,6 @@ namespace FF
         [SerializeField] private List<EnemySpawnDefinition> spawnDefinitions = new();
 
         [Header("Audio")]
-        [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip fallbackSpawnClip;
 
         private void Awake()
@@ -30,7 +29,6 @@ namespace FF
                 spawnCamera = Camera.main;
             }
 
-            EnsureAudioSource();
         }
 
         public void SpawnWave(int wave)
@@ -40,7 +38,6 @@ namespace FF
                 return;
             }
 
-            EnsureAudioSource();
             bool isBossWave = bossWaveInterval > 0 && wave > 0 && wave % bossWaveInterval == 0;
             float radius = GetSpawnRadius();
 
@@ -262,37 +259,18 @@ namespace FF
             spawnBuffer = Mathf.Max(0f, spawnBuffer);
             maxSpawnAttempts = Mathf.Max(1, maxSpawnAttempts);
             bossWaveInterval = Mathf.Max(1, bossWaveInterval);
-            EnsureAudioSource();
         }
 
         #region Audio
-        private void EnsureAudioSource()
-        {
-            if (audioSource)
-            {
-                return;
-            }
-
-            audioSource = GetComponent<AudioSource>();
-            if (!audioSource)
-            {
-                audioSource = gameObject.AddComponent<AudioSource>();
-            }
-
-            audioSource.playOnAwake = false;
-            audioSource.loop = false;
-            audioSource.spatialBlend = 0f;
-        }
-
         private void PlaySpawnCue(AudioClip clip)
         {
             AudioClip finalClip = clip ? clip : fallbackSpawnClip;
-            if (!finalClip || !audioSource)
+            if (!finalClip)
             {
                 return;
             }
 
-            audioSource.PlayOneShot(finalClip);
+            SoundManager.PlaySfx(finalClip);
         }
         #endregion Audio
     }
