@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &5730462982848647284
+--- !u!1 &3140079311658644263
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,25 +8,25 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5766101820934448341}
-  - component: {fileID: 3275969523894094470}
-  - component: {fileID: 3184557726738430590}
-  - component: {fileID: 6714893403692221539}
-  - component: {fileID: 2139274892160190764}
+  - component: {fileID: 2177696300718328595}
+  - component: {fileID: 6175079704377587100}
+  - component: {fileID: 8402821923291490455}
+  - component: {fileID: 3386970526413415766}
+  - component: {fileID: 2380167602723371700}
   m_Layer: 0
-  m_Name: MoveSpeedBoostPickup
+  m_Name: DamagePickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5766101820934448341
+--- !u!4 &2177696300718328595
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5730462982848647284}
+  m_GameObject: {fileID: 3140079311658644263}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -35,13 +35,13 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &3275969523894094470
+--- !u!212 &6175079704377587100
 SpriteRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5730462982848647284}
+  m_GameObject: {fileID: 3140079311658644263}
   m_Enabled: 1
   m_CastShadows: 0
   m_ReceiveShadows: 0
@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingLayerID: 1329244529
   m_SortingLayer: 2
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: f31ce7eea1c14c94cab2e89c66cd6463, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 8446dff894364604089c28ff040ab391, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -93,13 +93,13 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!70 &3184557726738430590
+--- !u!70 &8402821923291490455
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5730462982848647284}
+  m_GameObject: {fileID: 3140079311658644263}
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
@@ -130,20 +130,20 @@ CapsuleCollider2D:
   m_Offset: {x: -0.016668558, y: 0.00416708}
   m_Size: {x: 0.8832836, y: 0.958292}
   m_Direction: 0
---- !u!114 &6714893403692221539
+--- !u!114 &3386970526413415766
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5730462982848647284}
+  m_GameObject: {fileID: 3140079311658644263}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 93c3286d6e2a483cbab4118ae4c0bba3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.UpgradePickup
   lifetimeSeconds: 60
-  indicatorRenderer: {fileID: 3275969523894094470}
+  indicatorRenderer: {fileID: 6175079704377587100}
   hoverAmplitude: 0.25
   hoverSpeed: 2
   rotationAmplitude: 5
@@ -155,14 +155,14 @@ MonoBehaviour:
   lightFadeDuration: 0.2
   shakeDuration: 0.1
   shakeMagnitude: 0.15
-  effect: {fileID: 11400000, guid: 78489819743345b1ab5ce347143289f4, type: 2}
---- !u!114 &2139274892160190764
+  effect: {fileID: 11400000, guid: 423310aff87543f6ad848cb5f0757e45, type: 2}
+--- !u!114 &2380167602723371700
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5730462982848647284}
+  m_GameObject: {fileID: 3140079311658644263}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
@@ -172,7 +172,7 @@ MonoBehaviour:
   m_LightType: 3
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_Intensity: 0.5
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0

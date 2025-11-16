@@ -15,6 +15,6 @@ MonoBehaviour:
   Type: 3
   HealAmount: 0
   Multiplier: 1.2
-  Duration: 10
-  Tint: {r: 1, g: 0.84313726, b: 0.5372549, a: 1}
+  Duration: 12
+  Tint: {r: 1, g: 1, b: 1, a: 1}
   PickupSound: {fileID: 0}

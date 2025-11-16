@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Heal
   m_EditorClassIdentifier: 
   Type: 0
-  HealAmount: 10
-  Multiplier: 1.2
-  Duration: 10
-  Tint: {r: 0.6313726, g: 1, b: 0.6313726, a: 1}
+  HealAmount: 30
+  Multiplier: 0
+  Duration: 0
+  Tint: {r: 1, g: 1, b: 1, a: 1}
   PickupSound: {fileID: 0}

@@ -62,7 +62,6 @@ namespace FF
             }
             consumed = false;
             isDespawning = false;
-            ApplyVisuals();
         }
 
         void Update()
@@ -106,7 +105,6 @@ namespace FF
         public void SetEffect(UpgradePickupEffect newEffect)
         {
             effect = newEffect;
-            ApplyVisuals();
         }
 
         private bool TryApplyEffect(Collider2D playerCollider)
@@ -154,14 +152,6 @@ namespace FF
             }
 
             return true;
-        }
-
-        private void ApplyVisuals()
-        {
-            if (indicatorRenderer && effect != null)
-            {
-                indicatorRenderer.color = effect.Tint;
-            }
         }
 
         private void AnimateIdle()

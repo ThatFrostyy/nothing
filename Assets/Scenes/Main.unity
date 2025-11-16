@@ -1556,9 +1556,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f2a3d2f14c940cd9a9852f2a661f8d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.UpgradePickupSpawner
-  pickupPrefab: {fileID: 0}
-  availableEffects: []
-  player: {fileID: 0}
+  pickupPrefabs:
+  - {fileID: 6714893403692221539, guid: 7d559a64bbc2c2c44a631ee8f8fd6904, type: 3}
+  - {fileID: 3386970526413415766, guid: d9955593fb1aebb44a1abed78c98adcc, type: 3}
+  player: {fileID: 1207903152}
   offscreenPadding: 2
   minSpawnRadius: 6
   respawnDelay: 1
