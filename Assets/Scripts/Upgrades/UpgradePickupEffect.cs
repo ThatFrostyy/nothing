@@ -21,5 +21,6 @@ namespace FF
 
         [Header("Presentation")]
         public AudioClip PickupSound;
+        public Sprite Icon;
     }
 }

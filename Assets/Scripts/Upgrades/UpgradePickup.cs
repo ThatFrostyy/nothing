@@ -36,6 +36,7 @@ namespace FF
 
         public event Action<UpgradePickup> OnCollected;
         public event Action<UpgradePickup> OnExpired;
+        public static event Action<UpgradePickupEffect> OnEffectApplied;
 
         void Awake()
         {
@@ -132,6 +133,7 @@ namespace FF
                         return false;
                     }
                     stats.ApplyTemporaryMultiplier(PlayerStats.StatType.Damage, effect.Multiplier, effect.Duration);
+                    NotifyEffectApplied();
                     break;
                 case UpgradePickupEffect.EffectType.MoveSpeedBoost:
                     if (stats == null)
@@ -139,6 +141,7 @@ namespace FF
                         return false;
                     }
                     stats.ApplyTemporaryMultiplier(PlayerStats.StatType.MoveSpeed, effect.Multiplier, effect.Duration);
+                    NotifyEffectApplied();
                     break;
                 case UpgradePickupEffect.EffectType.FireRateBoost:
                     if (stats == null)
@@ -146,6 +149,7 @@ namespace FF
                         return false;
                     }
                     stats.ApplyTemporaryMultiplier(PlayerStats.StatType.FireRate, effect.Multiplier, effect.Duration);
+                    NotifyEffectApplied();
                     break;
                 default:
                     return false;
@@ -176,6 +180,14 @@ namespace FF
             }
 
             AudioPlaybackPool.PlayOneShot(effect.PickupSound, transform.position);
+        }
+
+        private void NotifyEffectApplied()
+        {
+            if (effect != null && effect.Duration > 0f)
+            {
+                OnEffectApplied?.Invoke(effect);
+            }
         }
 
         private void TriggerExpired()
