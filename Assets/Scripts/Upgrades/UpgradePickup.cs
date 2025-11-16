@@ -22,6 +22,7 @@ namespace FF
         [SerializeField] private float lightFadeDuration = 0.2f;
         [SerializeField] private float shakeDuration = 0.1f;
         [SerializeField] private float shakeMagnitude = 0.15f;
+        [SerializeField] private GameObject pickupFx;
 
         [SerializeField] private UpgradePickupEffect effect;
         private float lifetimeTimer;
@@ -98,6 +99,7 @@ namespace FF
 
             consumed = true;
             PlayPickupSound();
+            SpawnPickupFx();
             TriggerCollected();
         }
 
@@ -269,6 +271,16 @@ namespace FF
 
             light.intensity = 0f;
             light.enabled = false;
+        }
+
+        private void SpawnPickupFx()
+        {
+            if (!pickupFx)
+            {
+                return;
+            }
+
+            PoolManager.Get(pickupFx, transform.position, Quaternion.identity);
         }
     }
 }
