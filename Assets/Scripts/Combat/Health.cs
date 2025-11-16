@@ -42,6 +42,22 @@ namespace FF
             if (hp <= 0) Die();
         }
 
+        public void Heal(int amount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            int previousHp = hp;
+            hp = Mathf.Min(maxHP, hp + amount);
+
+            if (hp != previousHp)
+            {
+                OnHealthChanged?.Invoke(hp, maxHP);
+            }
+        }
+
         private void Die()
         {
             OnDeath?.Invoke();
