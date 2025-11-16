@@ -1,10 +1,9 @@
-using System;
 using UnityEngine;
 
 namespace FF
 {
-    [Serializable]
-    public class UpgradePickupEffect
+    [CreateAssetMenu(menuName = "FF/Upgrade Pickup Effect", fileName = "UpgradePickupEffect_")]
+    public class UpgradePickupEffect : ScriptableObject
     {
         public enum EffectType
         {

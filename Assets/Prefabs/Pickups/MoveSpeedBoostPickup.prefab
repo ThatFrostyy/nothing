@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6714893403692221539}
   - component: {fileID: 2139274892160190764}
   m_Layer: 0
-  m_Name: HealthPickup
+  m_Name: MoveSpeedBoostPickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -155,7 +155,7 @@ MonoBehaviour:
   lightFadeDuration: 0.2
   shakeDuration: 0.1
   shakeMagnitude: 0.15
-  effect: {fileID: 11400000, guid: df5d5c89484846138d232bcfae377e32, type: 2}
+  effect: {fileID: 11400000, guid: 78489819743345b1ab5ce347143289f4, type: 2}
 --- !u!114 &2139274892160190764
 MonoBehaviour:
   m_ObjectHideFlags: 0

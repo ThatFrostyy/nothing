@@ -23,7 +23,7 @@ namespace FF
         [SerializeField] private float shakeDuration = 0.1f;
         [SerializeField] private float shakeMagnitude = 0.15f;
 
-        private UpgradePickupEffect effect;
+        [SerializeField] private UpgradePickupEffect effect;
         private float lifetimeTimer;
         private float idleTimer;
         private Vector3 startLocalPosition;
@@ -100,6 +100,8 @@ namespace FF
             PlayPickupSound();
             TriggerCollected();
         }
+
+        public UpgradePickupEffect Effect => effect;
 
         public void SetEffect(UpgradePickupEffect newEffect)
         {

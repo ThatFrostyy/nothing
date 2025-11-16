@@ -5,8 +5,7 @@ namespace FF
 {
     public class UpgradePickupSpawner : MonoBehaviour
     {
-        [SerializeField] private UpgradePickup pickupPrefab;
-        [SerializeField] private UpgradePickupEffect[] availableEffects;
+        [SerializeField] private UpgradePickup[] pickupPrefabs;
         [SerializeField] private Transform player;
         [SerializeField, Min(0f)] private float offscreenPadding = 2f;
         [SerializeField, Min(0f)] private float minSpawnRadius = 6f;
@@ -44,14 +43,19 @@ namespace FF
 
         private void SpawnPickup()
         {
-            if (pickupPrefab == null || player == null || availableEffects == null || availableEffects.Length == 0)
+            if (pickupPrefabs == null || pickupPrefabs.Length == 0 || player == null)
             {
                 return;
             }
 
             Vector3 spawnPos = GetSpawnPosition();
+            var pickupPrefab = GetRandomPickupPrefab();
+            if (!pickupPrefab)
+            {
+                return;
+            }
+
             activePickup = Instantiate(pickupPrefab, spawnPos, Quaternion.identity);
-            activePickup.SetEffect(GetRandomEffect());
             activePickup.OnCollected += HandlePickupFinished;
             activePickup.OnExpired += HandlePickupFinished;
         }
@@ -90,10 +94,10 @@ namespace FF
             pickup.OnExpired -= HandlePickupFinished;
         }
 
-        private UpgradePickupEffect GetRandomEffect()
+        private UpgradePickup GetRandomPickupPrefab()
         {
-            int index = Random.Range(0, availableEffects.Length);
-            return availableEffects[index];
+            int index = Random.Range(0, pickupPrefabs.Length);
+            return pickupPrefabs[index];
         }
 
         private Vector3 GetSpawnPosition()
