@@ -7,6 +7,7 @@ namespace FF
     {
         [SerializeField] private RectTransform container;
         [SerializeField] private ActivePickupEntry entryPrefab;
+        [SerializeField, Min(1)] private int maxActiveEntries = 3;
 
         private readonly List<ActivePickupEntry> activeEntries = new();
 
@@ -33,9 +34,25 @@ namespace FF
                 return;
             }
 
+            EnforceEntryLimit();
+
             ActivePickupEntry entry = Instantiate(entryPrefab, container ? container : transform);
             entry.Initialize(effect.Icon, effect.Multiplier, effect.Duration);
             activeEntries.Add(entry);
+
+            if (container)
+            {
+                int targetIndex = Mathf.Max(0, container.childCount - 1);
+                entry.transform.SetSiblingIndex(targetIndex);
+            }
+        }
+
+        private void EnforceEntryLimit()
+        {
+            while (activeEntries.Count >= maxActiveEntries)
+            {
+                DestroyEntry(0);
+            }
         }
 
         private void UpdateEntries()

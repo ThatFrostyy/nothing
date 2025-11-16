@@ -24,6 +24,7 @@ namespace FF
         [SerializeField] float shakeDuration = 0.1f;
         [SerializeField] float shakeMagnitude = 0.15f;
         [SerializeField] float lightFadeDuration = 0.2f; // fade duration for the glow
+        [SerializeField] GameObject pickupFx;
 
         Vector3 startPos;
         Vector3 startScale;
@@ -108,6 +109,7 @@ namespace FF
                 wm.Equip(weaponData);
                 isPickedUp = true;
                 PlayPickupSound();
+                SpawnPickupFx();
                 TriggerPickupAnimation();
             }
         }
@@ -127,5 +129,15 @@ namespace FF
             light.enabled = false;
         }
         #endregion Light Fade
+
+        private void SpawnPickupFx()
+        {
+            if (!pickupFx)
+            {
+                return;
+            }
+
+            PoolManager.Get(pickupFx, transform.position, Quaternion.identity);
+        }
     }
 }
