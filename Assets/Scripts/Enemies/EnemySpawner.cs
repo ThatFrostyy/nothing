@@ -19,9 +19,17 @@ namespace FF
         [SerializeField] private WaveAttributeScaling defaultScaling = new();
         [SerializeField] private List<EnemySpawnDefinition> spawnDefinitions = new();
 
+        [Header("Limits (0 = Unlimited)")]
+        [SerializeField, Min(0)] private int maxActiveNonBosses = 0;
+        [SerializeField, Min(0)] private int maxActiveBosses = 0;
+        [SerializeField, Min(0)] private int maxActiveTotal = 0;
+
         [Header("Audio")]
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip fallbackSpawnClip;
+
+        private int _activeBosses;
+        private int _activeNonBosses;
 
         private void Awake()
         {
@@ -31,6 +39,17 @@ namespace FF
             }
 
             EnsureAudioSource();
+        }
+
+        private void OnEnable()
+        {
+            Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
+            CountExistingEnemies();
+        }
+
+        private void OnDisable()
+        {
+            Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
         }
 
         public void SpawnWave(int wave)
@@ -57,14 +76,21 @@ namespace FF
                     continue;
                 }
 
-                int count = definition.EvaluateSpawnCount(wave);
+                bool definitionIsBoss = definition.IsBoss || definition.SpawnOnlyOnBossWaves;
+                int remainingAllowed = GetRemainingSpawnAllowance(definitionIsBoss);
+                if (remainingAllowed <= 0)
+                {
+                    continue;
+                }
+
+                int count = Mathf.Min(remainingAllowed, definition.EvaluateSpawnCount(wave));
                 if (count <= 0)
                 {
                     continue;
                 }
 
                 EnemyWaveModifiers modifiers = definition.GetWaveModifiers(wave, defaultScaling);
-                int spawned = SpawnDefinition(definition, count, radius, modifiers);
+                int spawned = SpawnDefinition(definition, count, radius, modifiers, definitionIsBoss);
                 if (spawned > 0)
                 {
                     PlaySpawnCue(definition.SpawnCue);
@@ -113,7 +139,7 @@ namespace FF
             return true;
         }
 
-        private int SpawnDefinition(EnemySpawnDefinition definition, int count, float radius, EnemyWaveModifiers modifiers)
+        private int SpawnDefinition(EnemySpawnDefinition definition, int count, float radius, EnemyWaveModifiers modifiers, bool isBoss)
         {
             if (count <= 0)
             {
@@ -134,7 +160,7 @@ namespace FF
                 {
                     Vector2 offset = Random.insideUnitCircle * definition.PackRadius;
                     Vector2 spawnPosition = anchor + offset;
-                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers))
+                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers, isBoss))
                     {
                         spawned++;
                     }
@@ -147,7 +173,7 @@ namespace FF
                     float angle = Random.value * Mathf.PI * 2f;
                     Vector2 direction = new(Mathf.Cos(angle), Mathf.Sin(angle));
                     Vector2 spawnPosition = FindSpawnPosition(direction, radius);
-                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers))
+                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers, isBoss))
                     {
                         spawned++;
                     }
@@ -166,7 +192,7 @@ namespace FF
             return def.Prefabs[index];
         }
 
-        private bool SpawnEnemy(GameObject prefab, Vector2 position, EnemyWaveModifiers modifiers)
+        private bool SpawnEnemy(GameObject prefab, Vector2 position, EnemyWaveModifiers modifiers, bool isBoss)
         {
             var enemyInstance = Instantiate(prefab, position, Quaternion.identity);
             if (!enemyInstance)
@@ -176,8 +202,10 @@ namespace FF
 
             if (enemyInstance.TryGetComponent(out Enemy enemy))
             {
+                enemy.SetIsBoss(isBoss);
                 enemy.Initialize(player);
                 enemy.ApplyWaveModifiers(modifiers);
+                IncrementSpawnCount(isBoss);
             }
 
             return true;
@@ -262,6 +290,9 @@ namespace FF
             spawnBuffer = Mathf.Max(0f, spawnBuffer);
             maxSpawnAttempts = Mathf.Max(1, maxSpawnAttempts);
             bossWaveInterval = Mathf.Max(1, bossWaveInterval);
+            maxActiveBosses = Mathf.Max(0, maxActiveBosses);
+            maxActiveNonBosses = Mathf.Max(0, maxActiveNonBosses);
+            maxActiveTotal = Mathf.Max(0, maxActiveTotal);
             EnsureAudioSource();
         }
 
@@ -295,5 +326,73 @@ namespace FF
             audioSource.PlayOneShot(finalClip);
         }
         #endregion Audio
+
+        #region Tracking
+        private void IncrementSpawnCount(bool isBoss)
+        {
+            if (isBoss)
+            {
+                _activeBosses++;
+            }
+            else
+            {
+                _activeNonBosses++;
+            }
+        }
+
+        private void DecrementSpawnCount(bool isBoss)
+        {
+            if (isBoss)
+            {
+                _activeBosses = Mathf.Max(0, _activeBosses - 1);
+            }
+            else
+            {
+                _activeNonBosses = Mathf.Max(0, _activeNonBosses - 1);
+            }
+        }
+
+        private void HandleEnemyKilled(Enemy enemy)
+        {
+            if (!enemy)
+            {
+                return;
+            }
+
+            DecrementSpawnCount(enemy.IsBoss);
+        }
+
+        private void CountExistingEnemies()
+        {
+            _activeBosses = 0;
+            _activeNonBosses = 0;
+
+            Enemy[] existing = FindObjectsOfType<Enemy>();
+            for (int i = 0; i < existing.Length; i++)
+            {
+                Enemy enemy = existing[i];
+                if (!enemy)
+                {
+                    continue;
+                }
+
+                IncrementSpawnCount(enemy.IsBoss);
+            }
+        }
+
+        private int GetRemainingSpawnAllowance(bool isBoss)
+        {
+            int totalLimit = maxActiveTotal > 0 ? maxActiveTotal : int.MaxValue;
+            int bossLimit = maxActiveBosses > 0 ? maxActiveBosses : int.MaxValue;
+            int nonBossLimit = maxActiveNonBosses > 0 ? maxActiveNonBosses : int.MaxValue;
+
+            int totalRemaining = Mathf.Max(0, totalLimit - (_activeBosses + _activeNonBosses));
+            int typeRemaining = isBoss
+                ? Mathf.Max(0, bossLimit - _activeBosses)
+                : Mathf.Max(0, nonBossLimit - _activeNonBosses);
+
+            return Mathf.Min(totalRemaining, typeRemaining);
+        }
+        #endregion Tracking
     }
 }

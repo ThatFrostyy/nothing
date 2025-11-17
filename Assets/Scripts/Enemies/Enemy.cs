@@ -25,6 +25,11 @@ namespace FF
         [SerializeField] private float idleSwayFrequency = 1.5f;
         [SerializeField] private float idleSwayAmplitude = 3f;
 
+        [Header("Helmets")]
+        [SerializeField] private Transform helmetAnchor;
+        [SerializeField] private GameObject[] helmetPrefabs;
+        [SerializeField, Range(0f, 1f)] private float chanceForNoHelmet = 0.25f;
+
         [Header("Audio & FX")]
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip[] hitSound;
@@ -33,6 +38,7 @@ namespace FF
 
         [Header("Behaviour Flags")]
         [SerializeField] private bool isDog;
+        [SerializeField] private bool isBoss;
         [Space]
         [Header("Dog Behaviour")]
         [SerializeField, Min(0f)] private float dogAttackRange = 1.25f;
@@ -81,11 +87,19 @@ namespace FF
         private float _dogAttackCooldownTimer;
         private Coroutine _dogJumpRoutine;
         private Vector3 _dogAttackOffset = Vector3.zero;
+        private GameObject _helmetInstance;
+
+        public bool IsBoss => isBoss;
 
         public void Initialize(Transform player)
         {
             _player = player;
             CachePlayerHealth();
+        }
+
+        public void SetIsBoss(bool value)
+        {
+            isBoss = value;
         }
 
         public void ApplyWaveModifiers(EnemyWaveModifiers modifiers)
@@ -188,6 +202,8 @@ namespace FF
                     : Mathf.Sign(enemyVisual.localScale.x);
             }
 
+            SpawnHelmet();
+
             if (autoShooter)
             {
                 autoShooter.SetStatsProvider(_stats);
@@ -208,6 +224,42 @@ namespace FF
             _attackBehaviour = GetComponent<IEnemyAttack>();
 
             EnsurePlayerReference();
+        }
+
+        private void SpawnHelmet()
+        {
+            if (_helmetInstance)
+            {
+                Destroy(_helmetInstance);
+                _helmetInstance = null;
+            }
+
+            Transform anchor = helmetAnchor ? helmetAnchor : enemyVisual;
+            if (!anchor)
+            {
+                return;
+            }
+
+            if (helmetPrefabs == null || helmetPrefabs.Length == 0)
+            {
+                return;
+            }
+
+            if (chanceForNoHelmet > 0f && Random.value < Mathf.Clamp01(chanceForNoHelmet))
+            {
+                return;
+            }
+
+            GameObject prefab = helmetPrefabs[Random.Range(0, helmetPrefabs.Length)];
+            if (!prefab)
+            {
+                return;
+            }
+
+            _helmetInstance = Instantiate(prefab, anchor);
+            _helmetInstance.transform.localPosition = Vector3.zero;
+            _helmetInstance.transform.localRotation = Quaternion.identity;
+            _helmetInstance.transform.localScale = Vector3.one;
         }
 
         private void Start()

@@ -13,6 +13,7 @@ namespace FF
         [SerializeField] private int endWave = -1;
         [SerializeField, Min(1)] private int spawnInterval = 1;
         [SerializeField] private bool spawnOnlyOnBossWaves;
+        [SerializeField] private bool isBoss;
 
         [Header("Spawn Behaviour")]
         [SerializeField] private AnimationCurve spawnCountByWave = AnimationCurve.Linear(1f, 1f, 20f, 10f);
@@ -31,6 +32,7 @@ namespace FF
         public int EndWave => endWave;
         public int SpawnInterval => Mathf.Max(1, spawnInterval);
         public bool SpawnOnlyOnBossWaves => spawnOnlyOnBossWaves;
+        public bool IsBoss => isBoss;
         public bool SpawnInPacks => spawnInPacks;
         public float PackRadius => packRadius;
         public AudioClip SpawnCue => spawnCue;
