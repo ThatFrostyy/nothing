@@ -1635,13 +1635,13 @@ MonoBehaviour:
   - {fileID: 3386970526413415766, guid: d9955593fb1aebb44a1abed78c98adcc, type: 3}
   player: {fileID: 1207903152}
   offscreenPadding: 2
-  minSpawnRadius: 6
-  initialSpawnDelay: 0
-  spawnInterval: 15
-  respawnDelay: 1
-  spawnOnStart: 1
-  pickupsPerSpawn: 1
-  maxActivePickups: 1
+  minSpawnRadius: 8
+  initialSpawnDelay: 8
+  spawnInterval: 45
+  respawnDelay: 0
+  spawnOnStart: 0
+  pickupsPerSpawn: 2
+  maxActivePickups: 3
 --- !u!4 &592156656
 Transform:
   m_ObjectHideFlags: 0
