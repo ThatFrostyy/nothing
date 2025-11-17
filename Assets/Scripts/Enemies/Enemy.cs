@@ -235,7 +235,7 @@ namespace FF
             }
 
             Transform anchor = helmetAnchor ? helmetAnchor : enemyVisual;
-            if (!anchor)
+            if (!anchor && !enemyVisual)
             {
                 return;
             }
@@ -256,10 +256,15 @@ namespace FF
                 return;
             }
 
-            _helmetInstance = Instantiate(prefab, anchor);
-            _helmetInstance.transform.localPosition = Vector3.zero;
-            _helmetInstance.transform.localRotation = Quaternion.identity;
-            _helmetInstance.transform.localScale = Vector3.one;
+            Transform parent = enemyVisual ? enemyVisual : anchor;
+            Vector3 localPosition = anchor ? parent.InverseTransformPoint(anchor.position) : Vector3.zero;
+            Quaternion localRotation = anchor ? Quaternion.Inverse(parent.rotation) * anchor.rotation : Quaternion.identity;
+            Vector3 localScale = anchor ? anchor.localScale : Vector3.one;
+
+            _helmetInstance = Instantiate(prefab, parent);
+            _helmetInstance.transform.localPosition = localPosition;
+            _helmetInstance.transform.localRotation = localRotation;
+            _helmetInstance.transform.localScale = localScale;
         }
 
         private void Start()

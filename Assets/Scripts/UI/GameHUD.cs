@@ -12,6 +12,7 @@ namespace FF
         [SerializeField] private Health playerHealth;
         [SerializeField] private XPWallet wallet;
         [SerializeField] private WeaponManager weaponManager;
+        [SerializeField] private UpgradeManager upgradeManager;
 
         [Header("UI References")]
         [SerializeField] private TMP_Text healthValueText;
@@ -22,6 +23,8 @@ namespace FF
         [SerializeField] private TMP_Text timeText;
         [SerializeField] private TMP_Text xpText;
         [SerializeField] private Image xpFillImage;
+        [SerializeField] private TMP_Text upgradePromptText;
+        [SerializeField] private string upgradeKeyLabel = "Tab";
 
         [SerializeField] private string timeFormat = "mm\\:ss";
 
@@ -71,6 +74,7 @@ namespace FF
         private float xpFillCurrent;
         private float xpPulseTimer;
         private bool xpIsFilling;
+        private int pendingUpgrades;
 
         private float waveBannerTimer;
         private float waveFlashElapsed = float.PositiveInfinity;
@@ -113,6 +117,11 @@ namespace FF
                 weaponManager = playerHealth.GetComponent<WeaponManager>();
             }
 
+            if (!upgradeManager)
+            {
+                upgradeManager = FindObjectOfType<UpgradeManager>();
+            }
+
             healthPulseTarget = ResolveHealthPulseTarget();
 
             if (!xpPulseTarget && xpFillImage)
@@ -134,6 +143,7 @@ namespace FF
             InitializeAudio();
             SetWaveBannerVisible(0f);
             InitializeWaveFlash();
+            RefreshUpgradePrompt();
         }
 
         void OnEnable()
@@ -158,6 +168,13 @@ namespace FF
             {
                 weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
             }
+
+            if (upgradeManager != null)
+            {
+                upgradeManager.OnPendingUpgradesChanged += HandlePendingUpgradesChanged;
+            }
+
+            UpgradeUI.OnVisibilityChanged += HandleUpgradeVisibilityChanged;
 
             RefreshAll();
             SyncFillImmediately();
@@ -186,6 +203,13 @@ namespace FF
                 weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
             }
 
+            if (upgradeManager != null)
+            {
+                upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
+            }
+
+            UpgradeUI.OnVisibilityChanged -= HandleUpgradeVisibilityChanged;
+
             SetHeartbeatActive(false);
             SetXPFillSoundActive(false);
             lowHealthPulseActive = false;
@@ -197,6 +221,7 @@ namespace FF
             SetWaveBannerVisible(0f);
             waveFlashElapsed = float.PositiveInfinity;
             SetWaveFlashAlpha(0f);
+            RefreshUpgradePrompt();
         }
 
         void Update()
@@ -222,6 +247,7 @@ namespace FF
             UpdateWeaponDisplay();
             UpdateWaveDisplay();
             UpdateTimeDisplay();
+            RefreshUpgradePrompt();
         }
 
         void HandleHealthChanged(int current, int max)
@@ -292,6 +318,12 @@ namespace FF
             xpFillTarget = target;
         }
 
+        void HandlePendingUpgradesChanged(int pending)
+        {
+            pendingUpgrades = Mathf.Max(0, pending);
+            RefreshUpgradePrompt();
+        }
+
         void HandleKillCountChanged(int kills)
         {
             if (!killCountText)
@@ -319,6 +351,26 @@ namespace FF
             SetWaveBannerVisible(1f);
             TriggerWaveFlash();
             PlayWaveStartSound(wave);
+        }
+
+        void HandleUpgradeVisibilityChanged(bool isVisible)
+        {
+            RefreshUpgradePrompt();
+        }
+
+        void RefreshUpgradePrompt()
+        {
+            if (!upgradePromptText)
+            {
+                return;
+            }
+
+            bool shouldShow = pendingUpgrades > 0 && !UpgradeUI.IsShowing;
+            upgradePromptText.gameObject.SetActive(shouldShow);
+            if (shouldShow)
+            {
+                upgradePromptText.text = $"Press {upgradeKeyLabel} to upgrade! ({pendingUpgrades} left)";
+            }
         }
 
         void UpdateWeaponDisplay(Weapon weaponOverride = null)
