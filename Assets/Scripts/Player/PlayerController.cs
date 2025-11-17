@@ -11,6 +11,7 @@ namespace FF
         [SerializeField] private AutoShooter _autoShooter;
         [SerializeField] private Transform _gunPivot;
         [SerializeField] private Transform _playerVisual;
+        [SerializeField] private UpgradeManager _upgradeManager;
 
         [Header("Movement Settings")]
         [SerializeField] private float _acceleration = 0.18f;
@@ -31,6 +32,7 @@ namespace FF
             _stats = GetComponent<PlayerStats>();
             _camera = _camera ? _camera : Camera.main;
             _collider = GetComponent<Collider2D>();
+            _upgradeManager = _upgradeManager ? _upgradeManager : GetComponent<UpgradeManager>();
         }
 
         private void OnEnable()
@@ -162,6 +164,16 @@ namespace FF
             }
 
             _autoShooter.OnFire(value);
+        }
+
+        public void OnUpgrade(InputValue value)
+        {
+            if (!value.isPressed || _upgradeManager == null)
+            {
+                return;
+            }
+
+            _upgradeManager.TryOpenUpgradeMenu();
         }
         #endregion Input System Callbacks
 

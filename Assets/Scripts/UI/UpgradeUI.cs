@@ -10,6 +10,7 @@ namespace FF
         [SerializeField] GameObject panel;
         [SerializeField] Button aBtn, bBtn, cBtn;
         [SerializeField] TMPro.TMP_Text aTxt, bTxt, cTxt;
+        [SerializeField] TMPro.TMP_Text upgradesRemainingText;
 
         Action<Upgrade> callback;
         Upgrade a, b, c;
@@ -24,13 +25,18 @@ namespace FF
             callback?.Invoke(u);
         }
 
-        public void Show(Upgrade A, Upgrade B, Upgrade C, Action<Upgrade> onPick)
+        public void Show(Upgrade A, Upgrade B, Upgrade C, Action<Upgrade> onPick, int pendingUpgrades)
         {
             a = A; b = B; c = C; callback = onPick;
             aTxt.text = $"{A.Title}\n{A.Description}";
             bTxt.text = $"{B.Title}\n{B.Description}";
             cTxt.text = $"{C.Title}\n{C.Description}";
             panel.SetActive(true);
+
+            if (upgradesRemainingText)
+            {
+                upgradesRemainingText.text = $"Upgrades left: {Mathf.Max(0, pendingUpgrades)}";
+            }
 
             if (aListener != null) aBtn.onClick.RemoveListener(aListener);
             if (bListener != null) bBtn.onClick.RemoveListener(bListener);
