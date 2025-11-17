@@ -97,7 +97,8 @@ namespace FF
         private void PlayPickupSound()
         {
             if (pickupSound == null) return;
-            AudioSource.PlayClipAtPoint(pickupSound, transform.position);
+
+            AudioPlaybackPool.PlayOneShot(pickupSound, transform.position);
         }
 
         void OnTriggerEnter2D(Collider2D other)

@@ -112,7 +112,7 @@ MonoBehaviour:
   rotationSpeed: 2
   pulseAmplitude: 0.05
   pulseSpeed: 3
-  pickupSound: {fileID: 8300000, guid: 7e9e8cefc2c64694b9ed986549811ee7, type: 3}
+  pickupSound: {fileID: 8300000, guid: a45e9c89b58da674594c1e183dc545cb, type: 3}
   pickupShrinkSpeed: 12
   pickupFadeSpeed: 8
   shakeDuration: 0.1

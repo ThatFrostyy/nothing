@@ -16,5 +16,5 @@ MonoBehaviour:
   HealAmount: 30
   Multiplier: 0
   Duration: 0
-  PickupSound: {fileID: 8300000, guid: 683d3ce1a0e4ed24c83258e7ca489c54, type: 3}
+  PickupSound: {fileID: 8300000, guid: ed4e13bee49028c45b83fd218b1b1935, type: 3}
   Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}

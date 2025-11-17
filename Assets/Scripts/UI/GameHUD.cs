@@ -119,7 +119,7 @@ namespace FF
 
             if (!upgradeManager)
             {
-                upgradeManager = FindObjectOfType<UpgradeManager>();
+                upgradeManager = FindFirstObjectByType<UpgradeManager>();
             }
 
             healthPulseTarget = ResolveHealthPulseTarget();
