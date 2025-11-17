@@ -258,7 +258,10 @@ namespace FF
 
             Transform parent = enemyVisual ? enemyVisual : anchor;
             Vector3 localPosition = anchor ? parent.InverseTransformPoint(anchor.position) : Vector3.zero;
-            Quaternion localRotation = anchor ? Quaternion.Inverse(parent.rotation) * anchor.rotation : Quaternion.identity;
+            Quaternion prefabLocalRotation = prefab.transform.localRotation;
+            Quaternion localRotation = anchor
+                ? Quaternion.Inverse(parent.rotation) * anchor.rotation * prefabLocalRotation
+                : prefabLocalRotation;
             Vector3 localScale = anchor ? anchor.localScale : Vector3.one;
 
             _helmetInstance = Instantiate(prefab, parent);
