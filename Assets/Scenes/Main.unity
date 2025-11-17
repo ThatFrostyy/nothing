@@ -866,6 +866,9 @@ MonoBehaviour:
   spawnDefinitions:
   - {fileID: 11400000, guid: 4174eb15d6631e248a2c394c3b45ff15, type: 2}
   - {fileID: 11400000, guid: 76838362ef8b6be45ba745a92506de76, type: 2}
+  maxActiveNonBosses: 300
+  maxActiveBosses: 50
+  maxActiveTotal: 0
   audioSource: {fileID: 322110425}
   fallbackSpawnClip: {fileID: 0}
 --- !u!4 &322110424
@@ -4931,6 +4934,7 @@ MonoBehaviour:
   stats: {fileID: 1207903155}
   wallet: {fileID: 1207903163}
   ui: {fileID: 1333906377}
+  maxUpgradeSelections: 15
 --- !u!1001 &1910549644
 PrefabInstance:
   m_ObjectHideFlags: 0

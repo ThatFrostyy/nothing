@@ -309,10 +309,10 @@ MonoBehaviour:
   fireRateMultiplier: 1
   damageMultiplier: 1
   movementAccuracyPenalty: 1.3
-  avoidanceRadius: 0.85
+  avoidanceRadius: 1
   avoidancePush: 6
-  avoidanceResponsiveness: 0.35
-  avoidanceWeight: 0.75
+  avoidanceResponsiveness: 0.45
+  avoidanceWeight: 0.85
 --- !u!114 &2329570480403992263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -348,6 +348,11 @@ MonoBehaviour:
   walkSquashAmount: 0.08
   idleSwayFrequency: 1.5
   idleSwayAmplitude: 6
+  helmetAnchor: {fileID: 7556550191872587613}
+  helmetPrefabs:
+  - {fileID: 8131325469464129517, guid: f2cb7e4b55a73c84db6d08a6218c3a7f, type: 3}
+  - {fileID: 8177723574371877624, guid: 77246d0ebb9f6ab419ef84021246fcb1, type: 3}
+  chanceForNoHelmet: 0.25
   audioSource: {fileID: 4092019642368032325}
   hitSound:
   - {fileID: 8300000, guid: e375acb7908dc354b88d454e6f37f804, type: 3}
@@ -357,6 +362,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: ab9a9327dff658549ace2a131d4347e3, type: 3}
   deathFX: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
   isDog: 0
+  isBoss: 0
   dogAttackRange: 1.25
   dogAttackCooldown: 1.1
   dogAttackDamage: 8

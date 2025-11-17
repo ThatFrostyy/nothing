@@ -366,8 +366,7 @@ namespace FF
         {
             _activeBosses = 0;
             _activeNonBosses = 0;
-
-            Enemy[] existing = FindObjectsOfType<Enemy>();
+            Enemy[] existing = Object.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
             for (int i = 0; i < existing.Length; i++)
             {
                 Enemy enemy = existing[i];

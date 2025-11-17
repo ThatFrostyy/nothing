@@ -245,12 +245,12 @@ namespace FF
                 return;
             }
 
-            if (chanceForNoHelmet > 0f && Random.value < Mathf.Clamp01(chanceForNoHelmet))
+            if (chanceForNoHelmet > 0f && UnityEngine.Random.value < Mathf.Clamp01(chanceForNoHelmet))
             {
                 return;
             }
 
-            GameObject prefab = helmetPrefabs[Random.Range(0, helmetPrefabs.Length)];
+            GameObject prefab = helmetPrefabs[UnityEngine.Random.Range(0, helmetPrefabs.Length)];
             if (!prefab)
             {
                 return;
