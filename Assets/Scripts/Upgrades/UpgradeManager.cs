@@ -9,6 +9,9 @@ namespace FF
         [SerializeField] PlayerStats stats;
         [SerializeField] XPWallet wallet;
         [SerializeField] UpgradeUI ui;
+        [SerializeField, Min(0)] int maxUpgradeSelections = 0;
+
+        int upgradesTaken;
 
         Upgrade RandomUpgrade() => all[Random.Range(0, all.Length)];
 
@@ -21,6 +24,16 @@ namespace FF
         {
             if (ui == null) return;
 
+            if (maxUpgradeSelections > 0 && upgradesTaken >= maxUpgradeSelections)
+            {
+                return;
+            }
+
+            if (all == null || all.Length == 0)
+            {
+                return;
+            }
+
             ui.Show(RandomUpgrade(), RandomUpgrade(), RandomUpgrade(), Pick);
         }
 
@@ -29,6 +42,7 @@ namespace FF
             if (ui == null) return;
 
             u.Apply(stats);
+            upgradesTaken++;
             ui.Hide();
         }
     }
