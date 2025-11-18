@@ -24,6 +24,7 @@ namespace FF
         [SerializeField] private TMP_Text xpText;
         [SerializeField] private Image xpFillImage;
         [SerializeField] private TMP_Text upgradePromptText;
+        [SerializeField] private CanvasGroup upgradePromptGroup;
         [SerializeField] private string upgradeKeyLabel = "Tab";
 
         [SerializeField] private string timeFormat = "mm\\:ss";
@@ -39,6 +40,7 @@ namespace FF
         [SerializeField, Min(0f)] private float xpPulseSpeed = 10f;
         [SerializeField, Range(0f, 1f)] private float xpPulseAmplitude = 0.06f;
         [SerializeField, Min(0f)] private float lowHealthHeartbeatDuration = 4f;
+        [SerializeField, Min(0f)] private float upgradePromptFadeDuration = 0.2f;
 
         [Header("Wave Banner")]
         [SerializeField] private TMP_Text waveBannerText;
@@ -80,6 +82,8 @@ namespace FF
         private float waveFlashElapsed = float.PositiveInfinity;
         private float waveFlashBaseAlpha = 1f;
 
+        private Coroutine upgradePromptFadeRoutine;
+
         private Vector3 healthPulseBaseScale = Vector3.one;
         private Vector3 xpPulseBaseScale = Vector3.one;
         private Vector2 healthPulseBaseAnchoredPosition = Vector2.zero;
@@ -120,6 +124,15 @@ namespace FF
             if (!upgradeManager)
             {
                 upgradeManager = FindFirstObjectByType<UpgradeManager>();
+            }
+
+            if (!upgradePromptGroup && upgradePromptText)
+            {
+                upgradePromptGroup = upgradePromptText.GetComponent<CanvasGroup>();
+                if (!upgradePromptGroup)
+                {
+                    upgradePromptGroup = upgradePromptText.gameObject.AddComponent<CanvasGroup>();
+                }
             }
 
             healthPulseTarget = ResolveHealthPulseTarget();
@@ -214,6 +227,11 @@ namespace FF
             SetXPFillSoundActive(false);
             lowHealthPulseActive = false;
             xpIsFilling = false;
+            if (upgradePromptFadeRoutine != null)
+            {
+                StopCoroutine(upgradePromptFadeRoutine);
+                upgradePromptFadeRoutine = null;
+            }
             lowHealthHeartbeatTimer = 0f;
             ResetHealthPulse();
             ResetXPPulse();
@@ -366,11 +384,65 @@ namespace FF
             }
 
             bool shouldShow = pendingUpgrades > 0 && !UpgradeUI.IsShowing;
-            upgradePromptText.gameObject.SetActive(shouldShow);
             if (shouldShow)
             {
                 upgradePromptText.text = $"Press {upgradeKeyLabel} to upgrade! ({pendingUpgrades} left)";
             }
+
+            if (!upgradePromptGroup)
+            {
+                upgradePromptText.gameObject.SetActive(shouldShow);
+                return;
+            }
+
+            upgradePromptText.gameObject.SetActive(true);
+            StartUpgradePromptFade(shouldShow ? 1f : 0f);
+        }
+
+        void StartUpgradePromptFade(float targetAlpha)
+        {
+            if (upgradePromptFadeRoutine != null)
+            {
+                StopCoroutine(upgradePromptFadeRoutine);
+            }
+
+            upgradePromptFadeRoutine = StartCoroutine(FadeUpgradePrompt(targetAlpha));
+        }
+
+        System.Collections.IEnumerator FadeUpgradePrompt(float targetAlpha)
+        {
+            if (!upgradePromptGroup)
+            {
+                yield break;
+            }
+
+            float duration = Mathf.Max(0.01f, upgradePromptFadeDuration);
+            float startAlpha = upgradePromptGroup.alpha;
+            float elapsed = 0f;
+
+            upgradePromptGroup.gameObject.SetActive(true);
+            upgradePromptGroup.interactable = true;
+            upgradePromptGroup.blocksRaycasts = true;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+                upgradePromptGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
+                yield return null;
+            }
+
+            upgradePromptGroup.alpha = targetAlpha;
+            bool isVisible = targetAlpha > 0f;
+            upgradePromptGroup.interactable = isVisible;
+            upgradePromptGroup.blocksRaycasts = isVisible;
+
+            if (!isVisible)
+            {
+                upgradePromptText.gameObject.SetActive(false);
+            }
+
+            upgradePromptFadeRoutine = null;
         }
 
         void UpdateWeaponDisplay(Weapon weaponOverride = null)
