@@ -10,6 +10,7 @@ namespace FF
         public UpgradePickup pickupPrefab;
         [SerializeField, Min(0f)] public float initialSpawnDelay = 0f;
         [SerializeField] public bool spawnOnStart = true;
+        [SerializeField] public bool useRespawnDelay = true;
         [SerializeField, Min(0f)] public float respawnDelay = 1f;
         [SerializeField] public AnimationCurve spawnIntervalCurve = AnimationCurve.Linear(0f, 15f, 300f, 5f);
         [SerializeField] public AnimationCurve pickupsPerSpawnCurve = AnimationCurve.Constant(0f, 1f, 1f);
@@ -225,7 +226,10 @@ namespace FF
                     StopCoroutine(state.RespawnRoutine);
                 }
 
-                state.RespawnRoutine = StartCoroutine(RespawnAfterDelay(state));
+                if (state.Config.useRespawnDelay)
+                {
+                    state.RespawnRoutine = StartCoroutine(RespawnAfterDelay(state));
+                }
             }
             else
             {

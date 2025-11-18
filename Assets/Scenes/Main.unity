@@ -1631,18 +1631,198 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f2a3d2f14c940cd9a9852f2a661f8d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.UpgradePickupSpawner
-  pickupPrefabs:
-  - {fileID: 6714893403692221539, guid: 7d559a64bbc2c2c44a631ee8f8fd6904, type: 3}
-  - {fileID: 3386970526413415766, guid: d9955593fb1aebb44a1abed78c98adcc, type: 3}
+  pickupConfigs:
+  - pickupPrefab: {fileID: 6714893403692221539, guid: 7d559a64bbc2c2c44a631ee8f8fd6904, type: 3}
+    initialSpawnDelay: 10
+    spawnOnStart: 0
+    respawnDelay: 0
+    spawnIntervalCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 45
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 35
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 25
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    pickupsPerSpawnCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    maxActiveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 2
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 4
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - pickupPrefab: {fileID: 3386970526413415766, guid: d9955593fb1aebb44a1abed78c98adcc, type: 3}
+    initialSpawnDelay: 10
+    spawnOnStart: 0
+    respawnDelay: 0
+    spawnIntervalCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 45
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 35
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 25
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    pickupsPerSpawnCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    maxActiveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 2
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 4
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
   player: {fileID: 1207903152}
   offscreenPadding: 2
   minSpawnRadius: 8
-  initialSpawnDelay: 8
-  spawnInterval: 45
-  respawnDelay: 0
-  spawnOnStart: 0
-  pickupsPerSpawn: 2
-  maxActivePickups: 3
 --- !u!4 &592156656
 Transform:
   m_ObjectHideFlags: 0
@@ -2160,8 +2340,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0.000011444, y: 0}
-  m_SizeDelta: {x: 460.132, y: 158.111}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 460.132, y: 117.865}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &760478392
 MonoBehaviour:
@@ -2294,11 +2474,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1333906376}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 200, y: -135}
-  m_SizeDelta: {x: 341.07, y: 128.231}
-  m_Pivot: {x: 0, y: 1}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -90}
+  m_SizeDelta: {x: 341.07007, y: 92.01}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &901023473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3037,7 +3217,7 @@ MonoBehaviour:
   _autoShooter: {fileID: 1207903154}
   _gunPivot: {fileID: 125305192}
   _playerVisual: {fileID: 507405423}
-  _upgradeManager: {fileID: 0}
+  _upgradeManager: {fileID: 1885342134}
   _acceleration: 0.18
   _bodyTiltDegrees: 10
   _boundsPadding: 0.05
@@ -3773,6 +3953,7 @@ MonoBehaviour:
   xpText: {fileID: 1269021521}
   xpFillImage: {fileID: 658359175}
   upgradePromptText: {fileID: 1612907682}
+  upgradePromptGroup: {fileID: 1612907681}
   upgradeKeyLabel: Tab
   timeFormat: mm\:ss
   healthPulseTarget: {fileID: 2001000101}
@@ -3785,6 +3966,7 @@ MonoBehaviour:
   xpPulseSpeed: 10
   xpPulseAmplitude: 0.06
   lowHealthHeartbeatDuration: 3
+  upgradePromptFadeDuration: 0.5
   waveBannerText: {fileID: 320424109}
   waveBannerGroup: {fileID: 320424108}
   waveBannerDuration: 2.5
@@ -4278,7 +4460,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1612907680
 RectTransform:
   m_ObjectHideFlags: 0

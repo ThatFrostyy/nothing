@@ -14,12 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
   - {fileID: 7386967301448027551, guid: 3d5045b0b6d64fb45bdb17def63bb84a, type: 3}
-  - {fileID: 8500711371696030824, guid: 4e21cabceb3548147a5a4182e8715b88, type: 3}
-  - {fileID: 6954183349728851308, guid: 973105a2c0733364a87c67780b357682, type: 3}
   startWave: 1
   endWave: -1
   spawnInterval: 1
   spawnOnlyOnBossWaves: 0
+  isBoss: 0
   spawnCountByWave:
     serializedVersion: 2
     m_Curve:
