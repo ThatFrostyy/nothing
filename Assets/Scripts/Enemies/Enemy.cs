@@ -18,12 +18,20 @@ namespace FF
 
         [Header("Visuals")]
         [SerializeField] private Transform gunPivot;
+        [SerializeField] private Vector3 gunOffsetRight = new Vector3(0.35f, -0.1f, 0f);
+        [SerializeField] private Vector3 gunOffsetLeft = new Vector3(-0.35f, -0.1f, 0f);
         [SerializeField] private Transform enemyVisual;
         [SerializeField] private float walkBobFrequency = 6f;
         [SerializeField] private float walkBobAmplitude = 0.12f;
         [SerializeField] private float walkSquashAmount = 0.08f;
         [SerializeField] private float idleSwayFrequency = 1.5f;
         [SerializeField] private float idleSwayAmplitude = 3f;
+
+        [Header("Movement Variation")]
+        [SerializeField, Range(0f, 1f)] private float moveWhileShootingChance = 0.4f;
+        [SerializeField, Range(0f, 1f)] private float moveWhileShootingSpeedMultiplier = 0.55f;
+        [SerializeField, Min(0f)] private float weaveFrequency = 0.9f;
+        [SerializeField, Range(0f, 1f)] private float weaveStrength = 0.35f;
 
         [Header("Helmets")]
         [SerializeField] private Transform helmetAnchor;
@@ -88,6 +96,10 @@ namespace FF
         private Coroutine _dogJumpRoutine;
         private Vector3 _dogAttackOffset = Vector3.zero;
         private GameObject _helmetInstance;
+        private float _weaveOffset;
+        private float _moveWhileShootingTimer;
+        private bool _shouldMoveWhileShooting;
+        private bool wasInShootZone = false;
 
         public bool IsBoss => isBoss;
 
@@ -203,6 +215,10 @@ namespace FF
             }
 
             SpawnHelmet();
+
+            _weaveOffset = UnityEngine.Random.Range(0f, 32f);
+            _moveWhileShootingTimer = UnityEngine.Random.Range(0.75f, 1.5f);
+            _shouldMoveWhileShooting = UnityEngine.Random.value < moveWhileShootingChance;
 
             if (autoShooter)
             {
@@ -389,9 +405,22 @@ namespace FF
                 Vector2 toPlayer = _player.position - transform.position;
                 float distance = toPlayer.magnitude;
                 Vector2 direction = distance > 0.001f ? toPlayer / distance : Vector2.zero;
+                Vector2 strafeDirection = direction.sqrMagnitude > 0f
+                    ? new Vector2(-direction.y, direction.x)
+                    : Vector2.zero;
+                float weaveOffset = Mathf.Sin((Time.time + _weaveOffset) * weaveFrequency) * weaveStrength;
 
                 float buffer = _stats ? _stats.DistanceBuffer : 1f;
                 float shootDistance = _stats ? _stats.ShootingDistance : 8f;
+
+                bool inShootZone = Mathf.Abs(distance - shootDistance) <= buffer;
+
+                if (inShootZone && !wasInShootZone)
+                {
+                    _shouldMoveWhileShooting = UnityEngine.Random.value < moveWhileShootingChance;
+                }
+
+                wasInShootZone = inShootZone;
 
                 if (distance > shootDistance + buffer)
                 {
@@ -401,9 +430,33 @@ namespace FF
                 {
                     targetVelocity = moveSpeed * retreatMultiplier * -direction;
                 }
+                else
+                {
+                    UpdateMoveWhileShootingTimer();
+
+                    if (_shouldMoveWhileShooting && strafeDirection.sqrMagnitude > 0f)
+                    {
+                        targetVelocity = strafeDirection * (moveSpeed * moveWhileShootingSpeedMultiplier * weaveOffset);
+                    }
+                }
+
+                if (strafeDirection.sqrMagnitude > 0f && Mathf.Abs(weaveOffset) > 0.001f)
+                {
+                    targetVelocity += strafeDirection * (moveSpeed * weaveOffset * 0.5f);
+                }
             }
 
             return targetVelocity;
+        }
+
+        private void UpdateMoveWhileShootingTimer()
+        {
+            _moveWhileShootingTimer -= Time.fixedDeltaTime;
+            if (_moveWhileShootingTimer <= 0f)
+            {
+                _shouldMoveWhileShooting = UnityEngine.Random.value < moveWhileShootingChance;
+                _moveWhileShootingTimer = UnityEngine.Random.Range(1.25f, 2.25f);
+            }
         }
 
         private void ApplyDesiredVelocity(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
@@ -411,12 +464,9 @@ namespace FF
             targetVelocity = ApplySeparationAndClamp(targetVelocity, moveSpeed, clampToStats);
             _desiredVelocity = targetVelocity;
 
-            float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.linearVelocity = Vector2.MoveTowards(
-                _rigidbody.linearVelocity,
-                targetVelocity,
-                acceleration * 10f * Time.fixedDeltaTime
-            );
+            //float acceleration = _stats ? _stats.Acceleration : 0.2f;
+            _rigidbody.linearVelocity = targetVelocity;
+
         }
 
         private Vector2 ApplySeparationAndClamp(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
@@ -601,17 +651,27 @@ namespace FF
         {
             if (!gunPivot || !_player) return;
 
-            Vector2 direction = _player.position - gunPivot.position;
-            if (direction.sqrMagnitude < 0.001f) return;
+            Vector2 dir = _player.position - gunPivot.position;
+            if (dir.sqrMagnitude < 0.001f) return;
 
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-            gunPivot.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
 
-            bool isAimingLeft = direction.x < 0f;
-            gunPivot.localScale = isAimingLeft ? new Vector3(1f, -1f, 1f) : Vector3.one;
-            _isFacingLeft = isAimingLeft;
+            // Rotate gun
+            gunPivot.rotation = Quaternion.Euler(0f, 0f, angle);
+
+            // Detect facing direction
+            bool facingLeft = dir.x < 0f;
+            _isFacingLeft = facingLeft;
+
+            // Move gun to left or right shoulder
+            weaponManager.transform.localPosition = facingLeft ? gunOffsetLeft : gunOffsetRight;
+
+            // Flip gun sprite visually
+            Vector3 scale = gunPivot.localScale;
+            scale.y = facingLeft ? -1f : 1f;
+            gunPivot.localScale = scale;
         }
-#endregion Movement
+        #endregion Movement
 
         #region Animations
         private void UpdateBodyTilt()
@@ -641,7 +701,7 @@ namespace FF
                 enemyVisual.localEulerAngles.z,
                 targetTilt,
                 ref _tiltVelocity,
-                0.12f
+                0.07f
             );
             enemyVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
 
@@ -671,7 +731,7 @@ namespace FF
                 enemyVisual.localPosition,
                 targetLocalPosition,
                 ref _visualPositionVelocity,
-                0.08f,
+                0.045f,
                 Mathf.Infinity,
                 Time.deltaTime
             );
@@ -691,7 +751,7 @@ namespace FF
                 enemyVisual.localScale,
                 targetScale,
                 ref _visualScaleVelocity,
-                0.08f,
+                0.055f,
                 Mathf.Infinity,
                 Time.deltaTime
             );

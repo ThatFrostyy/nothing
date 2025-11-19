@@ -41,6 +41,7 @@ namespace FF
         [SerializeField, Range(0f, 1f)] private float xpPulseAmplitude = 0.06f;
         [SerializeField, Min(0f)] private float lowHealthHeartbeatDuration = 4f;
         [SerializeField, Min(0f)] private float upgradePromptFadeDuration = 0.2f;
+        [SerializeField] private float upgradePromptVisibleTime = 1.5f;
 
         [Header("Wave Banner")]
         [SerializeField] private TMP_Text waveBannerText;
@@ -83,6 +84,7 @@ namespace FF
         private float waveFlashBaseAlpha = 1f;
 
         private Coroutine upgradePromptFadeRoutine;
+        private float upgradePromptTimer = 0f;
 
         private Vector3 healthPulseBaseScale = Vector3.one;
         private Vector3 xpPulseBaseScale = Vector3.one;
@@ -246,6 +248,17 @@ namespace FF
         {
             float deltaTime = Time.deltaTime;
             float unscaledDeltaTime = Time.unscaledDeltaTime;
+
+            if (upgradePromptTimer > 0f)
+            {
+                upgradePromptTimer -= Time.deltaTime;
+
+                if (upgradePromptTimer <= 0f)
+                {
+                    StartUpgradePromptFade(0f);  
+                }
+            }
+
             UpdateWaveDisplay();
             UpdateTimeDisplay();
             UpdateHealthFill(deltaTime);
@@ -339,6 +352,13 @@ namespace FF
         void HandlePendingUpgradesChanged(int pending)
         {
             pendingUpgrades = Mathf.Max(0, pending);
+
+            if (pendingUpgrades > 0)
+            {
+                upgradePromptTimer = upgradePromptVisibleTime;
+                StartUpgradePromptFade(1f);
+            }
+
             RefreshUpgradePrompt();
         }
 
@@ -378,25 +398,12 @@ namespace FF
 
         void RefreshUpgradePrompt()
         {
-            if (!upgradePromptText)
-            {
-                return;
-            }
+            if (!upgradePromptText) return;
 
-            bool shouldShow = pendingUpgrades > 0 && !UpgradeUI.IsShowing;
-            if (shouldShow)
+            if (pendingUpgrades > 0)
             {
                 upgradePromptText.text = $"Press {upgradeKeyLabel} to upgrade! ({pendingUpgrades} left)";
             }
-
-            if (!upgradePromptGroup)
-            {
-                upgradePromptText.gameObject.SetActive(shouldShow);
-                return;
-            }
-
-            upgradePromptText.gameObject.SetActive(true);
-            StartUpgradePromptFade(shouldShow ? 1f : 0f);
         }
 
         void StartUpgradePromptFade(float targetAlpha)

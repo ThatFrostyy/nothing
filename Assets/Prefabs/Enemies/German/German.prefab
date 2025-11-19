@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 4144694435313951730}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.28999996, y: -0.52, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -301,18 +301,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemyStats
   moveSpeed: 3.2
-  acceleration: 0.18
+  acceleration: 0.7
   retreatSpeedMultiplier: 0.6
-  bodyTiltDegrees: 10
+  bodyTiltDegrees: 7
   shootingDistance: 6
-  distanceBuffer: 1.5
+  distanceBuffer: 2
   fireRateMultiplier: 1
   damageMultiplier: 1
   movementAccuracyPenalty: 1.3
-  avoidanceRadius: 0.85
-  avoidancePush: 6
-  avoidanceResponsiveness: 0.45
-  avoidanceWeight: 0.85
+  avoidanceRadius: 0.9
+  avoidancePush: 2.7
+  avoidanceResponsiveness: 0.65
+  avoidanceWeight: 1
 --- !u!114 &2329570480403992263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -342,12 +342,18 @@ MonoBehaviour:
   weaponManager: {fileID: 5985841820440995128}
   autoShooter: {fileID: 3905552623909107986}
   gunPivot: {fileID: 3650370905618874034}
+  gunOffsetRight: {x: 0.3, y: -0.35, z: 0}
+  gunOffsetLeft: {x: -0.3, y: -0.35, z: 0}
   enemyVisual: {fileID: 3060269664654068321}
-  walkBobFrequency: 8
-  walkBobAmplitude: 0.12
-  walkSquashAmount: 0.08
+  walkBobFrequency: 7.2
+  walkBobAmplitude: 0.09
+  walkSquashAmount: 0.06
   idleSwayFrequency: 1.5
   idleSwayAmplitude: 6
+  moveWhileShootingChance: 0.4
+  moveWhileShootingSpeedMultiplier: 0.55
+  weaveFrequency: 1.4
+  weaveStrength: 0.15
   helmetAnchor: {fileID: 7556550191872587613}
   helmetPrefabs:
   - {fileID: 8131325469464129517, guid: f2cb7e4b55a73c84db6d08a6218c3a7f, type: 3}
@@ -491,7 +497,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 691340329
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 89aa8c075b48ebe4cb4386d2298e7ad2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

@@ -866,6 +866,7 @@ MonoBehaviour:
   spawnDefinitions:
   - {fileID: 11400000, guid: 4174eb15d6631e248a2c394c3b45ff15, type: 2}
   - {fileID: 11400000, guid: 76838362ef8b6be45ba745a92506de76, type: 2}
+  - {fileID: 11400000, guid: 76838362ef8b6be45ba745a92506de76, type: 2}
   maxActiveNonBosses: 300
   maxActiveBosses: 50
   maxActiveTotal: 0
@@ -1635,7 +1636,8 @@ MonoBehaviour:
   - pickupPrefab: {fileID: 6714893403692221539, guid: 7d559a64bbc2c2c44a631ee8f8fd6904, type: 3}
     initialSpawnDelay: 10
     spawnOnStart: 0
-    respawnDelay: 0
+    useRespawnDelay: 0
+    respawnDelay: 60
     spawnIntervalCurve:
       serializedVersion: 2
       m_Curve:
@@ -1729,7 +1731,8 @@ MonoBehaviour:
   - pickupPrefab: {fileID: 3386970526413415766, guid: d9955593fb1aebb44a1abed78c98adcc, type: 3}
     initialSpawnDelay: 10
     spawnOnStart: 0
-    respawnDelay: 0
+    useRespawnDelay: 0
+    respawnDelay: 60
     spawnIntervalCurve:
       serializedVersion: 2
       m_Curve:
@@ -1875,7 +1878,7 @@ MonoBehaviour:
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 0000000055d8ba1071a93a4f29043529855afc31e962a2d93f694072
+  m_ApplyToSortingLayers: 0000000055d8ba1071a93a4f29043529855afc31e962a2d93f69407203c03427
   m_LightCookieSprite: {fileID: 0}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -3967,6 +3970,7 @@ MonoBehaviour:
   xpPulseAmplitude: 0.06
   lowHealthHeartbeatDuration: 3
   upgradePromptFadeDuration: 0.5
+  upgradePromptVisibleTime: 1.5
   waveBannerText: {fileID: 320424109}
   waveBannerGroup: {fileID: 320424108}
   waveBannerDuration: 2.5
@@ -5408,7 +5412,7 @@ MonoBehaviour:
   stats: {fileID: 1207903155}
   wallet: {fileID: 1207903163}
   ui: {fileID: 1333906377}
-  maxUpgradeSelections: 15
+  maxUpgradeSelections: 16
 --- !u!1001 &1910549644
 PrefabInstance:
   m_ObjectHideFlags: 0

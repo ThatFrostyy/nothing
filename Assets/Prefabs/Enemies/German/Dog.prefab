@@ -119,12 +119,21 @@ MonoBehaviour:
   weaponManager: {fileID: 0}
   autoShooter: {fileID: 0}
   gunPivot: {fileID: 0}
+  gunOffsetRight: {x: 0.35, y: -0.1, z: 0}
+  gunOffsetLeft: {x: -0.35, y: -0.1, z: 0}
   enemyVisual: {fileID: 265158592845213640}
   walkBobFrequency: 8
   walkBobAmplitude: 0.12
   walkSquashAmount: 0.08
   idleSwayFrequency: 1.5
   idleSwayAmplitude: 5
+  moveWhileShootingChance: 0.4
+  moveWhileShootingSpeedMultiplier: 0.55
+  weaveFrequency: 0.9
+  weaveStrength: 0.35
+  helmetAnchor: {fileID: 0}
+  helmetPrefabs: []
+  chanceForNoHelmet: 0.25
   audioSource: {fileID: 6948851067300768603}
   hitSound:
   - {fileID: 8300000, guid: e375acb7908dc354b88d454e6f37f804, type: 3}
@@ -134,6 +143,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: ab9a9327dff658549ace2a131d4347e3, type: 3}
   deathFX: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
   isDog: 1
+  isBoss: 0
   dogAttackRange: 1.25
   dogAttackCooldown: 1
   dogAttackDamage: 8
@@ -142,7 +152,7 @@ MonoBehaviour:
   dogAttackSound: {fileID: 8300000, guid: 75f8c44e53e509147a559e6d7cbbbc8f, type: 3}
   xpOrbPrefab: {fileID: 5860978669140793186, guid: 6a3eb14e9abcb124ca084a235e022790, type: 3}
   xpOrbValue: 2
-  xpOrbCount: 3
+  xpOrbCount: 2
   xpOrbSpreadRadius: 1
   avoidanceLayers:
     serializedVersion: 2
@@ -359,7 +369,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 838621829
-  m_SortingLayer: 4
+  m_SortingLayer: 5
   m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: e3eb9155c00dd9148a276bf10ce17e49, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
