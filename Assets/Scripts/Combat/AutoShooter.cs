@@ -178,45 +178,16 @@ namespace FF
             float angleOffset = UnityEngine.Random.Range(-_currentSpread, _currentSpread);
             Quaternion spreadRotation = _muzzle.rotation * Quaternion.AngleAxis(angleOffset, Vector3.forward);
 
-            if (_weapon.ejectParticles)
+            SpawnEjectParticles();
+
+            bool launchedGrenade = TryLaunchGrenade(spreadRotation);
+            if (!launchedGrenade)
             {
-                GameObject ejectInstance = PoolManager.Get(_weapon.ejectParticles, _ejectPos.position, _ejectPos.rotation);
-                if (ejectInstance && !ejectInstance.TryGetComponent<PooledParticleSystem>(out var ejectPooled))
-                {
-                    ejectPooled = ejectInstance.AddComponent<PooledParticleSystem>();
-                    ejectPooled.OnTakenFromPool();
-                }
+                SpawnStandardBullet(spreadRotation);
             }
 
-            GameObject bulletInstance = PoolManager.Get(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
-
-            if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
-            {
-                float damageMultiplier = 1f;
-                if (_stats != null)
-                {
-                    damageMultiplier = _stats.GetDamageMultiplier();
-                }
-                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier));
-                bullet.SetOwner(transform.root.tag);
-            }
-
-            if (_weapon.fireSFX)
-            {
-                AudioMixerGroup mixer = _audioSource ? _audioSource.outputAudioMixerGroup : null;
-                float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
-                AudioPlaybackPool.PlayOneShot(_weapon.fireSFX, _muzzle.position, mixer, spatialBlend, _audioSource ? _audioSource.volume : 1f, _audioSource ? _audioSource.pitch : 1f);
-            }
-
-            if (_weapon.muzzleFlash)
-            {
-                GameObject flashInstance = PoolManager.Get(_weapon.muzzleFlash, _muzzle.position, _muzzle.rotation);
-                if (flashInstance && !flashInstance.TryGetComponent<PooledParticleSystem>(out var flashPooled))
-                {
-                    flashPooled = flashInstance.AddComponent<PooledParticleSystem>();
-                    flashPooled.OnTakenFromPool();
-                }
-            }
+            PlayFireAudio();
+            SpawnMuzzleFlash();
 
             if (_cameraShakeEnabled)
             {
@@ -227,6 +198,98 @@ namespace FF
             _currentRecoil = _weapon.recoilAmount;
             _recoilTimer = 0f;
             SetCooldownProgress(0f);
+        }
+
+        private void SpawnEjectParticles()
+        {
+            if (!_weapon.ejectParticles || !_ejectPos)
+            {
+                return;
+            }
+
+            GameObject ejectInstance = PoolManager.Get(_weapon.ejectParticles, _ejectPos.position, _ejectPos.rotation);
+            if (ejectInstance && !ejectInstance.TryGetComponent<PooledParticleSystem>(out var ejectPooled))
+            {
+                ejectPooled = ejectInstance.AddComponent<PooledParticleSystem>();
+                ejectPooled.OnTakenFromPool();
+            }
+        }
+
+        private void SpawnStandardBullet(Quaternion spreadRotation)
+        {
+            if (!_weapon.bulletPrefab)
+            {
+                return;
+            }
+
+            GameObject bulletInstance = PoolManager.Get(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
+
+            if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
+            {
+                float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
+                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier));
+                string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
+                bullet.SetOwner(ownerTag);
+            }
+        }
+
+        private bool TryLaunchGrenade(Quaternion spreadRotation)
+        {
+            if (!_weapon.bulletPrefab)
+            {
+                return false;
+            }
+
+            if (!_weapon.bulletPrefab.TryGetComponent<GrenadeProjectile>(out _))
+            {
+                return false;
+            }
+
+            GameObject grenadeInstance = PoolManager.Get(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
+            if (!grenadeInstance.TryGetComponent<GrenadeProjectile>(out var grenade))
+            {
+                return false;
+            }
+
+            float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
+            Vector2 direction = spreadRotation * Vector3.right;
+            string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
+            AudioMixerGroup mixer = _audioSource ? _audioSource.outputAudioMixerGroup : null;
+            float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
+            float volume = _audioSource ? _audioSource.volume : 1f;
+            float pitch = _audioSource ? _audioSource.pitch : 1f;
+
+            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch);
+            return true;
+        }
+
+        private void PlayFireAudio()
+        {
+            if (!_weapon.fireSFX)
+            {
+                return;
+            }
+
+            AudioMixerGroup mixer = _audioSource ? _audioSource.outputAudioMixerGroup : null;
+            float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
+            float volume = _audioSource ? _audioSource.volume : 1f;
+            float pitch = _audioSource ? _audioSource.pitch : 1f;
+            AudioPlaybackPool.PlayOneShot(_weapon.fireSFX, _muzzle.position, mixer, spatialBlend, volume, pitch);
+        }
+
+        private void SpawnMuzzleFlash()
+        {
+            if (!_weapon.muzzleFlash)
+            {
+                return;
+            }
+
+            GameObject flashInstance = PoolManager.Get(_weapon.muzzleFlash, _muzzle.position, _muzzle.rotation);
+            if (flashInstance && !flashInstance.TryGetComponent<PooledParticleSystem>(out var flashPooled))
+            {
+                flashPooled = flashInstance.AddComponent<PooledParticleSystem>();
+                flashPooled.OnTakenFromPool();
+            }
         }
 
         private void UpdateRecoil()

@@ -34,13 +34,30 @@ namespace FF
                 return;
             }
 
-            SpawnGrenade(enemy.transform.position, toPlayer.normalized);
+            SpawnGrenade(enemy, stats, toPlayer.normalized);
             _cooldownTimer = cooldown;
         }
 
-        private void SpawnGrenade(Vector3 origin, Vector2 direction)
+        private void SpawnGrenade(Enemy enemy, EnemyStats stats, Vector2 direction)
         {
-            GameObject grenade = Instantiate(grenadePrefab, origin, Quaternion.identity);
+            if (!enemy)
+            {
+                return;
+            }
+
+            GameObject grenade = Instantiate(grenadePrefab, enemy.transform.position, Quaternion.identity);
+            if (!grenade)
+            {
+                return;
+            }
+
+            if (grenade.TryGetComponent(out GrenadeProjectile projectile))
+            {
+                float multiplier = stats ? stats.GetDamageMultiplier() : 1f;
+                projectile.Launch(direction, -1, multiplier, enemy.tag, null, 0f, 1f, 1f, null, throwForce, arcHeight);
+                return;
+            }
+
             if (grenade.TryGetComponent(out Rigidbody2D body))
             {
                 Vector2 velocity = direction * throwForce;

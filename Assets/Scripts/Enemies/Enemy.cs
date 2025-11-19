@@ -101,6 +101,8 @@ namespace FF
         private bool _shouldMoveWhileShooting;
         private bool wasInShootZone = false;
 
+        private const float FacingDeadZone = 0.05f;
+
         public bool IsBoss => isBoss;
 
         public void Initialize(Transform player)
@@ -660,7 +662,12 @@ namespace FF
             gunPivot.rotation = Quaternion.Euler(0f, 0f, angle);
 
             // Detect facing direction
-            bool facingLeft = dir.x < 0f;
+            bool facingLeft = _isFacingLeft;
+            if (Mathf.Abs(dir.x) > FacingDeadZone)
+            {
+                facingLeft = dir.x < 0f;
+            }
+
             _isFacingLeft = facingLeft;
 
             // Move gun to left or right shoulder
