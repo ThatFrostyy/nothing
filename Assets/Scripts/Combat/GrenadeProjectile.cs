@@ -40,6 +40,7 @@ namespace FF
         private float _audioSpatialBlend;
         private float _audioVolume = 1f;
         private float _audioPitch = 1f;
+        private bool _isArmed;
 
         public int BaseDamage => baseDamage;
 
@@ -74,6 +75,7 @@ namespace FF
             _audioVolume = Mathf.Clamp01(volume);
             _audioPitch = Mathf.Max(0.01f, pitch);
             _fuseTimer = Mathf.Max(0.05f, fuseOverride ?? fuseDuration);
+            _isArmed = true;
             _hasExploded = false;
             _hasPlayedLanding = false;
 
@@ -91,7 +93,7 @@ namespace FF
 
         private void Update()
         {
-            if (_hasExploded)
+            if (_hasExploded || !_isArmed)
             {
                 return;
             }
@@ -105,7 +107,7 @@ namespace FF
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
-            if (_hasExploded || _hasPlayedLanding)
+            if (_hasExploded || _hasPlayedLanding || !_isArmed)
             {
                 return;
             }
@@ -236,6 +238,7 @@ namespace FF
             _fuseTimer = fuseDuration;
             _hasExploded = false;
             _hasPlayedLanding = false;
+            _isArmed = false;
             if (_body)
             {
                 _body.linearVelocity = Vector2.zero;
@@ -250,6 +253,7 @@ namespace FF
             _hasExploded = false;
             _hasPlayedLanding = false;
             _fuseTimer = 0f;
+            _isArmed = false;
             if (_body)
             {
                 _body.linearVelocity = Vector2.zero;
