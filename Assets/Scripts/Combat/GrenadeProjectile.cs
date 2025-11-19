@@ -255,7 +255,7 @@ namespace FF
 
                 Vector2 impulse = offset.normalized * (explosionForce * falloff);
                 impulse.y += explosionForce * 0.15f * falloff;
-                hitBody.linearVelocity += impulse;
+                hitBody.AddForce(impulse, ForceMode2D.Impulse);
             }
         }
 
