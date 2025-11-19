@@ -85,6 +85,7 @@ namespace FF
 
         private Coroutine upgradePromptFadeRoutine;
         private float upgradePromptTimer = 0f;
+        private bool upgradeMenuVisible;
 
         private Vector3 healthPulseBaseScale = Vector3.one;
         private Vector3 xpPulseBaseScale = Vector3.one;
@@ -190,6 +191,7 @@ namespace FF
             }
 
             UpgradeUI.OnVisibilityChanged += HandleUpgradeVisibilityChanged;
+            upgradeMenuVisible = UpgradeUI.IsShowing;
 
             RefreshAll();
             SyncFillImmediately();
@@ -224,6 +226,7 @@ namespace FF
             }
 
             UpgradeUI.OnVisibilityChanged -= HandleUpgradeVisibilityChanged;
+            upgradeMenuVisible = false;
 
             SetHeartbeatActive(false);
             SetXPFillSoundActive(false);
@@ -255,7 +258,7 @@ namespace FF
 
                 if (upgradePromptTimer <= 0f)
                 {
-                    StartUpgradePromptFade(0f);  
+                    StartUpgradePromptFade(0f);
                 }
             }
 
@@ -356,7 +359,16 @@ namespace FF
             if (pendingUpgrades > 0)
             {
                 upgradePromptTimer = upgradePromptVisibleTime;
-                StartUpgradePromptFade(1f);
+
+                if (!upgradeMenuVisible)
+                {
+                    StartUpgradePromptFade(1f);
+                }
+            }
+            else
+            {
+                upgradePromptTimer = 0f;
+                StartUpgradePromptFade(0f);
             }
 
             RefreshUpgradePrompt();
@@ -393,6 +405,19 @@ namespace FF
 
         void HandleUpgradeVisibilityChanged(bool isVisible)
         {
+            upgradeMenuVisible = isVisible;
+
+            if (isVisible)
+            {
+                upgradePromptTimer = 0f;
+                StartUpgradePromptFade(0f);
+            }
+            else if (pendingUpgrades > 0)
+            {
+                upgradePromptTimer = upgradePromptVisibleTime;
+                StartUpgradePromptFade(1f);
+            }
+
             RefreshUpgradePrompt();
         }
 
@@ -404,6 +429,10 @@ namespace FF
             {
                 upgradePromptText.text = $"Press {upgradeKeyLabel} to upgrade! ({pendingUpgrades} left)";
             }
+            else
+            {
+                upgradePromptText.text = string.Empty;
+            }
         }
 
         void StartUpgradePromptFade(float targetAlpha)
@@ -411,6 +440,11 @@ namespace FF
             if (upgradePromptFadeRoutine != null)
             {
                 StopCoroutine(upgradePromptFadeRoutine);
+            }
+
+            if (targetAlpha > 0f && upgradePromptText && !upgradePromptText.gameObject.activeSelf)
+            {
+                upgradePromptText.gameObject.SetActive(true);
             }
 
             upgradePromptFadeRoutine = StartCoroutine(FadeUpgradePrompt(targetAlpha));
@@ -444,7 +478,7 @@ namespace FF
             upgradePromptGroup.interactable = isVisible;
             upgradePromptGroup.blocksRaycasts = isVisible;
 
-            if (!isVisible)
+            if (!isVisible && upgradePromptText)
             {
                 upgradePromptText.gameObject.SetActive(false);
             }
