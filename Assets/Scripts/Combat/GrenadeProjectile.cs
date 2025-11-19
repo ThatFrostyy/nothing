@@ -15,6 +15,7 @@ namespace FF
         [SerializeField, Min(0f)] private float arcLift = 1.5f;
         [SerializeField, Min(0.1f)] private float fuseDuration = 1.2f;
         [SerializeField] private LayerMask landingLayers = ~0;
+        [SerializeField, Min(0f)] private float gravity = 15f;
 
         [Header("Explosion")]
         [SerializeField, Min(0.1f)] private float explosionRadius = 2.75f;
@@ -83,6 +84,7 @@ namespace FF
             float lift = liftOverride ?? arcLift;
             if (_body)
             {
+                _body.gravityScale = 0f;
                 Vector2 velocity = direction.sqrMagnitude <= Mathf.Epsilon
                     ? Vector2.right * speed
                     : direction.normalized * speed;
@@ -102,6 +104,20 @@ namespace FF
             if (_fuseTimer <= 0f)
             {
                 Explode();
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (_hasExploded || !_isArmed || !_body)
+            {
+                return;
+            }
+
+            if (gravity > 0f)
+            {
+                float gravityStep = gravity * Time.fixedDeltaTime;
+                _body.linearVelocity += Vector2.down * gravityStep;
             }
         }
 
@@ -182,13 +198,7 @@ namespace FF
                 return;
             }
 
-            ContactFilter2D filter = new()
-            {
-                useTriggers = true
-            };
-            filter.SetLayerMask(damageLayers);
-
-            int hits = Physics2D.OverlapCircle(center, explosionRadius, filter, OverlapBuffer);
+            int hits = Physics2D.OverlapCircleNonAlloc(center, explosionRadius, OverlapBuffer, damageLayers);
             for (int i = 0; i < hits; i++)
             {
                 Collider2D hit = OverlapBuffer[i];
