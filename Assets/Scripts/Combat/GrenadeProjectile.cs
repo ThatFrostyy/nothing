@@ -12,10 +12,9 @@ namespace FF
 
         [Header("Flight")]
         [SerializeField, Min(0.1f)] private float launchSpeed = 12f;
-        [SerializeField, Min(0f)] private float arcLift = 1.5f;
+        [SerializeField, Min(0f)] private float slowdownRate = 15f;
         [SerializeField, Min(0.1f)] private float fuseDuration = 1.2f;
         [SerializeField] private LayerMask landingLayers = ~0;
-        [SerializeField, Min(0f)] private float gravity = 15f;
 
         [Header("Explosion")]
         [SerializeField, Min(0.1f)] private float explosionRadius = 2.75f;
@@ -42,6 +41,9 @@ namespace FF
         private float _audioVolume = 1f;
         private float _audioPitch = 1f;
         private bool _isArmed;
+        private float _currentSpeed;
+        private float _activeSlowdown;
+        private Vector2 _movementDirection;
 
         public int BaseDamage => baseDamage;
 
@@ -66,7 +68,7 @@ namespace FF
             float pitch = 1f,
             float? fuseOverride = null,
             float? speedOverride = null,
-            float? liftOverride = null)
+            float? slowdownOverride = null)
         {
             int sourceDamage = damageOverride >= 0 ? damageOverride : baseDamage;
             _pendingDamage = Mathf.Max(0, Mathf.RoundToInt(sourceDamage * Mathf.Max(0f, damageMultiplier)));
@@ -79,17 +81,17 @@ namespace FF
             _isArmed = true;
             _hasExploded = false;
             _hasPlayedLanding = false;
+            _activeSlowdown = Mathf.Max(0f, slowdownOverride ?? slowdownRate);
 
             float speed = Mathf.Max(0.1f, speedOverride ?? launchSpeed);
-            float lift = liftOverride ?? arcLift;
             if (_body)
             {
                 _body.gravityScale = 0f;
-                Vector2 velocity = direction.sqrMagnitude <= Mathf.Epsilon
-                    ? Vector2.right * speed
-                    : direction.normalized * speed;
-                velocity.y += lift;
-                _body.linearVelocity = velocity;
+                _movementDirection = direction.sqrMagnitude <= Mathf.Epsilon
+                    ? Vector2.right
+                    : direction.normalized;
+                _currentSpeed = speed;
+                _body.linearVelocity = _movementDirection * _currentSpeed;
             }
         }
 
@@ -114,10 +116,15 @@ namespace FF
                 return;
             }
 
-            if (gravity > 0f)
+            if (_currentSpeed > 0f)
             {
-                float gravityStep = gravity * Time.fixedDeltaTime;
-                _body.linearVelocity += Vector2.down * gravityStep;
+                _currentSpeed = Mathf.Max(0f, _currentSpeed - _activeSlowdown * Time.fixedDeltaTime);
+                _body.linearVelocity = _movementDirection * _currentSpeed;
+                if (_currentSpeed <= Mathf.Epsilon)
+                {
+                    _body.linearVelocity = Vector2.zero;
+                    PlayLanding(transform.position);
+                }
             }
         }
 
@@ -133,8 +140,17 @@ namespace FF
                 return;
             }
 
+            PlayLanding(collision.GetContact(0).point);
+        }
+
+        private void PlayLanding(Vector3 point)
+        {
+            if (_hasPlayedLanding)
+            {
+                return;
+            }
+
             _hasPlayedLanding = true;
-            Vector3 point = collision.GetContact(0).point;
 
             if (landingFX)
             {
@@ -249,6 +265,9 @@ namespace FF
             _hasExploded = false;
             _hasPlayedLanding = false;
             _isArmed = false;
+            _currentSpeed = 0f;
+            _movementDirection = Vector2.zero;
+            _activeSlowdown = 0f;
             if (_body)
             {
                 _body.linearVelocity = Vector2.zero;
@@ -264,6 +283,9 @@ namespace FF
             _hasPlayedLanding = false;
             _fuseTimer = 0f;
             _isArmed = false;
+            _currentSpeed = 0f;
+            _movementDirection = Vector2.zero;
+            _activeSlowdown = 0f;
             if (_body)
             {
                 _body.linearVelocity = Vector2.zero;
