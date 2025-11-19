@@ -100,6 +100,8 @@ namespace FF
         private float _moveWhileShootingTimer;
         private bool _shouldMoveWhileShooting;
         private bool wasInShootZone = false;
+        private float knockbackTimer = 0f;
+        private Vector2 knockbackVelocity;
 
         private const float FacingDeadZone = 0.05f;
 
@@ -317,6 +319,13 @@ namespace FF
 
         private void FixedUpdate()
         {
+            if (knockbackTimer > 0f)
+            {
+                knockbackTimer -= Time.fixedDeltaTime;
+                _rigidbody.linearVelocity = knockbackVelocity;
+                return;  
+            }
+
             UpdateMovement();
             UpdateBodyTilt();
         }
@@ -678,6 +687,13 @@ namespace FF
             scale.y = facingLeft ? -1f : 1f;
             gunPivot.localScale = scale;
         }
+
+        public void ApplyKnockback(Vector2 force, float duration = 0.25f)
+        {
+            knockbackTimer = duration;
+            knockbackVelocity = force;
+        }
+
         #endregion Movement
 
         #region Animations

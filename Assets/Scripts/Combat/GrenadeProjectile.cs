@@ -255,7 +255,12 @@ namespace FF
 
                 Vector2 impulse = offset.normalized * (explosionForce * falloff);
                 impulse.y += explosionForce * 0.15f * falloff;
-                hitBody.AddForce(impulse, ForceMode2D.Impulse);
+
+                hitBody.AddForce(impulse * 2f, ForceMode2D.Impulse);
+                if (hit.TryGetComponent<Enemy>(out var enemy))
+                {
+                    enemy.ApplyKnockback(impulse * 2f, 0.35f);
+                }
             }
         }
 
