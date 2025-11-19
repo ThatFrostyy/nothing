@@ -132,18 +132,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 089df39ceba347078e2e3aadaa96416c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.GrenadeProjectile
-  baseDamage: 100
+  baseDamage: 25
   damageLayers:
     serializedVersion: 2
     m_Bits: 128
-  launchSpeed: 6
-  arcLift: 1.5
-  fuseDuration: 1.3
+  launchSpeed: 15
+  slowdownRate: 15
+  fuseDuration: 1.5
   landingLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  explosionRadius: 2.75
-  explosionForce: 18
+  explosionRadius: 6
+  explosionForce: 20
   forceFalloff:
     serializedVersion: 2
     m_Curve:
