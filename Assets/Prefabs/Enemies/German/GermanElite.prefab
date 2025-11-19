@@ -433,7 +433,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.OrbitAroundPlayerMovement
   orbitRadius: 6
-  orbitSpeedMultiplier: 0.75
+  orbitSpeedMultiplier: 0.5
   orbitDirection: 1
 --- !u!1 &8108987329848278325
 GameObject:

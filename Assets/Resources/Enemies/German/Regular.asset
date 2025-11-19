@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
   - {fileID: 7386967301448027551, guid: 3d5045b0b6d64fb45bdb17def63bb84a, type: 3}
-  - {fileID: 7117406024691269827, guid: 5a26e7b3483023347880cd84250d2708, type: 3}
   startWave: 1
   endWave: -1
   spawnInterval: 1

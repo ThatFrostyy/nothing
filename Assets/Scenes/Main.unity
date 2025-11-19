@@ -866,7 +866,6 @@ MonoBehaviour:
   spawnDefinitions:
   - {fileID: 11400000, guid: 4174eb15d6631e248a2c394c3b45ff15, type: 2}
   - {fileID: 11400000, guid: 76838362ef8b6be45ba745a92506de76, type: 2}
-  - {fileID: 11400000, guid: 76838362ef8b6be45ba745a92506de76, type: 2}
   maxActiveNonBosses: 300
   maxActiveBosses: 50
   maxActiveTotal: 0
@@ -2728,13 +2727,14 @@ GameObject:
   - component: {fileID: 1100433745}
   - component: {fileID: 1100433747}
   - component: {fileID: 1100433746}
+  - component: {fileID: 1100433748}
   m_Layer: 5
   m_Name: ShockWave
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1100433745
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2792,6 +2792,92 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1100433744}
   m_CullTransparentMesh: 1
+--- !u!114 &1100433748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100433744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2a6b37523864c6aa24624f1116ae3a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.ShockwaveUI
+  shockwaveImage: {fileID: 1100433746}
+  duration: 0.7
+  radiusCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.05
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.4
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  thicknessCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.15
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.04
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  strengthCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.5
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &1142411344
 GameObject:
   m_ObjectHideFlags: 0

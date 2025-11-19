@@ -180,7 +180,13 @@ namespace FF
                 return;
             }
 
-            int hits = Physics2D.OverlapCircleNonAlloc(center, explosionRadius, OverlapBuffer, damageLayers);
+            ContactFilter2D filter = new()
+            {
+                useTriggers = true
+            };
+            filter.SetLayerMask(damageLayers);
+
+            int hits = Physics2D.OverlapCircle(center, explosionRadius, filter, OverlapBuffer);
             for (int i = 0; i < hits; i++)
             {
                 Collider2D hit = OverlapBuffer[i];
