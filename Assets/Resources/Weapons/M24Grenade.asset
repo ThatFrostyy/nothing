@@ -18,7 +18,7 @@ MonoBehaviour:
   ejectParticles: {fileID: 0}
   recoilAmount: 6
   recoilRecoverySpeed: 10
-  bulletPrefab: {fileID: 0}
+  bulletPrefab: {fileID: 1314581820453278891, guid: e418b23278424284794c2a49a1b9c815, type: 3}
   weaponPrefab: {fileID: 1314581820453278891, guid: e418b23278424284794c2a49a1b9c815, type: 3}
   rpm: 420
   damage: 10

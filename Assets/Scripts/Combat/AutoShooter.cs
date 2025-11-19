@@ -128,6 +128,11 @@ namespace FF
             float rpm = Mathf.Max(_weapon.rpm * rpmMultiplier, 0.01f);
             float interval = 60f / rpm;
 
+            if (!_weapon.isAuto && _weapon.fireCooldown > 0f)
+            {
+                interval = _weapon.fireCooldown / rpmMultiplier;
+            }
+
             if (_fireTimer >= interval)
             {
                 if (!_weapon.isAuto && _isFirePressed)
