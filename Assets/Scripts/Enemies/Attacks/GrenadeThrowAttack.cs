@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace FF
 {
@@ -11,7 +12,8 @@ namespace FF
         [Header("Throw Settings")]
         [SerializeField, Min(0.1f)] private float cooldown = 3f;
         [SerializeField, Min(0.1f)] private float throwForce = 10f;
-        [SerializeField, Min(0f)] private float arcHeight = 1.5f;
+        [FormerlySerializedAs("arcHeight")]
+        [SerializeField, Min(0f)] private float slowdownRate = 1.5f;
 
         private float _cooldownTimer;
 
@@ -54,14 +56,13 @@ namespace FF
             if (grenade.TryGetComponent(out GrenadeProjectile projectile))
             {
                 float multiplier = stats ? stats.GetDamageMultiplier() : 1f;
-                projectile.Launch(direction, -1, multiplier, enemy.tag, null, 0f, 1f, 1f, null, throwForce, arcHeight);
+                projectile.Launch(direction, -1, multiplier, enemy.tag, null, 0f, 1f, 1f, null, throwForce, slowdownRate);
                 return;
             }
 
             if (grenade.TryGetComponent(out Rigidbody2D body))
             {
                 Vector2 velocity = direction * throwForce;
-                velocity.y += arcHeight;
                 body.linearVelocity = velocity;
             }
         }
