@@ -18,6 +18,12 @@ namespace FF
         private bool _isFireHeld;
         private bool _isFirePressed;
 
+        [Header("Grenade Charging")]
+        [SerializeField, Min(0.1f)] private float grenadeMinThrowSpeed = 8f;
+        [SerializeField, Min(0.1f)] private float grenadeMaxThrowSpeed = 22f;
+        [SerializeField, Min(0.05f)] private float grenadeChargeTime = 1.1f;
+        [SerializeField] private AnimationCurve grenadeChargeCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
         [Header("Camera Shake")]
         [SerializeField] private bool _cameraShakeEnabled = true;
         private float sustainedFireTime;
@@ -30,10 +36,15 @@ namespace FF
         private Transform _gunPivot;
 
         private float _currentCooldownProgress = 1f;
+        private float _currentChargeProgress;
+        private bool _isGrenadeWeapon;
+        private bool _isChargingGrenade;
 
         public event Action<float> OnCooldownChanged;
+        public event Action<float> OnGrenadeChargeChanged;
 
         public float CooldownProgress => _currentCooldownProgress;
+        public float GrenadeChargeProgress => _currentChargeProgress;
 
         #region Initialization
         private void Awake()
@@ -59,6 +70,8 @@ namespace FF
             _muzzle = muzzleTransform;
             _ejectPos = eject;
             _currentSpread = _weapon.baseSpread;
+            _isGrenadeWeapon = _weapon && _weapon.bulletPrefab && _weapon.bulletPrefab.TryGetComponent<GrenadeProjectile>(out _);
+            SetGrenadeChargeProgress(0f);
 
             SetCooldownProgress(1f);
 
@@ -104,6 +117,7 @@ namespace FF
             if (_weapon == null || _muzzle == null)
             {
                 SetCooldownProgress(1f);
+                SetGrenadeChargeProgress(0f);
                 return;
             }
 
@@ -133,24 +147,14 @@ namespace FF
                 interval = _weapon.fireCooldown / rpmMultiplier;
             }
 
-            if (_fireTimer >= interval)
+            if (_isGrenadeWeapon)
             {
-                if (!_weapon.isAuto && _isFirePressed)
-                {
-                    _fireTimer = 0f;
-                    _isFirePressed = false;
-                    Shoot();
-                }
-
-                if (_weapon.isAuto && _isFireHeld)
-                {
-                    _fireTimer = 0f;
-                    Shoot();
-                }
+                HandleGrenadeCharging(interval);
             }
-
-            float cooldownFraction = Mathf.Clamp01(_fireTimer / interval);
-            SetCooldownProgress(cooldownFraction);
+            else
+            {
+                HandleStandardFiring(interval);
+            }
 
             float movementSpeed = _playerBody ? _playerBody.linearVelocity.magnitude : 0f;
             bool isMoving = movementSpeed > 0.1f;
@@ -167,7 +171,7 @@ namespace FF
         }
 
         #region Recoil & Shooting
-        private void Shoot()
+        private void Shoot(float? grenadeSpeedOverride = null)
         {
             _currentSpread += _weapon.spreadIncreasePerShot;
 
@@ -185,7 +189,7 @@ namespace FF
 
             SpawnEjectParticles();
 
-            bool launchedGrenade = TryLaunchGrenade(spreadRotation);
+            bool launchedGrenade = TryLaunchGrenade(spreadRotation, grenadeSpeedOverride);
             if (!launchedGrenade)
             {
                 SpawnStandardBullet(spreadRotation);
@@ -238,7 +242,7 @@ namespace FF
             }
         }
 
-        private bool TryLaunchGrenade(Quaternion spreadRotation)
+        private bool TryLaunchGrenade(Quaternion spreadRotation, float? speedOverride = null)
         {
             if (!_weapon.bulletPrefab)
             {
@@ -264,7 +268,7 @@ namespace FF
             float volume = _audioSource ? _audioSource.volume : 1f;
             float pitch = _audioSource ? _audioSource.pitch : 1f;
 
-            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch);
+            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch, null, speedOverride);
             return true;
         }
 
@@ -318,6 +322,79 @@ namespace FF
             _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, Time.deltaTime * _weapon.recoilRecoverySpeed);
         }
         #endregion Recoil & Shooting
+
+        #region Grenade Charging
+        private void HandleStandardFiring(float interval)
+        {
+            if (_fireTimer >= interval)
+            {
+                if (!_weapon.isAuto && _isFirePressed)
+                {
+                    _fireTimer = 0f;
+                    _isFirePressed = false;
+                    Shoot();
+                }
+
+                if (_weapon.isAuto && _isFireHeld)
+                {
+                    _fireTimer = 0f;
+                    Shoot();
+                }
+            }
+
+            float cooldownFraction = Mathf.Clamp01(_fireTimer / interval);
+            SetCooldownProgress(cooldownFraction);
+        }
+
+        private void HandleGrenadeCharging(float interval)
+        {
+            if (_fireTimer < interval)
+            {
+                _isChargingGrenade = false;
+                SetGrenadeChargeProgress(0f);
+                SetCooldownProgress(Mathf.Clamp01(_fireTimer / interval));
+                return;
+            }
+
+            SetCooldownProgress(1f);
+
+            if (_isFireHeld)
+            {
+                if (!_isChargingGrenade)
+                {
+                    _isChargingGrenade = true;
+                    SetGrenadeChargeProgress(0f);
+                }
+
+                float chargeDelta = grenadeChargeTime > 0.001f
+                    ? Time.deltaTime / grenadeChargeTime
+                    : 1f;
+                SetGrenadeChargeProgress(_currentChargeProgress + chargeDelta);
+            }
+            else if (_isChargingGrenade)
+            {
+                float curved = grenadeChargeCurve != null
+                    ? grenadeChargeCurve.Evaluate(_currentChargeProgress)
+                    : _currentChargeProgress;
+                float throwSpeed = Mathf.Lerp(grenadeMinThrowSpeed, grenadeMaxThrowSpeed, Mathf.Clamp01(curved));
+                _fireTimer = 0f;
+                _isFirePressed = false;
+                _isChargingGrenade = false;
+                Shoot(throwSpeed);
+                SetGrenadeChargeProgress(0f);
+            }
+            else
+            {
+                SetGrenadeChargeProgress(0f);
+            }
+        }
+
+        private void SetGrenadeChargeProgress(float progress)
+        {
+            _currentChargeProgress = Mathf.Clamp01(progress);
+            OnGrenadeChargeChanged?.Invoke(_currentChargeProgress);
+        }
+        #endregion Grenade Charging
 
         #region Cooldown
         private void SetCooldownProgress(float value)
