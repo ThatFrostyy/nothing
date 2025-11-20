@@ -9,6 +9,7 @@ namespace FF
     {
         [SerializeField] GameObject panel;
         [SerializeField] Button aBtn, bBtn, cBtn;
+        [SerializeField] TMPro.TMP_Text aTitle, bTitle, cTitle;
         [SerializeField] TMPro.TMP_Text aTxt, bTxt, cTxt;
         [SerializeField] TMPro.TMP_Text upgradesRemainingText;
 
@@ -28,9 +29,15 @@ namespace FF
         public void Show(Upgrade A, Upgrade B, Upgrade C, Action<Upgrade> onPick, int pendingUpgrades)
         {
             a = A; b = B; c = C; callback = onPick;
-            aTxt.text = $"{A.Title}\n{A.Description}";
-            bTxt.text = $"{B.Title}\n{B.Description}";
-            cTxt.text = $"{C.Title}\n{C.Description}";
+
+            aTitle.text = $"{A.Title}\n";
+            bTitle.text = $"{B.Title}\n";
+            cTitle.text = $"{C.Title}\n";
+
+            aTxt.text = $"{A.Description}";
+            bTxt.text = $"{B.Description}";
+            cTxt.text = $"{C.Description}";
+
             panel.SetActive(true);
 
             if (upgradesRemainingText)
