@@ -510,7 +510,7 @@ namespace FF
 
             if (weaponNameText)
             {
-                weaponNameText.text = $"Weapon: {weaponLabel}";
+                weaponNameText.text = $"{weaponLabel}";
             }
 
             UpdateWeaponHotbar();

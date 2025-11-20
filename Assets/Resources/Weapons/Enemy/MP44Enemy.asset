@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
-  m_Name: MP44
+  m_Name: MP44Enemy
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
   weaponName: MP-44
   fireSFX: {fileID: 8300000, guid: c960eaae77f8e5a47875f670d30ecaa5, type: 3}

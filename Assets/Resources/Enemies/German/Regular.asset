@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Regular
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
-  - {fileID: 7386967301448027551, guid: 3d5045b0b6d64fb45bdb17def63bb84a, type: 3}
+  - {fileID: 6707323173478319066, guid: c1b1eef79dac881449c365c2f9167731, type: 3}
   startWave: 1
   endWave: -1
   spawnInterval: 1
