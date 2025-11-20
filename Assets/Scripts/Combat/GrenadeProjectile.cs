@@ -195,7 +195,11 @@ namespace FF
 
             ApplyExplosionDamage(position);
             ShockwaveUI.Trigger(position, Mathf.Clamp(explosionRadius / 4f, 0.35f, 1.5f));
-            CameraShake.Shake(0.18f, 0.25f);
+
+            float shakeScale = Mathf.InverseLerp(1.5f, 4f, explosionRadius);
+            float shakeDuration = Mathf.Lerp(0.15f, 0.32f, shakeScale);
+            float shakeIntensity = Mathf.Lerp(0.2f, 0.45f, shakeScale);
+            CameraShake.Shake(shakeDuration, shakeIntensity);
 
             if (_poolToken != null)
             {
