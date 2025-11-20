@@ -33,6 +33,9 @@ namespace FF
             _camera = _camera ? _camera : Camera.main;
             _collider = GetComponent<Collider2D>();
             _upgradeManager = _upgradeManager ? _upgradeManager : GetComponent<UpgradeManager>();
+
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
         }
 
         private void OnEnable()

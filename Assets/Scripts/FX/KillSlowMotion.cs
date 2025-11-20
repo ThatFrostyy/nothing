@@ -149,7 +149,7 @@ namespace FF
             _bannerText = bannerGo.AddComponent<TextMeshProUGUI>();
             _bannerText.alignment = TextAlignmentOptions.Center;
             _bannerText.fontSize = 72f;
-            _bannerText.enableWordWrapping = false;
+            _bannerText.textWrappingMode = TextWrappingModes.NoWrap;
             _bannerText.color = bannerColor;
             _bannerText.text = string.Empty;
 

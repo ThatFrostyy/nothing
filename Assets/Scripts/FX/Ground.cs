@@ -1,10 +1,16 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Ground : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private Collider2D _boundsCollider;
+
+    [Header("Environment Spawning")]
+    [SerializeField] private List<GameObject> environmentPrefabs; // bushes, trees, etc.
+    [SerializeField, Min(0)] private int spawnCount = 25;
+    [SerializeField, Min(0f)] private float spawnPadding = 1f;
 
     private Bounds _worldBounds;
 
@@ -26,9 +32,11 @@ public class Ground : MonoBehaviour
         CacheBounds();
     }
 
-    void OnEnable()
+    void OnEnable() => CacheBounds();
+
+    void Start()
     {
-        CacheBounds();
+        SpawnEnvironment();
     }
 
     void OnDestroy()
@@ -39,12 +47,39 @@ public class Ground : MonoBehaviour
         }
     }
 
+    // --- NEW: Random spawn inside bounds ---
+    private void SpawnEnvironment()
+    {
+        if (environmentPrefabs == null || environmentPrefabs.Count == 0) return;
+
+        for (int i = 0; i < spawnCount; i++)
+        {
+            GameObject prefab = environmentPrefabs[Random.Range(0, environmentPrefabs.Count)];
+            Vector2 spawnPos = GetRandomPointInsideBounds(spawnPadding);
+
+            Instantiate(prefab, spawnPos, Quaternion.identity, transform);
+        }
+    }
+
+    private Vector2 GetRandomPointInsideBounds(float padding)
+    {
+        Vector2 min = (Vector2)_worldBounds.min;
+        Vector2 max = (Vector2)_worldBounds.max;
+
+        min += Vector2.one * padding;
+        max -= Vector2.one * padding;
+
+        return new Vector2(
+            Random.Range(min.x, max.x),
+            Random.Range(min.y, max.y)
+        );
+    }
+
+    // --- Your existing clamp logic ---
     public Vector2 ClampPoint(Vector2 worldPoint, Vector2 padding)
     {
         if (_worldBounds.size == Vector3.zero)
-        {
             return worldPoint;
-        }
 
         padding = new Vector2(Mathf.Max(padding.x, 0f), Mathf.Max(padding.y, 0f));
 
@@ -88,16 +123,10 @@ public class Ground : MonoBehaviour
     private void CacheBounds()
     {
         if (_spriteRenderer && _spriteRenderer.sprite)
-        {
             _worldBounds = _spriteRenderer.bounds;
-        }
         else if (_boundsCollider)
-        {
             _worldBounds = _boundsCollider.bounds;
-        }
         else
-        {
             _worldBounds = new Bounds(transform.position, Vector3.zero);
-        }
     }
 }

@@ -33,7 +33,6 @@ namespace FF
             }
 
             _text.alignment = TextAlignmentOptions.Center;
-            _text.enableKerning = true;
             _text.sortingOrder = 32000;
             _text.fontSize = baseFontSize;
             _text.outlineWidth = 0.12f;
@@ -46,7 +45,7 @@ namespace FF
             }
         }
 
-        public void Play(Vector3 worldPosition, int amount, Color color, float sizeMultiplier = 1f)
+        public void Play(Vector3 worldPosition, int amount, Color color, float sizeMultiplier = 0)
         {
             transform.position = worldPosition + new Vector3(
                 Random.Range(-spawnJitter.x, spawnJitter.x),
@@ -92,7 +91,7 @@ namespace FF
                 Color c = _color;
                 c.a *= alpha;
                 _text.color = c;
-                transform.localScale = Vector3.one * scale * _scaleMultiplier;
+                transform.localScale = _scaleMultiplier * scale * Vector3.one;
             }
         }
 

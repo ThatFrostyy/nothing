@@ -77,7 +77,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 691340329
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: f9c7ff2bc079f0040a90b1fdf20f8715, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -199,6 +199,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d221d6788c88f149a3c30cdd493439e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.AutoShooter
+  grenadeMinThrowSpeed: 8
+  grenadeMaxThrowSpeed: 22
+  grenadeChargeTime: 1.1
+  grenadeChargeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   _cameraShakeEnabled: 0
   maxSustainedShake: 0.15
 --- !u!114 &8399450370093803168
@@ -432,12 +459,18 @@ MonoBehaviour:
   weaponManager: {fileID: 8399450370093803168}
   autoShooter: {fileID: 6702371812173516594}
   gunPivot: {fileID: 952101190178741876}
+  gunOffsetRight: {x: 0.35, y: -0.1, z: 0}
+  gunOffsetLeft: {x: -0.35, y: -0.1, z: 0}
   enemyVisual: {fileID: 7158890004339175380}
   walkBobFrequency: 8
   walkBobAmplitude: 0.12
   walkSquashAmount: 0.08
   idleSwayFrequency: 1.5
   idleSwayAmplitude: 6
+  moveWhileShootingChance: 0.4
+  moveWhileShootingSpeedMultiplier: 0.55
+  weaveFrequency: 0.9
+  weaveStrength: 0.35
   helmetAnchor: {fileID: 0}
   helmetPrefabs: []
   chanceForNoHelmet: 0.25
