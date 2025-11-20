@@ -70,6 +70,11 @@ namespace FF
         [SerializeField] private Color emptyWeaponColor = new(1f, 1f, 1f, 0.25f);
         [SerializeField] private Color activeSlotHighlight = Color.white;
         [SerializeField] private Color inactiveSlotHighlight = new(1f, 1f, 1f, 0.35f);
+        [SerializeField, Min(0f)] private float weaponNameFadeInDuration = 0.2f;
+        [SerializeField, Min(0f)] private float weaponNameHoldDuration = 1.2f;
+        [SerializeField, Min(0f)] private float weaponNameFadeOutDuration = 0.35f;
+        [SerializeField, Min(0f)] private float slotScaleAnimationTime = 0.12f;
+        [SerializeField, Min(1f)] private float slotSelectedScale = 1.12f;
 
         private AudioSource uiAudioSource;
         private AudioSource heartbeatSource;
@@ -101,6 +106,10 @@ namespace FF
         private Vector2 xpPulseBaseAnchoredPosition = Vector2.zero;
         private Vector3 healthPulseScaleVelocity = Vector3.zero;
         private Vector3 xpPulseScaleVelocity = Vector3.zero;
+        private Color weaponNameBaseColor = Color.white;
+        private Coroutine weaponNameRoutine;
+        private Vector3[] slotBaseScales = Array.Empty<Vector3>();
+        private Coroutine[] slotScaleRoutines = Array.Empty<Coroutine>();
 
         void Awake()
         {
@@ -157,6 +166,13 @@ namespace FF
             xpPulseBaseScale = xpPulseTarget ? xpPulseTarget.localScale : Vector3.one;
             healthPulseBaseAnchoredPosition = healthPulseTarget ? healthPulseTarget.anchoredPosition : Vector2.zero;
             xpPulseBaseAnchoredPosition = xpPulseTarget ? xpPulseTarget.anchoredPosition : Vector2.zero;
+
+            if (weaponNameText)
+            {
+                weaponNameBaseColor = weaponNameText.color;
+            }
+
+            CacheSlotBaseScales();
 
             healthFillCurrent = healthFillImage ? healthFillImage.fillAmount : 0f;
             healthFillTarget = healthFillCurrent;
@@ -510,7 +526,7 @@ namespace FF
 
             if (weaponNameText)
             {
-                weaponNameText.text = $"{weaponLabel}";
+                StartWeaponNameFade(weaponLabel);
             }
 
             UpdateWeaponHotbar();
@@ -545,8 +561,140 @@ namespace FF
                 {
                     bool isSelected = weaponManager && weaponManager.CurrentSlotIndex == i;
                     weaponSlotHighlights[i].color = isSelected ? activeSlotHighlight : inactiveSlotHighlight;
+                    AnimateSlotScale(i, isSelected);
                 }
             }
+        }
+
+        void StartWeaponNameFade(string label)
+        {
+            if (!weaponNameText)
+            {
+                return;
+            }
+
+            if (weaponNameRoutine != null)
+            {
+                StopCoroutine(weaponNameRoutine);
+            }
+
+            weaponNameRoutine = StartCoroutine(WeaponNameFadeRoutine(label));
+        }
+
+        System.Collections.IEnumerator WeaponNameFadeRoutine(string label)
+        {
+            weaponNameText.text = label;
+
+            Color startColor = weaponNameBaseColor;
+            startColor.a = 0f;
+            weaponNameText.color = startColor;
+
+            float elapsed = 0f;
+            while (elapsed < weaponNameFadeInDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = weaponNameFadeInDuration <= 0f ? 1f : Mathf.Clamp01(elapsed / weaponNameFadeInDuration);
+                weaponNameText.color = Color.Lerp(startColor, weaponNameBaseColor, t);
+                yield return null;
+            }
+
+            weaponNameText.color = weaponNameBaseColor;
+
+            if (weaponNameHoldDuration > 0f)
+            {
+                yield return new WaitForSeconds(weaponNameHoldDuration);
+            }
+
+            elapsed = 0f;
+            Color targetColor = weaponNameBaseColor;
+            targetColor.a = 0f;
+            while (elapsed < weaponNameFadeOutDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = weaponNameFadeOutDuration <= 0f ? 1f : Mathf.Clamp01(elapsed / weaponNameFadeOutDuration);
+                weaponNameText.color = Color.Lerp(weaponNameBaseColor, targetColor, t);
+                yield return null;
+            }
+
+            weaponNameText.color = targetColor;
+            weaponNameRoutine = null;
+        }
+
+        void CacheSlotBaseScales()
+        {
+            int slotVisualCount = Mathf.Max(
+                weaponSlotIcons != null ? weaponSlotIcons.Length : 0,
+                weaponSlotHighlights != null ? weaponSlotHighlights.Length : 0
+            );
+
+            slotBaseScales = new Vector3[slotVisualCount];
+            slotScaleRoutines = new Coroutine[slotVisualCount];
+
+            for (int i = 0; i < slotVisualCount; i++)
+            {
+                Transform slotTransform = ResolveSlotTransform(i);
+                slotBaseScales[i] = slotTransform ? slotTransform.localScale : Vector3.one;
+            }
+        }
+
+        Transform ResolveSlotTransform(int index)
+        {
+            if (index < 0)
+            {
+                return null;
+            }
+
+            if (weaponSlotHighlights != null && index < weaponSlotHighlights.Length && weaponSlotHighlights[index])
+            {
+                return weaponSlotHighlights[index].rectTransform;
+            }
+
+            if (weaponSlotIcons != null && index < weaponSlotIcons.Length && weaponSlotIcons[index])
+            {
+                return weaponSlotIcons[index].rectTransform;
+            }
+
+            return null;
+        }
+
+        void AnimateSlotScale(int index, bool isSelected)
+        {
+            if (index < 0 || index >= slotBaseScales.Length)
+            {
+                return;
+            }
+
+            Transform targetTransform = ResolveSlotTransform(index);
+            if (!targetTransform)
+            {
+                return;
+            }
+
+            if (slotScaleRoutines[index] != null)
+            {
+                StopCoroutine(slotScaleRoutines[index]);
+            }
+
+            Vector3 baseScale = slotBaseScales[index];
+            Vector3 targetScale = isSelected ? baseScale * slotSelectedScale : baseScale;
+            slotScaleRoutines[index] = StartCoroutine(SlotScaleRoutine(targetTransform, targetScale, index));
+        }
+
+        System.Collections.IEnumerator SlotScaleRoutine(Transform target, Vector3 targetScale, int index)
+        {
+            Vector3 startScale = target.localScale;
+            float elapsed = 0f;
+
+            while (elapsed < slotScaleAnimationTime)
+            {
+                elapsed += Time.deltaTime;
+                float t = slotScaleAnimationTime <= 0f ? 1f : Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / slotScaleAnimationTime));
+                target.localScale = Vector3.Lerp(startScale, targetScale, t);
+                yield return null;
+            }
+
+            target.localScale = targetScale;
+            slotScaleRoutines[index] = null;
         }
 
         void UpdateWaveDisplay()

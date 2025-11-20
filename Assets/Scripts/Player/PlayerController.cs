@@ -13,10 +13,14 @@ namespace FF
         [SerializeField] private Transform _playerVisual;
         [SerializeField] private UpgradeManager _upgradeManager;
         [SerializeField] private WeaponManager _weaponManager;
+        [SerializeField] private Weapon _startingWeapon;
 
         [Header("Movement Settings")]
         [SerializeField] private float _acceleration = 0.18f;
         [SerializeField] private float _bodyTiltDegrees = 15f;
+        [SerializeField] private float _tiltSmoothTime = 0.07f;
+        [SerializeField] private float _idleSwayFrequency = 6f;
+        [SerializeField] private float _idleSwayAmplitude = 1.2f;
 
         [Header("Bounds Settings")]
         [SerializeField] private float _boundsPadding = 0.05f;
@@ -26,6 +30,7 @@ namespace FF
         private Vector2 _moveInput;
         private Collider2D _collider;
         private bool _upgradeMenuOpen;
+        private float _tiltVelocity;
 
         private void Awake()
         {
@@ -38,6 +43,14 @@ namespace FF
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
+        }
+
+        private void Start()
+        {
+            if (_startingWeapon && _weaponManager)
+            {
+                _weaponManager.Equip(_startingWeapon);
+            }
         }
 
         private void OnEnable()
@@ -136,19 +149,24 @@ namespace FF
             float normalizedSpeed = speed / maxSpeed;
 
             float targetTilt = speed > 0.1f ? -_bodyTiltDegrees * normalizedSpeed : _bodyTiltDegrees * 0.3f;
-            if (speed > 0.01f)
+            if (_moveInput.sqrMagnitude > 0.01f)
             {
-                float sideTilt = Mathf.Clamp(velocity.normalized.x, -1f, 1f) * (_bodyTiltDegrees * 0.5f);
+                float sideTilt = Mathf.Clamp(_moveInput.normalized.x, -1f, 1f) * (_bodyTiltDegrees * 0.5f);
                 targetTilt += sideTilt;
             }
 
-            float currentZ = _playerVisual.localEulerAngles.z;
-            if (currentZ > 180f)
+            float idleBlend = 1f - Mathf.Clamp01(normalizedSpeed * 3f);
+            if (idleBlend > 0f)
             {
-                currentZ -= 360f;
+                targetTilt += Mathf.Sin(Time.time * _idleSwayFrequency) * _idleSwayAmplitude * idleBlend;
             }
 
-            float newZ = Mathf.Lerp(currentZ, targetTilt, 0.15f);
+            float newZ = Mathf.SmoothDampAngle(
+                _playerVisual.localEulerAngles.z,
+                targetTilt,
+                ref _tiltVelocity,
+                _tiltSmoothTime
+            );
             _playerVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
         }
         #endregion Animations
