@@ -105,9 +105,13 @@ namespace FF
         {
             if (isPickedUp) return;
 
-            if (other.TryGetComponent<WeaponManager>(out var wm))
+            if (!weaponData)
             {
-                wm.Equip(weaponData);
+                return;
+            }
+
+            if (other.TryGetComponent<WeaponManager>(out var wm) && wm.TryEquip(weaponData))
+            {
                 isPickedUp = true;
                 PlayPickupSound();
                 SpawnPickupFx();
