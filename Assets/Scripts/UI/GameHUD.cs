@@ -63,6 +63,14 @@ namespace FF
         [SerializeField] private AudioClip heartbeatClip;
         [SerializeField] private AudioClip xpFillLoopClip;
 
+        [Header("Weapon Hotbar")]
+        [SerializeField] private Image[] weaponSlotIcons = new Image[3];
+        [SerializeField] private Image[] weaponSlotHighlights = new Image[3];
+        [SerializeField] private Sprite emptyWeaponIcon;
+        [SerializeField] private Color emptyWeaponColor = new(1f, 1f, 1f, 0.25f);
+        [SerializeField] private Color activeSlotHighlight = Color.white;
+        [SerializeField] private Color inactiveSlotHighlight = new(1f, 1f, 1f, 0.35f);
+
         private AudioSource uiAudioSource;
         private AudioSource heartbeatSource;
         private AudioSource xpFillSource;
@@ -183,6 +191,7 @@ namespace FF
             if (weaponManager != null)
             {
                 weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
+                weaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
             }
 
             if (upgradeManager != null)
@@ -218,6 +227,7 @@ namespace FF
             if (weaponManager != null)
             {
                 weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+                weaponManager.OnInventoryChanged -= HandleWeaponInventoryChanged;
             }
 
             if (upgradeManager != null)
@@ -389,6 +399,11 @@ namespace FF
             UpdateWeaponDisplay(weapon);
         }
 
+        void HandleWeaponInventoryChanged()
+        {
+            UpdateWeaponHotbar();
+        }
+
         void HandleWaveStarted(int wave)
         {
             int displayWave = Mathf.Max(1, wave);
@@ -488,17 +503,50 @@ namespace FF
 
         void UpdateWeaponDisplay(Weapon weaponOverride = null)
         {
-            if (!weaponNameText)
-            {
-                return;
-            }
-
             Weapon weaponToShow = weaponOverride ? weaponOverride : weaponManager ? weaponManager.CurrentWeapon : null;
             string weaponLabel = weaponToShow && !string.IsNullOrEmpty(weaponToShow.weaponName)
                 ? weaponToShow.weaponName
                 : "--";
 
-            weaponNameText.text = $"Weapon: {weaponLabel}";
+            if (weaponNameText)
+            {
+                weaponNameText.text = $"Weapon: {weaponLabel}";
+            }
+
+            UpdateWeaponHotbar();
+        }
+
+        void UpdateWeaponHotbar()
+        {
+            int slotVisualCount = Mathf.Max(
+                weaponSlotIcons != null ? weaponSlotIcons.Length : 0,
+                weaponSlotHighlights != null ? weaponSlotHighlights.Length : 0
+            );
+
+            if (slotVisualCount == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < slotVisualCount; i++)
+            {
+                Weapon slotWeapon = weaponManager && i < weaponManager.SlotCount
+                    ? weaponManager.GetWeaponInSlot(i)
+                    : null;
+
+                if (weaponSlotIcons != null && i < weaponSlotIcons.Length && weaponSlotIcons[i])
+                {
+                    Sprite slotSprite = slotWeapon && slotWeapon.weaponIcon ? slotWeapon.weaponIcon : emptyWeaponIcon;
+                    weaponSlotIcons[i].sprite = slotSprite;
+                    weaponSlotIcons[i].color = slotWeapon ? Color.white : emptyWeaponColor;
+                }
+
+                if (weaponSlotHighlights != null && i < weaponSlotHighlights.Length && weaponSlotHighlights[i])
+                {
+                    bool isSelected = weaponManager && weaponManager.CurrentSlotIndex == i;
+                    weaponSlotHighlights[i].color = isSelected ? activeSlotHighlight : inactiveSlotHighlight;
+                }
+            }
         }
 
         void UpdateWaveDisplay()

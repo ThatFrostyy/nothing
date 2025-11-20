@@ -12,6 +12,7 @@ namespace FF
         [SerializeField] private Transform _gunPivot;
         [SerializeField] private Transform _playerVisual;
         [SerializeField] private UpgradeManager _upgradeManager;
+        [SerializeField] private WeaponManager _weaponManager;
 
         [Header("Movement Settings")]
         [SerializeField] private float _acceleration = 0.18f;
@@ -33,6 +34,7 @@ namespace FF
             _camera = _camera ? _camera : Camera.main;
             _collider = GetComponent<Collider2D>();
             _upgradeManager = _upgradeManager ? _upgradeManager : GetComponent<UpgradeManager>();
+            _weaponManager = _weaponManager ? _weaponManager : GetComponentInChildren<WeaponManager>();
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
@@ -182,6 +184,26 @@ namespace FF
             }
 
             _upgradeManager.TryOpenUpgradeMenu();
+        }
+
+        public void OnPrevious(InputValue value)
+        {
+            if (!value.isPressed || _weaponManager == null)
+            {
+                return;
+            }
+
+            _weaponManager.SelectPreviousSlot();
+        }
+
+        public void OnNext(InputValue value)
+        {
+            if (!value.isPressed || _weaponManager == null)
+            {
+                return;
+            }
+
+            _weaponManager.SelectNextSlot();
         }
         #endregion Input System Callbacks
 

@@ -13,8 +13,12 @@ namespace FF
         public AudioClip fireSFX;
         public GameObject muzzleFlash;
         public GameObject ejectParticles;
-        public float recoilAmount = 6f; 
+        public float recoilAmount = 6f;
         public float recoilRecoverySpeed = 10f;
+
+        [Header("UI")]
+        public Sprite weaponIcon;
+        public bool isSpecial;
 
         [Header("Prefabs & Assets")]
         public GameObject bulletPrefab;

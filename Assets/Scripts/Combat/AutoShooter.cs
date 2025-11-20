@@ -86,6 +86,16 @@ namespace FF
             NotifyCooldownChanged();
         }
 
+        public void ClearWeapon()
+        {
+            _weapon = null;
+            _muzzle = null;
+            _ejectPos = null;
+            _isGrenadeWeapon = false;
+            SetCooldownProgress(1f);
+            SetGrenadeChargeProgress(0f);
+        }
+
         public void SetFireHeld(bool isHeld)
         {
             if (isHeld)
