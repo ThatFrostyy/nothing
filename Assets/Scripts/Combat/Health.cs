@@ -35,6 +35,12 @@ namespace FF
             if (damageApplied > 0)
             {
                 OnDamaged?.Invoke(damageApplied);
+
+                if (TryGetComponent<Enemy>(out var enemy))
+                {
+                    bool emphasize = enemy.IsBoss || damageApplied >= Mathf.Max(10, maxHP * 0.35f);
+                    DamageNumberManager.ShowDamage(transform.position, damageApplied, emphasize);
+                }
             }
 
             OnHealthChanged?.Invoke(hp, maxHP);
