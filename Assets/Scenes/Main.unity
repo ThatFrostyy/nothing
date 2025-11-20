@@ -1011,7 +1011,7 @@ MonoBehaviour:
   spawnBuffer: 2
   maxSpawnAttempts: 8
   spawnCamera: {fileID: 1147590089}
-  bossWaveInterval: 5
+  bossWaveInterval: 10
   spawnNonBossDefinitionsDuringBossWave: 1
   defaultScaling:
     healthMultiplierByWave:
@@ -1227,8 +1227,11 @@ MonoBehaviour:
   spawnDefinitions:
   - {fileID: 11400000, guid: 4174eb15d6631e248a2c394c3b45ff15, type: 2}
   - {fileID: 11400000, guid: 76838362ef8b6be45ba745a92506de76, type: 2}
-  maxActiveNonBosses: 300
-  maxActiveBosses: 50
+  - {fileID: 11400000, guid: bd500877cb6bc8a4296df68454e22c68, type: 2}
+  - {fileID: 11400000, guid: ffe14a2bcce7a614c93d629a558beb8e, type: 2}
+  - {fileID: 11400000, guid: bd6bc3c20b4f3b446993e27e87c6571c, type: 2}
+  maxActiveNonBosses: 0
+  maxActiveBosses: 0
   maxActiveTotal: 0
   audioSource: {fileID: 322110425}
   fallbackSpawnClip: {fileID: 0}
@@ -8029,63 +8032,6 @@ Transform:
   - {fileID: 1147590090}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &9189716238370353752
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 15.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3796077446926676588, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4670520786986673882, guid: 10611e9bd10067340b08a734943f0066, type: 3}
-      propertyPath: m_Name
-      value: M24GrenadePickup
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 10611e9bd10067340b08a734943f0066, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -8103,4 +8049,3 @@ SceneRoots:
   - {fileID: 1756355925}
   - {fileID: 497791597}
   - {fileID: 483938635}
-  - {fileID: 9189716238370353752}

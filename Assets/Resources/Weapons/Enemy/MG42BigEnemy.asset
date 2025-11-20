@@ -10,24 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
-  m_Name: KP31
+  m_Name: MG42BigEnemy
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: Suomi KP-31
-  fireSFX: {fileID: 8300000, guid: da5607309e7e7664db52abffc2f9b550, type: 3}
+  weaponName: MG 42
+  fireSFX: {fileID: 8300000, guid: 53927b112fb025949ae0690991b6b739, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
   ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
-  recoilAmount: 9
+  recoilAmount: 6
   recoilRecoverySpeed: 10
-  weaponIcon: {fileID: 21300000, guid: 9be22d794900dd145bf3b09dfe95efb9, type: 3}
+  weaponIcon: {fileID: 21300000, guid: ed9fd6fc2f9bdd744bf4ef12f197392a, type: 3}
   isSpecial: 0
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
-  weaponPrefab: {fileID: 3752265850316741010, guid: 29ebbb06e81f07c4485e0e1d00f2c13f, type: 3}
-  rpm: 480
-  damage: 6
-  recoilKick: 5.5
+  weaponPrefab: {fileID: 3223184033403384928, guid: fee8c6a8ebc353340a026514c2d6bb34, type: 3}
+  rpm: 500
+  damage: 4
+  recoilKick: 7
   isAuto: 1
   fireCooldown: 0.1
-  baseSpread: 2
+  baseSpread: 3
   maxSpread: 8
   spreadIncreasePerShot: 0.5
   spreadRecoverySpeed: 2
