@@ -128,13 +128,17 @@ namespace FF
         {
             if (!_playerVisual) return;
 
-            float speed = _rigidbody.linearVelocity.magnitude;
+            Vector2 velocity = _rigidbody.linearVelocity;
+            float speed = velocity.magnitude;
             float maxSpeed = Mathf.Max(_stats.GetMoveSpeed(), Mathf.Epsilon);
             float normalizedSpeed = speed / maxSpeed;
 
             float targetTilt = speed > 0.1f ? -_bodyTiltDegrees * normalizedSpeed : _bodyTiltDegrees * 0.3f;
-            float sideTilt = _moveInput.x * (_bodyTiltDegrees * 0.5f);
-            targetTilt += sideTilt;
+            if (speed > 0.01f)
+            {
+                float sideTilt = Mathf.Clamp(velocity.normalized.x, -1f, 1f) * (_bodyTiltDegrees * 0.5f);
+                targetTilt += sideTilt;
+            }
 
             float currentZ = _playerVisual.localEulerAngles.z;
             if (currentZ > 180f)
