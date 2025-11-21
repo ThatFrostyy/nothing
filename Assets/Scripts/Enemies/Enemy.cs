@@ -102,6 +102,7 @@ namespace FF
         private bool wasInShootZone = false;
         private float knockbackTimer = 0f;
         private Vector2 knockbackVelocity;
+        private Vector2 _lastAimDirection = Vector2.right;
 
         private const float FacingDeadZone = 0.05f;
 
@@ -665,16 +666,27 @@ namespace FF
             Vector2 dir = _player.position - gunPivot.position;
             if (dir.sqrMagnitude < 0.001f) return;
 
-            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            Vector2 aimDirection = dir.normalized;
+            if (Mathf.Abs(aimDirection.x) <= FacingDeadZone * 0.5f)
+            {
+                float preservedSign = Mathf.Approximately(_lastAimDirection.x, 0f)
+                    ? Mathf.Sign(Mathf.Approximately(aimDirection.y, 0f) ? 1f : aimDirection.y)
+                    : Mathf.Sign(_lastAimDirection.x);
+                aimDirection.x = preservedSign * FacingDeadZone;
+            }
+
+            _lastAimDirection = aimDirection;
+
+            float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
 
             // Rotate gun
             gunPivot.rotation = Quaternion.Euler(0f, 0f, angle);
 
             // Detect facing direction
             bool facingLeft = _isFacingLeft;
-            if (Mathf.Abs(dir.x) > FacingDeadZone)
+            if (Mathf.Abs(aimDirection.x) > FacingDeadZone)
             {
-                facingLeft = dir.x < 0f;
+                facingLeft = aimDirection.x < 0f;
             }
 
             _isFacingLeft = facingLeft;

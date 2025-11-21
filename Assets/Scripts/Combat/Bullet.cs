@@ -15,9 +15,12 @@ namespace FF
         float t;
         string teamTag;
         PoolToken poolToken;
+        float baseSpeed;
 
         public void SetDamage(int d) => damage = d;
         public void SetOwner(string tag) => teamTag = tag;
+        public void SetSpeed(float newSpeed) => speed = Mathf.Max(0.01f, newSpeed);
+        public float BaseSpeed => baseSpeed;
 
         void Awake()
         {
@@ -26,6 +29,8 @@ namespace FF
             {
                 poolToken = gameObject.AddComponent<PoolToken>();
             }
+
+            baseSpeed = Mathf.Max(0.01f, speed);
         }
 
         void Update()
@@ -76,6 +81,7 @@ namespace FF
             t = 0f;
             damage = 0;
             teamTag = null;
+            speed = baseSpeed;
         }
         #endregion Pooling
     }
