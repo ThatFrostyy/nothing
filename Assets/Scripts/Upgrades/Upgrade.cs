@@ -18,7 +18,8 @@ namespace FF
             ProjectileSpeedMult,
             CritChance,
             CritDamageMult,
-            MaxHealthMult
+            MaxHealthMult,
+            Heal
         }
 
         public enum Rarity { Common, Uncommon, Rare, Epic, Legendary }
@@ -28,6 +29,7 @@ namespace FF
         [Min(0f)] public float Cap = 0f;
         [Min(0f)] public float MinValue = 0f;
         [Min(0)] public int MaxStacks = 0;
+        [Min(0)] public int HealAmount = 25;
         [SerializeField] private Rarity rarity = Rarity.Common;
         [SerializeField, Min(0)] private int rarityWeightOverride = 0;
 
@@ -54,6 +56,8 @@ namespace FF
                 case Kind.CritChance: return !IsAtOrBeyondCap(stats.CritChance, Cap > 0f ? Cap : 1f);
                 case Kind.CritDamageMult: return !IsAtOrBeyondCap(stats.CritDamageMult, Cap);
                 case Kind.MaxHealthMult: return stats.GetHealth() && !IsAtOrBeyondCap(stats.MaxHealthMult, Cap);
+                case Kind.Heal:
+                    return stats.GetHealth() && HealAmount > 0 && stats.GetHealth().CurrentHP < stats.GetHealth().MaxHP;
                 default: return true;
             }
         }
@@ -89,7 +93,13 @@ namespace FF
                     stats.MaxHealthMult = Mathf.Max(0f, newHealthMult);
                     if (stats.GetHealth())
                     {
-                        stats.GetHealth().ScaleMaxHP(stats.MaxHealthMult, true);
+                        stats.GetHealth().ScaleMaxHP(stats.MaxHealthMult, false);
+                    }
+                    break;
+                case Kind.Heal:
+                    if (stats.GetHealth() && HealAmount > 0)
+                    {
+                        stats.GetHealth().Heal(Mathf.Max(0, HealAmount));
                     }
                     break;
             }

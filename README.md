@@ -21,3 +21,16 @@
 
 ## Audio pool usage
 - Weapon fire now routes through `AudioPlaybackPool` automatically. No scene setup is required, but you can cap simultaneous sources at runtime via `AudioPlaybackPool.SetMaxSources(limit)` if you need stricter budgeting.
+
+## Main menu and scene switching setup
+- A barebones `Assets/Scenes/MainMenu.unity` scene has been added and is already in **File > Build Settings** ahead of `Main.unity` so it will launch first.
+- Drop a `SceneFlowController` on an empty GameObject in that scene to wire up buttons: call `LoadGameplayScene()` for your Play button, `LoadMainMenuScene()` for back/quit buttons, and `QuitGame()` for exiting builds.
+- Add an `EventSystem` (already present) and your own Canvas/UI to design the menu; `MainMenuUI` can toggle a character-select panel and pass through start/quit actions.
+
+## Character selection menu
+- Create `FF/Character` assets (place them under `Assets/Resources/Characters` to keep them grouped) to describe each selectable character: set a display name, description, ability id, and optional portrait.
+- Add those assets to a `CharacterSelectionUI` component in the main menu; hook its Next/Previous/Confirm methods to your UI buttons.
+- The chosen `CharacterDefinition` is stored in `CharacterSelectionState.SelectedCharacter` and persists across scene loads so gameplay scripts can read the `AbilityId` later.
+
+## Healing upgrade
+- A new "Field Medic" upgrade heals the player for 35 HP without granting bonus stats. The Max Health upgrade now raises max HP without refilling current health to avoid accidental heals.

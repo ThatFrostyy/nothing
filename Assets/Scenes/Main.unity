@@ -6937,6 +6937,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 92bab5dec5398a44aa17afedef956f83, type: 2}
   - {fileID: 11400000, guid: a1f0644a5653a4543b409d340bd308d5, type: 2}
   - {fileID: 11400000, guid: 93e55faaf9c56ed49a43b899ec7c8016, type: 2}
+  - {fileID: 11400000, guid: d90c6410465143d3a0bde11e01a409de, type: 2}
   stats: {fileID: 1207903155}
   wallet: {fileID: 1207903163}
   ui: {fileID: 1333906377}
