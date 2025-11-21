@@ -335,7 +335,7 @@ MonoBehaviour:
   distanceBuffer: 2
   fireRateMultiplier: 1
   damageMultiplier: 1
-  movementAccuracyPenalty: 1.3
+  movementAccuracyPenalty: 1.5
   avoidanceRadius: 0.9
   avoidancePush: 2.7
   avoidanceResponsiveness: 0.65
@@ -379,7 +379,7 @@ MonoBehaviour:
   idleSwayAmplitude: 6
   moveWhileShootingChance: 0.35
   moveWhileShootingSpeedMultiplier: 0.5
-  weaveFrequency: 1.4
+  weaveFrequency: 1.2
   weaveStrength: 0.15
   helmetAnchor: {fileID: 7556550191872587613}
   helmetPrefabs:

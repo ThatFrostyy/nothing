@@ -300,9 +300,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55305ce63bd979641b6f39e9a8f08901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.FlankerMovement
-  flankRadius: 7
+  flankRadius: 8
   flankAngle: 90
-  repositionSpeed: 1
+  repositionSpeed: 1.5
   attackSpeed: 1.5
 --- !u!1 &1856882074656435891
 GameObject:

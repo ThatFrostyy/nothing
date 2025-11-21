@@ -427,7 +427,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3038,7 +3038,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3342,7 +3342,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -3661,7 +3661,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 2100000, guid: 07ae125ff00a5644e94342b6e66e274a, type: 2}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -4189,9 +4189,13 @@ MonoBehaviour:
   _gunPivot: {fileID: 125305192}
   _playerVisual: {fileID: 507405423}
   _upgradeManager: {fileID: 1885342134}
-  _weaponManager: {fileID: 0}
+  _weaponManager: {fileID: 1207903161}
+  _startingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
   _acceleration: 0.18
   _bodyTiltDegrees: 10
+  _tiltSmoothTime: 0.07
+  _idleSwayFrequency: 6
+  _idleSwayAmplitude: 1.2
   _boundsPadding: 0.05
 --- !u!70 &1207903157
 CapsuleCollider2D:
@@ -5048,6 +5052,11 @@ MonoBehaviour:
   emptyWeaponColor: {r: 0.25490198, g: 0.023529412, b: 0.023529412, a: 0.8627451}
   activeSlotHighlight: {r: 0.36862746, g: 0.36862746, b: 0.36862746, a: 0.8627451}
   inactiveSlotHighlight: {r: 0.16470589, g: 0.16470589, b: 0.16470589, a: 0.8627451}
+  weaponNameFadeInDuration: 0.2
+  weaponNameHoldDuration: 1.2
+  weaponNameFadeOutDuration: 0.35
+  slotScaleAnimationTime: 0.12
+  slotSelectedScale: 1.12
 --- !u!222 &1337724838
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -6932,71 +6941,6 @@ MonoBehaviour:
   normalColor: {r: 1, g: 0.366525, b: 0.06132078, a: 1}
   highlightColor: {r: 1, g: 0, b: 0, a: 1}
   emphasizedScale: 0.5
---- !u!1001 &1910549644
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 3.95924
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.1899
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2390863069891480433, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3120436423263530663, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_Name
-      value: ThompsonPickup
-      objectReference: {fileID: 0}
-    - target: {fileID: 5997343494060177822, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5997343494060177822, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
-      propertyPath: m_Intensity
-      value: 0.5
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
 --- !u!1 &1914320513
 GameObject:
   m_ObjectHideFlags: 0
@@ -8045,7 +7989,6 @@ SceneRoots:
   - {fileID: 2091572886}
   - {fileID: 1207903152}
   - {fileID: 562780113}
-  - {fileID: 1910549644}
   - {fileID: 1756355925}
   - {fileID: 497791597}
   - {fileID: 483938635}
