@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98be82d2fe4824c4fae56dac9cacea6b, type: 3}
-  m_Name: Greased Mechanism
+  m_Name: Fresh Barrel
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
-  Title: Greased Mechanism
-  Description: <b>Your weapons fire rate is increased by <color=#D17A22>+10%</color></b>
-  Type: 1
+  Title: Fresh Barrel
+  Description: <b>Your weapons cooldown rate is <color=#0060BC>+10%</color> faster.</b>
+  Type: 3
   Magnitude: 0.1
-  Cap: 0
+  Cap: 0.1
   MinValue: 0
-  MaxStacks: 8
-  rarity: 0
+  MaxStacks: 5
+  rarity: 1
   rarityWeightOverride: 0

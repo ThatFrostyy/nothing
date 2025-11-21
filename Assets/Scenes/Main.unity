@@ -1230,6 +1230,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: bd500877cb6bc8a4296df68454e22c68, type: 2}
   - {fileID: 11400000, guid: ffe14a2bcce7a614c93d629a558beb8e, type: 2}
   - {fileID: 11400000, guid: bd6bc3c20b4f3b446993e27e87c6571c, type: 2}
+  initialSpawnInterval: 0.6
+  minimumSpawnInterval: 0.18
+  spawnRampDuration: 1.25
+  sideSwapDelay: 1.15
+  packSpawnBurst: 3
   maxActiveNonBosses: 0
   maxActiveBosses: 0
   maxActiveTotal: 0
@@ -4169,9 +4174,15 @@ MonoBehaviour:
   FireRateRPM: 450
   Damage: 10
   MovementAccuracyPenalty: 1.5
+  health: {fileID: 1207903153}
+  MaxHealthMult: 1
   MoveMult: 1
   FireRateMult: 1
   DamageMult: 1
+  ProjectileSpeedMult: 1
+  FireCooldownMult: 1
+  CritChance: 0
+  CritDamageMult: 1
 --- !u!114 &1207903156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4190,7 +4201,7 @@ MonoBehaviour:
   _playerVisual: {fileID: 507405423}
   _upgradeManager: {fileID: 1885342134}
   _weaponManager: {fileID: 1207903161}
-  _startingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
+  _startingWeapon: {fileID: 11400000, guid: 2b9ec3c6f8023bb4fb57fb21b7bbcd95, type: 2}
   _acceleration: 0.18
   _bodyTiltDegrees: 10
   _tiltSmoothTime: 0.07
@@ -5221,7 +5232,7 @@ CanvasGroup:
   m_Enabled: 1
   m_Alpha: 1
   m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!1 &1397370914
 GameObject:
@@ -5693,7 +5704,7 @@ CanvasGroup:
   m_Enabled: 1
   m_Alpha: 1
   m_Interactable: 1
-  m_BlocksRaycasts: 1
+  m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
 --- !u!1 &1471313201
 GameObject:
@@ -6921,10 +6932,15 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 788f62a067cfa8248aebde662e8515d7, type: 2}
   - {fileID: 11400000, guid: ed90a2abcf030d848acc39c81fbc917a, type: 2}
   - {fileID: 11400000, guid: e8e297da8e036c643af433e1df631fc4, type: 2}
+  - {fileID: 11400000, guid: 38fa9f9751c1ad249b5f55e1c85affd2, type: 2}
+  - {fileID: 11400000, guid: d211c4023e33e5b4ca243dab46214f88, type: 2}
+  - {fileID: 11400000, guid: 92bab5dec5398a44aa17afedef956f83, type: 2}
+  - {fileID: 11400000, guid: a1f0644a5653a4543b409d340bd308d5, type: 2}
+  - {fileID: 11400000, guid: 93e55faaf9c56ed49a43b899ec7c8016, type: 2}
   stats: {fileID: 1207903155}
   wallet: {fileID: 1207903163}
   ui: {fileID: 1333906377}
-  maxUpgradeSelections: 16
+  maxUpgradeSelections: 30
 --- !u!114 &1885342135
 MonoBehaviour:
   m_ObjectHideFlags: 0

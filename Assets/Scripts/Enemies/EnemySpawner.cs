@@ -141,33 +141,51 @@ namespace FF
         {
             var requests = new List<SpawnRequest>();
 
+            int virtualActiveBosses = _activeBosses;
+            int virtualActiveNonBosses = _activeNonBosses;
+
+            int VirtualRemaining(bool isBoss)
+            {
+                int totalLimit = maxActiveTotal > 0 ? maxActiveTotal : int.MaxValue;
+                int bossLimit = maxActiveBosses > 0 ? maxActiveBosses : int.MaxValue;
+                int nonBossLimit = maxActiveNonBosses > 0 ? maxActiveNonBosses : int.MaxValue;
+
+                int totalRemaining = Mathf.Max(0, totalLimit - (virtualActiveBosses + virtualActiveNonBosses));
+                int typeRemaining = isBoss
+                    ? Mathf.Max(0, bossLimit - virtualActiveBosses)
+                    : Mathf.Max(0, nonBossLimit - virtualActiveNonBosses);
+
+                return Mathf.Min(totalRemaining, typeRemaining);
+            }
+
             for (int i = 0; i < spawnDefinitions.Count; i++)
             {
                 EnemySpawnDefinition definition = spawnDefinitions[i];
                 if (definition == null || definition.Prefabs == null || definition.Prefabs.Length == 0)
-                {
                     continue;
-                }
 
                 if (!DefinitionIsActive(definition, wave, isBossWave))
-                {
                     continue;
-                }
 
                 bool definitionIsBoss = definition.IsBoss || definition.SpawnOnlyOnBossWaves;
-                int remainingAllowed = GetRemainingSpawnAllowance(definitionIsBoss);
-                if (remainingAllowed <= 0)
-                {
-                    continue;
-                }
 
-                int count = Mathf.Min(remainingAllowed, definition.EvaluateSpawnCount(wave));
-                if (count <= 0)
-                {
+                int remainingAllowed = VirtualRemaining(definitionIsBoss);
+                if (remainingAllowed <= 0)
                     continue;
-                }
+
+                int desired = definition.EvaluateSpawnCount(wave);
+                int count = Mathf.Min(desired, remainingAllowed);
+
+                if (count <= 0)
+                    continue;
+
+                if (definitionIsBoss)
+                    virtualActiveBosses += count;
+                else
+                    virtualActiveNonBosses += count;
 
                 EnemyWaveModifiers modifiers = definition.GetWaveModifiers(wave, defaultScaling);
+
                 requests.Add(new SpawnRequest(definition, count, modifiers, definitionIsBoss));
             }
 

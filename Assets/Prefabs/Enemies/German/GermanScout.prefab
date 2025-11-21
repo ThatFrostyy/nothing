@@ -219,7 +219,7 @@ MonoBehaviour:
   walkSquashAmount: 0.06
   idleSwayFrequency: 1.5
   idleSwayAmplitude: 6
-  moveWhileShootingChance: 0.4
+  moveWhileShootingChance: 0.5
   moveWhileShootingSpeedMultiplier: 0.55
   weaveFrequency: 1.4
   weaveStrength: 0.15

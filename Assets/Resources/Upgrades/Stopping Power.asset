@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98be82d2fe4824c4fae56dac9cacea6b, type: 3}
-  m_Name: Greased Mechanism
+  m_Name: Stopping Power
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
-  Title: Greased Mechanism
-  Description: <b>Your weapons fire rate is increased by <color=#D17A22>+10%</color></b>
-  Type: 1
+  Title: Stopping Power
+  Description: <b>Your weapons deal <color=#FF4040>+10%</color> more damage.</b>
+  Type: 0
   Magnitude: 0.1
-  Cap: 0
+  Cap: 750
   MinValue: 0
   MaxStacks: 8
   rarity: 0
