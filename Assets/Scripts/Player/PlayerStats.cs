@@ -14,12 +14,45 @@ namespace FF
         public float MovementAccuracyPenalty = 1.5f;
 
 
+        [Header("Health")]
+        [SerializeField] private Health health;
+        [Min(0f)] public float MaxHealthMult = 1f;
+
+
         [Header("Multipliers (from Upgrades)")]
         public float MoveMult = 1f;
         public float FireRateMult = 1f;
         public float DamageMult = 1f;
+        public float ProjectileSpeedMult = 1f;
+        public float FireCooldownMult = 1f;
+        [Range(0f, 1f)] public float CritChance = 0f;
+        [Min(1f)] public float CritDamageMult = 1f;
 
         private readonly System.Collections.Generic.List<TimedModifier> _activeModifiers = new();
+
+        void Awake()
+        {
+            if (!health)
+            {
+                health = GetComponent<Health>();
+            }
+        }
+
+        void OnValidate()
+        {
+            MoveSpeed = Mathf.Max(0f, MoveSpeed);
+            FireRateRPM = Mathf.Max(0f, FireRateRPM);
+            Damage = Mathf.Max(0f, Damage);
+            MovementAccuracyPenalty = Mathf.Max(0f, MovementAccuracyPenalty);
+            MaxHealthMult = Mathf.Max(0f, MaxHealthMult);
+            MoveMult = Mathf.Max(0f, MoveMult);
+            FireRateMult = Mathf.Max(0f, FireRateMult);
+            DamageMult = Mathf.Max(0f, DamageMult);
+            ProjectileSpeedMult = Mathf.Max(0f, ProjectileSpeedMult);
+            FireCooldownMult = Mathf.Max(0.1f, FireCooldownMult);
+            CritChance = Mathf.Clamp01(CritChance);
+            CritDamageMult = Mathf.Max(1f, CritDamageMult);
+        }
 
         public float GetMoveSpeed() => MoveSpeed * MoveMult * GetActiveMultiplier(StatType.MoveSpeed);
         public float GetRPM() => FireRateRPM * FireRateMult * GetActiveMultiplier(StatType.FireRate);
@@ -28,6 +61,10 @@ namespace FF
         public float GetDamageMultiplier() => DamageMult * GetActiveMultiplier(StatType.Damage);
         public float GetFireRateMultiplier() => FireRateMult * GetActiveMultiplier(StatType.FireRate);
         public float GetMovementAccuracyPenalty() => MovementAccuracyPenalty;
+        public float GetProjectileSpeedMultiplier() => ProjectileSpeedMult;
+        public float GetFireCooldownMultiplier() => Mathf.Max(0.1f, FireCooldownMult);
+        public float GetCritChance() => Mathf.Clamp01(CritChance);
+        public float GetCritDamageMultiplier() => Mathf.Max(1f, CritDamageMult);
 
         void Update()
         {
@@ -89,5 +126,7 @@ namespace FF
                 Expiry = expiry;
             }
         }
+
+        public Health GetHealth() => health;
     }
 }

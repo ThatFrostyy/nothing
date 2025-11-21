@@ -53,6 +53,10 @@ namespace FF
         public float GetDamageMultiplier() => currentDamageMultiplier;
         public float GetFireRateMultiplier() => currentFireRateMultiplier;
         public float GetMovementAccuracyPenalty() => currentMovementAccuracyPenalty;
+        public float GetProjectileSpeedMultiplier() => 1f;
+        public float GetFireCooldownMultiplier() => 1f;
+        public float GetCritChance() => 0f;
+        public float GetCritDamageMultiplier() => 1f;
 
         public void ApplyWaveMultipliers(float moveSpeedMultiplier, float fireRateMultiplierMultiplier, float damageMultiplierMultiplier, float accuracyPenaltyMultiplier)
         {

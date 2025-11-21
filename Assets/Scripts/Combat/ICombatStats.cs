@@ -7,5 +7,9 @@ namespace FF
         float GetDamageMultiplier();
         float GetFireRateMultiplier();
         float GetMovementAccuracyPenalty();
+        float GetProjectileSpeedMultiplier();
+        float GetFireCooldownMultiplier();
+        float GetCritChance();
+        float GetCritDamageMultiplier();
     }
 }

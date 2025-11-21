@@ -19,6 +19,13 @@ namespace FF
         [SerializeField] private WaveAttributeScaling defaultScaling = new();
         [SerializeField] private List<EnemySpawnDefinition> spawnDefinitions = new();
 
+        [Header("Spawn Timing")]
+        [SerializeField, Min(0.01f)] private float initialSpawnInterval = 0.6f;
+        [SerializeField, Min(0.01f)] private float minimumSpawnInterval = 0.18f;
+        [SerializeField, Min(0f)] private float spawnRampDuration = 1.25f;
+        [SerializeField, Min(0f)] private float sideSwapDelay = 1.15f;
+        [SerializeField, Min(1)] private int packSpawnBurst = 3;
+
         [Header("Limits (0 = Unlimited)")]
         [SerializeField, Min(0)] private int maxActiveNonBosses = 0;
         [SerializeField, Min(0)] private int maxActiveBosses = 0;
@@ -30,6 +37,7 @@ namespace FF
 
         private int _activeBosses;
         private int _activeNonBosses;
+        private Coroutine _spawnRoutine;
 
         private void Awake()
         {
@@ -50,6 +58,12 @@ namespace FF
         private void OnDisable()
         {
             Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
+
+            if (_spawnRoutine != null)
+            {
+                StopCoroutine(_spawnRoutine);
+                _spawnRoutine = null;
+            }
         }
 
         public void SpawnWave(int wave)
@@ -60,8 +74,72 @@ namespace FF
             }
 
             EnsureAudioSource();
+            if (_spawnRoutine != null)
+            {
+                StopCoroutine(_spawnRoutine);
+            }
+
+            _spawnRoutine = StartCoroutine(SpawnWaveRoutine(wave));
+        }
+
+        private System.Collections.IEnumerator SpawnWaveRoutine(int wave)
+        {
             bool isBossWave = bossWaveInterval > 0 && wave > 0 && wave % bossWaveInterval == 0;
             float radius = GetSpawnRadius();
+
+            List<SpawnRequest> requests = BuildSpawnRequests(wave, isBossWave);
+            if (requests.Count == 0)
+            {
+                _spawnRoutine = null;
+                yield break;
+            }
+
+            List<Vector2> primarySides = Random.value > 0.5f
+                ? new List<Vector2> { Vector2.left, Vector2.right }
+                : new List<Vector2> { Vector2.up, Vector2.down };
+            List<Vector2> allSides = new() { Vector2.left, Vector2.right, Vector2.up, Vector2.down };
+
+            float elapsed = 0f;
+            int requestIndex = 0;
+            int idleIterations = 0;
+
+            while (HasPendingRequests(requests))
+            {
+                float interval = GetCurrentSpawnInterval(elapsed);
+                Vector2 direction = SelectDirection(elapsed < sideSwapDelay ? primarySides : allSides);
+                SpawnRequest current = requests[requestIndex];
+
+                bool spawned = TrySpawnFromRequest(current, direction, radius);
+                if (spawned && !current.CuePlayed)
+                {
+                    PlaySpawnCue(current.Definition.SpawnCue);
+                    current.CuePlayed = true;
+                }
+
+                if (!spawned)
+                {
+                    idleIterations++;
+                    if (idleIterations >= requests.Count)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    idleIterations = 0;
+                }
+
+                requestIndex = (requestIndex + 1) % requests.Count;
+                elapsed += interval;
+                yield return new WaitForSeconds(interval);
+            }
+
+            _spawnRoutine = null;
+        }
+
+        private List<SpawnRequest> BuildSpawnRequests(int wave, bool isBossWave)
+        {
+            var requests = new List<SpawnRequest>();
 
             for (int i = 0; i < spawnDefinitions.Count; i++)
             {
@@ -90,11 +168,130 @@ namespace FF
                 }
 
                 EnemyWaveModifiers modifiers = definition.GetWaveModifiers(wave, defaultScaling);
-                int spawned = SpawnDefinition(definition, count, radius, modifiers, definitionIsBoss);
-                if (spawned > 0)
+                requests.Add(new SpawnRequest(definition, count, modifiers, definitionIsBoss));
+            }
+
+            return requests;
+        }
+
+        private bool HasPendingRequests(List<SpawnRequest> requests)
+        {
+            if (requests == null || requests.Count == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < requests.Count; i++)
+            {
+                if (requests[i] != null && requests[i].Remaining > 0)
                 {
-                    PlaySpawnCue(definition.SpawnCue);
+                    return true;
                 }
+            }
+
+            return false;
+        }
+
+        private bool TrySpawnFromRequest(SpawnRequest request, Vector2 direction, float radius)
+        {
+            if (request == null || request.Definition == null || request.Remaining <= 0)
+            {
+                return false;
+            }
+
+            int allowance = GetRemainingSpawnAllowance(request.IsBoss);
+            if (allowance <= 0)
+            {
+                return false;
+            }
+
+            int batchSize = request.Definition.SpawnInPacks
+                ? Mathf.Min(request.Remaining, Mathf.Max(1, packSpawnBurst))
+                : 1;
+
+            batchSize = Mathf.Min(batchSize, allowance);
+            if (batchSize <= 0)
+            {
+                return false;
+            }
+
+            int spawned = SpawnBatch(request.Definition, batchSize, direction, radius, request.Modifiers, request.IsBoss);
+            request.Remaining = Mathf.Max(0, request.Remaining - spawned);
+            return spawned > 0;
+        }
+
+        private int SpawnBatch(EnemySpawnDefinition definition, int count, Vector2 direction, float radius, EnemyWaveModifiers modifiers, bool isBoss)
+        {
+            int spawned = 0;
+            Vector2 baseDirection = direction.sqrMagnitude > Mathf.Epsilon ? direction.normalized : Random.insideUnitCircle.normalized;
+            if (definition.SpawnInPacks)
+            {
+                Vector2 anchor = FindSpawnPosition(baseDirection, radius);
+                for (int i = 0; i < count; i++)
+                {
+                    Vector2 offset = Random.insideUnitCircle * definition.PackRadius;
+                    Vector2 spawnPosition = anchor + offset;
+                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers, isBoss))
+                    {
+                        spawned++;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    Vector2 spawnDirection = baseDirection;
+                    if (spawnDirection.sqrMagnitude < Mathf.Epsilon)
+                    {
+                        float angle = Random.value * Mathf.PI * 2f;
+                        spawnDirection = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                    }
+
+                    Vector2 spawnPosition = FindSpawnPosition(spawnDirection, radius);
+                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers, isBoss))
+                    {
+                        spawned++;
+                    }
+                }
+            }
+
+            return spawned;
+        }
+
+        private Vector2 SelectDirection(List<Vector2> sides)
+        {
+            if (sides == null || sides.Count == 0)
+            {
+                Vector2 fallback = Random.insideUnitCircle;
+                return fallback.sqrMagnitude > Mathf.Epsilon ? fallback.normalized : Vector2.right;
+            }
+
+            Vector2 choice = sides[Random.Range(0, sides.Count)];
+            return choice.sqrMagnitude > Mathf.Epsilon ? choice.normalized : Vector2.right;
+        }
+
+        private float GetCurrentSpawnInterval(float elapsed)
+        {
+            float t = spawnRampDuration <= 0f ? 1f : Mathf.Clamp01(elapsed / spawnRampDuration);
+            float interval = Mathf.Lerp(initialSpawnInterval, minimumSpawnInterval, t);
+            return Mathf.Max(0.01f, interval);
+        }
+
+        private sealed class SpawnRequest
+        {
+            public EnemySpawnDefinition Definition { get; }
+            public int Remaining { get; set; }
+            public EnemyWaveModifiers Modifiers { get; }
+            public bool IsBoss { get; }
+            public bool CuePlayed { get; set; }
+
+            public SpawnRequest(EnemySpawnDefinition definition, int count, EnemyWaveModifiers modifiers, bool isBoss)
+            {
+                Definition = definition;
+                Remaining = count;
+                Modifiers = modifiers;
+                IsBoss = isBoss;
             }
         }
 
@@ -137,50 +334,6 @@ namespace FF
             }
 
             return true;
-        }
-
-        private int SpawnDefinition(EnemySpawnDefinition definition, int count, float radius, EnemyWaveModifiers modifiers, bool isBoss)
-        {
-            if (count <= 0)
-            {
-                return 0;
-            }
-
-            int spawned = 0;
-            if (definition.SpawnInPacks)
-            {
-                Vector2 baseDirection = Random.insideUnitCircle.normalized;
-                if (baseDirection.sqrMagnitude < Mathf.Epsilon)
-                {
-                    baseDirection = Vector2.right;
-                }
-
-                Vector2 anchor = FindSpawnPosition(baseDirection, radius);
-                for (int i = 0; i < count; i++)
-                {
-                    Vector2 offset = Random.insideUnitCircle * definition.PackRadius;
-                    Vector2 spawnPosition = anchor + offset;
-                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers, isBoss))
-                    {
-                        spawned++;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    float angle = Random.value * Mathf.PI * 2f;
-                    Vector2 direction = new(Mathf.Cos(angle), Mathf.Sin(angle));
-                    Vector2 spawnPosition = FindSpawnPosition(direction, radius);
-                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers, isBoss))
-                    {
-                        spawned++;
-                    }
-                }
-            }
-
-            return spawned;
         }
 
         private GameObject ChooseRandomPrefab(EnemySpawnDefinition def)
@@ -293,6 +446,11 @@ namespace FF
             maxActiveBosses = Mathf.Max(0, maxActiveBosses);
             maxActiveNonBosses = Mathf.Max(0, maxActiveNonBosses);
             maxActiveTotal = Mathf.Max(0, maxActiveTotal);
+            initialSpawnInterval = Mathf.Max(0.01f, initialSpawnInterval);
+            minimumSpawnInterval = Mathf.Clamp(Mathf.Max(0.01f, minimumSpawnInterval), 0.01f, initialSpawnInterval);
+            spawnRampDuration = Mathf.Max(0f, spawnRampDuration);
+            sideSwapDelay = Mathf.Max(0f, sideSwapDelay);
+            packSpawnBurst = Mathf.Max(1, packSpawnBurst);
             EnsureAudioSource();
         }
 

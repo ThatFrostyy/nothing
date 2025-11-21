@@ -25,6 +25,11 @@ namespace FF
                 shouldFire = false;
             }
 
+            if (enemy && enemy.TryGetComponent(out Movement.BushAmbushMovement bush) && bush.ShouldHoldFire)
+            {
+                shouldFire = false;
+            }
+
             shooter.SetFireHeld(shouldFire);
         }
     }

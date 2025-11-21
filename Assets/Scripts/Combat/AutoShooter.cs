@@ -152,9 +152,13 @@ namespace FF
             float rpm = Mathf.Max(_weapon.rpm * rpmMultiplier, 0.01f);
             float interval = 60f / rpm;
 
+            float cooldownMultiplier = _stats != null ? _stats.GetFireCooldownMultiplier() : 1f;
+            interval *= Mathf.Max(0.1f, cooldownMultiplier);
+
             if (!_weapon.isAuto && _weapon.fireCooldown > 0f)
             {
                 interval = _weapon.fireCooldown / rpmMultiplier;
+                interval *= Mathf.Max(0.1f, cooldownMultiplier);
             }
 
             if (_isGrenadeWeapon)
@@ -245,10 +249,12 @@ namespace FF
 
             if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
             {
-                float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
+                float damageMultiplier = GetFinalDamageMultiplier(out _);
+                float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
                 bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier));
                 string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
                 bullet.SetOwner(ownerTag);
+                bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
             }
         }
 
@@ -270,7 +276,7 @@ namespace FF
                 return false;
             }
 
-            float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
+            float damageMultiplier = GetFinalDamageMultiplier(out _);
             Vector2 direction = spreadRotation * Vector3.right;
             string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
             AudioMixerGroup mixer = _audioSource ? _audioSource.outputAudioMixerGroup : null;
@@ -278,7 +284,13 @@ namespace FF
             float volume = _audioSource ? _audioSource.volume : 1f;
             float pitch = _audioSource ? _audioSource.pitch : 1f;
 
-            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch, null, speedOverride);
+            float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
+            float baseLaunchSpeed = grenade.BaseLaunchSpeed;
+            float finalLaunchSpeed = speedOverride.HasValue
+                ? Mathf.Max(0.1f, speedOverride.Value * projectileSpeedMultiplier)
+                : Mathf.Max(0.1f, baseLaunchSpeed * projectileSpeedMultiplier);
+
+            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch, null, finalLaunchSpeed);
             return true;
         }
 
@@ -330,6 +342,23 @@ namespace FF
             _gunPivot.localPosition = _baseLocalPosition + localRecoil;
 
             _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, Time.deltaTime * _weapon.recoilRecoverySpeed);
+        }
+
+        private float GetFinalDamageMultiplier(out bool isCrit)
+        {
+            float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
+            float critChance = _stats != null ? _stats.GetCritChance() : 0f;
+            float critDamageMultiplier = _stats != null ? _stats.GetCritDamageMultiplier() : 1f;
+
+            bool didCrit = critChance > 0f && UnityEngine.Random.value < critChance;
+            isCrit = didCrit;
+
+            if (!didCrit)
+            {
+                return damageMultiplier;
+            }
+
+            return damageMultiplier * Mathf.Max(1f, critDamageMultiplier);
         }
         #endregion Recoil & Shooting
 

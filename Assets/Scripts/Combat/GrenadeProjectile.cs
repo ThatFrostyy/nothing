@@ -44,6 +44,7 @@ namespace FF
         private float _currentSpeed;
         private float _activeSlowdown;
         private Vector2 _movementDirection;
+        private float _baseLaunchSpeed;
 
         public int BaseDamage => baseDamage;
 
@@ -55,7 +56,11 @@ namespace FF
             {
                 _poolToken = gameObject.AddComponent<PoolToken>();
             }
+
+            _baseLaunchSpeed = Mathf.Max(0.1f, launchSpeed);
         }
+
+        public float BaseLaunchSpeed => _baseLaunchSpeed;
 
         public void Launch(
             Vector2 direction,

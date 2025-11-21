@@ -441,7 +441,7 @@ namespace FF
             if (isVisible)
             {
                 upgradePromptTimer = 0f;
-                StartUpgradePromptFade(0f);
+                StartUpgradePromptFade(0f, true);
             }
             else if (pendingUpgrades > 0)
             {
@@ -466,7 +466,7 @@ namespace FF
             }
         }
 
-        void StartUpgradePromptFade(float targetAlpha)
+        void StartUpgradePromptFade(float targetAlpha, bool instant = false)
         {
             if (upgradePromptFadeRoutine != null)
             {
@@ -476,6 +476,13 @@ namespace FF
             if (targetAlpha > 0f && upgradePromptText && !upgradePromptText.gameObject.activeSelf)
             {
                 upgradePromptText.gameObject.SetActive(true);
+            }
+
+            if (instant || targetAlpha <= 0f)
+            {
+                ApplyUpgradePromptVisibility(targetAlpha);
+                upgradePromptFadeRoutine = null;
+                return;
             }
 
             upgradePromptFadeRoutine = StartCoroutine(FadeUpgradePrompt(targetAlpha));
@@ -505,16 +512,28 @@ namespace FF
             }
 
             upgradePromptGroup.alpha = targetAlpha;
+            ApplyUpgradePromptVisibility(targetAlpha);
+
+            upgradePromptFadeRoutine = null;
+        }
+
+        void ApplyUpgradePromptVisibility(float targetAlpha)
+        {
+            if (!upgradePromptGroup)
+            {
+                return;
+            }
+
             bool isVisible = targetAlpha > 0f;
+            upgradePromptGroup.alpha = Mathf.Max(0f, targetAlpha);
             upgradePromptGroup.interactable = isVisible;
             upgradePromptGroup.blocksRaycasts = isVisible;
+            upgradePromptGroup.gameObject.SetActive(isVisible);
 
             if (!isVisible && upgradePromptText)
             {
                 upgradePromptText.gameObject.SetActive(false);
             }
-
-            upgradePromptFadeRoutine = null;
         }
 
         void UpdateWeaponDisplay(Weapon weaponOverride = null)
