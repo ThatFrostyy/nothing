@@ -11,6 +11,7 @@ namespace FF
         [SerializeField] private AutoShooter _autoShooter;
         [SerializeField] private Transform _gunPivot;
         [SerializeField] private Transform _playerVisual;
+        [SerializeField] private PlayerCosmetics _cosmetics;
         [SerializeField] private UpgradeManager _upgradeManager;
         [SerializeField] private WeaponManager _weaponManager;
         [SerializeField] private Weapon _startingWeapon;
@@ -40,6 +41,22 @@ namespace FF
             _collider = GetComponent<Collider2D>();
             _upgradeManager = _upgradeManager ? _upgradeManager : GetComponent<UpgradeManager>();
             _weaponManager = _weaponManager ? _weaponManager : GetComponentInChildren<WeaponManager>();
+            _cosmetics = _cosmetics ? _cosmetics : GetComponent<PlayerCosmetics>();
+
+            if (!_cosmetics && _playerVisual)
+            {
+                _cosmetics = _playerVisual.GetComponent<PlayerCosmetics>();
+            }
+
+            if (!_cosmetics && _playerVisual)
+            {
+                SpriteRenderer renderer = _playerVisual.GetComponent<SpriteRenderer>();
+                if (renderer)
+                {
+                    _cosmetics = gameObject.AddComponent<PlayerCosmetics>();
+                    _cosmetics.SetRenderTargets(renderer, _playerVisual);
+                }
+            }
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
@@ -47,6 +64,8 @@ namespace FF
 
         private void Start()
         {
+            ApplyCharacterSelection();
+
             if (_startingWeapon && _weaponManager)
             {
                 _weaponManager.Equip(_startingWeapon);
@@ -175,6 +194,11 @@ namespace FF
         }
         #endregion Animations
 
+        public void OverrideStartingWeapon(Weapon weapon)
+        {
+            _startingWeapon = weapon;
+        }
+
         #region Input System Callbacks
         public void OnMove(InputValue value)
         {
@@ -235,6 +259,32 @@ namespace FF
             if (isVisible && _autoShooter != null)
             {
                 _autoShooter.SetFireHeld(false);
+            }
+        }
+
+        private void ApplyCharacterSelection()
+        {
+            if (!CharacterSelectionState.HasSelection)
+            {
+                return;
+            }
+
+            CharacterDefinition character = CharacterSelectionState.SelectedCharacter;
+            HatDefinition hat = CharacterSelectionState.SelectedHat ?? character?.GetDefaultHat();
+            Weapon weapon = CharacterSelectionState.SelectedWeapon ?? character?.StartingWeapon;
+
+            if (_cosmetics && character != null)
+            {
+                _cosmetics.Apply(hat, character.PlayerSprite);
+            }
+            else if (_cosmetics)
+            {
+                _cosmetics.Apply(hat, null);
+            }
+
+            if (weapon)
+            {
+                OverrideStartingWeapon(weapon);
             }
         }
     }
