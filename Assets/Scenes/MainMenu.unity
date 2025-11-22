@@ -2024,7 +2024,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1135301260}
+      - m_Target: {fileID: 1015119881}
         m_TargetAssemblyTypeName: FF.CharacterSelectionUI, Assembly-CSharp
         m_MethodName: NextHat
         m_Mode: 1
@@ -2086,6 +2086,7 @@ GameObject:
   - component: {fileID: 1015119879}
   - component: {fileID: 1015119878}
   - component: {fileID: 1015119877}
+  - component: {fileID: 1015119881}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -2177,6 +2178,33 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1015119881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1015119876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50a1ec6a6f6b4605b7c91ae2a35b92b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterSelectionUI
+  availableCharacters:
+  - {fileID: 11400000, guid: 968fc4a4a96a8ca429344ced2ac63fb0, type: 2}
+  - {fileID: 11400000, guid: 80c0672bf0d5a9a4782e0e79ff898bfa, type: 2}
+  nameText: {fileID: 423339882}
+  descriptionText: {fileID: 1937666109}
+  abilityText: {fileID: 0}
+  portraitImage: {fileID: 219154102}
+  availableHats:
+  - {fileID: 11400000, guid: 2d0acd9532aaca44895d3a4ef1731d3c, type: 2}
+  - {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
+  hatNameText: {fileID: 1565012089}
+  hatIconImage: {fileID: 1097028446}
+  weaponNameText: {fileID: 0}
+  weaponIconImage: {fileID: 43208988}
+  preview: {fileID: 0}
 --- !u!1 &1097028444
 GameObject:
   m_ObjectHideFlags: 0
@@ -2263,7 +2291,6 @@ GameObject:
   - component: {fileID: 1135301259}
   - component: {fileID: 1135301262}
   - component: {fileID: 1135301261}
-  - component: {fileID: 1135301260}
   m_Layer: 5
   m_Name: Customize
   m_TagString: Untagged
@@ -2293,33 +2320,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1135301260
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1135301258}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50a1ec6a6f6b4605b7c91ae2a35b92b9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterSelectionUI
-  availableCharacters:
-  - {fileID: 11400000, guid: 968fc4a4a96a8ca429344ced2ac63fb0, type: 2}
-  - {fileID: 11400000, guid: 80c0672bf0d5a9a4782e0e79ff898bfa, type: 2}
-  nameText: {fileID: 423339882}
-  descriptionText: {fileID: 1937666109}
-  abilityText: {fileID: 0}
-  portraitImage: {fileID: 219154102}
-  availableHats:
-  - {fileID: 11400000, guid: 2d0acd9532aaca44895d3a4ef1731d3c, type: 2}
-  - {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
-  hatNameText: {fileID: 1565012089}
-  hatIconImage: {fileID: 1097028446}
-  weaponNameText: {fileID: 0}
-  weaponIconImage: {fileID: 43208988}
-  preview: {fileID: 0}
 --- !u!114 &1135301261
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3506,7 +3506,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1135301260}
+      - m_Target: {fileID: 1015119881}
         m_TargetAssemblyTypeName: FF.CharacterSelectionUI, Assembly-CSharp
         m_MethodName: ConfirmSelection
         m_Mode: 1
@@ -3917,7 +3917,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1135301260}
+      - m_Target: {fileID: 1015119881}
         m_TargetAssemblyTypeName: FF.CharacterSelectionUI, Assembly-CSharp
         m_MethodName: PreviousHat
         m_Mode: 1
@@ -4068,7 +4068,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1135301260}
+      - m_Target: {fileID: 1015119881}
         m_TargetAssemblyTypeName: FF.CharacterSelectionUI, Assembly-CSharp
         m_MethodName: Previous
         m_Mode: 1
@@ -4878,7 +4878,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1135301260}
+      - m_Target: {fileID: 1015119881}
         m_TargetAssemblyTypeName: FF.CharacterSelectionUI, Assembly-CSharp
         m_MethodName: Next
         m_Mode: 1

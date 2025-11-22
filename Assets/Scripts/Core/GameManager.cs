@@ -35,6 +35,7 @@ namespace FF
             }
 
             I = this;
+            Debug.Log("GameManager spawned in scene: " + gameObject.scene.name);
 
             Application.targetFrameRate = 144;
 
@@ -53,6 +54,12 @@ namespace FF
         {
             Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
         }
+
+        void OnDestroy()
+        {
+            Debug.Log("GameManager WAS DESTROYED!");
+        }
+
 
         void Update()
         {
