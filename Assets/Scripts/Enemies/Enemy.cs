@@ -67,6 +67,7 @@ namespace FF
         [Header("Avoidance")]
         [SerializeField] private LayerMask avoidanceLayers = ~0;
         [SerializeField, Range(4, 128)] private int maxAvoidanceChecks = 32;
+        [SerializeField, Min(0f)] private float avoidanceSampleInterval = 0.08f;
 
         private Rigidbody2D _rigidbody;
         private EnemyStats _stats;
@@ -103,6 +104,8 @@ namespace FF
         private float knockbackTimer = 0f;
         private Vector2 knockbackVelocity;
         private Vector2 _lastAimDirection = Vector2.right;
+        private Vector2 _cachedSeparationForce = Vector2.zero;
+        private float _nextAvoidanceSampleTime;
 
         private const float FacingDeadZone = 0.05f;
 
@@ -240,6 +243,9 @@ namespace FF
                 useTriggers = true
             };
             _avoidanceFilter.SetLayerMask(avoidanceLayers);
+
+            float interval = Mathf.Max(0f, avoidanceSampleInterval);
+            _nextAvoidanceSampleTime = Time.time + (interval > 0f ? UnityEngine.Random.Range(0f, interval) : 0f);
 
             _movementBehaviour = GetComponent<IEnemyMovement>();
             _attackBehaviour = GetComponent<IEnemyAttack>();
@@ -509,6 +515,13 @@ namespace FF
                 return Vector2.zero;
             }
 
+            float interval = Mathf.Max(0f, avoidanceSampleInterval);
+            bool shouldCache = interval > 0f;
+            if (shouldCache && Time.time < _nextAvoidanceSampleTime)
+            {
+                return _cachedSeparationForce;
+            }
+
             Vector2 origin = _rigidbody ? _rigidbody.position : (Vector2)transform.position;
             if (_avoidanceResults == null || _avoidanceResults.Length == 0)
             {
@@ -517,18 +530,15 @@ namespace FF
             }
 
             int hitCount = Physics2D.OverlapCircle(origin, radius, _avoidanceFilter, _avoidanceResults);
-            int currentCapacity = _avoidanceResults.Length;
+            int clampedHitCount = Mathf.Min(hitCount, _avoidanceResults.Length);
 
-            while (hitCount >= currentCapacity && currentCapacity < AvoidanceBufferCeiling)
+            if (clampedHitCount <= 0)
             {
-                int newCapacity = Mathf.Min(currentCapacity * 2, AvoidanceBufferCeiling);
-                System.Array.Resize(ref _avoidanceResults, newCapacity);
-                currentCapacity = _avoidanceResults.Length;
-                hitCount = Physics2D.OverlapCircle(origin, radius, _avoidanceFilter, _avoidanceResults);
-            }
-
-            if (hitCount <= 0)
-            {
+                _cachedSeparationForce = Vector2.zero;
+                if (shouldCache)
+                {
+                    _nextAvoidanceSampleTime = Time.time + interval;
+                }
                 return Vector2.zero;
             }
 
@@ -536,7 +546,7 @@ namespace FF
             float totalWeight = 0f;
             int contributions = 0;
 
-            for (int i = 0; i < hitCount; i++)
+            for (int i = 0; i < clampedHitCount; i++)
             {
                 Collider2D neighbor = _avoidanceResults[i];
                 if (!neighbor)
@@ -581,19 +591,36 @@ namespace FF
 
             if (contributions == 0 || totalWeight <= 0f)
             {
+                _cachedSeparationForce = Vector2.zero;
+                if (shouldCache)
+                {
+                    _nextAvoidanceSampleTime = Time.time + interval;
+                }
                 return Vector2.zero;
             }
 
             if (separation.sqrMagnitude < 0.0001f)
             {
+                _cachedSeparationForce = Vector2.zero;
+                if (shouldCache)
+                {
+                    _nextAvoidanceSampleTime = Time.time + interval;
+                }
                 return Vector2.zero;
             }
 
             Vector2 separationDirection = separation.normalized;
             float crowdingStrength = Mathf.Clamp(totalWeight, 0.25f, 1f);
             Vector2 force = crowdingStrength * pushStrength * separationDirection;
+            Vector2 clampedForce = Vector2.ClampMagnitude(force, pushStrength);
 
-            return Vector2.ClampMagnitude(force, pushStrength);
+            _cachedSeparationForce = clampedForce;
+            if (shouldCache)
+            {
+                _nextAvoidanceSampleTime = Time.time + interval;
+            }
+
+            return clampedForce;
         }
 
         private void UpdateDogBehaviour(float deltaTime)
