@@ -185,12 +185,35 @@ namespace FF
 
         private List<HatDefinition> GetHatsForCharacter(CharacterDefinition character)
         {
-            if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
+            List<HatDefinition> hats = new();
+
+            void TryAdd(HatDefinition definition)
             {
-                return character.AvailableHats;
+                if (definition != null && !hats.Contains(definition))
+                {
+                    hats.Add(definition);
+                }
             }
 
-            return availableHats;
+            if (availableHats != null)
+            {
+                for (int i = 0; i < availableHats.Count; i++)
+                {
+                    TryAdd(availableHats[i]);
+                }
+            }
+
+            if (character != null && character.AvailableHats != null)
+            {
+                for (int i = 0; i < character.AvailableHats.Count; i++)
+                {
+                    TryAdd(character.AvailableHats[i]);
+                }
+            }
+
+            TryAdd(character != null ? character.GetDefaultHat() : null);
+
+            return hats;
         }
 
         private HatDefinition ResolveHatSelection(CharacterDefinition character)
