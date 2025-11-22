@@ -29,8 +29,10 @@ namespace FF
 
         void OnEnable()
         {
+            RemoveNullEntries();
             SyncIndexWithSelection();
             SyncHatWithSelection();
+            ApplyCurrentSelectionIfMissing();
             Refresh();
         }
 
@@ -46,17 +48,7 @@ namespace FF
 
         public void ConfirmSelection()
         {
-            if (availableCharacters.Count == 0)
-            {
-                return;
-            }
-
-            CharacterDefinition character = availableCharacters[_index];
-            HatDefinition hat = ResolveHatSelection(character);
-            Weapon weapon = character != null ? character.StartingWeapon : null;
-
-            CharacterSelectionState.SetSelection(character, hat, weapon);
-            Refresh();
+            ApplyCurrentSelection();
         }
 
         public void NextHat()
@@ -77,7 +69,9 @@ namespace FF
             }
 
             _index = Mathf.FloorToInt(Mathf.Repeat(_index + delta, availableCharacters.Count));
+            _hatIndex = 0;
             SyncHatWithSelection();
+            ApplyCurrentSelection();
             Refresh();
         }
 
@@ -160,6 +154,7 @@ namespace FF
             }
 
             _hatIndex = Mathf.FloorToInt(Mathf.Repeat(_hatIndex + delta, hats.Count));
+            ApplyCurrentSelection();
             Refresh();
         }
 
@@ -198,6 +193,36 @@ namespace FF
 
             _hatIndex = Mathf.Clamp(_hatIndex, 0, hats.Count - 1);
             return hats[_hatIndex];
+        }
+
+        private void ApplyCurrentSelection()
+        {
+            if (availableCharacters.Count == 0)
+            {
+                return;
+            }
+
+            CharacterDefinition character = availableCharacters[Mathf.Clamp(_index, 0, availableCharacters.Count - 1)];
+            HatDefinition hat = ResolveHatSelection(character);
+            Weapon weapon = character != null ? character.StartingWeapon : null;
+
+            CharacterSelectionState.SetSelection(character, hat, weapon);
+        }
+
+        private void ApplyCurrentSelectionIfMissing()
+        {
+            if (CharacterSelectionState.HasSelection)
+            {
+                return;
+            }
+
+            ApplyCurrentSelection();
+        }
+
+        private void RemoveNullEntries()
+        {
+            availableCharacters.RemoveAll(character => character == null);
+            availableHats.RemoveAll(hat => hat == null);
         }
     }
 }
