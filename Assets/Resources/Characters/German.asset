@@ -18,6 +18,8 @@ MonoBehaviour:
   Portrait: {fileID: 21300000, guid: 89aa8c075b48ebe4cb4386d2298e7ad2, type: 3}
   PlayerSprite: {fileID: 21300000, guid: 89aa8c075b48ebe4cb4386d2298e7ad2, type: 3}
   DefaultHat: {fileID: 11400000, guid: 2d0acd9532aaca44895d3a4ef1731d3c, type: 2}
-  AvailableHats: []
+  AvailableHats:
+  - {fileID: 11400000, guid: 2d0acd9532aaca44895d3a4ef1731d3c, type: 2}
+  - {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
   StartingWeapon: {fileID: 11400000, guid: 59004b20c34904b499fe859f8e5fc176, type: 2}
   WeaponIconOverride: {fileID: 21300000, guid: 1e8ccd5ef4db5d644b6fc1e4caded914, type: 3}

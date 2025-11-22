@@ -19,6 +19,7 @@ namespace FF
         [SerializeField] private Button playButton;
         [SerializeField] private Color overlayColor = new(0f, 0f, 0f, 0.75f);
         [SerializeField] private MapOption[] maps = { new() { SceneName = "Main", DisplayName = "Main" } };
+        [SerializeField] private TMP_FontAsset defaultFont;
 
         private GameObject mapOverlay;
         private TMP_Text mapLabel;
@@ -202,7 +203,7 @@ namespace FF
 
         private TMP_Text CreateText(string content, RectTransform parent, Vector2 anchor, float fontSize)
         {
-            GameObject obj = new("Text", typeof(RectTransform), typeof(CanvasRenderer), typeof(TMP_Text));
+            GameObject obj = new("Text", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
             obj.transform.SetParent(parent, false);
 
             RectTransform rect = obj.GetComponent<RectTransform>();
@@ -211,11 +212,11 @@ namespace FF
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = new Vector2(600f, 80f);
 
-            TMP_Text text = obj.GetComponent<TMP_Text>();
+            TextMeshProUGUI text = obj.GetComponent<TextMeshProUGUI>();
             text.text = content;
             text.alignment = TextAlignmentOptions.Center;
             text.fontSize = fontSize;
-            text.font = TMP_Settings.defaultFontAsset;
+            text.font = defaultFont;
 
             return text;
         }
