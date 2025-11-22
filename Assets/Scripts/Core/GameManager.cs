@@ -30,11 +30,12 @@ namespace FF
         {
             if (I != null)
             {
-                Destroy(gameObject); 
+                Destroy(gameObject);
                 return;
             }
 
             I = this;
+            DontDestroyOnLoad(gameObject);
 
             Application.targetFrameRate = 144;
 
