@@ -41,7 +41,7 @@ namespace FF
             LoadScene(SceneManager.GetActiveScene().name);
         }
 
-        private static void LoadScene(string sceneName)
+        private void LoadScene(string sceneName)
         {
             if (string.IsNullOrWhiteSpace(sceneName))
             {
@@ -49,7 +49,30 @@ namespace FF
             }
 
             Time.timeScale = 1f;
-            SceneManager.LoadScene(sceneName);
+            StartCoroutine(LoadSceneRoutine(sceneName));
+        }
+
+        private System.Collections.IEnumerator LoadSceneRoutine(string sceneName)
+        {
+            LoadingScreen.Instance.Show();
+
+            AsyncOperation operation = SceneManager.LoadSceneAsync(sceneName);
+            operation.allowSceneActivation = false;
+
+            while (!operation.isDone)
+            {
+                float progress = Mathf.Clamp01(operation.progress / 0.9f);
+                LoadingScreen.Instance.UpdateProgress(progress);
+
+                if (operation.progress >= 0.9f)
+                {
+                    operation.allowSceneActivation = true;
+                }
+
+                yield return null;
+            }
+
+            LoadingScreen.Instance.Hide();
         }
 
         public static void QuitGame()

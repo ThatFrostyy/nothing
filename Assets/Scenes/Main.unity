@@ -6901,6 +6901,7 @@ MonoBehaviour:
   initialTimeBetweenWaves: 8
   waveIntervalIncrease: 2
   maximumTimeBetweenWaves: 60
+  startFirstWaveImmediately: 1
 --- !u!4 &1885342133
 Transform:
   m_ObjectHideFlags: 0

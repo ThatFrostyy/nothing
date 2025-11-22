@@ -16,6 +16,7 @@ namespace FF
         [SerializeField, Min(0f)] private float initialTimeBetweenWaves = 30f;
         [SerializeField, Min(0f)] private float waveIntervalIncrease = 5f;
         [SerializeField, Min(0f)] private float maximumTimeBetweenWaves = 60f;
+        [SerializeField] private bool startFirstWaveImmediately = true;
 
         float timer;
         float currentWaveInterval;
@@ -44,6 +45,14 @@ namespace FF
             currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
         }
 
+        void Start()
+        {
+            if (startFirstWaveImmediately)
+            {
+                BeginNextWave();
+            }
+        }
+
         void OnEnable()
         {
             Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
@@ -61,18 +70,23 @@ namespace FF
 
             if (timer >= interval)
             {
-                timer = 0f;
-                Wave++;
-
-                OnWaveStarted?.Invoke(Wave);
-
-                if (spawner)
-                {
-                    spawner.SpawnWave(Wave);
-                }
-
-                AdvanceWaveInterval();
+                BeginNextWave();
             }
+        }
+
+        void BeginNextWave()
+        {
+            timer = 0f;
+            Wave++;
+
+            OnWaveStarted?.Invoke(Wave);
+
+            if (spawner)
+            {
+                spawner.SpawnWave(Wave);
+            }
+
+            AdvanceWaveInterval();
         }
 
         void HandleEnemyKilled(Enemy enemy)

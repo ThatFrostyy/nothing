@@ -12,6 +12,7 @@ namespace FF
         public void Apply(HatDefinition hat, Sprite bodySprite)
         {
             UpdateBody(bodySprite);
+            UpdateHatAnchor(bodySprite);
             UpdateHat(hat);
         }
 
@@ -36,6 +37,31 @@ namespace FF
             }
 
             bodyRenderer.sprite = sprite != null ? sprite : bodyRenderer.sprite;
+        }
+
+        private void UpdateHatAnchor(Sprite spriteOverride)
+        {
+            if (!bodyRenderer)
+            {
+                return;
+            }
+
+            if (!hatAnchor)
+            {
+                GameObject anchorObject = new("HatAnchor");
+                anchorObject.transform.SetParent(bodyRenderer.transform, false);
+                hatAnchor = anchorObject.transform;
+            }
+
+            Sprite sprite = spriteOverride != null ? spriteOverride : bodyRenderer.sprite;
+            if (!sprite)
+            {
+                hatAnchor.localPosition = Vector3.zero;
+                return;
+            }
+
+            Vector3 offset = new(0f, sprite.bounds.extents.y, 0f);
+            hatAnchor.localPosition = offset;
         }
 
         private void UpdateHat(HatDefinition hat)
