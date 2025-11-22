@@ -27,6 +27,8 @@ namespace FF
         private int _index;
         private int _hatIndex;
 
+        private bool HasCharacters => availableCharacters.Count > 0;
+
         void OnEnable()
         {
             RemoveNullEntries();
@@ -38,7 +40,6 @@ namespace FF
 
         public void Next()
         {
-            Debug.Log("Next character");
             Step(1);
         }
 
@@ -55,7 +56,6 @@ namespace FF
         public void NextHat()
         {
             StepHat(1);
-            Debug.Log("Next hat");
         }
 
         public void PreviousHat()
@@ -65,7 +65,7 @@ namespace FF
 
         private void Step(int delta)
         {
-            if (availableCharacters.Count == 0)
+            if (!HasCharacters)
             {
                 return;
             }
@@ -73,9 +73,7 @@ namespace FF
             _index = Mathf.FloorToInt(Mathf.Repeat(_index + delta, availableCharacters.Count));
             _hatIndex = 0;
             SyncHatWithSelection();
-            ApplyCurrentSelection();
-            Refresh();
-            Debug.Log("Next character");
+            ApplySelectionAndRefresh();
         }
 
         private void SyncIndexWithSelection()
@@ -147,9 +145,7 @@ namespace FF
 
         private void StepHat(int delta)
         {
-            Debug.Log("Next hat");
-            CharacterDefinition character = availableCharacters.Count > 0 ? availableCharacters[_index] : null;
-            List<HatDefinition> hats = GetHatsForCharacter(character);
+            List<HatDefinition> hats = GetAvailableHats();
             if (hats.Count == 0)
             {
                 _hatIndex = 0;
@@ -158,20 +154,19 @@ namespace FF
             }
 
             _hatIndex = Mathf.FloorToInt(Mathf.Repeat(_hatIndex + delta, hats.Count));
-            ApplyCurrentSelection();
-            Refresh();
+            ApplySelectionAndRefresh();
         }
 
         private void SyncHatWithSelection()
         {
             if (!CharacterSelectionState.HasSelection)
             {
-                _hatIndex = Mathf.Clamp(_hatIndex, 0, Mathf.Max(GetHatsForCharacter(null).Count - 1, 0));
+                _hatIndex = Mathf.Clamp(_hatIndex, 0, Mathf.Max(GetAvailableHats().Count - 1, 0));
                 return;
             }
 
             CharacterDefinition selectedCharacter = CharacterSelectionState.SelectedCharacter;
-            List<HatDefinition> hats = GetHatsForCharacter(selectedCharacter);
+            List<HatDefinition> hats = GetAvailableHats();
             if (hats.Count == 0)
             {
                 _hatIndex = 0;
@@ -182,14 +177,11 @@ namespace FF
             _hatIndex = found >= 0 ? found : Mathf.Clamp(_hatIndex, 0, hats.Count - 1);
         }
 
-        private List<HatDefinition> GetHatsForCharacter(CharacterDefinition character)
-        {
-            return availableHats ?? new List<HatDefinition>();
-        }
+        private List<HatDefinition> GetAvailableHats() => availableHats ?? new List<HatDefinition>();
 
         private HatDefinition ResolveHatSelection(CharacterDefinition character)
         {
-            List<HatDefinition> hats = GetHatsForCharacter(character);
+            List<HatDefinition> hats = GetAvailableHats();
             if (hats.Count == 0)
             {
                 return character != null ? character.GetDefaultHat() : null;
@@ -197,6 +189,12 @@ namespace FF
 
             _hatIndex = Mathf.Clamp(_hatIndex, 0, hats.Count - 1);
             return hats[_hatIndex];
+        }
+
+        private void ApplySelectionAndRefresh()
+        {
+            ApplyCurrentSelection();
+            Refresh();
         }
 
         private void ApplyCurrentSelection()

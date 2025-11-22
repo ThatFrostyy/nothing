@@ -8,15 +8,22 @@ namespace FF
     {
         private const int DefaultMaxSources = 24;
         private static readonly List<AudioSource> Sources = new(DefaultMaxSources);
-        private static GameObject host;
-        private static int maxSources = DefaultMaxSources;
+        private static GameObject _host;
+        private static int _maxSources = DefaultMaxSources;
 
         public static void SetMaxSources(int limit)
         {
-            maxSources = Mathf.Max(1, limit);
+            _maxSources = Mathf.Max(1, limit);
+            CullDestroyedSources();
         }
 
-        public static void PlayOneShot(AudioClip clip, Vector3 position, AudioMixerGroup mixer = null, float spatialBlend = 0f, float volume = 1f, float pitch = 1f)
+        public static void PlayOneShot(
+            AudioClip clip,
+            Vector3 position,
+            AudioMixerGroup mixer = null,
+            float spatialBlend = 0f,
+            float volume = 1f,
+            float pitch = 1f)
         {
             if (!clip)
             {
@@ -40,6 +47,7 @@ namespace FF
         private static AudioSource GetAvailableSource()
         {
             EnsureHost();
+            CullDestroyedSources();
 
             for (int i = 0; i < Sources.Count; i++)
             {
@@ -50,7 +58,7 @@ namespace FF
                 }
             }
 
-            if (Sources.Count < Mathf.Max(1, maxSources))
+            if (Sources.Count < Mathf.Max(1, _maxSources))
             {
                 return CreateSource();
             }
@@ -69,7 +77,7 @@ namespace FF
         private static AudioSource CreateSource()
         {
             EnsureHost();
-            var source = host.AddComponent<AudioSource>();
+            var source = _host.AddComponent<AudioSource>();
             source.playOnAwake = false;
             source.loop = false;
             source.spatialBlend = 0f;
@@ -80,22 +88,41 @@ namespace FF
 
         private static void EnsureHost()
         {
-            if (host)
+            if (_host)
             {
                 return;
             }
 
-            host = new GameObject("AudioPlaybackPool");
-            host.hideFlags = HideFlags.HideAndDontSave;
-            Object.DontDestroyOnLoad(host);
+            _host = new GameObject("AudioPlaybackPool");
+            _host.hideFlags = HideFlags.HideAndDontSave;
+            Object.DontDestroyOnLoad(_host);
+        }
+
+        private static void CullDestroyedSources()
+        {
+            for (int i = Sources.Count - 1; i >= 0; i--)
+            {
+                if (!Sources[i])
+                {
+                    Sources.RemoveAt(i);
+                }
+            }
+
+            if (Sources.Count <= _maxSources)
+            {
+                return;
+            }
+
+            int removeCount = Sources.Count - _maxSources;
+            Sources.RemoveRange(Sources.Count - removeCount, removeCount);
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetState()
         {
-            host = null;
+            _host = null;
             Sources.Clear();
-            maxSources = DefaultMaxSources;
+            _maxSources = DefaultMaxSources;
         }
     }
 }

@@ -223,7 +223,6 @@ namespace FF
 
         public void OnUpgrade(InputValue value)
         {
-            Debug.Log("press");
             if (!value.isPressed || _upgradeManager == null)
             {
                 return;
