@@ -7,7 +7,7 @@ namespace FF
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(EnemyStats))]
     [RequireComponent(typeof(Health))]
-    public class Enemy : MonoBehaviour
+    public class Enemy : MonoBehaviour, IPoolable
     {
         public static event Action<Enemy> OnAnyEnemyKilled;
 
@@ -868,6 +868,77 @@ namespace FF
         }
         #endregion Handlers
 
+        #region Pooling
+        public void OnTakenFromPool()
+        {
+            if (_health != null)
+            {
+                _health.ResetToBase();
+            }
+
+            if (_stats != null)
+            {
+                _stats.ResetRuntimeValues();
+            }
+
+            xpOrbValue = _baseXpOrbValue;
+            isBoss = false;
+            knockbackTimer = 0f;
+            knockbackVelocity = Vector2.zero;
+            _bobTimer = 0f;
+            _facingBlend = 1f;
+            _facingVelocity = 0f;
+            _visualPositionVelocity = Vector3.zero;
+            _visualScaleVelocity = Vector3.zero;
+            _tiltVelocity = 0f;
+            _dogAttackCooldownTimer = 0f;
+            _dogAttackOffset = Vector3.zero;
+            _moveWhileShootingTimer = UnityEngine.Random.Range(0.75f, 1.5f);
+            _shouldMoveWhileShooting = UnityEngine.Random.value < moveWhileShootingChance;
+            _weaveOffset = UnityEngine.Random.Range(0f, 32f);
+            wasInShootZone = false;
+            _desiredVelocity = Vector2.zero;
+
+            if (_rigidbody)
+            {
+                _rigidbody.linearVelocity = Vector2.zero;
+                _rigidbody.angularVelocity = 0f;
+            }
+
+            if (autoShooter)
+            {
+                autoShooter.SetFireHeld(false);
+            }
+        }
+
+        public void OnReturnedToPool()
+        {
+            if (_dogJumpRoutine != null)
+            {
+                StopCoroutine(_dogJumpRoutine);
+                _dogJumpRoutine = null;
+            }
+
+            _dogAttackOffset = Vector3.zero;
+            _dogAttackCooldownTimer = 0f;
+            _desiredVelocity = Vector2.zero;
+            knockbackTimer = 0f;
+            knockbackVelocity = Vector2.zero;
+            wasInShootZone = false;
+
+            if (_rigidbody)
+            {
+                _rigidbody.linearVelocity = Vector2.zero;
+                _rigidbody.angularVelocity = 0f;
+            }
+
+            if (autoShooter)
+            {
+                autoShooter.SetFireHeld(false);
+            }
+        }
+        #endregion Pooling
+
         private void EnsurePlayerReference()
         {
             if (_player)
@@ -964,18 +1035,7 @@ namespace FF
             float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
             var mixerGroup = _audioSource ? _audioSource.outputAudioMixerGroup : null;
 
-            GameObject audioObject = new("EnemyDeathSound");
-            audioObject.transform.position = transform.position;
-
-            var tempSource = audioObject.AddComponent<AudioSource>();
-            tempSource.clip = clip;
-            tempSource.volume = volume;
-            tempSource.pitch = pitch;
-            tempSource.spatialBlend = spatialBlend;
-            tempSource.outputAudioMixerGroup = mixerGroup;
-            tempSource.Play();
-
-            Destroy(audioObject, clip.length / Mathf.Max(tempSource.pitch, 0.01f));
+            AudioPlaybackPool.PlayOneShot(clip, transform.position, mixerGroup, spatialBlend, volume, pitch);
         }
 
         private void PlayDogAttackSound()

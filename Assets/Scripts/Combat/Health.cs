@@ -67,7 +67,15 @@ namespace FF
         private void Die()
         {
             OnDeath?.Invoke();
-            Destroy(gameObject);
+
+            if (TryGetComponent(out PoolToken token) && token.Owner != null)
+            {
+                token.Release();
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         #region Max HP Management

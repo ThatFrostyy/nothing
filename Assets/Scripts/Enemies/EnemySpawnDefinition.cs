@@ -20,6 +20,7 @@ namespace FF
         [SerializeField, Range(0f, 1f)] private float spawnChance = 1f;
         [SerializeField] private bool spawnInPacks = false;
         [SerializeField, Min(0.1f)] private float packRadius = 1.5f;
+        [SerializeField, Min(0)] private int poolPrewarmCount = 4;
 
         [Header("Scaling Override")]
         [SerializeField] private WaveAttributeScaling attributeScalingOverride;
@@ -37,6 +38,7 @@ namespace FF
         public float PackRadius => packRadius;
         public AudioClip SpawnCue => spawnCue;
         public float SpawnChance => Mathf.Clamp01(spawnChance);
+        public int PoolPrewarmCount => Mathf.Max(0, poolPrewarmCount);
 
         public int EvaluateSpawnCount(int wave)
         {
