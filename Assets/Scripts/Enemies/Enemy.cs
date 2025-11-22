@@ -1,10 +1,10 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace FF
 {
-    [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(EnemyStats))]
     [RequireComponent(typeof(Health))]
     public class Enemy : MonoBehaviour, IPoolable
@@ -70,11 +70,13 @@ namespace FF
         [SerializeField, Min(0f)] private float avoidanceSampleInterval = 0.08f;
 
         private Rigidbody2D _rigidbody;
+        private NavMeshAgent _agent;
         private EnemyStats _stats;
         private Health _health;
         private Transform _player;
         private Health _playerHealth;
         private Vector2 _desiredVelocity;
+        private Vector2 _currentVelocity;
         private IEnemyMovement _movementBehaviour;
         private IEnemyAttack _attackBehaviour;
         private Vector2 _smoothedSeparation;
@@ -148,6 +150,25 @@ namespace FF
         private void Awake()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
+            if (_rigidbody)
+            {
+                _rigidbody.bodyType = RigidbodyType2D.Kinematic;
+                _rigidbody.simulated = true;
+                _rigidbody.freezeRotation = true;
+            }
+
+            _agent = GetComponent<NavMeshAgent>();
+            if (!_agent)
+            {
+                _agent = gameObject.AddComponent<NavMeshAgent>();
+            }
+
+            if (_agent)
+            {
+                _agent.updateRotation = false;
+                _agent.updateUpAxis = false;
+                _agent.autoBraking = false;
+            }
             _stats = GetComponent<EnemyStats>();
             _health = GetComponent<Health>();
 
@@ -251,6 +272,7 @@ namespace FF
             _attackBehaviour = GetComponent<IEnemyAttack>();
 
             EnsurePlayerReference();
+            TryWarpAgent();
         }
 
         private void SpawnHelmet()
@@ -329,10 +351,11 @@ namespace FF
             if (knockbackTimer > 0f)
             {
                 knockbackTimer -= Time.fixedDeltaTime;
-                _rigidbody.linearVelocity = knockbackVelocity;
-                return;  
+                ApplyKnockbackDisplacement(Time.fixedDeltaTime);
+                return;
             }
 
+            ResumeAgentIfNeeded();
             UpdateMovement();
             UpdateBodyTilt();
         }
@@ -384,7 +407,7 @@ namespace FF
             float retreatMultiplier = _stats ? _stats.RetreatSpeedMultiplier : 0.6f;
             bool clampToStats = _movementBehaviour == null;
             Vector2 targetVelocity = _movementBehaviour != null
-                ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, _rigidbody, Time.fixedDeltaTime)
+                ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, Time.fixedDeltaTime)
                 : CalculateDefaultDesiredVelocity(moveSpeed, retreatMultiplier);
 
             ApplyDesiredVelocity(targetVelocity, moveSpeed, clampToStats);
@@ -411,7 +434,8 @@ namespace FF
             _desiredVelocity = targetVelocity;
 
             float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
+            Vector2 smoothedVelocity = Vector2.Lerp(_currentVelocity, targetVelocity, acceleration);
+            MoveAgent(smoothedVelocity, moveSpeed);
         }
 
         private Vector2 CalculateDefaultDesiredVelocity(float moveSpeed, float retreatMultiplier)
@@ -482,9 +506,39 @@ namespace FF
             targetVelocity = ApplySeparationAndClamp(targetVelocity, moveSpeed, clampToStats);
             _desiredVelocity = targetVelocity;
 
-            //float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.linearVelocity = targetVelocity;
+            MoveAgent(targetVelocity, moveSpeed);
 
+        }
+
+        private void MoveAgent(Vector2 targetVelocity, float moveSpeed)
+        {
+            _currentVelocity = targetVelocity;
+
+            if (_agent == null)
+            {
+                transform.position += (Vector3)(targetVelocity * Time.fixedDeltaTime);
+                return;
+            }
+
+            _agent.speed = moveSpeed;
+            _agent.acceleration = Mathf.Max(moveSpeed / Mathf.Max(Time.fixedDeltaTime, Mathf.Epsilon), 8f);
+
+            if (!_agent.isOnNavMesh)
+            {
+                TryWarpAgent();
+            }
+
+            Vector3 displacement = (Vector3)(targetVelocity * Time.fixedDeltaTime);
+
+            if (_agent.isOnNavMesh)
+            {
+                _agent.Move(displacement);
+                _agent.velocity = targetVelocity;
+            }
+            else
+            {
+                transform.position += displacement;
+            }
         }
 
         private Vector2 ApplySeparationAndClamp(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
@@ -521,7 +575,7 @@ namespace FF
                 return _cachedSeparationForce;
             }
 
-            Vector2 origin = _rigidbody ? _rigidbody.position : (Vector2)transform.position;
+            Vector2 origin = (Vector2)transform.position;
             if (_avoidanceResults == null || _avoidanceResults.Length == 0)
             {
                 int initialSize = Mathf.Clamp(maxAvoidanceChecks, 4, AvoidanceBufferCeiling);
@@ -620,6 +674,53 @@ namespace FF
             }
 
             return clampedForce;
+        }
+
+        private void TryWarpAgent()
+        {
+            if (_agent == null || !_agent.enabled || _agent.isOnNavMesh)
+            {
+                return;
+            }
+
+            if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 1.5f, NavMesh.AllAreas))
+            {
+                _agent.Warp(hit.position);
+            }
+        }
+
+        private void ApplyKnockbackDisplacement(float deltaTime)
+        {
+            Vector3 displacement = (Vector3)(knockbackVelocity * deltaTime);
+            transform.position += displacement;
+            _currentVelocity = knockbackVelocity;
+
+            if (_agent && _agent.enabled)
+            {
+                _agent.Warp(transform.position);
+                _agent.velocity = knockbackVelocity;
+            }
+        }
+
+        private void ResumeAgentIfNeeded()
+        {
+            if (_agent && _agent.enabled && _agent.isStopped && knockbackTimer <= 0f)
+            {
+                _agent.isStopped = false;
+            }
+        }
+
+        private void SyncAgentVelocity(Vector2 velocity)
+        {
+            _currentVelocity = velocity;
+            if (_agent && _agent.enabled)
+            {
+                _agent.velocity = velocity;
+                if (_agent.isOnNavMesh)
+                {
+                    _agent.nextPosition = transform.position;
+                }
+            }
         }
 
         private void UpdateDogBehaviour(float deltaTime)
@@ -731,6 +832,10 @@ namespace FF
         {
             knockbackTimer = duration;
             knockbackVelocity = force;
+            if (_agent && _agent.enabled)
+            {
+                _agent.isStopped = true;
+            }
         }
 
         #endregion Movement
@@ -741,7 +846,7 @@ namespace FF
             if (!enemyVisual) return;
 
             float bodyTiltDegrees = _stats ? _stats.BodyTiltDegrees : 12f;
-            float speed = _rigidbody.linearVelocity.magnitude;
+            float speed = _currentVelocity.magnitude;
             float maxSpeed = Mathf.Max(_stats ? _stats.MoveSpeed : 1f, Mathf.Epsilon);
             float normalizedSpeed = speed / maxSpeed;
 
@@ -926,10 +1031,11 @@ namespace FF
             wasInShootZone = false;
             _desiredVelocity = Vector2.zero;
 
-            if (_rigidbody)
+            SyncAgentVelocity(Vector2.zero);
+            if (_agent && _agent.enabled)
             {
-                _rigidbody.linearVelocity = Vector2.zero;
-                _rigidbody.angularVelocity = 0f;
+                _agent.isStopped = false;
+                _agent.Warp(transform.position);
             }
 
             if (autoShooter)
@@ -953,10 +1059,11 @@ namespace FF
             knockbackVelocity = Vector2.zero;
             wasInShootZone = false;
 
-            if (_rigidbody)
+            SyncAgentVelocity(Vector2.zero);
+            if (_agent && _agent.enabled)
             {
-                _rigidbody.linearVelocity = Vector2.zero;
-                _rigidbody.angularVelocity = 0f;
+                _agent.isStopped = false;
+                _agent.Warp(transform.position);
             }
 
             if (autoShooter)

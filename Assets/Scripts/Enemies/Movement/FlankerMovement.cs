@@ -14,7 +14,7 @@ namespace FF
         private float chosenAngle;
         private bool angleChosen = false;
 
-        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
+        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, float deltaTime)
         {
             if (!player)
                 return Vector2.zero;

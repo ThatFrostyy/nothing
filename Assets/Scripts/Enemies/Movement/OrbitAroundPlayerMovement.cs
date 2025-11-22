@@ -10,7 +10,7 @@ namespace FF
         [SerializeField, Min(0.1f)] private float orbitSpeedMultiplier = 0.75f;
         [SerializeField, Range(-1f, 1f)] private float orbitDirection = 1f;
 
-        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
+        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, float deltaTime)
         {
             if (!player)
             {
