@@ -152,6 +152,7 @@ namespace FF
             _bannerText.textWrappingMode = TextWrappingModes.NoWrap;
             _bannerText.color = bannerColor;
             _bannerText.text = string.Empty;
+            _bannerText.raycastTarget = false;
 
             TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF");
             if (!font)
