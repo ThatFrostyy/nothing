@@ -5,6 +5,8 @@ namespace FF
 {
     public class UpgradeManager : MonoBehaviour
     {
+        public static UpgradeManager Instance { get; private set; }
+
         [SerializeField] Upgrade[] all;
         [SerializeField] PlayerStats stats;
         [SerializeField] XPWallet wallet;
@@ -60,8 +62,33 @@ namespace FF
 
         void Awake()
         {
-            wallet.OnLevelUp += OnLevel;
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+
+            if (wallet == null)
+            {
+                wallet = GetComponent<XPWallet>();
+            }
+
+            if (wallet != null)
+            {
+                wallet.OnLevelUp += OnLevel;
+            }
             NotifyPendingChanged();
+        }
+
+        void OnDestroy()
+        {
+            if (wallet != null)
+            {
+                wallet.OnLevelUp -= OnLevel;
+            }
         }
 
         void OnLevel(int lvl)
