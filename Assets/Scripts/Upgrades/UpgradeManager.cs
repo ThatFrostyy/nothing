@@ -1,11 +1,9 @@
 using UnityEngine;
-using UnityEngine.InputSystem.HID;
-using UnityEngine.SceneManagement;
 
 
 namespace FF
 {
-    public class UpgradeManager : MonoBehaviour
+    public class UpgradeManager : MonoBehaviour, ISceneReferenceHandler
     {
         public static UpgradeManager I { get; private set; }
 
@@ -82,17 +80,12 @@ namespace FF
 
         void OnEnable()
         {
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            SceneReferenceRegistry.Register(this);
         }
 
         void OnDisable()
         {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
-        }
-
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            ClearSceneRefs();
+            SceneReferenceRegistry.Unregister(this);
         }
 
         public void RegisterPlayerStats(PlayerStats playerStats)
@@ -103,6 +96,7 @@ namespace FF
 
         public void RegisterWallet(XPWallet wallet)
         {
+            UnsubscribeWalletEvents();
             this.wallet = wallet;
             OnWalletRgistered?.Invoke(wallet);
             wallet.OnLevelUp += OnLevel;
@@ -114,11 +108,31 @@ namespace FF
             OnUIRegistered?.Invoke(upgradeUI);
         }
 
-        public void ClearSceneRefs()
+        public void ClearSceneReferences()
         {
+            UnsubscribeWalletEvents();
             stats = null;
             wallet = null;
             ui = null;
+        }
+
+        public void ResetState()
+        {
+            ClearSceneReferences();
+
+            upgradesTaken = 0;
+            pendingUpgrades = 0;
+            upgradeCounts.Clear();
+
+            NotifyPendingChanged();
+        }
+
+        void UnsubscribeWalletEvents()
+        {
+            if (wallet != null)
+            {
+                wallet.OnLevelUp -= OnLevel;
+            }
         }
 
         void OnLevel(int lvl)
