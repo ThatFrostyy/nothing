@@ -38,6 +38,7 @@ namespace FF
 
         public void Next()
         {
+            Debug.Log("Next character");
             Step(1);
         }
 
@@ -54,6 +55,7 @@ namespace FF
         public void NextHat()
         {
             StepHat(1);
+            Debug.Log("Next hat");
         }
 
         public void PreviousHat()
@@ -73,6 +75,7 @@ namespace FF
             SyncHatWithSelection();
             ApplyCurrentSelection();
             Refresh();
+            Debug.Log("Next character");
         }
 
         private void SyncIndexWithSelection()
@@ -144,6 +147,7 @@ namespace FF
 
         private void StepHat(int delta)
         {
+            Debug.Log("Next hat");
             CharacterDefinition character = availableCharacters.Count > 0 ? availableCharacters[_index] : null;
             List<HatDefinition> hats = GetHatsForCharacter(character);
             if (hats.Count == 0)
