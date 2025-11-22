@@ -9,7 +9,7 @@ namespace FF
         [SerializeField, Min(0.1f)] private float speedMultiplier = 1.4f;
         [SerializeField, Min(0f)] private float minimumChaseDistance = 0f;
 
-        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
+        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, float deltaTime)
         {
             if (!player)
             {

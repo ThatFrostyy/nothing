@@ -19,7 +19,7 @@ namespace FF
 
         public bool ShouldHoldFire => !_isSneaking || _lastDistance > Mathf.Max(closeStopDistance, fireReleaseDistance);
 
-        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
+        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, float deltaTime)
         {
             if (!player)
             {
