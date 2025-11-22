@@ -7,6 +7,9 @@ namespace FF
     {
         public static SceneFlowController Instance { get; private set; }
 
+        public string MainMenuSceneName => mainMenuSceneName;
+        public string GameplaySceneName => gameplaySceneName;
+
         [SerializeField] private string mainMenuSceneName = "MainMenu";
         [SerializeField] private string gameplaySceneName = "Main";
         [SerializeField] private bool persistAcrossScenes = true;
@@ -39,6 +42,17 @@ namespace FF
         public void ReloadCurrentScene()
         {
             LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+        public AsyncOperation LoadSceneAsync(string sceneName)
+        {
+            if (string.IsNullOrWhiteSpace(sceneName))
+            {
+                return null;
+            }
+
+            Time.timeScale = 1f;
+            return SceneManager.LoadSceneAsync(sceneName);
         }
 
         private static void LoadScene(string sceneName)

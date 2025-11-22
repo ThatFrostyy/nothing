@@ -2086,6 +2086,7 @@ GameObject:
   - component: {fileID: 1015119879}
   - component: {fileID: 1015119878}
   - component: {fileID: 1015119877}
+  - component: {fileID: 1015119881}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -2110,6 +2111,24 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
+--- !u!114 &1015119881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1015119876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b328070324d34d7aba823611d3e000ac, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  sceneFlow: {fileID: 1002}
+  playButton: {fileID: 1182034261}
+  overlayColor: {r: 0, g: 0, b: 0, a: 0.75}
+  maps:
+  - SceneName: Main
+    DisplayName: Main
 --- !u!114 &1015119878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2459,9 +2478,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1002}
-        m_TargetAssemblyTypeName: FF.SceneFlowController, Assembly-CSharp
-        m_MethodName: LoadGameplayScene
+      - m_Target: {fileID: 1015119881}
+        m_TargetAssemblyTypeName: FF.MapSelectionUI, Assembly-CSharp
+        m_MethodName: OpenMapSelection
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

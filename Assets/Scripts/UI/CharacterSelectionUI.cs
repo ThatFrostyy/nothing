@@ -185,12 +185,7 @@ namespace FF
 
         private List<HatDefinition> GetHatsForCharacter(CharacterDefinition character)
         {
-            if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
-            {
-                return character.AvailableHats;
-            }
-
-            return availableHats;
+            return availableHats ?? new List<HatDefinition>();
         }
 
         private HatDefinition ResolveHatSelection(CharacterDefinition character)
