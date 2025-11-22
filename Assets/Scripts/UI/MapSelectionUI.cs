@@ -17,22 +17,20 @@ namespace FF
 
         [SerializeField] private SceneFlowController sceneFlow;
         [SerializeField] private Button playButton;
-        [SerializeField] private Color overlayColor = new(0f, 0f, 0f, 0.75f);
+        [SerializeField] private Button startButton;
+        [SerializeField] private Button cancelButton;
+        [SerializeField] private Button previousButton;
+        [SerializeField] private Button nextButton;
+        [SerializeField] private GameObject mapOverlay;
+        [SerializeField] private TMP_Text mapLabel;
+        [SerializeField] private GameObject loadingOverlay;
+        [SerializeField] private TMP_Text loadingLabel;
+        [SerializeField] private Slider loadingSlider;
         [SerializeField] private MapOption[] maps = { new() { SceneName = "Main", DisplayName = "Main" } };
-        [SerializeField] private TMP_FontAsset defaultFont;
 
-        private GameObject mapOverlay;
-        private TMP_Text mapLabel;
-        private Button startButton;
-        private Button cancelButton;
-        private Button previousButton;
-        private Button nextButton;
-        private int mapIndex;
-
-        private GameObject loadingOverlay;
-        private TMP_Text loadingLabel;
-        private Slider loadingSlider;
         private Coroutine loadingRoutine;
+        private int mapIndex;
+        private bool buttonsWired;
 
         void Awake()
         {
@@ -40,46 +38,92 @@ namespace FF
             {
                 sceneFlow = FindFirstObjectByType<SceneFlowController>();
             }
-
-            if (!playButton)
-            {
-                playButton = GetComponentInChildren<Button>();
-            }
-
-            BuildMapOverlay();
-            BuildLoadingOverlay();
-
-            if (playButton)
-            {
-                bool hasPersistent = false;
-                for (int i = 0; i < playButton.onClick.GetPersistentEventCount(); i++)
-                {
-                    if (playButton.onClick.GetPersistentMethodName(i) == nameof(OpenMapSelection))
-                    {
-                        hasPersistent = true;
-                        break;
-                    }
-                }
-
-                if (!hasPersistent)
-                {
-                    playButton.onClick.RemoveListener(OpenMapSelection);
-                    playButton.onClick.AddListener(OpenMapSelection);
-                }
-            }
         }
 
-        void Start()
+        void OnEnable()
         {
+            WireButtons();
             RefreshMapLabel();
             ShowMapOverlay(false);
             ShowLoadingOverlay(false, 0f);
+        }
+
+        void OnDisable()
+        {
+            UnwireButtons();
+
+            if (loadingRoutine != null)
+            {
+                StopCoroutine(loadingRoutine);
+                loadingRoutine = null;
+            }
         }
 
         public void OpenMapSelection()
         {
             RefreshMapLabel();
             ShowMapOverlay(true);
+        }
+
+        public void CloseMapSelection()
+        {
+            ShowMapOverlay(false);
+        }
+
+        public void SelectNextMap()
+        {
+            StepMap(1);
+        }
+
+        public void SelectPreviousMap()
+        {
+            StepMap(-1);
+        }
+
+        private void WireButtons()
+        {
+            if (buttonsWired)
+            {
+                return;
+            }
+
+            if (playButton)
+            {
+                playButton.onClick.AddListener(OpenMapSelection);
+            }
+
+            if (startButton)
+            {
+                startButton.onClick.AddListener(BeginLoadingSelectedMap);
+            }
+
+            if (cancelButton)
+            {
+                cancelButton.onClick.AddListener(CloseMapSelection);
+            }
+
+            if (previousButton)
+            {
+                previousButton.onClick.AddListener(SelectPreviousMap);
+            }
+
+            if (nextButton)
+            {
+                nextButton.onClick.AddListener(SelectNextMap);
+            }
+
+            buttonsWired = true;
+        }
+
+        private void UnwireButtons()
+        {
+            if (playButton) playButton.onClick.RemoveListener(OpenMapSelection);
+            if (startButton) startButton.onClick.RemoveListener(BeginLoadingSelectedMap);
+            if (cancelButton) cancelButton.onClick.RemoveListener(CloseMapSelection);
+            if (previousButton) previousButton.onClick.RemoveListener(SelectPreviousMap);
+            if (nextButton) nextButton.onClick.RemoveListener(SelectNextMap);
+
+            buttonsWired = false;
         }
 
         private void StepMap(int delta)
@@ -95,7 +139,7 @@ namespace FF
 
         private void RefreshMapLabel()
         {
-            if (mapLabel == null)
+            if (!mapLabel)
             {
                 return;
             }
@@ -111,168 +155,39 @@ namespace FF
             mapLabel.text = $"Map: {displayName}";
         }
 
-        private void BuildMapOverlay()
-        {
-            mapOverlay = CreateOverlay("MapSelectionOverlay", overlayColor);
-            mapOverlay.SetActive(true);
-
-            RectTransform root = mapOverlay.GetComponent<RectTransform>();
-
-            TMP_Text title = CreateText("Select a Map", root, new Vector2(0.5f, 0.8f), 36);
-            mapLabel = CreateText("Map: Main", root, new Vector2(0.5f, 0.65f), 30);
-
-            previousButton = CreateButton("Previous", root, new Vector2(0.35f, 0.5f));
-            previousButton.onClick.AddListener(() => StepMap(-1));
-
-            nextButton = CreateButton("Next", root, new Vector2(0.65f, 0.5f));
-            nextButton.onClick.AddListener(() => StepMap(1));
-
-            startButton = CreateButton("Start", root, new Vector2(0.5f, 0.35f));
-            startButton.onClick.AddListener(BeginLoadingSelectedMap);
-
-            cancelButton = CreateButton("Cancel", root, new Vector2(0.5f, 0.22f));
-            cancelButton.onClick.AddListener(() => ShowMapOverlay(false));
-
-            mapOverlay.SetActive(false);
-        }
-
-        private void BuildLoadingOverlay()
-        {
-            loadingOverlay = CreateOverlay("LoadingOverlay", overlayColor);
-            loadingOverlay.SetActive(true);
-
-            RectTransform root = loadingOverlay.GetComponent<RectTransform>();
-            loadingLabel = CreateText("Loading...", root, new Vector2(0.5f, 0.55f), 32);
-
-            GameObject sliderObject = new("LoadingSlider", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Slider));
-            sliderObject.transform.SetParent(root, false);
-
-            RectTransform rect = sliderObject.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.2f, 0.45f);
-            rect.anchorMax = new Vector2(0.8f, 0.45f);
-            rect.sizeDelta = new Vector2(0f, 24f);
-
-            Image background = sliderObject.GetComponent<Image>();
-            background.color = new Color(1f, 1f, 1f, 0.25f);
-
-            loadingSlider = sliderObject.GetComponent<Slider>();
-            loadingSlider.minValue = 0f;
-            loadingSlider.maxValue = 1f;
-            loadingSlider.value = 0f;
-            loadingSlider.transition = Selectable.Transition.None;
-
-            GameObject fillArea = new("Fill Area", typeof(RectTransform));
-            fillArea.transform.SetParent(sliderObject.transform, false);
-            RectTransform fillRect = fillArea.GetComponent<RectTransform>();
-            fillRect.anchorMin = new Vector2(0.05f, 0.25f);
-            fillRect.anchorMax = new Vector2(0.95f, 0.75f);
-            fillRect.sizeDelta = Vector2.zero;
-
-            GameObject fill = new("Fill", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            fill.transform.SetParent(fillArea.transform, false);
-            RectTransform fillTransform = fill.GetComponent<RectTransform>();
-            fillTransform.anchorMin = new Vector2(0f, 0f);
-            fillTransform.anchorMax = new Vector2(1f, 1f);
-            fillTransform.sizeDelta = Vector2.zero;
-
-            Image fillImage = fill.GetComponent<Image>();
-            fillImage.color = new Color(0.3f, 0.9f, 0.6f, 0.9f);
-
-            loadingSlider.fillRect = fillTransform;
-            loadingSlider.targetGraphic = fillImage;
-
-            loadingOverlay.SetActive(false);
-        }
-
-        private GameObject CreateOverlay(string name, Color color)
-        {
-            GameObject overlay = new(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            overlay.transform.SetParent(transform, false);
-
-            RectTransform rect = overlay.GetComponent<RectTransform>();
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-
-            Image image = overlay.GetComponent<Image>();
-            image.color = color;
-
-            return overlay;
-        }
-
-        private TMP_Text CreateText(string content, RectTransform parent, Vector2 anchor, float fontSize)
-        {
-            GameObject obj = new("Text", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
-            obj.transform.SetParent(parent, false);
-
-            RectTransform rect = obj.GetComponent<RectTransform>();
-            rect.anchorMin = anchor;
-            rect.anchorMax = anchor;
-            rect.anchoredPosition = Vector2.zero;
-            rect.sizeDelta = new Vector2(600f, 80f);
-
-            TextMeshProUGUI text = obj.GetComponent<TextMeshProUGUI>();
-            text.text = content;
-            text.alignment = TextAlignmentOptions.Center;
-            text.fontSize = fontSize;
-            text.font = defaultFont;
-
-            return text;
-        }
-
-        private Button CreateButton(string label, RectTransform parent, Vector2 anchor)
-        {
-            GameObject obj = new(label + "Button", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-            obj.transform.SetParent(parent, false);
-
-            RectTransform rect = obj.GetComponent<RectTransform>();
-            rect.anchorMin = anchor;
-            rect.anchorMax = anchor;
-            rect.anchoredPosition = Vector2.zero;
-            rect.sizeDelta = new Vector2(240f, 60f);
-
-            Image image = obj.GetComponent<Image>();
-            image.color = new Color(0.17f, 0.18f, 0.2f, 0.85f);
-
-            Button button = obj.GetComponent<Button>();
-            button.transition = Selectable.Transition.ColorTint;
-
-            TMP_Text text = CreateText(label, rect, new Vector2(0.5f, 0.5f), 26f);
-            text.rectTransform.SetParent(obj.transform, false);
-            text.rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            text.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            text.rectTransform.anchoredPosition = Vector2.zero;
-            text.rectTransform.sizeDelta = Vector2.zero;
-
-            return button;
-        }
-
         private void BeginLoadingSelectedMap()
         {
-            string sceneName = null;
-            if (maps != null && maps.Length > 0)
-            {
-                MapOption selected = maps[Mathf.Clamp(mapIndex, 0, maps.Length - 1)];
-                sceneName = string.IsNullOrWhiteSpace(selected.SceneName) ? sceneFlow?.GameplaySceneName : selected.SceneName;
-            }
-
+            string sceneName = GetSelectedSceneName();
             if (string.IsNullOrWhiteSpace(sceneName))
             {
-                sceneName = sceneFlow ? sceneFlow.GameplaySceneName : SceneManager.GetActiveScene().name;
+                return;
             }
 
             ShowMapOverlay(false);
             StartLoading(sceneName);
         }
 
-        private void StartLoading(string sceneName)
+        private string GetSelectedSceneName()
         {
-            if (string.IsNullOrWhiteSpace(sceneName))
+            if (maps != null && maps.Length > 0)
             {
-                return;
+                MapOption selected = maps[Mathf.Clamp(mapIndex, 0, maps.Length - 1)];
+                if (!string.IsNullOrWhiteSpace(selected.SceneName))
+                {
+                    return selected.SceneName;
+                }
             }
 
+            if (sceneFlow && !string.IsNullOrWhiteSpace(sceneFlow.GameplaySceneName))
+            {
+                return sceneFlow.GameplaySceneName;
+            }
+
+            return SceneManager.GetActiveScene().name;
+        }
+
+        private void StartLoading(string sceneName)
+        {
             if (loadingRoutine != null)
             {
                 StopCoroutine(loadingRoutine);
@@ -288,6 +203,7 @@ namespace FF
             AsyncOperation operation = sceneFlow ? sceneFlow.LoadSceneAsync(sceneName) : SceneManager.LoadSceneAsync(sceneName);
             if (operation == null)
             {
+                ShowLoadingOverlay(false, 0f);
                 yield break;
             }
 
@@ -297,6 +213,8 @@ namespace FF
                 ShowLoadingOverlay(true, progress);
                 yield return null;
             }
+
+            ShowLoadingOverlay(false, 1f);
         }
 
         private void ShowMapOverlay(bool visible)
