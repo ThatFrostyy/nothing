@@ -307,7 +307,6 @@ namespace FF
 
         private void Update()
         {
-            return;
             EnsurePlayerReference();
             AimAtPlayer();
             float deltaTime = Time.deltaTime;
