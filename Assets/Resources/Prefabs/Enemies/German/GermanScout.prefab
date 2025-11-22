@@ -99,12 +99,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3668429809643813206}
-  - component: {fileID: 5782900519153121213}
   - component: {fileID: 8799466446598583616}
   - component: {fileID: 5009798840361324626}
   - component: {fileID: 472424061299689098}
-  - component: {fileID: 3702352278689290230}
   - component: {fileID: 7007760860764463659}
+  - component: {fileID: 4113005339642682787}
   m_Layer: 7
   m_Name: GermanScout
   m_TagString: Enemy
@@ -130,33 +129,6 @@ Transform:
   - {fileID: 3016989360391334906}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &5782900519153121213
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1684379601896230019}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 1
-  m_Constraints: 4
 --- !u!114 &8799466446598583616
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -247,47 +219,7 @@ MonoBehaviour:
   xpOrbValue: 1
   xpOrbCount: 4
   xpOrbSpreadRadius: 1
-  avoidanceLayers:
-    serializedVersion: 2
-    m_Bits: 128
-  maxAvoidanceChecks: 16
---- !u!70 &3702352278689290230
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1684379601896230019}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0.0048520565, y: -0.126154}
-  m_Size: {x: 1.3442614, y: 1.6353861}
-  m_Direction: 0
+  knockbackRecoveryTime: 0.25
 --- !u!114 &7007760860764463659
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -304,6 +236,28 @@ MonoBehaviour:
   flankAngle: 90
   repositionSpeed: 1.5
   attackSpeed: 1.5
+--- !u!195 &4113005339642682787
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1684379601896230019}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &1856882074656435891
 GameObject:
   m_ObjectHideFlags: 0

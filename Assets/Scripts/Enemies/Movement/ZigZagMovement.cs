@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace FF
 {
-    [AddComponentMenu("FF/Enemies/Movement/Zig Zag Movement")]
+    [AddComponentMenu("FF/Enemies/Movement/Zig Zag Movement (NavMesh)")]
     public class ZigZagMovement : MonoBehaviour, IEnemyMovement
     {
         [Header("Zig Zag Settings")]
@@ -17,26 +18,31 @@ namespace FF
             _phaseOffset = Random.Range(0f, Mathf.PI * 2f);
         }
 
-        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
+        public Vector2 GetDesiredVelocity(
+            Enemy enemy,
+            Transform player,
+            EnemyStats stats,
+            NavMeshAgent agent,
+            float deltaTime)
         {
             if (!player)
-            {
                 return Vector2.zero;
-            }
 
             float speed = (stats ? stats.MoveSpeed : 3f) * speedMultiplier;
+
             Vector2 toPlayer = (Vector2)(player.position - enemy.transform.position);
             float distance = toPlayer.magnitude;
-            if (distance <= Mathf.Epsilon)
-            {
+            if (distance < 0.001f)
                 return Vector2.zero;
-            }
 
-            Vector2 forward = toPlayer / Mathf.Max(distance, 0.001f);
+            Vector2 forward = toPlayer / distance;
             Vector2 right = new(-forward.y, forward.x);
+
             float wave = Mathf.Sin(Time.time * zigZagFrequency + _phaseOffset);
-            Vector2 zigzag = forward + 0.1f * wave * zigZagAmplitude * right;
-            return zigzag.normalized * speed;
+
+            Vector2 zigZag = forward + wave * zigZagAmplitude * 0.1f * right;
+
+            return zigZag.normalized * speed;
         }
     }
 }

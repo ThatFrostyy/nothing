@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace FF
 {
-    [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(NavMeshAgent))]
     [RequireComponent(typeof(EnemyStats))]
     [RequireComponent(typeof(Health))]
     public class Enemy : MonoBehaviour, IPoolable
@@ -64,28 +66,28 @@ namespace FF
 
         private int _baseXpOrbValue;
 
-        [Header("Avoidance")]
-        [SerializeField] private LayerMask avoidanceLayers = ~0;
-        [SerializeField, Range(4, 128)] private int maxAvoidanceChecks = 32;
-        [SerializeField, Min(0f)] private float avoidanceSampleInterval = 0.08f;
+        // NavMesh / movement
+        [Header("NavMesh")]
+        [SerializeField, Min(0.01f)] private float knockbackRecoveryTime = 0.25f;
 
-        private Rigidbody2D _rigidbody;
+        private NavMeshAgent _agent;
         private EnemyStats _stats;
         private Health _health;
         private Transform _player;
         private Health _playerHealth;
+
         private Vector2 _desiredVelocity;
+        private Vector2 _currentVelocity;
+
         private IEnemyMovement _movementBehaviour;
         private IEnemyAttack _attackBehaviour;
-        private Vector2 _smoothedSeparation;
+
         private Vector3 _baseVisualLocalPosition;
         private Vector3 _baseVisualLocalScale = Vector3.one;
         private float _bobTimer;
         private bool _isFacingLeft;
-        private Collider2D[] _avoidanceResults;
-        private ContactFilter2D _avoidanceFilter;
+
         private AudioSource _audioSource;
-        private const int AvoidanceBufferCeiling = 256;
         private int lastIndex = -1;
         private Vector3 _visualPositionVelocity;
         private Vector3 _visualScaleVelocity;
@@ -101,11 +103,13 @@ namespace FF
         private float _moveWhileShootingTimer;
         private bool _shouldMoveWhileShooting;
         private bool wasInShootZone = false;
+
         private float knockbackTimer = 0f;
         private Vector2 knockbackVelocity;
+
         private Vector2 _lastAimDirection = Vector2.right;
-        private Vector2 _cachedSeparationForce = Vector2.zero;
-        private float _nextAvoidanceSampleTime;
+
+        private static readonly List<Enemy> ActiveEnemies = new List<Enemy>();
 
         private const float FacingDeadZone = 0.05f;
 
@@ -147,7 +151,17 @@ namespace FF
 
         private void Awake()
         {
-            _rigidbody = GetComponent<Rigidbody2D>();
+            _agent = GetComponent<NavMeshAgent>();
+            if (!_agent)
+            {
+                _agent = gameObject.AddComponent<NavMeshAgent>();
+            }
+
+            // 2D setup
+            _agent.updateRotation = false;
+            _agent.updateUpAxis = false;
+            _agent.autoBraking = false;
+
             _stats = GetComponent<EnemyStats>();
             _health = GetComponent<Health>();
 
@@ -235,22 +249,11 @@ namespace FF
                 autoShooter.SetCameraShakeEnabled(false);
             }
 
-            int bufferSize = Mathf.Clamp(maxAvoidanceChecks, 4, AvoidanceBufferCeiling);
-            _avoidanceResults = new Collider2D[bufferSize];
-            _avoidanceFilter = new ContactFilter2D
-            {
-                useLayerMask = true,
-                useTriggers = true
-            };
-            _avoidanceFilter.SetLayerMask(avoidanceLayers);
-
-            float interval = Mathf.Max(0f, avoidanceSampleInterval);
-            _nextAvoidanceSampleTime = Time.time + (interval > 0f ? UnityEngine.Random.Range(0f, interval) : 0f);
-
             _movementBehaviour = GetComponent<IEnemyMovement>();
             _attackBehaviour = GetComponent<IEnemyAttack>();
 
             EnsurePlayerReference();
+            TryWarpAgent();
         }
 
         private void SpawnHelmet()
@@ -309,6 +312,7 @@ namespace FF
         {
             EnsurePlayerReference();
             AimAtPlayer();
+
             float deltaTime = Time.deltaTime;
             if (_attackBehaviour != null)
             {
@@ -329,16 +333,22 @@ namespace FF
             if (knockbackTimer > 0f)
             {
                 knockbackTimer -= Time.fixedDeltaTime;
-                _rigidbody.linearVelocity = knockbackVelocity;
-                return;  
+                ApplyKnockbackDisplacement(Time.fixedDeltaTime);
+                return;
             }
 
+            ResumeAgentIfNeeded();
             UpdateMovement();
             UpdateBodyTilt();
         }
 
         private void OnEnable()
         {
+            if (!ActiveEnemies.Contains(this))
+            {
+                ActiveEnemies.Add(this);
+            }
+
             if (_health != null)
             {
                 _health.OnDeath += HandleDeath;
@@ -357,6 +367,8 @@ namespace FF
 
         private void OnDisable()
         {
+            ActiveEnemies.Remove(this);
+
             if (_health != null)
             {
                 _health.OnDeath -= HandleDeath;
@@ -373,6 +385,7 @@ namespace FF
         }
 
         #region Movement
+
         private void UpdateMovement()
         {
             if (isDog && _movementBehaviour == null)
@@ -380,14 +393,15 @@ namespace FF
                 UpdateDogMovement();
                 return;
             }
+
             float moveSpeed = _stats ? _stats.MoveSpeed : 3f;
             float retreatMultiplier = _stats ? _stats.RetreatSpeedMultiplier : 0.6f;
-            bool clampToStats = _movementBehaviour == null;
+
             Vector2 targetVelocity = _movementBehaviour != null
-                ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, _rigidbody, Time.fixedDeltaTime)
+                ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, _agent, Time.fixedDeltaTime)
                 : CalculateDefaultDesiredVelocity(moveSpeed, retreatMultiplier);
 
-            ApplyDesiredVelocity(targetVelocity, moveSpeed, clampToStats);
+            ApplyDesiredVelocity(targetVelocity, moveSpeed);
         }
 
         private void UpdateDogMovement()
@@ -407,11 +421,8 @@ namespace FF
                 }
             }
 
-            targetVelocity = ApplySeparationAndClamp(targetVelocity, moveSpeed, true);
-            _desiredVelocity = targetVelocity;
-
-            float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
+            _desiredVelocity = Vector2.ClampMagnitude(targetVelocity, moveSpeed);
+            MoveAgent(_desiredVelocity, moveSpeed);
         }
 
         private Vector2 CalculateDefaultDesiredVelocity(float moveSpeed, float retreatMultiplier)
@@ -477,149 +488,76 @@ namespace FF
             }
         }
 
-        private void ApplyDesiredVelocity(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
+        private void ApplyDesiredVelocity(Vector2 targetVelocity, float moveSpeed)
         {
-            targetVelocity = ApplySeparationAndClamp(targetVelocity, moveSpeed, clampToStats);
-            _desiredVelocity = targetVelocity;
-
-            //float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.linearVelocity = targetVelocity;
-
+            _desiredVelocity = Vector2.ClampMagnitude(targetVelocity, moveSpeed);
+            MoveAgent(_desiredVelocity, moveSpeed);
         }
 
-        private Vector2 ApplySeparationAndClamp(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
+        private void MoveAgent(Vector2 targetVelocity, float moveSpeed)
         {
-            if (_stats)
-            {
-                Vector2 separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);
-                float responsiveness = _stats.AvoidanceResponsiveness;
-                _smoothedSeparation = responsiveness > 0f
-                    ? Vector2.Lerp(_smoothedSeparation, separationForce, responsiveness)
-                    : separationForce;
+            _currentVelocity = targetVelocity;
 
-                targetVelocity += _smoothedSeparation * _stats.AvoidanceWeight;
+            if (_agent == null || !_agent.enabled)
+            {
+                transform.position += (Vector3)(targetVelocity * Time.fixedDeltaTime);
+                return;
+            }
+
+            _agent.speed = moveSpeed;
+            _agent.acceleration = Mathf.Max(moveSpeed / Mathf.Max(Time.fixedDeltaTime, Mathf.Epsilon), 8f);
+
+            if (!_agent.isOnNavMesh)
+            {
+                TryWarpAgent();
+            }
+
+            Vector3 displacement = (Vector3)(targetVelocity * Time.fixedDeltaTime);
+
+            if (_agent.isOnNavMesh)
+            {
+                _agent.Move(displacement);
+                _agent.velocity = targetVelocity;
             }
             else
             {
-                _smoothedSeparation = Vector2.zero;
+                transform.position += displacement;
             }
-
-            return clampToStats ? Vector2.ClampMagnitude(targetVelocity, moveSpeed) : targetVelocity;
         }
 
-        private Vector2 CalculateSeparationForce(float radius, float pushStrength)
+        private void TryWarpAgent()
         {
-            if (radius <= 0f || pushStrength <= 0f)
+            if (_agent == null || !_agent.enabled)
+                return;
+
+            if (_agent.isOnNavMesh)
+                return;
+
+            if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 1.5f, NavMesh.AllAreas))
             {
-                return Vector2.zero;
+                _agent.Warp(hit.position);
             }
+        }
 
-            float interval = Mathf.Max(0f, avoidanceSampleInterval);
-            bool shouldCache = interval > 0f;
-            if (shouldCache && Time.time < _nextAvoidanceSampleTime)
+        private void ApplyKnockbackDisplacement(float deltaTime)
+        {
+            Vector3 displacement = (Vector3)(knockbackVelocity * deltaTime);
+            transform.position += displacement;
+            _currentVelocity = knockbackVelocity;
+
+            if (_agent && _agent.enabled && _agent.isOnNavMesh)
             {
-                return _cachedSeparationForce;
+                _agent.Warp(transform.position);
+                _agent.velocity = knockbackVelocity;
             }
+        }
 
-            Vector2 origin = _rigidbody ? _rigidbody.position : (Vector2)transform.position;
-            if (_avoidanceResults == null || _avoidanceResults.Length == 0)
+        private void ResumeAgentIfNeeded()
+        {
+            if (_agent && _agent.enabled && knockbackTimer <= 0f && _agent.isOnNavMesh && _agent.isStopped)
             {
-                int initialSize = Mathf.Clamp(maxAvoidanceChecks, 4, AvoidanceBufferCeiling);
-                _avoidanceResults = new Collider2D[initialSize];
+                _agent.isStopped = false;
             }
-
-            int hitCount = Physics2D.OverlapCircle(origin, radius, _avoidanceFilter, _avoidanceResults);
-            int clampedHitCount = Mathf.Min(hitCount, _avoidanceResults.Length);
-
-            if (clampedHitCount <= 0)
-            {
-                _cachedSeparationForce = Vector2.zero;
-                if (shouldCache)
-                {
-                    _nextAvoidanceSampleTime = Time.time + interval;
-                }
-                return Vector2.zero;
-            }
-
-            Vector2 separation = Vector2.zero;
-            float totalWeight = 0f;
-            int contributions = 0;
-
-            for (int i = 0; i < clampedHitCount; i++)
-            {
-                Collider2D neighbor = _avoidanceResults[i];
-                if (!neighbor)
-                {
-                    continue;
-                }
-
-                if (neighbor.attachedRigidbody == _rigidbody)
-                {
-                    continue;
-                }
-
-                Vector2 neighborPoint = neighbor.ClosestPoint(origin);
-                Vector2 offset = origin - neighborPoint;
-                float sqrMagnitude = offset.sqrMagnitude;
-
-                if (sqrMagnitude < 0.0001f)
-                {
-                    offset = origin - (Vector2)neighbor.transform.position;
-                    sqrMagnitude = offset.sqrMagnitude;
-                    if (sqrMagnitude < 0.0001f)
-                    {
-                        int hash = neighbor.GetInstanceID() ^ GetInstanceID();
-                        float angle = (hash & 1023) * Mathf.Deg2Rad;
-                        offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * 0.1f;
-                        sqrMagnitude = offset.sqrMagnitude;
-                        if (sqrMagnitude < 0.0001f)
-                        {
-                            continue;
-                        }
-                    }
-                }
-
-                float distance = Mathf.Sqrt(sqrMagnitude);
-                float weight = Mathf.InverseLerp(radius, 0f, distance);
-                Vector2 direction = offset / distance;
-
-                separation += direction * weight;
-                totalWeight += weight;
-                contributions++;
-            }
-
-            if (contributions == 0 || totalWeight <= 0f)
-            {
-                _cachedSeparationForce = Vector2.zero;
-                if (shouldCache)
-                {
-                    _nextAvoidanceSampleTime = Time.time + interval;
-                }
-                return Vector2.zero;
-            }
-
-            if (separation.sqrMagnitude < 0.0001f)
-            {
-                _cachedSeparationForce = Vector2.zero;
-                if (shouldCache)
-                {
-                    _nextAvoidanceSampleTime = Time.time + interval;
-                }
-                return Vector2.zero;
-            }
-
-            Vector2 separationDirection = separation.normalized;
-            float crowdingStrength = Mathf.Clamp(totalWeight, 0.25f, 1f);
-            Vector2 force = crowdingStrength * pushStrength * separationDirection;
-            Vector2 clampedForce = Vector2.ClampMagnitude(force, pushStrength);
-
-            _cachedSeparationForce = clampedForce;
-            if (shouldCache)
-            {
-                _nextAvoidanceSampleTime = Time.time + interval;
-            }
-
-            return clampedForce;
         }
 
         private void UpdateDogBehaviour(float deltaTime)
@@ -706,10 +644,8 @@ namespace FF
 
             float angle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg;
 
-            // Rotate gun
             gunPivot.rotation = Quaternion.Euler(0f, 0f, angle);
 
-            // Detect facing direction
             bool facingLeft = _isFacingLeft;
             if (Mathf.Abs(aimDirection.x) > FacingDeadZone)
             {
@@ -718,10 +654,8 @@ namespace FF
 
             _isFacingLeft = facingLeft;
 
-            // Move gun to left or right shoulder
             weaponManager.transform.localPosition = facingLeft ? gunOffsetLeft : gunOffsetRight;
 
-            // Flip gun sprite visually
             Vector3 scale = gunPivot.localScale;
             scale.y = facingLeft ? -1f : 1f;
             gunPivot.localScale = scale;
@@ -731,17 +665,23 @@ namespace FF
         {
             knockbackTimer = duration;
             knockbackVelocity = force;
+
+            if (_agent && _agent.enabled && _agent.isOnNavMesh)
+            {
+                _agent.isStopped = true;
+            }
         }
 
         #endregion Movement
 
         #region Animations
+
         private void UpdateBodyTilt()
         {
             if (!enemyVisual) return;
 
             float bodyTiltDegrees = _stats ? _stats.BodyTiltDegrees : 12f;
-            float speed = _rigidbody.linearVelocity.magnitude;
+            float speed = _currentVelocity.magnitude;
             float maxSpeed = Mathf.Max(_stats ? _stats.MoveSpeed : 1f, Mathf.Epsilon);
             float normalizedSpeed = speed / maxSpeed;
 
@@ -833,9 +773,11 @@ namespace FF
 
             _dogJumpRoutine = StartCoroutine(DogJumpRoutine());
         }
+
         #endregion Animations
 
         #region Handlers
+
         private void HandleFiring()
         {
             if (isDog)
@@ -893,9 +835,11 @@ namespace FF
             PlayDeathSound();
             SpawnDeathFx();
         }
+
         #endregion Handlers
 
         #region Pooling
+
         public void OnTakenFromPool()
         {
             if (_health != null)
@@ -925,11 +869,17 @@ namespace FF
             _weaveOffset = UnityEngine.Random.Range(0f, 32f);
             wasInShootZone = false;
             _desiredVelocity = Vector2.zero;
+            _currentVelocity = Vector2.zero;
 
-            if (_rigidbody)
+            if (_agent && _agent.enabled)
             {
-                _rigidbody.linearVelocity = Vector2.zero;
-                _rigidbody.angularVelocity = 0f;
+                TryWarpAgent();
+                if (_agent.isOnNavMesh)
+                {
+                    _agent.velocity = Vector3.zero;
+                    if (_agent.isStopped)
+                        _agent.isStopped = false;
+                }
             }
 
             if (autoShooter)
@@ -949,14 +899,16 @@ namespace FF
             _dogAttackOffset = Vector3.zero;
             _dogAttackCooldownTimer = 0f;
             _desiredVelocity = Vector2.zero;
+            _currentVelocity = Vector2.zero;
             knockbackTimer = 0f;
             knockbackVelocity = Vector2.zero;
             wasInShootZone = false;
 
-            if (_rigidbody)
+            if (_agent && _agent.enabled && _agent.isOnNavMesh)
             {
-                _rigidbody.linearVelocity = Vector2.zero;
-                _rigidbody.angularVelocity = 0f;
+                _agent.velocity = Vector3.zero;
+                if (_agent.isStopped)
+                    _agent.isStopped = false;
             }
 
             if (autoShooter)
@@ -964,6 +916,7 @@ namespace FF
                 autoShooter.SetFireHeld(false);
             }
         }
+
         #endregion Pooling
 
         private void EnsurePlayerReference()
@@ -1029,6 +982,7 @@ namespace FF
         }
 
         #region Audio
+
         private AudioClip GetRandomClip(AudioClip[] clips)
         {
             if (clips == null || clips.Length == 0) return null;
@@ -1080,6 +1034,7 @@ namespace FF
 
             AudioSource.PlayClipAtPoint(dogAttackSound, transform.position);
         }
+
         #endregion Audio
 
         private void SpawnDeathFx()

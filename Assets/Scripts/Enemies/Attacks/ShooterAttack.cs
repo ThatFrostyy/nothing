@@ -25,7 +25,7 @@ namespace FF
                 shouldFire = false;
             }
 
-            if (enemy && enemy.TryGetComponent(out BushAmbushMovement bush) && bush.ShouldHoldFire)
+            if (enemy)
             {
                 shouldFire = false;
             }

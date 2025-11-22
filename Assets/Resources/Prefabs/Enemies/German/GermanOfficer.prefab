@@ -40,12 +40,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 717759932389105854}
-  - component: {fileID: 7676069804136655696}
   - component: {fileID: 2058085623565422727}
   - component: {fileID: 3506462981212141742}
   - component: {fileID: 4581896921814132004}
-  - component: {fileID: 995747506977174408}
   - component: {fileID: 8761135668947194539}
+  - component: {fileID: 237480995292173556}
   m_Layer: 7
   m_Name: GermanOfficer
   m_TagString: Enemy
@@ -71,33 +70,6 @@ Transform:
   - {fileID: 2142084755589747196}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &7676069804136655696
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3393795199479919163}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 0
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 1
-  m_SleepingMode: 1
-  m_CollisionDetection: 1
-  m_Constraints: 4
 --- !u!114 &2058085623565422727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -188,47 +160,7 @@ MonoBehaviour:
   xpOrbValue: 3
   xpOrbCount: 4
   xpOrbSpreadRadius: 1
-  avoidanceLayers:
-    serializedVersion: 2
-    m_Bits: 128
-  maxAvoidanceChecks: 16
---- !u!70 &995747506977174408
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3393795199479919163}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0.0048520565, y: -0.126154}
-  m_Size: {x: 1.3442614, y: 1.6353861}
-  m_Direction: 0
+  knockbackRecoveryTime: 0.25
 --- !u!114 &8761135668947194539
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -245,6 +177,28 @@ MonoBehaviour:
   chargeDuration: 0.8
   chargeSpeedMultiplier: 2.5
   cooldownDuration: 1
+--- !u!195 &237480995292173556
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3393795199479919163}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &5110466496313123797
 GameObject:
   m_ObjectHideFlags: 0

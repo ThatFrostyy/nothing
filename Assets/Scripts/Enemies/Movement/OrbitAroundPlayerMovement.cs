@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace FF
 {
@@ -10,7 +11,12 @@ namespace FF
         [SerializeField, Min(0.1f)] private float orbitSpeedMultiplier = 0.75f;
         [SerializeField, Range(-1f, 1f)] private float orbitDirection = 1f;
 
-        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
+        public Vector2 GetDesiredVelocity(
+            Enemy enemy,
+            Transform player,
+            EnemyStats stats,
+            NavMeshAgent agent,
+            float deltaTime)
         {
             if (!player)
             {
@@ -18,6 +24,7 @@ namespace FF
             }
 
             float baseSpeed = stats ? stats.MoveSpeed : 3f;
+
             Vector2 toPlayer = (Vector2)(player.position - enemy.transform.position);
             float distance = toPlayer.magnitude;
             if (distance <= Mathf.Epsilon)
@@ -27,10 +34,12 @@ namespace FF
 
             Vector2 forward = toPlayer / distance;
             Vector2 tangent = new Vector2(-forward.y, forward.x) * Mathf.Sign(orbitDirection);
+
             Vector2 desired = baseSpeed * orbitSpeedMultiplier * tangent;
 
             float correction = Mathf.Clamp(distance - orbitRadius, -1f, 1f);
             desired += baseSpeed * correction * forward;
+
             return desired;
         }
     }

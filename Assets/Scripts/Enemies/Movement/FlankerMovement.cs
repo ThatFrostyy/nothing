@@ -1,20 +1,26 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace FF
 {
-    [AddComponentMenu("FF/Enemies/Movement/Flanker Movement")]
+    [AddComponentMenu("FF/Enemies/Movement/Flanker Movement (NavMesh)")]
     public class FlankerMovement : MonoBehaviour, IEnemyMovement
     {
         [Header("Flanker Settings")]
         [SerializeField, Min(0.1f)] private float flankRadius = 5f;
-        [SerializeField] private float flankAngle = 90f; // degrees left/right
+        [SerializeField] private float flankAngle = 90f;
         [SerializeField] private float repositionSpeed = 1.1f;
         [SerializeField] private float attackSpeed = 1.5f;
 
         private float chosenAngle;
         private bool angleChosen = false;
 
-        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
+        public Vector2 GetDesiredVelocity(
+            Enemy enemy,
+            Transform player,
+            EnemyStats stats,
+            NavMeshAgent agent,
+            float deltaTime)
         {
             if (!player)
                 return Vector2.zero;
@@ -25,12 +31,12 @@ namespace FF
             Vector2 toPlayer = (Vector2)(player.position) - enemyPos;
             float distance = toPlayer.magnitude;
 
-            if (distance <= Mathf.Epsilon)
+            if (distance < 0.001f)
                 return Vector2.zero;
 
             Vector2 forward = toPlayer.normalized;
 
-            // ---- 1. Choose a flank angle ONCE per flank cycle ----
+            // 1. Choose flank angle once
             if (!angleChosen)
             {
                 float side = Random.value < 0.5f ? -1f : 1f;
@@ -38,34 +44,27 @@ namespace FF
                 angleChosen = true;
             }
 
-            // ---- 2. Compute flank direction (rotate forward vector) ----
+            // 2. Rotate forward vector
             float rad = chosenAngle * Mathf.Deg2Rad;
+            Vector2 flankDir =
+                new Vector2(
+                    forward.x * Mathf.Cos(rad) - forward.y * Mathf.Sin(rad),
+                    forward.x * Mathf.Sin(rad) + forward.y * Mathf.Cos(rad)
+                );
 
-            Vector2 flankDir = new Vector2(
-                forward.x * Mathf.Cos(rad) - forward.y * Mathf.Sin(rad),
-                forward.x * Mathf.Sin(rad) + forward.y * Mathf.Cos(rad)
-            );
-
-            // Target flank position
+            // 3. Compute flank target
             Vector2 flankTarget = (Vector2)player.position + flankDir * flankRadius;
-
             Vector2 towardFlank = flankTarget - enemyPos;
-            float flankDist = towardFlank.magnitude;
 
-            // ---- 3. Move to flank position ----
-            if (flankDist > 0.4f)
-            {
-                return baseSpeed * repositionSpeed * towardFlank.normalized;
-            }
+            // 4. Move toward flank
+            if (towardFlank.magnitude > 0.4f)
+                return towardFlank.normalized * baseSpeed * repositionSpeed;
 
-            // ---- 4. Attack run toward the player ----
-            // Only when positioned at flank
+            // 5. Then attack directly
             if (distance > 1.5f)
-            {
-                return attackSpeed * baseSpeed * forward;
-            }
+                return forward * baseSpeed * attackSpeed;
 
-            // ---- 5. Reset flanking cycle when close to player ----
+            // 6. Reset flank cycle when close
             angleChosen = false;
 
             return Vector2.zero;

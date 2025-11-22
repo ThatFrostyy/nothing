@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace FF
 {
-    [AddComponentMenu("FF/Enemies/Movement/Charger Movement")]
+    [AddComponentMenu("FF/Enemies/Movement/Charger Movement (NavMesh)")]
     public class ChargerMovement : MonoBehaviour, IEnemyMovement
     {
         [Header("Charger Settings")]
@@ -15,31 +16,32 @@ namespace FF
         private State _state = State.Windup;
         private Vector2 _chargeDirection;
 
-        enum State
+        private enum State
         {
             Windup,
             Charging,
             Cooldown
         }
 
-        public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
+        public Vector2 GetDesiredVelocity(
+            Enemy enemy,
+            Transform player,
+            EnemyStats stats,
+            NavMeshAgent agent,
+            float deltaTime)
         {
             _stateTimer -= deltaTime;
             if (_stateTimer <= 0f)
-            {
                 AdvanceState(player, enemy.transform);
-            }
 
             float baseSpeed = stats ? stats.MoveSpeed : 3f;
-            switch (_state)
+
+            return _state switch
             {
-                case State.Charging:
-                    return baseSpeed * chargeSpeedMultiplier * _chargeDirection;
-                case State.Cooldown:
-                    return Vector2.zero;
-                default:
-                    return Vector2.zero;
-            }
+                State.Charging => _chargeDirection * baseSpeed * chargeSpeedMultiplier,
+                State.Cooldown => Vector2.zero,
+                _ => Vector2.zero
+            };
         }
 
         private void AdvanceState(Transform player, Transform enemyTransform)
@@ -64,23 +66,18 @@ namespace FF
         {
             _state = State.Charging;
             _stateTimer = chargeDuration;
+
             if (player)
             {
                 Vector2 toPlayer = (Vector2)(player.position - enemyTransform.position);
-                if (toPlayer.sqrMagnitude > Mathf.Epsilon)
+                if (toPlayer.sqrMagnitude > 0.001f)
                 {
                     _chargeDirection = toPlayer.normalized;
                     return;
                 }
             }
 
-            Vector2 forward = enemyTransform.right;
-            if (forward.sqrMagnitude < Mathf.Epsilon)
-            {
-                forward = Vector2.right;
-            }
-
-            _chargeDirection = forward.normalized;
+            _chargeDirection = enemyTransform.right.normalized;
         }
 
         void Reset()
