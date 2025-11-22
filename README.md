@@ -26,7 +26,7 @@
 - A barebones `Assets/Scenes/MainMenu.unity` scene has been added and is already in **File > Build Settings** ahead of `Main.unity` so it will launch first.
 - Drop a `SceneFlowController` on an empty GameObject in that scene to wire up buttons: call `LoadGameplayScene()` for your Play button, `LoadMainMenuScene()` for back/quit buttons, and `QuitGame()` for exiting builds.
 - Add an `EventSystem` (already present) and your own Canvas/UI to design the menu; `MainMenuUI` can toggle a character-select panel and pass through start/quit actions.
-- You can also place the `GameManager` in the main menu scene now—the singleton persists across scene loads, automatically grabs the `EnemySpawner` in whatever gameplay scene you open, and resets waves/kill counts each time you launch or replay a map.
+- You can also place the `GameManager` in the main menu scene now—the singleton persists across scene loads, automatically grabs the `EnemySpawner` in whatever gameplay scene you open, and resets waves/kill counts each time you launch or replay a map. The `WeaponManager` and `UpgradeManager` can be kept there too; they will auto-link to scene objects on load and reset their internal state for each run.
 
 ## Character selection menu
 - Create `FF/Character` assets (place them under `Assets/Resources/Characters` to keep them grouped) to describe each selectable character: set a display name, description, ability id, and optional portrait.

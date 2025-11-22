@@ -1,15 +1,23 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 
 namespace FF
 {
     public class UpgradeManager : MonoBehaviour
     {
+        public static UpgradeManager I;
+
         [SerializeField] Upgrade[] all;
         [SerializeField] PlayerStats stats;
         [SerializeField] XPWallet wallet;
         [SerializeField] UpgradeUI ui;
         [SerializeField, Min(0)] int maxUpgradeSelections = 0;
+
+        [Header("Scene Linking")]
+        [SerializeField] private bool persistAcrossScenes = true;
+        [SerializeField] private bool autoAssignReferencesOnSceneLoad = true;
+        [SerializeField] private bool resetUpgradesOnSceneLoad = true;
 
         int upgradesTaken;
         int pendingUpgrades;
@@ -60,8 +68,38 @@ namespace FF
 
         void Awake()
         {
-            wallet.OnLevelUp += OnLevel;
+            if (I != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            I = this;
+
+            if (persistAcrossScenes)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
+
+            AutoAssignReferences();
+
+            if (resetUpgradesOnSceneLoad)
+            {
+                ResetProgress();
+            }
+
             NotifyPendingChanged();
+        }
+
+        void OnEnable()
+        {
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
+        void OnDisable()
+        {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            AttachWallet(null);
         }
 
         void OnLevel(int lvl)
@@ -151,6 +189,54 @@ namespace FF
             }
 
             return true;
+        }
+
+        void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (autoAssignReferencesOnSceneLoad)
+            {
+                AutoAssignReferences();
+            }
+
+            if (resetUpgradesOnSceneLoad)
+            {
+                ResetProgress();
+            }
+        }
+
+        void AutoAssignReferences()
+        {
+            stats = stats ? stats : FindFirstObjectByType<PlayerStats>();
+            ui = ui ? ui : FindFirstObjectByType<UpgradeUI>();
+            AttachWallet(wallet ? wallet : FindFirstObjectByType<XPWallet>());
+        }
+
+        void AttachWallet(XPWallet newWallet)
+        {
+            if (wallet == newWallet)
+            {
+                return;
+            }
+
+            if (wallet != null)
+            {
+                wallet.OnLevelUp -= OnLevel;
+            }
+
+            wallet = newWallet;
+
+            if (wallet != null)
+            {
+                wallet.OnLevelUp += OnLevel;
+            }
+        }
+
+        void ResetProgress()
+        {
+            upgradesTaken = 0;
+            pendingUpgrades = 0;
+            upgradeCounts.Clear();
+            NotifyPendingChanged();
         }
 
         void NotifyPendingChanged()

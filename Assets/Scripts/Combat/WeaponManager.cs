@@ -1,16 +1,24 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace FF
 {
     public class WeaponManager : MonoBehaviour
     {
+        public static WeaponManager I;
+
         private const int PrimarySlotCount = 2;
         private const int SpecialSlotIndex = 2;
 
         [Header("References")]
         [SerializeField] Transform gunPivot;
         [SerializeField] AutoShooter shooter;
+
+        [Header("Scene Linking")]
+        [SerializeField] private bool persistAcrossScenes = true;
+        [SerializeField] private bool autoAssignReferencesOnSceneLoad = true;
+        [SerializeField] private bool resetLoadoutOnSceneLoad = true;
 
         readonly Weapon[] loadout = new Weapon[3];
         Weapon currentSO;
@@ -28,6 +36,39 @@ namespace FF
 
         public event Action<Weapon> OnWeaponEquipped;
         public event Action OnInventoryChanged;
+
+        void Awake()
+        {
+            if (I != null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            I = this;
+
+            if (persistAcrossScenes)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
+
+            AutoAssignReferences();
+
+            if (resetLoadoutOnSceneLoad)
+            {
+                ResetLoadout();
+            }
+        }
+
+        void OnEnable()
+        {
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
+        void OnDisable()
+        {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+        }
 
         public Weapon GetWeaponInSlot(int slotIndex)
         {
@@ -86,6 +127,66 @@ namespace FF
             }
 
             EquipCurrentSlotWeapon();
+        }
+
+        void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (autoAssignReferencesOnSceneLoad)
+            {
+                AutoAssignReferences();
+            }
+
+            if (resetLoadoutOnSceneLoad)
+            {
+                ResetLoadout();
+            }
+        }
+
+        void AutoAssignReferences()
+        {
+            shooter = shooter ? shooter : FindFirstObjectByType<AutoShooter>();
+            gunPivot = gunPivot ? gunPivot : ResolveGunPivot();
+
+            if (!gunPivot && shooter)
+            {
+                gunPivot = shooter.transform;
+            }
+        }
+
+        Transform ResolveGunPivot()
+        {
+            var foundShooter = shooter ? shooter : FindFirstObjectByType<AutoShooter>();
+            if (foundShooter && foundShooter.transform.parent)
+            {
+                return foundShooter.transform.parent;
+            }
+
+            GameObject namedPivot = GameObject.Find("GunPivot");
+            return namedPivot ? namedPivot.transform : null;
+        }
+
+        void ResetLoadout()
+        {
+            for (int i = 0; i < loadout.Length; i++)
+            {
+                loadout[i] = null;
+            }
+
+            currentSlotIndex = 0;
+            lastPrimarySlotIndex = 0;
+            currentSO = null;
+
+            if (currentWeaponInstance)
+            {
+                Destroy(currentWeaponInstance);
+            }
+
+            currentWeaponInstance = null;
+            muzzle = null;
+            eject = null;
+
+            EquipCurrentSlotWeapon();
+            OnInventoryChanged?.Invoke();
         }
 
         int ResolveTargetSlot(Weapon weapon)
