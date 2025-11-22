@@ -119,7 +119,6 @@ namespace FF
 
         public void ResetToBase()
         {
-            CacheBaseValues();
             SetMaxHP(baseMaxHP, true);
         }
 

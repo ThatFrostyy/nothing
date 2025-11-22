@@ -123,7 +123,7 @@ namespace FF
         {
             if (_health != null && modifiers.HealthMultiplier > 0f)
             {
-                _health.ScaleMaxHP(modifiers.HealthMultiplier, true);
+                _health.ScaleMaxHP(modifiers.HealthMultiplier, false);
             }
 
             if (_stats != null)
@@ -301,6 +301,7 @@ namespace FF
 
         private void Update()
         {
+            return;
             EnsurePlayerReference();
             AimAtPlayer();
             float deltaTime = Time.deltaTime;

@@ -54,7 +54,7 @@ namespace FF
                 return;
             }
 
-            if (!_grenadePool)
+            if (_grenadePool == null)
             {
                 WarmPool();
             }
