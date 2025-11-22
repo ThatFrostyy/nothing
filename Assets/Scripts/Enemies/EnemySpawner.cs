@@ -26,6 +26,10 @@ namespace FF
         [SerializeField, Min(0f)] private float sideSwapDelay = 1.15f;
         [SerializeField, Min(1)] private int packSpawnBurst = 3;
 
+        [Header("Pooling")]
+        [SerializeField] private Transform poolParent;
+        [SerializeField] private bool prewarmPoolsOnAwake = true;
+
         [Header("Limits (0 = Unlimited)")]
         [SerializeField, Min(0)] private int maxActiveNonBosses = 0;
         [SerializeField, Min(0)] private int maxActiveBosses = 0;
@@ -47,6 +51,13 @@ namespace FF
             }
 
             EnsureAudioSource();
+
+            EnsurePoolParent();
+
+            if (prewarmPoolsOnAwake)
+            {
+                PrewarmEnemyPools();
+            }
         }
 
         private void Start()
@@ -373,19 +384,22 @@ namespace FF
 
         private bool SpawnEnemy(GameObject prefab, Vector2 position, EnemyWaveModifiers modifiers, bool isBoss)
         {
-            var enemyInstance = Instantiate(prefab, position, Quaternion.identity);
+            var enemyInstance = PoolManager.Get(prefab, position, Quaternion.identity);
             if (!enemyInstance)
             {
                 return false;
             }
 
-            if (enemyInstance.TryGetComponent(out Enemy enemy))
+            if (!enemyInstance.TryGetComponent(out Enemy enemy))
             {
-                enemy.SetIsBoss(isBoss);
-                enemy.Initialize(player);
-                enemy.ApplyWaveModifiers(modifiers);
-                IncrementSpawnCount(isBoss);
+                PoolManager.Release(enemyInstance);
+                return false;
             }
+
+            enemy.SetIsBoss(isBoss);
+            enemy.Initialize(player);
+            enemy.ApplyWaveModifiers(modifiers);
+            IncrementSpawnCount(isBoss);
 
             return true;
         }
@@ -478,6 +492,7 @@ namespace FF
             sideSwapDelay = Mathf.Max(0f, sideSwapDelay);
             packSpawnBurst = Mathf.Max(1, packSpawnBurst);
             EnsureAudioSource();
+            EnsurePoolParent();
         }
 
         #region Audio
@@ -577,5 +592,60 @@ namespace FF
             return Mathf.Min(totalRemaining, typeRemaining);
         }
         #endregion Tracking
+
+        #region Pooling
+        private void EnsurePoolParent()
+        {
+            if (poolParent)
+            {
+                return;
+            }
+
+            Transform existing = transform.Find("EnemyPool");
+            if (existing)
+            {
+                poolParent = existing;
+                return;
+            }
+
+            var container = new GameObject("EnemyPool");
+            container.transform.SetParent(transform, false);
+            poolParent = container.transform;
+        }
+
+        private void PrewarmEnemyPools()
+        {
+            if (spawnDefinitions == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < spawnDefinitions.Count; i++)
+            {
+                EnemySpawnDefinition definition = spawnDefinitions[i];
+                if (definition == null || definition.Prefabs == null)
+                {
+                    continue;
+                }
+
+                int desiredWarmCount = Mathf.Max(1, definition.PoolPrewarmCount);
+                if (definition.SpawnInPacks)
+                {
+                    desiredWarmCount = Mathf.Max(desiredWarmCount, packSpawnBurst);
+                }
+
+                for (int p = 0; p < definition.Prefabs.Length; p++)
+                {
+                    GameObject prefab = definition.Prefabs[p];
+                    if (!prefab)
+                    {
+                        continue;
+                    }
+
+                    PoolManager.GetPool(prefab, desiredWarmCount, poolParent);
+                }
+            }
+        }
+        #endregion Pooling
     }
 }

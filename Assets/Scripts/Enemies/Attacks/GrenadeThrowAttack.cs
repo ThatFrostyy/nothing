@@ -8,6 +8,7 @@ namespace FF
     {
         [Header("Grenade Settings")]
         [SerializeField] private GameObject grenadePrefab;
+        [SerializeField, Min(0)] private int poolPrewarmCount = 2;
 
         [Header("Throw Settings")]
         [SerializeField, Min(0.1f)] private float cooldown = 3f;
@@ -16,6 +17,12 @@ namespace FF
         [SerializeField, Min(0f)] private float slowdownRate = 1.5f;
 
         private float _cooldownTimer;
+        private GameObjectPool _grenadePool;
+
+        private void Awake()
+        {
+            WarmPool();
+        }
 
         public void TickAttack(Enemy enemy, Transform player, EnemyStats stats, AutoShooter shooter, float deltaTime)
         {
@@ -42,12 +49,19 @@ namespace FF
 
         private void SpawnGrenade(Enemy enemy, EnemyStats stats, Vector2 direction)
         {
-            if (!enemy)
+            if (!enemy || !grenadePrefab)
             {
                 return;
             }
 
-            GameObject grenade = Instantiate(grenadePrefab, enemy.transform.position, Quaternion.identity);
+            if (!_grenadePool)
+            {
+                WarmPool();
+            }
+
+            GameObject grenade = _grenadePool != null
+                ? _grenadePool.Get(enemy.transform.position, Quaternion.identity)
+                : PoolManager.Get(grenadePrefab, enemy.transform.position, Quaternion.identity);
             if (!grenade)
             {
                 return;
@@ -65,6 +79,21 @@ namespace FF
                 Vector2 velocity = direction * throwForce;
                 body.linearVelocity = velocity;
             }
+        }
+
+        private void WarmPool()
+        {
+            if (!grenadePrefab)
+            {
+                return;
+            }
+
+            _grenadePool = PoolManager.GetPool(grenadePrefab, poolPrewarmCount, transform);
+        }
+
+        private void OnValidate()
+        {
+            poolPrewarmCount = Mathf.Max(0, poolPrewarmCount);
         }
     }
 }
