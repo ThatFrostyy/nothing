@@ -51,11 +51,22 @@ namespace FF
                 return;
             }
 
-            Transform parent = hatAnchor ? hatAnchor : transform;
+            Transform anchor = hatAnchor
+                ? hatAnchor
+                : bodyRenderer != null
+                    ? bodyRenderer.transform
+                    : transform;
+            Transform parent = anchor.parent ? anchor.parent : anchor;
+
+            Vector3 localPosition = parent.InverseTransformPoint(anchor.position);
+            Quaternion prefabLocalRotation = hat.HatPrefab.transform.localRotation;
+            Quaternion localRotation = Quaternion.Inverse(parent.rotation) * anchor.rotation * prefabLocalRotation;
+            Vector3 localScale = anchor.localScale;
+
             _hatInstance = Instantiate(hat.HatPrefab, parent);
-            _hatInstance.transform.localPosition = hat.HatPrefab.transform.localPosition;
-            _hatInstance.transform.localRotation = hat.HatPrefab.transform.localRotation;
-            _hatInstance.transform.localScale = hat.HatPrefab.transform.localScale;
+            _hatInstance.transform.localPosition = localPosition;
+            _hatInstance.transform.localRotation = localRotation;
+            _hatInstance.transform.localScale = localScale;
         }
     }
 }

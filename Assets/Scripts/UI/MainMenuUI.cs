@@ -11,7 +11,7 @@ namespace FF
         {
             if (!sceneFlow)
             {
-                sceneFlow = FindObjectOfType<SceneFlowController>();
+                sceneFlow = FindAnyObjectByType<SceneFlowController>();
             }
         }
 

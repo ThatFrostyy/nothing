@@ -1,25 +1,37 @@
 using UnityEngine;
 
-public class YSorter : MonoBehaviour
+namespace FF
 {
-    public int baseOrder = 1000;
-    public int offsetBody = 0;
-    public int offsetGun = 1;
-
-    private SpriteRenderer bodyRenderer;
-    private SpriteRenderer gunRenderer;
-
-    void Awake()
+    [DisallowMultipleComponent]
+    public class YSorter : MonoBehaviour
     {
-        bodyRenderer = transform.Find("Visual")?.GetComponent<SpriteRenderer>();
-        gunRenderer = transform.Find("GunPivot")?.GetComponentInChildren<SpriteRenderer>();
-    }
+        [Header("Sorting Order")]
+        [SerializeField] private int baseOrder = 1000;
+        [SerializeField] private int offsetBody = 0;
+        [SerializeField] private int offsetGun = 1;
 
-    void LateUpdate()
-    {
-        int order = baseOrder - Mathf.RoundToInt(transform.position.y * 10f);
+        private SpriteRenderer _bodyRenderer;
+        private SpriteRenderer _gunRenderer;
 
-        if (bodyRenderer) bodyRenderer.sortingOrder = order + offsetBody;
-        if (gunRenderer) gunRenderer.sortingOrder = order + offsetGun;
+        private void Awake()
+        {
+            _bodyRenderer = transform.Find("Visual")?.GetComponent<SpriteRenderer>();
+            _gunRenderer = transform.Find("GunPivot")?.GetComponentInChildren<SpriteRenderer>();
+        }
+
+        private void LateUpdate()
+        {
+            int order = baseOrder - Mathf.RoundToInt(transform.position.y * 10f);
+
+            if (_bodyRenderer)
+            {
+                _bodyRenderer.sortingOrder = order + offsetBody;
+            }
+
+            if (_gunRenderer)
+            {
+                _gunRenderer.sortingOrder = order + offsetGun;
+            }
+        }
     }
 }

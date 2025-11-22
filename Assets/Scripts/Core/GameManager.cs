@@ -30,11 +30,12 @@ namespace FF
         {
             if (I != null)
             {
-                Destroy(gameObject); 
+                Destroy(gameObject);
                 return;
             }
 
             I = this;
+            DontDestroyOnLoad(gameObject);
 
             Application.targetFrameRate = 144;
 
@@ -42,6 +43,16 @@ namespace FF
 
             float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
             currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
+        }
+
+        void Start()
+        {
+            if (!spawner)
+            {
+                spawner = FindFirstObjectByType<EnemySpawner>();
+            }
+
+            StartNextWave();
         }
 
         void OnEnable()
@@ -61,17 +72,7 @@ namespace FF
 
             if (timer >= interval)
             {
-                timer = 0f;
-                Wave++;
-
-                OnWaveStarted?.Invoke(Wave);
-
-                if (spawner)
-                {
-                    spawner.SpawnWave(Wave);
-                }
-
-                AdvanceWaveInterval();
+                StartNextWave();
             }
         }
 
@@ -99,6 +100,21 @@ namespace FF
             maximumTimeBetweenWaves = Mathf.Max(0f, maximumTimeBetweenWaves);
             float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
             currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
+        }
+
+        private void StartNextWave()
+        {
+            timer = 0f;
+            Wave++;
+
+            OnWaveStarted?.Invoke(Wave);
+
+            if (spawner)
+            {
+                spawner.SpawnWave(Wave);
+            }
+
+            AdvanceWaveInterval();
         }
     }
 }
