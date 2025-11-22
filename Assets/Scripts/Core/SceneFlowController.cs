@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -60,12 +61,48 @@ namespace FF
         private static void LoadScene(string sceneName)
         {
             if (string.IsNullOrWhiteSpace(sceneName))
-            {
                 return;
-            }
 
             Time.timeScale = 1f;
-            SceneManager.LoadScene(sceneName);
+            Instance.StartCoroutine(LoadSceneAsyncRoutine(sceneName));
+        }
+
+        private static IEnumerator LoadSceneAsyncRoutine(string sceneName)
+        {
+            var op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+            op.allowSceneActivation = true;
+
+            while (!op.isDone)
+                yield return null;
+        }
+
+        IEnumerator Start()
+        {
+            // Give Unity a frame to breathe
+            yield return null;
+
+            // Preload heavy assets
+            yield return Prewarm();
+        }
+
+        IEnumerator Prewarm()
+        {
+            yield return PrewarmFolder<GameObject>("Prefabs");
+            yield return PrewarmFolder<Sprite>("Art");
+            yield return PrewarmFolder<AudioClip>("Audio");
+
+            Debug.Log("Prewarming complete!");
+        }
+
+        IEnumerator PrewarmFolder<T>(string folderPath) where T : Object
+        {
+            T[] assets = Resources.LoadAll<T>(folderPath);
+
+            foreach (var asset in assets)
+            {
+                var req = Resources.LoadAsync<T>(folderPath + "/" + asset.name);
+                yield return req;
+            }
         }
 
         public static void QuitGame()
