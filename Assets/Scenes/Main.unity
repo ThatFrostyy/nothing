@@ -827,6 +827,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 275057848}
   m_CullTransparentMesh: 1
+--- !u!1 &301909242
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 301909244}
+  - component: {fileID: 301909243}
+  m_Layer: 0
+  m_Name: NumberManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &301909243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 301909242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6217d403d2c74cb592a826ed11397a5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.DamageNumberManager
+  damageNumberPrefab: {fileID: 6316204345962202603, guid: 3f65cb749f2e7dd47a6902e4057ff8b3, type: 3}
+  normalColor: {r: 1, g: 0.366525, b: 0.06132078, a: 1}
+  highlightColor: {r: 1, g: 0, b: 0, a: 1}
+  emphasizedScale: 0.5
+--- !u!4 &301909244
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 301909242}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &320424106
 GameObject:
   m_ObjectHideFlags: 0
@@ -4202,9 +4250,9 @@ MonoBehaviour:
   _gunPivot: {fileID: 125305192}
   _playerVisual: {fileID: 507405423}
   _cosmetics: {fileID: 1207903166}
-  _upgradeManager: {fileID: 1885342134}
+  _upgradeManager: {fileID: 0}
   _weaponManager: {fileID: 1207903161}
-  _startingWeapon: {fileID: 11400000, guid: 2b9ec3c6f8023bb4fb57fb21b7bbcd95, type: 2}
+  _startingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
   _acceleration: 0.18
   _bodyTiltDegrees: 10
   _tiltSmoothTime: 0.07
@@ -4803,7 +4851,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1333906376
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5002,11 +5050,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d73f1c00c3334c519d5658c4e40772d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.GameHUD
-  gameManager: {fileID: 1885342132}
+  gameManager: {fileID: 0}
   playerHealth: {fileID: 1207903153}
   wallet: {fileID: 1207903163}
   weaponManager: {fileID: 1207903161}
-  upgradeManager: {fileID: 1885342134}
+  upgradeManager: {fileID: 0}
   healthValueText: {fileID: 2001000303}
   healthFillImage: {fileID: 2001000203}
   killCountText: {fileID: 994975255}
@@ -6914,98 +6962,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1872001644}
   m_CullTransparentMesh: 1
---- !u!1 &1885342131
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1885342133}
-  - component: {fileID: 1885342132}
-  - component: {fileID: 1885342134}
-  - component: {fileID: 1885342135}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1885342132
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1885342131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0b949374cced92845ad478938eea683d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FF.GameManager
-  spawner: {fileID: 322110423}
-  initialTimeBetweenWaves: 8
-  waveIntervalIncrease: 2
-  maximumTimeBetweenWaves: 60
---- !u!4 &1885342133
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1885342131}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1885342134
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1885342131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ba129a0d96acb514cbcb6866cfa598f9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FF.UpgradeManager
-  all:
-  - {fileID: 11400000, guid: 788f62a067cfa8248aebde662e8515d7, type: 2}
-  - {fileID: 11400000, guid: ed90a2abcf030d848acc39c81fbc917a, type: 2}
-  - {fileID: 11400000, guid: e8e297da8e036c643af433e1df631fc4, type: 2}
-  - {fileID: 11400000, guid: 38fa9f9751c1ad249b5f55e1c85affd2, type: 2}
-  - {fileID: 11400000, guid: d211c4023e33e5b4ca243dab46214f88, type: 2}
-  - {fileID: 11400000, guid: 92bab5dec5398a44aa17afedef956f83, type: 2}
-  - {fileID: 11400000, guid: a1f0644a5653a4543b409d340bd308d5, type: 2}
-  - {fileID: 11400000, guid: 93e55faaf9c56ed49a43b899ec7c8016, type: 2}
-  - {fileID: 11400000, guid: d90c6410465143d3a0bde11e01a409de, type: 2}
-  stats: {fileID: 1207903155}
-  wallet: {fileID: 1207903163}
-  ui: {fileID: 1333906377}
-  maxUpgradeSelections: 30
---- !u!114 &1885342135
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1885342131}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6217d403d2c74cb592a826ed11397a5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FF.DamageNumberManager
-  damageNumberPrefab: {fileID: 6316204345962202603, guid: 3f65cb749f2e7dd47a6902e4057ff8b3, type: 3}
-  normalColor: {r: 1, g: 0.366525, b: 0.06132078, a: 1}
-  highlightColor: {r: 1, g: 0, b: 0, a: 1}
-  emphasizedScale: 0.5
 --- !u!1 &1914320513
 GameObject:
   m_ObjectHideFlags: 0
@@ -8046,7 +8002,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 619394802}
-  - {fileID: 1885342133}
+  - {fileID: 301909244}
   - {fileID: 322110424}
   - {fileID: 592156656}
   - {fileID: 1337338255}

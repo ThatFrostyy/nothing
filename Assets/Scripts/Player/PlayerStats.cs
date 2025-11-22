@@ -38,6 +38,12 @@ namespace FF
             }
         }
 
+        private void Start()
+        {
+            if (UpgradeManager.I != null)
+                UpgradeManager.I.RegisterPlayerStats(this);
+        }
+
         void OnValidate()
         {
             MoveSpeed = Mathf.Max(0f, MoveSpeed);

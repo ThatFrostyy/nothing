@@ -49,6 +49,14 @@ namespace FF
             EnsureAudioSource();
         }
 
+        private void Start()
+        {
+            if (GameManager.I != null)
+            {
+                GameManager.I.RegisterSpawner(this);
+            }
+        }
+
         private void OnEnable()
         {
             Enemy.OnAnyEnemyKilled += HandleEnemyKilled;

@@ -24,6 +24,13 @@ namespace FF
             ResetLevels(startingLevel, startingXP, false);
         }
 
+        private void Start()
+        {
+
+            if (UpgradeManager.I != null)
+                UpgradeManager.I.RegisterWallet(this);
+        }
+
         public void Add(int v)
         {
             if (v <= 0)

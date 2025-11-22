@@ -1,10 +1,14 @@
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
+using UnityEngine.SceneManagement;
 
 
 namespace FF
 {
     public class UpgradeManager : MonoBehaviour
     {
+        public static UpgradeManager I { get; private set; }
+
         [SerializeField] Upgrade[] all;
         [SerializeField] PlayerStats stats;
         [SerializeField] XPWallet wallet;
@@ -16,6 +20,10 @@ namespace FF
         readonly System.Collections.Generic.Dictionary<Upgrade, int> upgradeCounts = new();
 
         public System.Action<int> OnPendingUpgradesChanged;
+
+        public event System.Action<PlayerStats> OnPlayerStatsRegistered;
+        public event System.Action<XPWallet> OnWalletRgistered;
+        public event System.Action<UpgradeUI> OnUIRegistered;
 
         Upgrade RandomUpgrade(System.Collections.Generic.List<Upgrade> pool)
         {
@@ -60,8 +68,57 @@ namespace FF
 
         void Awake()
         {
-            wallet.OnLevelUp += OnLevel;
+            if (I != null && I != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            I = this;
+            DontDestroyOnLoad(gameObject);
+
             NotifyPendingChanged();
+        }
+
+        void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            ClearSceneRefs();
+        }
+
+        public void RegisterPlayerStats(PlayerStats playerStats)
+        {
+            stats = playerStats;
+            OnPlayerStatsRegistered?.Invoke(playerStats);
+        }
+
+        public void RegisterWallet(XPWallet wallet)
+        {
+            this.wallet = wallet;
+            OnWalletRgistered?.Invoke(wallet);
+            wallet.OnLevelUp += OnLevel;
+        }
+
+        public void RegisterUI(UpgradeUI upgradeUI)
+        {
+            ui = upgradeUI;
+            OnUIRegistered?.Invoke(upgradeUI);
+        }
+
+        public void ClearSceneRefs()
+        {
+            stats = null;
+            wallet = null;
+            ui = null;
         }
 
         void OnLevel(int lvl)

@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem.HID;
+using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 
@@ -26,6 +28,8 @@ namespace FF
         public event Action<int> OnKillCountChanged;
         public event Action<int> OnWaveStarted;
 
+        public event Action<EnemySpawner> OnSpawnerRegistered;
+
         void Awake()
         {
             if (I != null)
@@ -35,7 +39,7 @@ namespace FF
             }
 
             I = this;
-            Debug.Log("GameManager spawned in scene: " + gameObject.scene.name);
+            DontDestroyOnLoad(gameObject);
 
             Application.targetFrameRate = 144;
 
@@ -48,21 +52,36 @@ namespace FF
         void OnEnable()
         {
             Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
 
         void OnDisable()
         {
             Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 
-        void OnDestroy()
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            Debug.Log("GameManager WAS DESTROYED!");
+            ClearSceneRefs();
         }
 
+        public void RegisterSpawner(EnemySpawner spawner)
+        {
+            this.spawner = spawner;
+            OnSpawnerRegistered?.Invoke(spawner);
+        }
+
+        public void ClearSceneRefs()
+        {
+            spawner = null;
+        }
 
         void Update()
         {
+            if (spawner == null)
+                return;
+
             timer += Time.deltaTime;
             float interval = Mathf.Max(0.01f, currentWaveInterval);
 

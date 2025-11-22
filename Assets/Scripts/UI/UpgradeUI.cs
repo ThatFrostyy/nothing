@@ -21,6 +21,14 @@ namespace FF
 
         UnityAction aListener, bListener, cListener;
 
+        void Start()
+        {
+            if (UpgradeManager.I != null)
+                UpgradeManager.I.RegisterUI(this);
+
+            panel.SetActive(false);
+        }
+
         void Pick(Upgrade u)
         {
             callback?.Invoke(u);

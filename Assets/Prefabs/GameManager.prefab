@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3100446154709895051
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2037912364196150008}
+  - component: {fileID: 7721843222088791118}
+  - component: {fileID: 5457090804296160985}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2037912364196150008
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3100446154709895051}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7721843222088791118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3100446154709895051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b949374cced92845ad478938eea683d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.GameManager
+  spawner: {fileID: 0}
+  initialTimeBetweenWaves: 8
+  waveIntervalIncrease: 2
+  maximumTimeBetweenWaves: 60
+--- !u!114 &5457090804296160985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3100446154709895051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba129a0d96acb514cbcb6866cfa598f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.UpgradeManager
+  all:
+  - {fileID: 11400000, guid: 788f62a067cfa8248aebde662e8515d7, type: 2}
+  - {fileID: 11400000, guid: ed90a2abcf030d848acc39c81fbc917a, type: 2}
+  - {fileID: 11400000, guid: e8e297da8e036c643af433e1df631fc4, type: 2}
+  - {fileID: 11400000, guid: 38fa9f9751c1ad249b5f55e1c85affd2, type: 2}
+  - {fileID: 11400000, guid: d211c4023e33e5b4ca243dab46214f88, type: 2}
+  - {fileID: 11400000, guid: 92bab5dec5398a44aa17afedef956f83, type: 2}
+  - {fileID: 11400000, guid: a1f0644a5653a4543b409d340bd308d5, type: 2}
+  - {fileID: 11400000, guid: 93e55faaf9c56ed49a43b899ec7c8016, type: 2}
+  - {fileID: 11400000, guid: d90c6410465143d3a0bde11e01a409de, type: 2}
+  stats: {fileID: 0}
+  wallet: {fileID: 0}
+  ui: {fileID: 0}
+  maxUpgradeSelections: 30
