@@ -1,13 +1,11 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem.HID;
-using UnityEngine.SceneManagement;
 using UnityEngine.Serialization;
 
 
 namespace FF
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviour, ISceneReferenceHandler
     {
         public static GameManager I;
 
@@ -43,27 +41,21 @@ namespace FF
 
             Application.targetFrameRate = 144;
 
-            KillCount = 0;
-
-            float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
-            currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
+            ResetGameState();
         }
 
         void OnEnable()
         {
             Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
-            SceneManager.sceneLoaded += OnSceneLoaded;
+
+            SceneReferenceRegistry.Register(this);
         }
 
         void OnDisable()
         {
             Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
-            SceneManager.sceneLoaded -= OnSceneLoaded;
-        }
 
-        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            ClearSceneRefs();
+            SceneReferenceRegistry.Unregister(this);
         }
 
         public void RegisterSpawner(EnemySpawner spawner)
@@ -72,9 +64,23 @@ namespace FF
             OnSpawnerRegistered?.Invoke(spawner);
         }
 
-        public void ClearSceneRefs()
+        public void ClearSceneReferences()
         {
             spawner = null;
+        }
+
+        public void ResetGameState()
+        {
+            KillCount = 0;
+            Wave = 0;
+            timer = 0f;
+
+            float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
+            currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
+
+            ClearSceneReferences();
+
+            OnKillCountChanged?.Invoke(KillCount);
         }
 
         void Update()

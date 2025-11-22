@@ -28,6 +28,7 @@ namespace FF
 
         public void LoadMainMenuScene()
         {
+            ResetPersistentState();
             LoadScene(mainMenuSceneName);
         }
 
@@ -39,6 +40,21 @@ namespace FF
         public void ReloadCurrentScene()
         {
             LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+        void ResetPersistentState()
+        {
+            SceneReferenceRegistry.ResetSceneReferences();
+
+            if (GameManager.I != null)
+            {
+                GameManager.I.ResetGameState();
+            }
+
+            if (UpgradeManager.I != null)
+            {
+                UpgradeManager.I.ResetState();
+            }
         }
 
         private static void LoadScene(string sceneName)
