@@ -12,7 +12,7 @@ namespace FF
         private Transform _ejectPos;
         private ICombatStats _stats;
         private AudioSource _audioSource;
-        private Rigidbody2D _playerBody;
+        private PlayerController _playerController;
 
         private float _fireTimer;
         private bool _isFireHeld;
@@ -51,7 +51,7 @@ namespace FF
         {
             _stats = GetComponentInParent<ICombatStats>();
             _audioSource = GetComponent<AudioSource>();
-            _playerBody = GetComponentInParent<Rigidbody2D>();
+            _playerController = GetComponentInParent<PlayerController>();
         }
 
         public void SetStatsProvider(ICombatStats stats)
@@ -170,7 +170,7 @@ namespace FF
                 HandleStandardFiring(interval);
             }
 
-            float movementSpeed = _playerBody ? _playerBody.linearVelocity.magnitude : 0f;
+            float movementSpeed = GetPlayerVelocity().magnitude;
             bool isMoving = movementSpeed > 0.1f;
 
             float movementPenalty = 1f;
@@ -184,12 +184,17 @@ namespace FF
             UpdateRecoil();
         }
 
+        private Vector2 GetPlayerVelocity()
+        {
+            return _playerController ? _playerController.CurrentVelocity : Vector2.zero;
+        }
+
         #region Recoil & Shooting
         private void Shoot(float? grenadeSpeedOverride = null)
         {
             _currentSpread += _weapon.spreadIncreasePerShot;
 
-            bool isMoving = _playerBody && _playerBody.linearVelocity.magnitude > 0.1f;
+            bool isMoving = GetPlayerVelocity().magnitude > 0.1f;
             float movementPenalty = 1f;
             if (_stats != null)
             {

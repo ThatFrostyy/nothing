@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace FF
 {
-    [RequireComponent(typeof(Collider2D))]
     public class XPOrb : MonoBehaviour, IPoolable
     {
         private const float DistanceEpsilon = 0.0001f;
@@ -14,6 +13,7 @@ namespace FF
         [SerializeField, Min(0f)] private float attractionRadius = 4f;
         [SerializeField, Min(0f)] private float moveSpeed = 10f;
         [SerializeField, Min(0f)] private float acceleration = 18f;
+        [SerializeField, Min(0f)] private float pickupRadius = 0.35f;
 
         [Header("Audio & Visual")]
         [SerializeField] private AudioClip pickupSound;
@@ -33,7 +33,6 @@ namespace FF
         private float pulseTimer;
         private static Transform cachedPlayerTransform;
         private static XPWallet cachedWallet;
-        private Collider2D orbCollider;
         private Renderer[] cachedRenderers;
         private bool collected;
         private Coroutine releaseRoutine;
@@ -42,12 +41,6 @@ namespace FF
 
         void Awake()
         {
-            orbCollider = GetComponent<Collider2D>();
-            if (orbCollider)
-            {
-                orbCollider.isTrigger = true;
-            }
-
             poolToken = GetComponent<PoolToken>();
             if (!poolToken)
             {
@@ -91,18 +84,8 @@ namespace FF
             }
             AcquireTarget();
             MoveTowardsTarget(Time.deltaTime);
+            CheckForCollection();
             AnimatePulse(Time.deltaTime);
-        }
-
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (!TryGetWallet(other, out var wallet))
-            {
-                return;
-            }
-
-            wallet.Add(value);
-            HandleCollected();
         }
 
         public void SetValue(int amount)
@@ -201,17 +184,6 @@ namespace FF
             transform.localScale = baseScale * Mathf.Max(scaleMultiplier, 0.01f);
         }
 
-        bool TryGetWallet(Collider2D other, out XPWallet wallet)
-        {
-            wallet = other.GetComponent<XPWallet>();
-            if (!wallet)
-            {
-                wallet = other.GetComponentInParent<XPWallet>();
-            }
-
-            return wallet != null;
-        }
-
         float PlayPickupSound()
         {
             if (!pickupSound)
@@ -294,11 +266,6 @@ namespace FF
                 pickupAudioSource.Stop();
             }
 
-            if (orbCollider)
-            {
-                orbCollider.enabled = true;
-            }
-
             SetRenderersEnabled(true);
             transform.localScale = baseScale;
             ResetPulseTimer();
@@ -348,11 +315,6 @@ namespace FF
                 pickupAudioSource.Stop();
             }
 
-            if (orbCollider)
-            {
-                orbCollider.enabled = false;
-            }
-
             SetRenderersEnabled(false);
         }
 
@@ -379,6 +341,33 @@ namespace FF
             }
 
             releaseRoutine = null;
+        }
+
+        void CheckForCollection()
+        {
+            if (collected || !followTarget || pickupRadius <= 0f)
+            {
+                return;
+            }
+
+            if (!cachedWallet || cachedWallet.transform != followTarget)
+            {
+                CachePlayerWallet();
+            }
+
+            if (!cachedWallet)
+            {
+                return;
+            }
+
+            float sqrDistance = (followTarget.position - transform.position).sqrMagnitude;
+            if (sqrDistance > pickupRadius * pickupRadius)
+            {
+                return;
+            }
+
+            cachedWallet.Add(value);
+            HandleCollected();
         }
 
         void CacheRenderers()

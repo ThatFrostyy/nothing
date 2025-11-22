@@ -5,7 +5,7 @@ namespace FF
     public class PlayerMovementEffects : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private Rigidbody2D playerBody;
+        [SerializeField] private PlayerController playerController;
         [SerializeField] private Transform spawnPoint;
         [SerializeField] private GameObject moveEffectPrefab;
 
@@ -21,10 +21,7 @@ namespace FF
 
         private void Awake()
         {
-            if (!playerBody)
-            {
-                playerBody = GetComponentInParent<Rigidbody2D>();
-            }
+            playerController = playerController ? playerController : GetComponentInParent<PlayerController>();
 
             if (!spawnPoint)
             {
@@ -39,7 +36,7 @@ namespace FF
 
         private void Update()
         {
-            if (!moveEffectPrefab || !playerBody)
+            if (!moveEffectPrefab || !playerController)
             {
                 return;
             }
@@ -47,7 +44,7 @@ namespace FF
             float deltaTime = Time.deltaTime;
             spawnTimer = Mathf.Max(0f, spawnTimer - deltaTime);
 
-            Vector2 velocity = playerBody.linearVelocity;
+            Vector2 velocity = playerController.CurrentVelocity;
             float speed = velocity.magnitude;
             if (speed < minSpeedForEffect)
             {

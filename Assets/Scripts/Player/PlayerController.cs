@@ -3,7 +3,6 @@ using UnityEngine.InputSystem;
 
 namespace FF
 {
-    [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
         [Header("References")]
@@ -26,19 +25,17 @@ namespace FF
         [Header("Bounds Settings")]
         [SerializeField] private float _boundsPadding = 0.05f;
 
-        private Rigidbody2D _rigidbody;
         private PlayerStats _stats;
         private Vector2 _moveInput;
-        private Collider2D _collider;
         private bool _upgradeMenuOpen;
         private float _tiltVelocity;
+        private Vector2 _currentVelocity;
+        private Vector2 _visualExtents;
 
         private void Awake()
         {
-            _rigidbody = GetComponent<Rigidbody2D>();
             _stats = GetComponent<PlayerStats>();
             _camera = _camera ? _camera : Camera.main;
-            _collider = GetComponent<Collider2D>();
             _upgradeManager = _upgradeManager ? _upgradeManager : GetComponent<UpgradeManager>();
             _weaponManager = _weaponManager ? _weaponManager : GetComponentInChildren<WeaponManager>();
             _cosmetics = _cosmetics ? _cosmetics : GetComponent<PlayerCosmetics>();
@@ -57,6 +54,8 @@ namespace FF
                     _cosmetics.SetRenderTargets(renderer, _playerVisual);
                 }
             }
+
+            CacheVisualExtents();
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
@@ -84,20 +83,22 @@ namespace FF
 
         private void Update()
         {
+            HandleMovement(Time.deltaTime);
             AimGunAtPointer();
         }
 
-        private void FixedUpdate()
+        private void HandleMovement(float deltaTime)
         {
-            float targetSpeed = _stats.GetMoveSpeed();
+            float targetSpeed = _stats ? _stats.GetMoveSpeed() : 0f;
             Vector2 targetVelocity = _moveInput.normalized * targetSpeed;
 
-            _rigidbody.linearVelocity = Vector2.Lerp(
-                _rigidbody.linearVelocity,
+            _currentVelocity = Vector2.Lerp(
+                _currentVelocity,
                 targetVelocity,
                 _acceleration
             );
 
+            transform.position += (Vector3)(_currentVelocity * deltaTime);
             UpdateBodyTilt();
             ConstrainToGroundBounds();
         }
@@ -109,32 +110,23 @@ namespace FF
                 return;
             }
 
-            Vector2 padding = Vector2.one * _boundsPadding;
-            if (_collider)
-            {
-                Vector2 extents = _collider.bounds.extents;
-                padding = extents + padding;
-            }
-
-            Vector2 currentPosition = _rigidbody.position;
+            Vector2 padding = _visualExtents + Vector2.one * _boundsPadding;
+            Vector2 currentPosition = transform.position;
             Vector2 clampedPosition = Ground.Instance.ClampPoint(currentPosition, padding);
 
             if (currentPosition != clampedPosition)
             {
-                Vector2 velocity = _rigidbody.linearVelocity;
-
                 if (!Mathf.Approximately(currentPosition.x, clampedPosition.x))
                 {
-                    velocity.x = 0f;
+                    _currentVelocity.x = 0f;
                 }
 
                 if (!Mathf.Approximately(currentPosition.y, clampedPosition.y))
                 {
-                    velocity.y = 0f;
+                    _currentVelocity.y = 0f;
                 }
 
-                _rigidbody.linearVelocity = velocity;
-                _rigidbody.position = clampedPosition;
+                transform.position = clampedPosition;
             }
         }
 
@@ -162,9 +154,9 @@ namespace FF
         {
             if (!_playerVisual) return;
 
-            Vector2 velocity = _rigidbody.linearVelocity;
+            Vector2 velocity = _currentVelocity;
             float speed = velocity.magnitude;
-            float maxSpeed = Mathf.Max(_stats.GetMoveSpeed(), Mathf.Epsilon);
+            float maxSpeed = Mathf.Max(_stats != null ? _stats.GetMoveSpeed() : speed, Mathf.Epsilon);
             float normalizedSpeed = speed / maxSpeed;
 
             float targetTilt = speed > 0.1f ? -_bodyTiltDegrees * normalizedSpeed : _bodyTiltDegrees * 0.3f;
@@ -193,6 +185,24 @@ namespace FF
             _playerVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
         }
         #endregion Animations
+
+        private void CacheVisualExtents()
+        {
+            _visualExtents = Vector2.zero;
+
+            if (_playerVisual && _playerVisual.TryGetComponent<SpriteRenderer>(out var renderer))
+            {
+                _visualExtents = renderer.bounds.extents;
+                return;
+            }
+
+            if (TryGetComponent<SpriteRenderer>(out var selfRenderer))
+            {
+                _visualExtents = selfRenderer.bounds.extents;
+            }
+        }
+
+        public Vector2 CurrentVelocity => _currentVelocity;
 
         public void OverrideStartingWeapon(Weapon weapon)
         {

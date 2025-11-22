@@ -5,7 +5,7 @@ public class Ground : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] private SpriteRenderer _spriteRenderer;
-    [SerializeField] private Collider2D _boundsCollider;
+    [SerializeField] private Vector2 _manualBoundsSize = Vector2.zero;
 
     [Header("Environment Spawning")]
     [SerializeField] private List<GameObject> environmentPrefabs; // bushes, trees, etc.
@@ -28,7 +28,6 @@ public class Ground : MonoBehaviour
         Instance = this;
 
         if (!_spriteRenderer) _spriteRenderer = GetComponent<SpriteRenderer>();
-        if (!_boundsCollider) _boundsCollider = GetComponent<Collider2D>();
         CacheBounds();
     }
 
@@ -122,10 +121,10 @@ public class Ground : MonoBehaviour
 
     private void CacheBounds()
     {
-        if (_spriteRenderer && _spriteRenderer.sprite)
+        if (_manualBoundsSize.sqrMagnitude > 0f)
+            _worldBounds = new Bounds(transform.position, _manualBoundsSize);
+        else if (_spriteRenderer && _spriteRenderer.sprite)
             _worldBounds = _spriteRenderer.bounds;
-        else if (_boundsCollider)
-            _worldBounds = _boundsCollider.bounds;
         else
             _worldBounds = new Bounds(transform.position, Vector3.zero);
     }

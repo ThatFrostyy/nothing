@@ -8,6 +8,7 @@ namespace FF
     {
         [Header("Weapon Data")]
         [SerializeField] Weapon weaponData;
+        [SerializeField, Min(0f)] float pickupRadius = 0.75f;
 
         [Header("Visual Settings")]
         [SerializeField] float hoverAmplitude = 0.25f;  // how high it floats
@@ -29,9 +30,10 @@ namespace FF
         Vector3 startPos;
         Vector3 startScale;
         SpriteRenderer sr;
-        Light2D glow; 
+        Light2D glow;
         bool isPickedUp = false;
         float timer = 0f;
+        WeaponManager cachedWeaponManager;
 
         void Awake()
         {
@@ -46,6 +48,7 @@ namespace FF
             if (!isPickedUp)
             {
                 IdleAnimation();
+                DetectPlayer();
             }
             else
             {
@@ -101,22 +104,41 @@ namespace FF
             AudioPlaybackPool.PlayOneShot(pickupSound, transform.position);
         }
 
-        void OnTriggerEnter2D(Collider2D other)
+        void DetectPlayer()
         {
-            if (isPickedUp) return;
-
-            if (!weaponData)
+            if (isPickedUp || pickupRadius <= 0f)
             {
                 return;
             }
 
-            if (other.TryGetComponent<WeaponManager>(out var wm) && wm.TryEquip(weaponData))
+            if (!cachedWeaponManager || !cachedWeaponManager.isActiveAndEnabled)
+            {
+                CacheWeaponManager();
+            }
+
+            if (!cachedWeaponManager || !weaponData)
+            {
+                return;
+            }
+
+            float sqrDistance = (cachedWeaponManager.transform.position - transform.position).sqrMagnitude;
+            if (sqrDistance > pickupRadius * pickupRadius)
+            {
+                return;
+            }
+
+            if (cachedWeaponManager.TryEquip(weaponData))
             {
                 isPickedUp = true;
                 PlayPickupSound();
                 SpawnPickupFx();
                 TriggerPickupAnimation();
             }
+        }
+
+        void CacheWeaponManager()
+        {
+            cachedWeaponManager = FindObjectOfType<WeaponManager>();
         }
 
         #region Light Fade

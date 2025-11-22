@@ -3,7 +3,6 @@ using UnityEngine.Audio;
 
 namespace FF
 {
-    [RequireComponent(typeof(Rigidbody2D))]
     public class GrenadeProjectile : MonoBehaviour, IPoolable
     {
         [Header("Damage")]
@@ -27,9 +26,6 @@ namespace FF
         [SerializeField] private GameObject landingFX;
         [SerializeField] private AudioClip landingSFX;
 
-        private static readonly Collider2D[] OverlapBuffer = new Collider2D[32];
-
-        private Rigidbody2D _body;
         private PoolToken _poolToken;
         private float _fuseTimer;
         private bool _hasExploded;
@@ -50,7 +46,6 @@ namespace FF
 
         private void Awake()
         {
-            _body = GetComponent<Rigidbody2D>();
             _poolToken = GetComponent<PoolToken>();
             if (!_poolToken)
             {
@@ -89,15 +84,10 @@ namespace FF
             _activeSlowdown = Mathf.Max(0f, slowdownOverride ?? slowdownRate);
 
             float speed = Mathf.Max(0.1f, speedOverride ?? launchSpeed);
-            if (_body)
-            {
-                _body.gravityScale = 0f;
-                _movementDirection = direction.sqrMagnitude <= Mathf.Epsilon
-                    ? Vector2.right
-                    : direction.normalized;
-                _currentSpeed = speed;
-                _body.linearVelocity = _movementDirection * _currentSpeed;
-            }
+            _movementDirection = direction.sqrMagnitude <= Mathf.Epsilon
+                ? Vector2.right
+                : direction.normalized;
+            _currentSpeed = speed;
         }
 
         private void Update()
@@ -107,6 +97,8 @@ namespace FF
                 return;
             }
 
+            MoveProjectile(Time.deltaTime);
+
             _fuseTimer -= Time.deltaTime;
             if (_fuseTimer <= 0f)
             {
@@ -114,38 +106,20 @@ namespace FF
             }
         }
 
-        private void FixedUpdate()
+        private void MoveProjectile(float deltaTime)
         {
-            if (_hasExploded || !_isArmed || !_body)
-            {
-                return;
-            }
-
             if (_currentSpeed > 0f)
             {
-                _currentSpeed = Mathf.Max(0f, _currentSpeed - _activeSlowdown * Time.fixedDeltaTime);
-                _body.linearVelocity = _movementDirection * _currentSpeed;
-                if (_currentSpeed <= Mathf.Epsilon)
+                transform.position += (Vector3)(_movementDirection * _currentSpeed * deltaTime);
+                float nextSpeed = Mathf.Max(0f, _currentSpeed - _activeSlowdown * deltaTime);
+
+                if (!_hasPlayedLanding && nextSpeed <= 0.05f)
                 {
-                    _body.linearVelocity = Vector2.zero;
                     PlayLanding(transform.position);
                 }
-            }
-        }
 
-        private void OnCollisionEnter2D(Collision2D collision)
-        {
-            if (_hasExploded || _hasPlayedLanding || !_isArmed)
-            {
-                return;
+                _currentSpeed = nextSpeed;
             }
-
-            if (((1 << collision.gameObject.layer) & landingLayers.value) == 0)
-            {
-                return;
-            }
-
-            PlayLanding(collision.GetContact(0).point);
         }
 
         private void PlayLanding(Vector3 point)
@@ -223,38 +197,37 @@ namespace FF
                 return;
             }
 
-            int hits = Physics2D.OverlapCircleNonAlloc(center, explosionRadius, OverlapBuffer, damageLayers);
-            for (int i = 0; i < hits; i++)
+            Health[] targets = FindObjectsOfType<Health>();
+            foreach (var health in targets)
             {
-                Collider2D hit = OverlapBuffer[i];
-                if (!hit)
+                if (!health)
                 {
                     continue;
                 }
 
-                if (!string.IsNullOrEmpty(_ownerTag) && hit.CompareTag(_ownerTag))
+                GameObject target = health.gameObject;
+                if (((1 << target.layer) & damageLayers) == 0)
                 {
                     continue;
                 }
 
-                if (_pendingDamage > 0 && hit.TryGetComponent<Health>(out var health))
+                if (!string.IsNullOrEmpty(_ownerTag) && target.CompareTag(_ownerTag))
+                {
+                    continue;
+                }
+
+                Vector2 offset = (Vector2)target.transform.position - center;
+                float distance = offset.magnitude;
+                if (distance > explosionRadius)
+                {
+                    continue;
+                }
+
+                if (_pendingDamage > 0)
                 {
                     health.Damage(_pendingDamage);
                 }
 
-                Rigidbody2D hitBody = hit.attachedRigidbody;
-                if (!hitBody)
-                {
-                    continue;
-                }
-
-                Vector2 offset = hitBody.position - center;
-                if (offset.sqrMagnitude < 0.0001f)
-                {
-                    offset = Random.insideUnitCircle * 0.1f;
-                }
-
-                float distance = offset.magnitude;
                 float normalized = Mathf.Clamp01(distance / Mathf.Max(0.01f, explosionRadius));
                 float falloff = forceFalloff != null ? Mathf.Max(0f, forceFalloff.Evaluate(normalized)) : 1f - normalized;
                 if (falloff <= 0f)
@@ -262,11 +235,15 @@ namespace FF
                     continue;
                 }
 
+                if (offset.sqrMagnitude < 0.0001f)
+                {
+                    offset = Random.insideUnitCircle * 0.1f;
+                }
+
                 Vector2 impulse = offset.normalized * (explosionForce * falloff);
                 impulse.y += explosionForce * 0.15f * falloff;
 
-                hitBody.AddForce(impulse * 2f, ForceMode2D.Impulse);
-                if (hit.TryGetComponent<Enemy>(out var enemy))
+                if (health.TryGetComponent<Enemy>(out var enemy))
                 {
                     enemy.ApplyKnockback(impulse * 2f, 0.35f);
                 }
@@ -282,11 +259,6 @@ namespace FF
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
-            if (_body)
-            {
-                _body.linearVelocity = Vector2.zero;
-                _body.angularVelocity = 0f;
-            }
         }
 
         public void OnReturnedToPool()
@@ -300,11 +272,6 @@ namespace FF
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
-            if (_body)
-            {
-                _body.linearVelocity = Vector2.zero;
-                _body.angularVelocity = 0f;
-            }
         }
 
 #if UNITY_EDITOR

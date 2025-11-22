@@ -10,6 +10,7 @@ namespace FF
         [SerializeField] float lifetime = 2f;
         [SerializeField] GameObject bloodFX;
         [SerializeField] LayerMask hitMask;
+        [SerializeField, Min(0f)] float hitRadius = 0.25f;
 
         int damage;
         float t;
@@ -37,19 +38,45 @@ namespace FF
         {
             transform.Translate(speed * Time.deltaTime * Vector3.right, Space.Self);
             t += Time.deltaTime;
+            CheckForHits();
             if (t > lifetime && poolToken != null)
             {
                 poolToken.Release();
             }
         }
 
-        void OnTriggerEnter2D(Collider2D other)
+        void CheckForHits()
         {
-            if (other.CompareTag(teamTag)) return;
-            if (((1 << other.gameObject.layer) & hitMask) == 0) return;
-
-            if (other.TryGetComponent<Health>(out var hp))
+            if (damage <= 0 || hitRadius <= 0f)
             {
+                return;
+            }
+
+            Health[] targets = FindObjectsOfType<Health>();
+            foreach (var hp in targets)
+            {
+                if (!hp)
+                {
+                    continue;
+                }
+
+                GameObject target = hp.gameObject;
+                if (!string.IsNullOrEmpty(teamTag) && target.CompareTag(teamTag))
+                {
+                    continue;
+                }
+
+                if (((1 << target.layer) & hitMask) == 0)
+                {
+                    continue;
+                }
+
+                float sqrDistance = (target.transform.position - transform.position).sqrMagnitude;
+                if (sqrDistance > hitRadius * hitRadius)
+                {
+                    continue;
+                }
+
                 hp.Damage(damage);
 
                 if (bloodFX)
@@ -67,6 +94,8 @@ namespace FF
                 {
                     poolToken.Release();
                 }
+
+                break;
             }
         }
 

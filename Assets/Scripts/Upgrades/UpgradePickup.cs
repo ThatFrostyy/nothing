@@ -5,11 +5,11 @@ using UnityEngine.Rendering.Universal;
 
 namespace FF
 {
-    [RequireComponent(typeof(Collider2D))]
     public class UpgradePickup : MonoBehaviour
     {
         [SerializeField] private float lifetimeSeconds = 60f;
         [SerializeField] private SpriteRenderer indicatorRenderer;
+        [SerializeField, Min(0f)] private float pickupRadius = 0.75f;
         [Header("Visual Settings")]
         [SerializeField] private float hoverAmplitude = 0.25f;
         [SerializeField] private float hoverSpeed = 2f;
@@ -29,11 +29,13 @@ namespace FF
         private float idleTimer;
         private Vector3 startLocalPosition;
         private Vector3 startLocalScale;
-        private Collider2D pickupCollider;
         private Light2D glow;
         private bool isDespawning;
         private bool consumed;
         private Coroutine despawnRoutine;
+        private Transform cachedPlayer;
+        private PlayerStats cachedStats;
+        private Health cachedHealth;
 
         public event Action<UpgradePickup> OnCollected;
         public event Action<UpgradePickup> OnExpired;
@@ -41,12 +43,6 @@ namespace FF
 
         void Awake()
         {
-            pickupCollider = GetComponent<Collider2D>();
-            if (pickupCollider)
-            {
-                pickupCollider.isTrigger = true;
-            }
-
             glow = GetComponentInChildren<Light2D>();
             startLocalPosition = transform.localPosition;
             startLocalScale = transform.localScale;
@@ -58,10 +54,6 @@ namespace FF
             idleTimer = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
             startLocalPosition = transform.localPosition;
             startLocalScale = transform.localScale;
-            if (pickupCollider)
-            {
-                pickupCollider.enabled = true;
-            }
             consumed = false;
             isDespawning = false;
         }
@@ -78,29 +70,12 @@ namespace FF
                 }
 
                 AnimateIdle();
+                DetectPlayer();
             }
             else
             {
                 AnimatePickup();
             }
-        }
-
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (!other.CompareTag("Player"))
-            {
-                return;
-            }
-
-            if (!TryApplyEffect(other))
-            {
-                return;
-            }
-
-            consumed = true;
-            PlayPickupSound();
-            SpawnPickupFx();
-            TriggerCollected();
         }
 
         public UpgradePickupEffect Effect => effect;
@@ -110,15 +85,15 @@ namespace FF
             effect = newEffect;
         }
 
-        private bool TryApplyEffect(Collider2D playerCollider)
+        private bool TryApplyEffect()
         {
             if (effect == null)
             {
                 return false;
             }
 
-            PlayerStats stats = playerCollider.GetComponentInParent<PlayerStats>();
-            Health health = playerCollider.GetComponentInParent<Health>();
+            PlayerStats stats = cachedStats;
+            Health health = cachedHealth;
 
             switch (effect.Type)
             {
@@ -158,6 +133,49 @@ namespace FF
             }
 
             return true;
+        }
+
+        private void DetectPlayer()
+        {
+            if (consumed || pickupRadius <= 0f)
+            {
+                return;
+            }
+
+            EnsurePlayerCached();
+            if (!cachedPlayer)
+            {
+                return;
+            }
+
+            float sqrDistance = (cachedPlayer.position - transform.position).sqrMagnitude;
+            if (sqrDistance > pickupRadius * pickupRadius)
+            {
+                return;
+            }
+
+            if (!TryApplyEffect())
+            {
+                return;
+            }
+
+            consumed = true;
+            PlayPickupSound();
+            SpawnPickupFx();
+            TriggerCollected();
+        }
+
+        private void EnsurePlayerCached()
+        {
+            if (cachedPlayer && cachedPlayer.gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
+            GameObject player = GameObject.FindWithTag("Player");
+            cachedPlayer = player ? player.transform : null;
+            cachedStats = cachedPlayer ? cachedPlayer.GetComponentInParent<PlayerStats>() : null;
+            cachedHealth = cachedPlayer ? cachedPlayer.GetComponentInParent<Health>() : null;
         }
 
         private void AnimateIdle()
@@ -206,11 +224,6 @@ namespace FF
 
         private void TriggerCollected()
         {
-            if (pickupCollider)
-            {
-                pickupCollider.enabled = false;
-            }
-
             CameraShake.Shake(shakeDuration, shakeMagnitude);
             TriggerDespawn();
             OnCollected?.Invoke(this);

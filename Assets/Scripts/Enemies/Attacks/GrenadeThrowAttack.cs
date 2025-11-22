@@ -73,12 +73,6 @@ namespace FF
                 projectile.Launch(direction, -1, multiplier, enemy.tag, null, 0f, 1f, 1f, null, throwForce, slowdownRate);
                 return;
             }
-
-            if (grenade.TryGetComponent(out Rigidbody2D body))
-            {
-                Vector2 velocity = direction * throwForce;
-                body.linearVelocity = velocity;
-            }
         }
 
         private void WarmPool()
