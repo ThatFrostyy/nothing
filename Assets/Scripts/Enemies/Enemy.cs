@@ -67,6 +67,7 @@ namespace FF
         [Header("Avoidance")]
         [SerializeField] private LayerMask avoidanceLayers = ~0;
         [SerializeField, Range(4, 128)] private int maxAvoidanceChecks = 32;
+        [SerializeField, Min(0f)] private float avoidanceSampleInterval = 0.05f;
 
         private Rigidbody2D _rigidbody;
         private EnemyStats _stats;
@@ -107,6 +108,7 @@ namespace FF
         private float knockbackTimer = 0f;
         private Vector2 knockbackVelocity;
         private Vector2 _lastAimDirection = Vector2.right;
+        private float _lastAvoidanceSampleTime = float.NegativeInfinity;
 
         private const float FacingDeadZone = 0.05f;
 
@@ -329,6 +331,7 @@ namespace FF
 
             _dogAttackCooldownTimer = 0f;
             _dogAttackOffset = Vector3.zero;
+            _lastAvoidanceSampleTime = float.NegativeInfinity;
         }
 
         private void OnDisable()
@@ -511,13 +514,32 @@ namespace FF
         {
             if (_stats)
             {
-                Vector2 separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);
-                float responsiveness = _stats.AvoidanceResponsiveness;
-                _smoothedSeparation = responsiveness > 0f
-                    ? Vector2.Lerp(_smoothedSeparation, separationForce, responsiveness)
-                    : separationForce;
+                bool canApplyAvoidance =
+                    _stats.AvoidanceWeight > 0f &&
+                    _stats.AvoidanceRadius > 0f &&
+                    _stats.AvoidancePush > 0f;
 
-                targetVelocity += _smoothedSeparation * _stats.AvoidanceWeight;
+                if (canApplyAvoidance)
+                {
+                    Vector2 separationForce = _smoothedSeparation;
+                    if (Time.time - _lastAvoidanceSampleTime >= avoidanceSampleInterval)
+                    {
+                        separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);
+                        _lastAvoidanceSampleTime = Time.time;
+                    }
+
+                    float responsiveness = _stats.AvoidanceResponsiveness;
+                    _smoothedSeparation = responsiveness > 0f
+                        ? Vector2.Lerp(_smoothedSeparation, separationForce, responsiveness)
+                        : separationForce;
+
+                    targetVelocity += _smoothedSeparation * _stats.AvoidanceWeight;
+                }
+                else
+                {
+                    _smoothedSeparation = Vector2.zero;
+                }
+
             }
             else
             {
