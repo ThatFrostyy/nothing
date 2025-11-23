@@ -481,8 +481,7 @@ namespace FF
             _desiredVelocity = targetVelocity;
 
             //float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.linearVelocity = targetVelocity;
-
+            _rigidbody.MovePosition(_rigidbody.position + targetVelocity * Time.fixedDeltaTime);
         }
 
         private Vector2 ApplySeparationAndClamp(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
