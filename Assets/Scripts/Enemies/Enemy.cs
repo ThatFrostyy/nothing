@@ -382,7 +382,7 @@ namespace FF
         {
             if (knockbackTimer > 0f)
             {
-                knockbackTimer -= fixedDeltaTime;
+                knockbackTimer -= deltaTime;
                 _rigidbody.linearVelocity = knockbackVelocity;
                 return;
             }
@@ -409,7 +409,7 @@ namespace FF
                 ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, _rigidbody, deltaTime)
                 : CalculateDefaultDesiredVelocity(moveSpeed, retreatMultiplier, deltaTime);
 
-            ApplyDesiredVelocity(targetVelocity, moveSpeed, clampToStats);
+            ApplyDesiredVelocity(targetVelocity, moveSpeed, clampToStats, deltaTime);
         }
 
         private void UpdateDogMovement()
@@ -499,13 +499,13 @@ namespace FF
             }
         }
 
-        private void ApplyDesiredVelocity(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
+        private void ApplyDesiredVelocity(Vector2 targetVelocity, float moveSpeed, bool clampToStats, float deltaTime)
         {
             targetVelocity = ApplySeparationAndClamp(targetVelocity, moveSpeed, clampToStats);
             _desiredVelocity = targetVelocity;
 
             //float acceleration = _stats ? _stats.Acceleration : 0.2f;
-            _rigidbody.MovePosition(_rigidbody.position + targetVelocity * Time.fixedDeltaTime);
+            _rigidbody.MovePosition(_rigidbody.position + targetVelocity * deltaTime);
         }
 
         private Vector2 ApplySeparationAndClamp(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
