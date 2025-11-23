@@ -10,7 +10,6 @@ namespace FF
 
         private readonly List<Enemy> _enemies = new();
         private readonly HashSet<Enemy> _lookup = new();
-        private readonly List<Enemy> _pendingRemoval = new();
 
         public static void Register(Enemy enemy)
         {
@@ -64,69 +63,12 @@ namespace FF
 
         private void InternalUnregister(Enemy enemy)
         {
-            if (!_lookup.Contains(enemy))
+            if (!_lookup.Remove(enemy))
             {
                 return;
             }
 
-            _pendingRemoval.Add(enemy);
-        }
-
-        private void Update()
-        {
-            float deltaTime = Time.deltaTime;
-            ProcessPendingRemovals();
-
-            for (int i = 0; i < _enemies.Count; i++)
-            {
-                Enemy enemy = _enemies[i];
-                if (!enemy || !enemy.isActiveAndEnabled)
-                {
-                    _pendingRemoval.Add(enemy);
-                    continue;
-                }
-
-                enemy.Tick(deltaTime);
-            }
-
-            ProcessPendingRemovals();
-        }
-
-        private void FixedUpdate()
-        {
-            float fixedDeltaTime = Time.fixedDeltaTime;
-            ProcessPendingRemovals();
-
-            for (int i = 0; i < _enemies.Count; i++)
-            {
-                Enemy enemy = _enemies[i];
-                if (!enemy || !enemy.isActiveAndEnabled)
-                {
-                    _pendingRemoval.Add(enemy);
-                    continue;
-                }
-
-                enemy.PhysicsTick(fixedDeltaTime);
-            }
-
-            ProcessPendingRemovals();
-        }
-
-        private void ProcessPendingRemovals()
-        {
-            if (_pendingRemoval.Count == 0)
-            {
-                return;
-            }
-
-            for (int i = 0; i < _pendingRemoval.Count; i++)
-            {
-                Enemy enemy = _pendingRemoval[i];
-                _lookup.Remove(enemy);
-                _enemies.Remove(enemy);
-            }
-
-            _pendingRemoval.Clear();
+            _enemies.Remove(enemy);
         }
 
         private void OnDestroy()
@@ -138,7 +80,6 @@ namespace FF
 
             _enemies.Clear();
             _lookup.Clear();
-            _pendingRemoval.Clear();
         }
     }
 }
