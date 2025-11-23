@@ -299,38 +299,6 @@ namespace FF
             }
         }
 
-        private void Update()
-        {
-            EnsurePlayerReference();
-            AimAtPlayer();
-            float deltaTime = Time.deltaTime;
-            if (_attackBehaviour != null)
-            {
-                _attackBehaviour.TickAttack(this, _player, _stats, autoShooter, deltaTime);
-            }
-            else if (isDog)
-            {
-                UpdateDogBehaviour(deltaTime);
-            }
-            else
-            {
-                HandleFiring();
-            }
-        }
-
-        private void FixedUpdate()
-        {
-            if (knockbackTimer > 0f)
-            {
-                knockbackTimer -= Time.fixedDeltaTime;
-                _rigidbody.linearVelocity = knockbackVelocity;
-                return;  
-            }
-
-            UpdateMovement();
-            UpdateBodyTilt();
-        }
-
         private void OnEnable()
         {
             if (_health != null)
@@ -338,6 +306,8 @@ namespace FF
                 _health.OnDeath += HandleDeath;
                 _health.OnDamaged += HandleDamaged;
             }
+
+            EnemyManager.Register(this);
 
             if (_dogJumpRoutine != null)
             {
@@ -357,6 +327,8 @@ namespace FF
                 _health.OnDamaged -= HandleDamaged;
             }
 
+            EnemyManager.Unregister(this);
+
             if (_dogJumpRoutine != null)
             {
                 StopCoroutine(_dogJumpRoutine);
@@ -367,7 +339,39 @@ namespace FF
         }
 
         #region Movement
-        private void UpdateMovement()
+        internal void Tick(float deltaTime)
+        {
+            EnsurePlayerReference();
+            AimAtPlayer();
+
+            if (_attackBehaviour != null)
+            {
+                _attackBehaviour.TickAttack(this, _player, _stats, autoShooter, deltaTime);
+            }
+            else if (isDog)
+            {
+                UpdateDogBehaviour(deltaTime);
+            }
+            else
+            {
+                HandleFiring();
+            }
+        }
+
+        internal void PhysicsTick(float fixedDeltaTime)
+        {
+            if (knockbackTimer > 0f)
+            {
+                knockbackTimer -= fixedDeltaTime;
+                _rigidbody.linearVelocity = knockbackVelocity;
+                return;
+            }
+
+            UpdateMovement(fixedDeltaTime);
+            UpdateBodyTilt(fixedDeltaTime);
+        }
+
+        private void UpdateMovement(float deltaTime)
         {
             if (isDog && _movementBehaviour == null)
             {
@@ -378,7 +382,7 @@ namespace FF
             float retreatMultiplier = _stats ? _stats.RetreatSpeedMultiplier : 0.6f;
             bool clampToStats = _movementBehaviour == null;
             Vector2 targetVelocity = _movementBehaviour != null
-                ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, _rigidbody, Time.fixedDeltaTime)
+                ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, _rigidbody, deltaTime)
                 : CalculateDefaultDesiredVelocity(moveSpeed, retreatMultiplier);
 
             ApplyDesiredVelocity(targetVelocity, moveSpeed, clampToStats);
@@ -444,7 +448,7 @@ namespace FF
                 }
                 else
                 {
-                    UpdateMoveWhileShootingTimer();
+                    UpdateMoveWhileShootingTimer(deltaTime);
 
                     if (_shouldMoveWhileShooting && strafeDirection.sqrMagnitude > 0f)
                     {
@@ -461,9 +465,9 @@ namespace FF
             return targetVelocity;
         }
 
-        private void UpdateMoveWhileShootingTimer()
+        private void UpdateMoveWhileShootingTimer(float deltaTime)
         {
-            _moveWhileShootingTimer -= Time.fixedDeltaTime;
+            _moveWhileShootingTimer -= deltaTime;
             if (_moveWhileShootingTimer <= 0f)
             {
                 _shouldMoveWhileShooting = UnityEngine.Random.value < moveWhileShootingChance;
@@ -709,7 +713,7 @@ namespace FF
         #endregion Movement
 
         #region Animations
-        private void UpdateBodyTilt()
+        private void UpdateBodyTilt(float deltaTime)
         {
             if (!enemyVisual) return;
 
@@ -736,14 +740,16 @@ namespace FF
                 enemyVisual.localEulerAngles.z,
                 targetTilt,
                 ref _tiltVelocity,
-                0.07f
+                0.07f,
+                Mathf.Infinity,
+                deltaTime
             );
             enemyVisual.localRotation = Quaternion.Euler(0f, 0f, newZ);
 
-            UpdateWalkCycle(normalizedSpeed);
+            UpdateWalkCycle(normalizedSpeed, deltaTime);
         }
 
-        private void UpdateWalkCycle(float normalizedSpeed)
+        private void UpdateWalkCycle(float normalizedSpeed, float deltaTime)
         {
             if (!enemyVisual)
             {
@@ -755,10 +761,10 @@ namespace FF
             float baseScaleZ = Mathf.Approximately(_baseVisualLocalScale.z, 0f) ? 1f : _baseVisualLocalScale.z;
 
             float targetStrength = Mathf.Clamp01(normalizedSpeed);
-            _bobStrength = Mathf.Lerp(_bobStrength, targetStrength, Time.deltaTime * 10f);
+            _bobStrength = Mathf.Lerp(_bobStrength, targetStrength, deltaTime * 10f);
 
             float bobSpeed = Mathf.Lerp(0.6f, 1.4f, _bobStrength);
-            _bobTimer += Time.deltaTime * walkBobFrequency * bobSpeed;
+            _bobTimer += deltaTime * walkBobFrequency * bobSpeed;
 
             float bobOffset = Mathf.Sin(_bobTimer) * walkBobAmplitude * _bobStrength;
             Vector3 targetLocalPosition = _baseVisualLocalPosition + _dogAttackOffset + new Vector3(0f, bobOffset, 0f);
@@ -768,13 +774,13 @@ namespace FF
                 ref _visualPositionVelocity,
                 0.045f,
                 Mathf.Infinity,
-                Time.deltaTime
+                deltaTime
             );
 
             float squashAmount = Mathf.Sin(_bobTimer) * walkSquashAmount * _bobStrength;
 
             float desiredFacing = _isFacingLeft ? -1f : 1f;
-            _facingBlend = Mathf.SmoothDamp(_facingBlend, desiredFacing, ref _facingVelocity, 0.1f, Mathf.Infinity, Time.deltaTime);
+            _facingBlend = Mathf.SmoothDamp(_facingBlend, desiredFacing, ref _facingVelocity, 0.1f, Mathf.Infinity, deltaTime);
 
             Vector3 targetScale = new(
                 absBaseScaleX * Mathf.Clamp(_facingBlend, -1f, 1f) * (1f - squashAmount),
@@ -788,7 +794,7 @@ namespace FF
                 ref _visualScaleVelocity,
                 0.055f,
                 Mathf.Infinity,
-                Time.deltaTime
+                deltaTime
             );
         }
 
