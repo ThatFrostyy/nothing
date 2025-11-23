@@ -383,7 +383,7 @@ namespace FF
             bool clampToStats = _movementBehaviour == null;
             Vector2 targetVelocity = _movementBehaviour != null
                 ? _movementBehaviour.GetDesiredVelocity(this, _player, _stats, _rigidbody, deltaTime)
-                : CalculateDefaultDesiredVelocity(moveSpeed, retreatMultiplier);
+                : CalculateDefaultDesiredVelocity(moveSpeed, retreatMultiplier, deltaTime);
 
             ApplyDesiredVelocity(targetVelocity, moveSpeed, clampToStats);
         }
@@ -412,7 +412,7 @@ namespace FF
             _rigidbody.linearVelocity = Vector2.Lerp(_rigidbody.linearVelocity, targetVelocity, acceleration);
         }
 
-        private Vector2 CalculateDefaultDesiredVelocity(float moveSpeed, float retreatMultiplier)
+        private Vector2 CalculateDefaultDesiredVelocity(float moveSpeed, float retreatMultiplier, float deltaTime)
         {
             Vector2 targetVelocity = Vector2.zero;
 

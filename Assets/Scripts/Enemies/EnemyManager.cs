@@ -40,7 +40,7 @@ namespace FF
                 return _instance;
             }
 
-            _instance = FindObjectOfType<EnemyManager>();
+            _instance = FindFirstObjectByType<EnemyManager>();
             if (_instance != null)
             {
                 return _instance;
