@@ -147,9 +147,12 @@ namespace FF
 
         private void Update()
         {
-            float deltaTime = Time.deltaTime;
-            HandleUpdateLoop(deltaTime);
-            HandleMovementLoop(deltaTime);
+            HandleUpdateLoop(Time.deltaTime);
+        }
+
+        private void FixedUpdate()
+        {
+            HandleFixedUpdateLoop(Time.fixedDeltaTime);
         }
 
         private void Awake()
@@ -375,7 +378,7 @@ namespace FF
             }
         }
 
-        private void HandleMovementLoop(float deltaTime)
+        private void HandleFixedUpdateLoop(float fixedDeltaTime)
         {
             if (knockbackTimer > 0f)
             {
@@ -389,7 +392,7 @@ namespace FF
                 return;
             }
 
-            UpdateMovement(deltaTime);
+            UpdateMovement(fixedDeltaTime);
         }
 
         private void UpdateMovement(float deltaTime)
