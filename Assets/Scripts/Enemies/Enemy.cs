@@ -85,6 +85,10 @@ namespace FF
         private ContactFilter2D _avoidanceFilter;
         private AudioSource _audioSource;
         private const int AvoidanceBufferCeiling = 256;
+        private const float PlayerLookupCooldown = 0.5f;
+        private static Transform _cachedPlayer;
+        private static Health _cachedPlayerHealth;
+        private static float _lastPlayerLookupTime = float.NegativeInfinity;
         private int lastIndex = -1;
         private Vector3 _visualPositionVelocity;
         private Vector3 _visualScaleVelocity;
@@ -110,8 +114,7 @@ namespace FF
 
         public void Initialize(Transform player)
         {
-            _player = player;
-            CachePlayerHealth();
+            SetPlayer(player);
         }
 
         public void SetIsBoss(bool value)
@@ -140,6 +143,16 @@ namespace FF
                 int scaledValue = Mathf.Max(1, Mathf.RoundToInt(_baseXpOrbValue * modifiers.XpValueMultiplier));
                 xpOrbValue = scaledValue;
             }
+        }
+
+        private void Update()
+        {
+            HandleUpdateLoop(Time.deltaTime);
+        }
+
+        private void FixedUpdate()
+        {
+            HandleFixedUpdateLoop(Time.fixedDeltaTime);
         }
 
         private void Awake()
@@ -339,9 +352,11 @@ namespace FF
         }
 
         #region Movement
-        internal void Tick(float deltaTime)
+        private void HandleUpdateLoop(float deltaTime)
         {
             EnsurePlayerReference();
+            bool hasPlayerTarget = _player != null;
+
             AimAtPlayer();
 
             if (_attackBehaviour != null)
@@ -356,9 +371,14 @@ namespace FF
             {
                 HandleFiring();
             }
+
+            if (hasPlayerTarget || _rigidbody.linearVelocity.sqrMagnitude > 0.0001f)
+            {
+                UpdateBodyTilt(deltaTime);
+            }
         }
 
-        internal void PhysicsTick(float fixedDeltaTime)
+        private void HandleFixedUpdateLoop(float fixedDeltaTime)
         {
             if (knockbackTimer > 0f)
             {
@@ -367,8 +387,12 @@ namespace FF
                 return;
             }
 
+            if (!_player && _desiredVelocity.sqrMagnitude < 0.0001f && _smoothedSeparation.sqrMagnitude < 0.0001f)
+            {
+                return;
+            }
+
             UpdateMovement(fixedDeltaTime);
-            UpdateBodyTilt(fixedDeltaTime);
         }
 
         private void UpdateMovement(float deltaTime)
@@ -948,18 +972,27 @@ namespace FF
         {
             if (_player)
             {
-                if (!_playerHealth)
-                {
-                    CachePlayerHealth();
-                }
+                EnsurePlayerHealthCached();
                 return;
             }
 
+            if (_cachedPlayer)
+            {
+                SetPlayer(_cachedPlayer);
+                return;
+            }
+
+            float time = Time.time;
+            if (time - _lastPlayerLookupTime < PlayerLookupCooldown)
+            {
+                return;
+            }
+
+            _lastPlayerLookupTime = time;
             var playerObject = GameObject.FindWithTag("Player");
             if (playerObject)
             {
-                _player = playerObject.transform;
-                CachePlayerHealth();
+                SetPlayer(playerObject.transform);
             }
         }
 
@@ -983,6 +1016,39 @@ namespace FF
             {
                 _playerHealth = _player.GetComponentInChildren<Health>();
             }
+
+            if (_playerHealth)
+            {
+                _cachedPlayerHealth = _playerHealth;
+            }
+        }
+
+        private void EnsurePlayerHealthCached()
+        {
+            if (_playerHealth)
+            {
+                return;
+            }
+
+            if (_cachedPlayerHealth)
+            {
+                _playerHealth = _cachedPlayerHealth;
+                return;
+            }
+
+            CachePlayerHealth();
+        }
+
+        private void SetPlayer(Transform player)
+        {
+            if (!player)
+            {
+                return;
+            }
+
+            _player = player;
+            _cachedPlayer = player;
+            CachePlayerHealth();
         }
 
         private void OnDrawGizmosSelected()
