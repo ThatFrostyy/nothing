@@ -40,6 +40,9 @@ namespace FF
         private bool _isGrenadeWeapon;
         private bool _isChargingGrenade;
 
+        [Header("Performance")]
+        [SerializeField, Min(1)] private int maxActiveBullets = 200;
+
         public event Action<float> OnCooldownChanged;
         public event Action<float> OnGrenadeChargeChanged;
 
@@ -241,6 +244,11 @@ namespace FF
         private void SpawnStandardBullet(Quaternion spreadRotation)
         {
             if (!_weapon.bulletPrefab)
+            {
+                return;
+            }
+
+            if (Bullet.ActiveCount >= maxActiveBullets)
             {
                 return;
             }

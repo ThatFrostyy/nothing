@@ -16,11 +16,13 @@ namespace FF
         string teamTag;
         PoolToken poolToken;
         float baseSpeed;
+        static int activeCount;
 
         public void SetDamage(int d) => damage = d;
         public void SetOwner(string tag) => teamTag = tag;
         public void SetSpeed(float newSpeed) => speed = Mathf.Max(0.01f, newSpeed);
         public float BaseSpeed => baseSpeed;
+        public static int ActiveCount => activeCount;
 
         void Awake()
         {
@@ -74,6 +76,7 @@ namespace FF
         public void OnTakenFromPool()
         {
             t = 0f;
+            activeCount++;
         }
 
         public void OnReturnedToPool()
@@ -82,6 +85,10 @@ namespace FF
             damage = 0;
             teamTag = null;
             speed = baseSpeed;
+            if (activeCount > 0)
+            {
+                activeCount--;
+            }
         }
         #endregion Pooling
     }
