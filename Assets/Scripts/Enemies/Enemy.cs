@@ -381,7 +381,7 @@ namespace FF
         {
             if (knockbackTimer > 0f)
             {
-                knockbackTimer -= deltaTime;
+                knockbackTimer -= fixedDeltaTime;
                 _rigidbody.linearVelocity = knockbackVelocity;
                 return;
             }
