@@ -410,6 +410,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   maxAvoidanceChecks: 16
+  avoidanceSampleInterval: 0.5
 --- !u!70 &8420919759142757581
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
