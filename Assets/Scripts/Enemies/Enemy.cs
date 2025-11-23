@@ -11,6 +11,9 @@ namespace FF
     {
         public static event Action<Enemy> OnAnyEnemyKilled;
 
+        [Header("Debug")]
+        [SerializeField] private bool simpleFollowTest = false;
+
         [Header("References")]
         [SerializeField] private Weapon startingWeapon;
         [SerializeField] private WeaponManager weaponManager;
@@ -301,7 +304,6 @@ namespace FF
 
         private void Update()
         {
-            return;
             EnsurePlayerReference();
             AimAtPlayer();
             float deltaTime = Time.deltaTime;
@@ -321,6 +323,12 @@ namespace FF
 
         private void FixedUpdate()
         {
+            if (simpleFollowTest)
+            {
+                SimpleFollowMovement();
+                return; 
+            }
+
             if (knockbackTimer > 0f)
             {
                 knockbackTimer -= Time.fixedDeltaTime;
@@ -329,7 +337,18 @@ namespace FF
             }
 
             UpdateMovement();
-            UpdateBodyTilt();
+            //UpdateBodyTilt();
+        }
+
+        private void SimpleFollowMovement()
+        {
+            if (!_player)
+                return;
+
+            float moveSpeed = 3f; 
+            Vector2 direction = ((Vector2)_player.position - _rigidbody.position).normalized;
+
+            _rigidbody.linearVelocity = direction * moveSpeed;
         }
 
         private void OnEnable()
@@ -484,6 +503,8 @@ namespace FF
 
         private Vector2 ApplySeparationAndClamp(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
         {
+            return clampToStats ? Vector2.ClampMagnitude(targetVelocity, moveSpeed) : targetVelocity;
+
             if (_stats)
             {
                 Vector2 separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);
