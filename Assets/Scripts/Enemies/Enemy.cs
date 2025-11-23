@@ -245,8 +245,7 @@ namespace FF
                 autoShooter.SetCameraShakeEnabled(false);
             }
 
-            int bufferSize = Mathf.Clamp(maxAvoidanceChecks, 4, AvoidanceBufferCeiling);
-            _avoidanceResults = new Collider2D[bufferSize];
+            EnsureAvoidanceBuffer();
             _avoidanceFilter = new ContactFilter2D
             {
                 useLayerMask = true,
@@ -528,6 +527,15 @@ namespace FF
             return clampToStats ? Vector2.ClampMagnitude(targetVelocity, moveSpeed) : targetVelocity;
         }
 
+        private void EnsureAvoidanceBuffer()
+        {
+            int size = Mathf.Clamp(maxAvoidanceChecks, 4, AvoidanceBufferCeiling);
+            if (_avoidanceResults == null || _avoidanceResults.Length != size)
+            {
+                _avoidanceResults = new Collider2D[size];
+            }
+        }
+
         private Vector2 CalculateSeparationForce(float radius, float pushStrength)
         {
             if (radius <= 0f || pushStrength <= 0f)
@@ -536,22 +544,10 @@ namespace FF
             }
 
             Vector2 origin = _rigidbody ? _rigidbody.position : (Vector2)transform.position;
-            if (_avoidanceResults == null || _avoidanceResults.Length == 0)
-            {
-                int initialSize = Mathf.Clamp(maxAvoidanceChecks, 4, AvoidanceBufferCeiling);
-                _avoidanceResults = new Collider2D[initialSize];
-            }
+            EnsureAvoidanceBuffer();
 
             int hitCount = Physics2D.OverlapCircle(origin, radius, _avoidanceFilter, _avoidanceResults);
-            int currentCapacity = _avoidanceResults.Length;
-
-            while (hitCount >= currentCapacity && currentCapacity < AvoidanceBufferCeiling)
-            {
-                int newCapacity = Mathf.Min(currentCapacity * 2, AvoidanceBufferCeiling);
-                System.Array.Resize(ref _avoidanceResults, newCapacity);
-                currentCapacity = _avoidanceResults.Length;
-                hitCount = Physics2D.OverlapCircle(origin, radius, _avoidanceFilter, _avoidanceResults);
-            }
+            hitCount = Mathf.Min(hitCount, _avoidanceResults.Length);
 
             if (hitCount <= 0)
             {
