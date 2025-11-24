@@ -282,6 +282,10 @@ namespace FF
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
+            _audioMixer = null;
+            _audioSpatialBlend = 0f;
+            _audioVolume = 1f;
+            _audioPitch = 1f;
             if (_body)
             {
                 _body.linearVelocity = Vector2.zero;
@@ -300,6 +304,10 @@ namespace FF
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
+            _audioMixer = null;
+            _audioSpatialBlend = 0f;
+            _audioVolume = 1f;
+            _audioPitch = 1f;
             if (_body)
             {
                 _body.linearVelocity = Vector2.zero;

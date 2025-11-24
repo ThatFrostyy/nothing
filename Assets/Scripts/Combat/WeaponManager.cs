@@ -147,11 +147,8 @@ namespace FF
 
             if (existing != null)
             {
-                existing.SetActive(false);
-                if (existing.Instance)
-                {
-                    Destroy(existing.Instance);
-                }
+                ReleaseInstance(existing);
+                loadout[slotIndex] = null;
             }
 
             loadout[slotIndex] = CreateInstance(weapon);
@@ -202,7 +199,9 @@ namespace FF
                 return null;
             }
 
-            GameObject instance = Instantiate(weapon.weaponPrefab, gunPivot);
+            GameObjectPool pool = PoolManager.GetPool(weapon.weaponPrefab, 1, gunPivot);
+            GameObject instance = pool.Get(gunPivot.position, gunPivot.rotation);
+            instance.transform.SetParent(gunPivot, false);
             instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
             instance.SetActive(false);
 
@@ -218,7 +217,18 @@ namespace FF
                 Debug.LogError("Weapon prefab missing child named 'Eject'", instance);
             }
 
-            return new WeaponInstance(weapon, instance, muzzle, eject);
+            return new WeaponInstance(weapon, instance, muzzle, eject, pool);
+        }
+
+        void ReleaseInstance(WeaponInstance instance)
+        {
+            if (instance == null)
+            {
+                return;
+            }
+
+            instance.SetActive(false);
+            instance.Release();
         }
 
         bool ValidateDependencies()
