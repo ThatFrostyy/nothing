@@ -18,9 +18,11 @@ namespace FF
         public event Action OnUpgradeRequested;
         public event Action OnNextWeaponRequested;
         public event Action OnPreviousWeaponRequested;
+        public event Action<Vector2> OnLook;
 
         public Vector2 MoveInput { get; private set; }
         public bool FireHeld { get; private set; }
+        public Vector2 LookInput { get; private set; }
 
         private bool _actionBlocked;
 
@@ -136,6 +138,18 @@ namespace FF
             _weaponManager?.SelectNextSlot();
         }
 
+        public void OnLook(InputValue value)
+        {
+            if (!CanProcessGameplayInput)
+            {
+                ResetLookState();
+                return;
+            }
+
+            LookInput = value.Get<Vector2>();
+            OnLook?.Invoke(LookInput);
+        }
+
         private bool ValidateDependencies()
         {
             bool ok = true;
@@ -155,12 +169,13 @@ namespace FF
             return ok;
         }
 
-        private bool CanProcessGameplayInput => isActiveAndEnabled && !_blockInputFromUI && !_actionBlocked;
+        public bool CanProcessGameplayInput => isActiveAndEnabled && !_blockInputFromUI && !_actionBlocked;
 
         private void ResetInputState()
         {
             MoveInput = Vector2.zero;
             ResetFireState();
+            ResetLookState();
         }
 
         private void ResetFireState()
@@ -172,6 +187,12 @@ namespace FF
 
             FireHeld = false;
             OnFireStop?.Invoke();
+        }
+
+        private void ResetLookState()
+        {
+            LookInput = Vector2.zero;
+            OnLook?.Invoke(LookInput);
         }
 
         private void HandleUpgradeVisibilityChanged(bool isVisible)

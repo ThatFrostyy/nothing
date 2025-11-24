@@ -32,11 +32,7 @@ namespace FF
         private float sustainedFireTime;
         [SerializeField] float maxSustainedShake = 0.35f;
 
-        private float _recoilTimer;
         private float _currentSpread;
-        private float _currentRecoil;
-        private Vector3 _baseLocalPosition;
-        private Transform _gunPivot;
 
         private float _currentCooldownProgress = 1f;
         private float _currentChargeProgress;
@@ -45,6 +41,7 @@ namespace FF
 
         public event Action<float> OnCooldownChanged;
         public event Action<float> OnGrenadeChargeChanged;
+        public event Action<Weapon> OnShotFired;
 
         public float CooldownProgress => _currentCooldownProgress;
         public float GrenadeChargeProgress => _currentChargeProgress;
@@ -88,11 +85,6 @@ namespace FF
             _statsProvider = stats as MonoBehaviour;
         }
 
-        public void InitializeRecoil(Transform gunPivotTransform)
-        {
-            _gunPivot = gunPivotTransform;
-        }
-
         public void SetWeapon(Weapon weapon, Transform muzzleTransform, Transform eject)
         {
             _weapon = weapon;
@@ -103,14 +95,6 @@ namespace FF
             SetGrenadeChargeProgress(0f);
 
             SetCooldownProgress(1f);
-
-            if (_gunPivot)
-            {
-                _baseLocalPosition = _gunPivot.localPosition;
-                _currentRecoil = 0f;
-                _recoilTimer = 0f;
-                _gunPivot.localPosition = _baseLocalPosition;
-            }
 
             NotifyCooldownChanged();
         }
@@ -272,8 +256,6 @@ namespace FF
             }
             float targetSpread = _weapon.baseSpread * (isMoving ? movementPenalty : 1f);
             _currentSpread = Mathf.Lerp(_currentSpread, targetSpread, Time.deltaTime * _weapon.spreadRecoverySpeed);
-
-            UpdateRecoil();
         }
 
         #region Recoil & Shooting
@@ -310,9 +292,8 @@ namespace FF
                 CameraShake.Shake(shakeStrength, shakeStrength);
             }
 
-            _currentRecoil = _weapon.recoilAmount;
-            _recoilTimer = 0f;
             SetCooldownProgress(0f);
+            OnShotFired?.Invoke(_weapon);
         }
 
         private void SpawnEjectParticles()
@@ -413,27 +394,6 @@ namespace FF
                 flashPooled = flashInstance.AddComponent<PooledParticleSystem>();
                 flashPooled.OnTakenFromPool();
             }
-        }
-
-        private void UpdateRecoil()
-        {
-            if (!_gunPivot)
-            {
-                return;
-            }
-
-            _gunPivot.localPosition = _baseLocalPosition;
-
-            _recoilTimer += Time.deltaTime * 10f;
-            float kick = Mathf.Lerp(_currentRecoil, 0f, _recoilTimer);
-
-            Vector3 recoilDirection = -_gunPivot.right * (kick * 0.1f);
-            Transform pivotParent = _gunPivot.parent;
-            Vector3 localRecoil = pivotParent ? pivotParent.InverseTransformDirection(recoilDirection) : recoilDirection;
-
-            _gunPivot.localPosition = _baseLocalPosition + localRecoil;
-
-            _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, Time.deltaTime * _weapon.recoilRecoverySpeed);
         }
 
         private float GetFinalDamageMultiplier(out bool isCrit)

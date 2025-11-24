@@ -179,7 +179,6 @@ namespace FF
 
             if (shooter)
             {
-                shooter.InitializeRecoil(gunPivot);
                 shooter.SetWeapon(currentSO, muzzle, eject);
             }
             else
