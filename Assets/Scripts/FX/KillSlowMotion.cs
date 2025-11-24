@@ -17,7 +17,7 @@ namespace FF
         [SerializeField, Min(0.1f)] private float killWindow = 2.2f;
         [SerializeField, Min(2)] private int killsNeededForSlowmo = 4;
 
-        [Header("UI")] 
+        [Header("UI")]
         [SerializeField] private string multiKillMessage = "BULLET TIME";
         [SerializeField] private string bossKillMessage = "BOSS DOWN";
         [SerializeField] private float bannerHoldTime = 0.6f;
@@ -27,22 +27,9 @@ namespace FF
         private readonly List<float> _recentKillTimes = new();
         private Coroutine _slowmoRoutine;
         private Coroutine _bannerRoutine;
-        private float _baseFixedDeltaTime;
+
         private CanvasGroup _bannerGroup;
         private TextMeshProUGUI _bannerText;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void EnsureInstance()
-        {
-            if (_instance)
-            {
-                return;
-            }
-
-            var go = new GameObject("KillSlowMotion");
-            DontDestroyOnLoad(go);
-            _instance = go.AddComponent<KillSlowMotion>();
-        }
 
         private void Awake()
         {
@@ -53,7 +40,9 @@ namespace FF
             }
 
             _instance = this;
-            _baseFixedDeltaTime = Time.fixedDeltaTime;
+            DontDestroyOnLoad(gameObject);
+
+            Time.timeScale = 1f;
             BuildBannerUI();
         }
 
@@ -71,11 +60,11 @@ namespace FF
         private void HandleEnemyKilled(Enemy enemy)
         {
             float now = Time.unscaledTime;
+
             _recentKillTimes.Add(now);
             _recentKillTimes.RemoveAll(t => now - t > killWindow);
 
-            bool isBoss = enemy != null && enemy.IsBoss;
-            if (isBoss)
+            if (enemy != null && enemy.IsBoss)
             {
                 TriggerSlowmo(bossKillTimeScale, bossKillDuration, bossKillMessage);
                 return;
@@ -93,9 +82,7 @@ namespace FF
             duration = Mathf.Max(0.05f, duration);
 
             if (_slowmoRoutine != null)
-            {
                 StopCoroutine(_slowmoRoutine);
-            }
 
             _slowmoRoutine = StartCoroutine(SlowmoRoutine(scale, duration));
             PlayBanner(message);
@@ -104,7 +91,6 @@ namespace FF
         private System.Collections.IEnumerator SlowmoRoutine(float scale, float duration)
         {
             Time.timeScale = scale;
-            Time.fixedDeltaTime = _baseFixedDeltaTime * scale;
 
             float elapsed = 0f;
             while (elapsed < duration)
@@ -120,16 +106,14 @@ namespace FF
         private void RestoreTimeScale()
         {
             Time.timeScale = 1f;
-            Time.fixedDeltaTime = _baseFixedDeltaTime;
         }
 
         private void BuildBannerUI()
         {
             if (_bannerGroup)
-            {
                 return;
-            }
 
+            // Canvas
             var canvasGo = new GameObject("SlowmoCanvas", typeof(RectTransform));
             DontDestroyOnLoad(canvasGo);
             var canvas = canvasGo.AddComponent<Canvas>();
@@ -138,6 +122,7 @@ namespace FF
             canvasGo.AddComponent<CanvasScaler>();
             canvasGo.AddComponent<GraphicRaycaster>();
 
+            // Banner
             var bannerGo = new GameObject("SlowmoBanner", typeof(RectTransform));
             bannerGo.transform.SetParent(canvasGo.transform, false);
             var rect = bannerGo.GetComponent<RectTransform>();
@@ -156,13 +141,9 @@ namespace FF
 
             TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF");
             if (!font)
-            {
                 font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF 2");
-            }
             if (font)
-            {
                 _bannerText.font = font;
-            }
 
             _bannerGroup = bannerGo.AddComponent<CanvasGroup>();
             _bannerGroup.alpha = 0f;
@@ -171,44 +152,38 @@ namespace FF
         private void PlayBanner(string message)
         {
             if (!_bannerGroup || !_bannerText)
-            {
                 return;
-            }
 
             _bannerText.text = message;
+
             if (_bannerRoutine != null)
-            {
                 StopCoroutine(_bannerRoutine);
-            }
 
             _bannerRoutine = StartCoroutine(BannerRoutine());
         }
 
         private System.Collections.IEnumerator BannerRoutine()
         {
+            // Fade in
             float elapsed = 0f;
             while (elapsed < bannerFadeTime)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / bannerFadeTime);
-                _bannerGroup.alpha = t;
+                _bannerGroup.alpha = Mathf.Clamp01(elapsed / bannerFadeTime);
                 yield return null;
             }
 
             _bannerGroup.alpha = 1f;
-            float holdTimer = 0f;
-            while (holdTimer < bannerHoldTime)
-            {
-                holdTimer += Time.unscaledDeltaTime;
-                yield return null;
-            }
 
+            // Hold
+            yield return new WaitForSecondsRealtime(bannerHoldTime);
+
+            // Fade out
             elapsed = 0f;
             while (elapsed < bannerFadeTime)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float t = 1f - Mathf.Clamp01(elapsed / bannerFadeTime);
-                _bannerGroup.alpha = t;
+                _bannerGroup.alpha = 1f - Mathf.Clamp01(elapsed / bannerFadeTime);
                 yield return null;
             }
 

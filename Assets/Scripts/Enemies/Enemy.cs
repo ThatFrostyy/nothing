@@ -337,7 +337,7 @@ namespace FF
             }
 
             UpdateMovement();
-            //UpdateBodyTilt();
+            UpdateBodyTilt();
         }
 
         private void SimpleFollowMovement()
@@ -503,8 +503,6 @@ namespace FF
 
         private Vector2 ApplySeparationAndClamp(Vector2 targetVelocity, float moveSpeed, bool clampToStats)
         {
-            return clampToStats ? Vector2.ClampMagnitude(targetVelocity, moveSpeed) : targetVelocity;
-
             if (_stats)
             {
                 Vector2 separationForce = CalculateSeparationForce(_stats.AvoidanceRadius, _stats.AvoidancePush);

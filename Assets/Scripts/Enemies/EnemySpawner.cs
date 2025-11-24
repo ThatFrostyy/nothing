@@ -87,6 +87,8 @@ namespace FF
 
         public void SpawnWave(int wave)
         {
+            Debug.Log("Wave from GM " + GameManager.I.GetInstanceID());
+
             if (!player)
             {
                 return;

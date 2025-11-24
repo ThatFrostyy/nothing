@@ -15,7 +15,6 @@ namespace FF
 
         private DamageNumber _runtimePrefab;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateInstance()
         {
             if (_instance)

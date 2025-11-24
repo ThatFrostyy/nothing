@@ -365,6 +365,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f67e22903008e4e8c6c8f3c6ec685b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
+  simpleFollowTest: 0
   startingWeapon: {fileID: 11400000, guid: 93a8e85db9419b74b82edb2b6d3797bb, type: 2}
   weaponManager: {fileID: 5985841820440995128}
   autoShooter: {fileID: 3905552623909107986}

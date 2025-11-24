@@ -78,11 +78,8 @@ namespace FF
 
         IEnumerator Start()
         {
-            // Give Unity a frame to breathe
             yield return null;
-
-            // Preload heavy assets
-            yield return Prewarm();
+            //yield return Prewarm();
         }
 
         IEnumerator Prewarm()

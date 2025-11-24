@@ -30,6 +30,7 @@ namespace FF
 
         void Awake()
         {
+            Application.targetFrameRate = -1;
             if (I != null)
             {
                 Destroy(gameObject); 
@@ -38,8 +39,6 @@ namespace FF
 
             I = this;
             DontDestroyOnLoad(gameObject);
-
-            Application.targetFrameRate = 144;
 
             ResetGameState();
         }
