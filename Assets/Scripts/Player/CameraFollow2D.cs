@@ -10,6 +10,7 @@ namespace FF
         [SerializeField] Camera cam;
         [SerializeField, Range(0f, 20f)] float followSpeed = 10f;
         [SerializeField, Range(0f, 1f)] float mouseInfluence = 0.2f;
+        [SerializeField] private GameSettings _gameSettings;
 
         Vector3 velocity;
 
@@ -33,6 +34,11 @@ namespace FF
             if (!target && transform.parent)
             {
                 target = transform.parent;
+            }
+
+            if (!_gameSettings)
+            {
+                _gameSettings = GameSettings.Instance;
             }
         }
 
@@ -68,7 +74,13 @@ namespace FF
 
             Vector3 desiredPos = basePos + dirToMouse * mouseInfluence;
 
-            Vector3 smoothed = Vector3.SmoothDamp(transform.position, desiredPos, ref velocity, 1f / followSpeed);
+            float smoothTime = followSpeed > 0f ? 1f / followSpeed : 0.01f;
+            if (_gameSettings)
+            {
+                smoothTime = _gameSettings.CameraFollowSmoothTime;
+            }
+
+            Vector3 smoothed = Vector3.SmoothDamp(transform.position, desiredPos, ref velocity, smoothTime);
 
             Vector2 padding = Vector2.zero;
             if (cam && cam.orthographic)

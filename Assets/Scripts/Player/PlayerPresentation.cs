@@ -15,15 +15,13 @@ namespace FF
         [SerializeField] private PlayerState _playerState;
         [SerializeField] private PlayerStats _stats;
         [SerializeField] private Rigidbody2D _rigidbody;
+        [SerializeField] private GameSettings _gameSettings;
 
         [Header("Movement Visuals")]
         [SerializeField] private float _bodyTiltDegrees = 15f;
         [SerializeField] private float _tiltSmoothTime = 0.07f;
         [SerializeField] private float _idleSwayFrequency = 6f;
         [SerializeField] private float _idleSwayAmplitude = 1.2f;
-
-        [Header("Cursor Settings")]
-        [SerializeField] private bool _lockCursor = true;
 
         private Vector2 _screenLookPosition;
         private float _tiltVelocity;
@@ -57,12 +55,6 @@ namespace FF
             if (_weaponManager != null)
             {
                 _weaponManager.OnWeaponChanged += HandleWeaponChanged;
-            }
-
-            if (_lockCursor)
-            {
-                Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Confined;
             }
         }
 
@@ -138,6 +130,7 @@ namespace FF
             {
                 _cosmetics = _playerVisual.GetComponent<PlayerCosmetics>();
             }
+            if (!_gameSettings) _gameSettings = GameSettings.Instance;
         }
 
         private void HandleLook(Vector2 screenPosition)
@@ -152,7 +145,14 @@ namespace FF
                 return;
             }
 
-            _currentRecoil = weapon.recoilAmount;
+            float recoilAmount = weapon.recoilAmount;
+            GameSettings settings = Settings;
+            if (settings)
+            {
+                recoilAmount *= settings.RecoilMultiplier;
+            }
+
+            _currentRecoil = recoilAmount;
             _recoilTimer = 0f;
         }
 
@@ -275,6 +275,8 @@ namespace FF
                 _playerState?.OverrideStartingWeapon(weapon);
             }
         }
+
+        private GameSettings Settings => _gameSettings != null ? _gameSettings : GameSettings.Instance;
 
         private bool ValidateDependencies()
         {

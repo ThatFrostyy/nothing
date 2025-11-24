@@ -4,6 +4,7 @@ namespace FF
 {
     public class RecoilPresenter : MonoBehaviour
     {
+        [SerializeField] private GameSettings _gameSettings;
         [SerializeField] private bool _cameraShakeEnabled = true;
         [SerializeField] private float maxSustainedShake = 0.35f;
 
@@ -19,6 +20,14 @@ namespace FF
         public void SetCameraShakeEnabled(bool enabled)
         {
             _cameraShakeEnabled = enabled;
+        }
+
+        private void OnValidate()
+        {
+            if (!_gameSettings)
+            {
+                _gameSettings = GameSettings.Instance;
+            }
         }
 
         public void UpdateHold(bool isFireHeld, bool isAuto, float deltaTime)
@@ -42,8 +51,18 @@ namespace FF
                 return;
             }
 
-            float shakeStrength = Mathf.Lerp(0.05f, maxSustainedShake, _sustainedFireTime);
+            GameSettings settings = Settings;
+            if (settings && !settings.ScreenShakeEnabled)
+            {
+                return;
+            }
+
+            float recoilScale = settings ? settings.RecoilMultiplier : 1f;
+
+            float shakeStrength = Mathf.Lerp(0.05f, maxSustainedShake, _sustainedFireTime) * recoilScale;
             CameraShake.Shake(shakeStrength, shakeStrength);
         }
+
+        private GameSettings Settings => _gameSettings != null ? _gameSettings : GameSettings.Instance;
     }
 }
