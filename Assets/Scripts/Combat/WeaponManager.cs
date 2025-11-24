@@ -75,6 +75,33 @@ namespace FF
             SelectSlot(previous);
         }
 
+        void Awake()
+        {
+            if (!ValidateDependencies())
+            {
+                Debug.LogError($"{nameof(WeaponManager)} on {name} disabled due to missing dependencies.", this);
+                enabled = false;
+                return;
+            }
+        }
+
+        void OnValidate()
+        {
+            if (!gunPivot)
+            {
+                Transform foundPivot = transform.Find("GunPivot");
+                if (foundPivot)
+                {
+                    gunPivot = foundPivot;
+                }
+            }
+
+            if (!shooter)
+            {
+                shooter = GetComponentInChildren<AutoShooter>();
+            }
+        }
+
         public void SelectSlot(int slotIndex)
         {
             int clampedIndex = Mathf.Clamp(slotIndex, 0, loadout.Length - 1);
@@ -161,6 +188,25 @@ namespace FF
             }
 
             OnWeaponEquipped?.Invoke(currentSO);
+        }
+
+        bool ValidateDependencies()
+        {
+            bool ok = true;
+
+            if (!gunPivot)
+            {
+                Debug.LogError("Missing gun pivot reference.", this);
+                ok = false;
+            }
+
+            if (!shooter)
+            {
+                Debug.LogError("Missing AutoShooter reference.", this);
+                ok = false;
+            }
+
+            return ok;
         }
     }
 }

@@ -15,7 +15,44 @@ namespace FF
 
         void Awake()
         {
-            if (!cam) cam = Camera.main;
+            if (!ValidateDependencies())
+            {
+                Debug.LogError($"{nameof(CameraFollow2D)} on {name} disabled due to missing dependencies.", this);
+                enabled = false;
+                return;
+            }
+        }
+
+        void OnValidate()
+        {
+            if (!cam)
+            {
+                cam = GetComponent<Camera>();
+            }
+
+            if (!target && transform.parent)
+            {
+                target = transform.parent;
+            }
+        }
+
+        bool ValidateDependencies()
+        {
+            bool ok = true;
+
+            if (!cam)
+            {
+                Debug.LogError("Missing Camera reference.", this);
+                ok = false;
+            }
+
+            if (!target)
+            {
+                Debug.LogError("Missing follow target reference.", this);
+                ok = false;
+            }
+
+            return ok;
         }
 
         void LateUpdate()

@@ -35,20 +35,103 @@ namespace FF
 
         private void Awake()
         {
-            _rigidbody = GetComponent<Rigidbody2D>();
-            _stats = GetComponent<PlayerStats>();
-            _camera = _camera ? _camera : Camera.main;
-            _collider = GetComponent<Collider2D>();
-            _upgradeManager = _upgradeManager ? _upgradeManager : GetComponent<UpgradeManager>();
-            _weaponManager = _weaponManager ? _weaponManager : GetComponentInChildren<WeaponManager>();
-            _cosmetics = _cosmetics ? _cosmetics : GetComponent<PlayerCosmetics>();
+            if (!ValidateDependencies())
+            {
+                Debug.LogError($"{nameof(PlayerController)} on {name} disabled due to missing dependencies.", this);
+                enabled = false;
+                return;
+            }
 
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
+        }
+
+        private void OnValidate()
+        {
+            if (!_rigidbody) _rigidbody = GetComponent<Rigidbody2D>();
+            if (!_stats) _stats = GetComponent<PlayerStats>();
+            if (!_collider) _collider = GetComponent<Collider2D>();
+            if (!_upgradeManager) _upgradeManager = GetComponent<UpgradeManager>();
+            if (!_weaponManager) _weaponManager = GetComponentInChildren<WeaponManager>();
+            if (!_autoShooter) _autoShooter = GetComponentInChildren<AutoShooter>();
+            if (!_cosmetics) _cosmetics = GetComponent<PlayerCosmetics>();
             if (!_cosmetics && _playerVisual)
             {
                 _cosmetics = _playerVisual.GetComponent<PlayerCosmetics>();
             }
+            if (!_camera)
+            {
+                Transform cameraTransform = transform.root.Find("GameplayRoot/Camera") ?? transform.Find("Camera") ?? transform.GetComponentInChildren<Camera>()?.transform;
+                if (cameraTransform && cameraTransform.TryGetComponent(out Camera foundCamera))
+                {
+                    _camera = foundCamera;
+                }
+            }
+            if (!_playerVisual)
+            {
+                Transform foundVisual = transform.Find("Visual");
+                if (foundVisual)
+                {
+                    _playerVisual = foundVisual;
+                }
+            }
+            if (!_gunPivot)
+            {
+                Transform foundGunPivot = transform.Find("GunPivot");
+                if (foundGunPivot)
+                {
+                    _gunPivot = foundGunPivot;
+                }
+            }
+        }
 
-            if (!_cosmetics && _playerVisual)
+        private bool ValidateDependencies()
+        {
+            bool ok = true;
+
+            if (!_rigidbody)
+            {
+                Debug.LogError("Missing Rigidbody2D reference.", this);
+                ok = false;
+            }
+
+            if (!_stats)
+            {
+                Debug.LogError("Missing PlayerStats reference.", this);
+                ok = false;
+            }
+
+            if (!_camera)
+            {
+                Debug.LogError("Missing Camera reference.", this);
+                ok = false;
+            }
+
+            if (!_collider)
+            {
+                Debug.LogError("Missing Collider2D reference.", this);
+                ok = false;
+            }
+
+            if (!_upgradeManager)
+            {
+                Debug.LogError("Missing UpgradeManager reference.", this);
+                ok = false;
+            }
+
+            if (!_weaponManager)
+            {
+                Debug.LogError("Missing WeaponManager reference.", this);
+                ok = false;
+            }
+
+            if (!_autoShooter)
+            {
+                Debug.LogError("Missing AutoShooter reference.", this);
+                ok = false;
+            }
+
+            if (_playerVisual && !_cosmetics)
             {
                 SpriteRenderer renderer = _playerVisual.GetComponent<SpriteRenderer>();
                 if (renderer)
@@ -58,8 +141,13 @@ namespace FF
                 }
             }
 
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Confined;
+            if (!_gunPivot)
+            {
+                Debug.LogError("Missing gun pivot reference.", this);
+                ok = false;
+            }
+
+            return ok;
         }
 
         private void Start()

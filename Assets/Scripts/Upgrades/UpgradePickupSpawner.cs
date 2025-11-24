@@ -21,6 +21,7 @@ namespace FF
     {
         [SerializeField] private UpgradeSpawnConfig[] pickupConfigs;
         [SerializeField] private Transform player;
+        [SerializeField] private Camera sceneCamera;
         [SerializeField, Min(0f)] private float offscreenPadding = 2f;
         [SerializeField, Min(0f)] private float minSpawnRadius = 6f;
 
@@ -40,7 +41,19 @@ namespace FF
             }
         }
 
-        void Start()
+        void Awake()
+        {
+            if (!ValidateDependencies())
+            {
+                Debug.LogError($"{nameof(UpgradePickupSpawner)} on {name} disabled due to missing dependencies.", this);
+                enabled = false;
+                return;
+            }
+
+            InitializeSpawnStates();
+        }
+
+        void OnValidate()
         {
             if (!player)
             {
@@ -51,7 +64,10 @@ namespace FF
                 }
             }
 
-            InitializeSpawnStates();
+            if (!sceneCamera)
+            {
+                sceneCamera = GetComponentInParent<Camera>();
+            }
         }
 
         void OnDisable()
@@ -258,7 +274,7 @@ namespace FF
         private Vector3 GetSpawnPosition()
         {
             Vector3 center = player ? player.position : Vector3.zero;
-            Camera cam = Camera.main;
+            Camera cam = sceneCamera;
 
             if (cam && cam.orthographic)
             {
@@ -271,6 +287,25 @@ namespace FF
 
             float fallbackRadius = Mathf.Max(minSpawnRadius, offscreenPadding + 5f);
             return center + (Vector3)(GetDirection() * fallbackRadius);
+        }
+
+        private bool ValidateDependencies()
+        {
+            bool ok = true;
+
+            if (!player)
+            {
+                Debug.LogError("Missing player reference.", this);
+                ok = false;
+            }
+
+            if (!sceneCamera)
+            {
+                Debug.LogError("Missing scene camera reference.", this);
+                ok = false;
+            }
+
+            return ok;
         }
 
         private static Vector2 GetDirection()

@@ -7,12 +7,15 @@ namespace FF
 {
     public class AutoShooter : MonoBehaviour
     {
-        private Weapon _weapon;
-        private Transform _muzzle;
-        private Transform _ejectPos;
+        [Header("References")]
+        [SerializeField] private Weapon _weapon;
+        [SerializeField] private Transform _muzzle;
+        [SerializeField] private Transform _ejectPos;
+        [SerializeField] private MonoBehaviour _statsProvider;
+        [SerializeField] private AudioSource _audioSource;
+        [SerializeField] private Rigidbody2D _playerBody;
+
         private ICombatStats _stats;
-        private AudioSource _audioSource;
-        private Rigidbody2D _playerBody;
 
         private float _fireTimer;
         private bool _isFireHeld;
@@ -49,14 +52,20 @@ namespace FF
         #region Initialization
         private void Awake()
         {
-            _stats = GetComponentInParent<ICombatStats>();
-            _audioSource = GetComponent<AudioSource>();
-            _playerBody = GetComponentInParent<Rigidbody2D>();
+            CacheInterfaces();
+
+            if (!ValidateDependencies())
+            {
+                Debug.LogError($"{nameof(AutoShooter)} on {name} disabled due to missing dependencies.", this);
+                enabled = false;
+                return;
+            }
         }
 
         public void SetStatsProvider(ICombatStats stats)
         {
             _stats = stats;
+            _statsProvider = stats as MonoBehaviour;
         }
 
         public void InitializeRecoil(Transform gunPivotTransform)
@@ -116,6 +125,57 @@ namespace FF
             _cameraShakeEnabled = enabled;
         }
         #endregion Initialization
+
+        private void OnValidate()
+        {
+            if (!_statsProvider)
+            {
+                MonoBehaviour[] parents = GetComponentsInParent<MonoBehaviour>(includeInactive: true);
+                foreach (MonoBehaviour behaviour in parents)
+                {
+                    if (behaviour is ICombatStats)
+                    {
+                        _statsProvider = behaviour;
+                        break;
+                    }
+                }
+            }
+
+            CacheInterfaces();
+
+            if (!_audioSource) _audioSource = GetComponent<AudioSource>();
+            if (!_playerBody) _playerBody = GetComponentInParent<Rigidbody2D>();
+        }
+
+        private void CacheInterfaces()
+        {
+            _stats = _statsProvider as ICombatStats;
+        }
+
+        private bool ValidateDependencies()
+        {
+            bool ok = true;
+
+            if (!_audioSource)
+            {
+                Debug.LogError("Missing AudioSource reference.", this);
+                ok = false;
+            }
+
+            if (!_playerBody)
+            {
+                Debug.LogError("Missing Rigidbody2D reference.", this);
+                ok = false;
+            }
+
+            if (_statsProvider && _stats == null)
+            {
+                Debug.LogError("Stats provider does not implement ICombatStats.", this);
+                ok = false;
+            }
+
+            return ok;
+        }
 
         public void OnFire(InputValue value)
         {
