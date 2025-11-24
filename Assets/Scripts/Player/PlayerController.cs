@@ -4,17 +4,17 @@ using UnityEngine.InputSystem;
 namespace FF
 {
     [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(InputRouter))]
     public class PlayerController : MonoBehaviour
     {
         [Header("References")]
         [SerializeField] private Camera _camera;
-        [SerializeField] private AutoShooter _autoShooter;
         [SerializeField] private Transform _gunPivot;
         [SerializeField] private Transform _playerVisual;
         [SerializeField] private PlayerCosmetics _cosmetics;
-        [SerializeField] private UpgradeManager _upgradeManager;
         [SerializeField] private WeaponManager _weaponManager;
         [SerializeField] private Weapon _startingWeapon;
+        [SerializeField] private InputRouter _inputRouter;
 
         [Header("Movement Settings")]
         [SerializeField] private float _acceleration = 0.18f;
@@ -28,10 +28,9 @@ namespace FF
 
         private Rigidbody2D _rigidbody;
         private PlayerStats _stats;
-        private Vector2 _moveInput;
         private Collider2D _collider;
-        private bool _upgradeMenuOpen;
         private float _tiltVelocity;
+        private Vector2 _moveInput;
 
         private void Awake()
         {
@@ -51,9 +50,8 @@ namespace FF
             if (!_rigidbody) _rigidbody = GetComponent<Rigidbody2D>();
             if (!_stats) _stats = GetComponent<PlayerStats>();
             if (!_collider) _collider = GetComponent<Collider2D>();
-            if (!_upgradeManager) _upgradeManager = GetComponent<UpgradeManager>();
             if (!_weaponManager) _weaponManager = GetComponentInChildren<WeaponManager>();
-            if (!_autoShooter) _autoShooter = GetComponentInChildren<AutoShooter>();
+            if (!_inputRouter) _inputRouter = GetComponent<InputRouter>();
             if (!_cosmetics) _cosmetics = GetComponent<PlayerCosmetics>();
             if (!_cosmetics && _playerVisual)
             {
@@ -113,21 +111,15 @@ namespace FF
                 ok = false;
             }
 
-            if (!_upgradeManager)
+            if (!_inputRouter)
             {
-                Debug.LogError("Missing UpgradeManager reference.", this);
+                Debug.LogError("Missing InputRouter reference.", this);
                 ok = false;
             }
 
             if (!_weaponManager)
             {
                 Debug.LogError("Missing WeaponManager reference.", this);
-                ok = false;
-            }
-
-            if (!_autoShooter)
-            {
-                Debug.LogError("Missing AutoShooter reference.", this);
                 ok = false;
             }
 
@@ -160,18 +152,9 @@ namespace FF
             }
         }
 
-        private void OnEnable()
-        {
-            UpgradeUI.OnVisibilityChanged += HandleUpgradeVisibilityChanged;
-        }
-
-        private void OnDisable()
-        {
-            UpgradeUI.OnVisibilityChanged -= HandleUpgradeVisibilityChanged;
-        }
-
         private void Update()
         {
+            _moveInput = _inputRouter != null ? _inputRouter.MoveInput : Vector2.zero;
             AimGunAtPointer();
         }
 
@@ -285,69 +268,6 @@ namespace FF
         public void OverrideStartingWeapon(Weapon weapon)
         {
             _startingWeapon = weapon;
-        }
-
-        #region Input System Callbacks
-        public void OnMove(InputValue value)
-        {
-            _moveInput = value.Get<Vector2>();
-        }
-
-        public void OnAttack(InputValue value)
-        {
-            if (_autoShooter == null)
-            {
-                return;
-            }
-
-            if (_upgradeMenuOpen)
-            {
-                _autoShooter.SetFireHeld(false);
-                return;
-            }
-
-            _autoShooter.OnFire(value);
-        }
-
-        public void OnUpgrade(InputValue value)
-        {
-            Debug.Log("press");
-            if (!value.isPressed || _upgradeManager == null)
-            {
-                return;
-            }
-
-            _upgradeManager.TryOpenUpgradeMenu();
-        }
-
-        public void OnPrevious(InputValue value)
-        {
-            if (!value.isPressed || _weaponManager == null)
-            {
-                return;
-            }
-
-            _weaponManager.SelectPreviousSlot();
-        }
-
-        public void OnNext(InputValue value)
-        {
-            if (!value.isPressed || _weaponManager == null)
-            {
-                return;
-            }
-
-            _weaponManager.SelectNextSlot();
-        }
-        #endregion Input System Callbacks
-
-        private void HandleUpgradeVisibilityChanged(bool isVisible)
-        {
-            _upgradeMenuOpen = isVisible;
-            if (isVisible && _autoShooter != null)
-            {
-                _autoShooter.SetFireHeld(false);
-            }
         }
 
         private void ApplyCharacterSelection()

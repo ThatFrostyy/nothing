@@ -1,7 +1,6 @@
 using System;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.InputSystem;
 
 namespace FF
 {
@@ -14,6 +13,7 @@ namespace FF
         [SerializeField] private MonoBehaviour _statsProvider;
         [SerializeField] private AudioSource _audioSource;
         [SerializeField] private Rigidbody2D _playerBody;
+        [SerializeField] private InputRouter _inputRouter;
 
         private ICombatStats _stats;
 
@@ -60,6 +60,26 @@ namespace FF
                 enabled = false;
                 return;
             }
+        }
+
+        private void OnEnable()
+        {
+            if (_inputRouter != null)
+            {
+                _inputRouter.OnFireStart += HandleFireStarted;
+                _inputRouter.OnFireStop += HandleFireStopped;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (_inputRouter != null)
+            {
+                _inputRouter.OnFireStart -= HandleFireStarted;
+                _inputRouter.OnFireStop -= HandleFireStopped;
+            }
+
+            SetFireHeld(false);
         }
 
         public void SetStatsProvider(ICombatStats stats)
@@ -145,6 +165,7 @@ namespace FF
 
             if (!_audioSource) _audioSource = GetComponent<AudioSource>();
             if (!_playerBody) _playerBody = GetComponentInParent<Rigidbody2D>();
+            if (!_inputRouter) _inputRouter = GetComponentInParent<InputRouter>();
         }
 
         private void CacheInterfaces()
@@ -174,12 +195,23 @@ namespace FF
                 ok = false;
             }
 
+            if (!_inputRouter)
+            {
+                Debug.LogError("Missing InputRouter reference.", this);
+                ok = false;
+            }
+
             return ok;
         }
 
-        public void OnFire(InputValue value)
+        private void HandleFireStarted()
         {
-            SetFireHeld(value.Get<float>() > 0.5f);
+            SetFireHeld(true);
+        }
+
+        private void HandleFireStopped()
+        {
+            SetFireHeld(false);
         }
 
         private void Update()
