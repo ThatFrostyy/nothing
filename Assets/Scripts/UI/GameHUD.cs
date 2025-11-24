@@ -206,7 +206,7 @@ namespace FF
 
             if (weaponManager != null)
             {
-                weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
+                weaponManager.OnWeaponChanged += HandleWeaponChanged;
                 weaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
             }
 
@@ -242,7 +242,7 @@ namespace FF
 
             if (weaponManager != null)
             {
-                weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+                weaponManager.OnWeaponChanged -= HandleWeaponChanged;
                 weaponManager.OnInventoryChanged -= HandleWeaponInventoryChanged;
             }
 
@@ -410,9 +410,9 @@ namespace FF
             killCountText.text = $"{Mathf.Max(0, kills)}";
         }
 
-        void HandleWeaponEquipped(Weapon weapon)
+        void HandleWeaponChanged(WeaponInstance weaponInstance)
         {
-            UpdateWeaponDisplay(weapon);
+            UpdateWeaponDisplay(weaponInstance != null ? weaponInstance.Weapon : null);
         }
 
         void HandleWeaponInventoryChanged()

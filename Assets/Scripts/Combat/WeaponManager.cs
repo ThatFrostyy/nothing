@@ -12,21 +12,20 @@ namespace FF
         [SerializeField] Transform gunPivot;
         [SerializeField] AutoShooter shooter;
 
-        readonly Weapon[] loadout = new Weapon[3];
+        readonly WeaponInstance[] loadout = new WeaponInstance[3];
         Weapon currentSO;
-        GameObject currentWeaponInstance;
-        Transform muzzle;
-        Transform eject;
+        WeaponInstance currentInstance;
         int currentSlotIndex;
         int lastPrimarySlotIndex;
 
         public Transform GunPivot => gunPivot;
         public AutoShooter Shooter => shooter;
         public Weapon CurrentWeapon => currentSO;
+        public WeaponInstance CurrentInstance => currentInstance;
         public int CurrentSlotIndex => currentSlotIndex;
         public int SlotCount => loadout.Length;
 
-        public event Action<Weapon> OnWeaponEquipped;
+        public event Action<WeaponInstance> OnWeaponChanged;
         public event Action OnInventoryChanged;
 
         public Weapon GetWeaponInSlot(int slotIndex)
@@ -36,7 +35,7 @@ namespace FF
                 return null;
             }
 
-            return loadout[slotIndex];
+            return loadout[slotIndex]?.Weapon;
         }
 
         public void Equip(Weapon newWeapon)
@@ -138,55 +137,88 @@ namespace FF
 
         void AssignWeaponToSlot(int slotIndex, Weapon weapon)
         {
-            loadout[slotIndex] = weapon;
+            WeaponInstance existing = loadout[slotIndex];
+
+            if (existing != null && existing.Weapon == weapon)
+            {
+                OnInventoryChanged?.Invoke();
+                return;
+            }
+
+            if (existing != null)
+            {
+                existing.SetActive(false);
+                if (existing.Instance)
+                {
+                    Destroy(existing.Instance);
+                }
+            }
+
+            loadout[slotIndex] = CreateInstance(weapon);
             OnInventoryChanged?.Invoke();
         }
 
         void EquipCurrentSlotWeapon()
         {
-            if (currentWeaponInstance != null)
+            if (currentInstance != null)
             {
-                Destroy(currentWeaponInstance);
+                currentInstance.SetActive(false);
             }
 
-            currentSO = loadout[currentSlotIndex];
+            currentInstance = loadout[currentSlotIndex];
+            currentSO = currentInstance?.Weapon;
 
-            if (!currentSO)
+            if (currentInstance == null || currentSO == null)
             {
-                if (shooter)
-                {
-                    shooter.ClearWeapon();
-                }
-
-                OnWeaponEquipped?.Invoke(currentSO);
+                shooter?.ClearWeapon();
+                OnWeaponChanged?.Invoke(null);
                 return;
             }
 
-            currentWeaponInstance = Instantiate(currentSO.weaponPrefab, gunPivot);
-            currentWeaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-
-            muzzle = currentWeaponInstance.transform.Find("Muzzle");
-            if (!muzzle)
-            {
-                Debug.LogError("Weapon prefab missing child named 'Muzzle'");
-            }
-
-            eject = currentWeaponInstance.transform.Find("Eject");
-            if (!eject)
-            {
-                Debug.LogError("Weapon prefab missing child named 'Eject'");
-            }
+            currentInstance.SetActive(true);
 
             if (shooter)
             {
-                shooter.SetWeapon(currentSO, muzzle, eject);
+                shooter.SetWeapon(currentInstance);
             }
             else
             {
                 Debug.LogWarning("WeaponManager is missing a shooter reference.");
             }
 
-            OnWeaponEquipped?.Invoke(currentSO);
+            OnWeaponChanged?.Invoke(currentInstance);
+        }
+
+        WeaponInstance CreateInstance(Weapon weapon)
+        {
+            if (!weapon)
+            {
+                return null;
+            }
+
+            if (!weapon.weaponPrefab)
+            {
+                Debug.LogError($"Weapon '{weapon.name}' is missing a weapon prefab.", this);
+                return null;
+            }
+
+            GameObject instance = Instantiate(weapon.weaponPrefab, gunPivot);
+            instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            instance.SetActive(false);
+
+            Transform muzzle = instance.transform.Find("Muzzle");
+            if (!muzzle)
+            {
+                Debug.LogError("Weapon prefab missing child named 'Muzzle'", instance);
+            }
+
+            Transform eject = instance.transform.Find("Eject");
+            if (!eject)
+            {
+                Debug.LogError("Weapon prefab missing child named 'Eject'", instance);
+            }
+
+            return new WeaponInstance(weapon, instance, muzzle, eject);
         }
 
         bool ValidateDependencies()

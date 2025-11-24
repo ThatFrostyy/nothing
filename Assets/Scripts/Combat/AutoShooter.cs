@@ -14,6 +14,7 @@ namespace FF
         [SerializeField] private AudioSource _audioSource;
         [SerializeField] private Rigidbody2D _playerBody;
         [SerializeField] private InputRouter _inputRouter;
+        [SerializeField] private WeaponManager _weaponManager;
 
         private ICombatStats _stats;
 
@@ -66,6 +67,12 @@ namespace FF
                 _inputRouter.OnFireStart += HandleFireStarted;
                 _inputRouter.OnFireStop += HandleFireStopped;
             }
+
+            if (_weaponManager != null)
+            {
+                _weaponManager.OnWeaponChanged += HandleWeaponChanged;
+                HandleWeaponChanged(_weaponManager.CurrentInstance);
+            }
         }
 
         private void OnDisable()
@@ -74,6 +81,11 @@ namespace FF
             {
                 _inputRouter.OnFireStart -= HandleFireStarted;
                 _inputRouter.OnFireStop -= HandleFireStopped;
+            }
+
+            if (_weaponManager != null)
+            {
+                _weaponManager.OnWeaponChanged -= HandleWeaponChanged;
             }
 
             SetFireHeld(false);
@@ -85,11 +97,17 @@ namespace FF
             _statsProvider = stats as MonoBehaviour;
         }
 
-        public void SetWeapon(Weapon weapon, Transform muzzleTransform, Transform eject)
+        public void SetWeapon(WeaponInstance weaponInstance)
         {
-            _weapon = weapon;
-            _muzzle = muzzleTransform;
-            _ejectPos = eject;
+            if (weaponInstance == null || weaponInstance.Weapon == null)
+            {
+                ClearWeapon();
+                return;
+            }
+
+            _weapon = weaponInstance.Weapon;
+            _muzzle = weaponInstance.Muzzle;
+            _ejectPos = weaponInstance.Eject;
             _currentSpread = _weapon.baseSpread;
             _isGrenadeWeapon = _weapon && _weapon.bulletPrefab && _weapon.bulletPrefab.TryGetComponent<GrenadeProjectile>(out _);
             SetGrenadeChargeProgress(0f);
@@ -150,6 +168,7 @@ namespace FF
             if (!_audioSource) _audioSource = GetComponent<AudioSource>();
             if (!_playerBody) _playerBody = GetComponentInParent<Rigidbody2D>();
             if (!_inputRouter) _inputRouter = GetComponentInParent<InputRouter>();
+            if (!_weaponManager) _weaponManager = GetComponentInParent<WeaponManager>();
         }
 
         private void CacheInterfaces()
@@ -185,7 +204,18 @@ namespace FF
                 ok = false;
             }
 
+            if (!_weaponManager)
+            {
+                Debug.LogError("Missing WeaponManager reference.", this);
+                ok = false;
+            }
+
             return ok;
+        }
+
+        private void HandleWeaponChanged(WeaponInstance weaponInstance)
+        {
+            SetWeapon(weaponInstance);
         }
 
         private void HandleFireStarted()

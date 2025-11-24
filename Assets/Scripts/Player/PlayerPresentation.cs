@@ -56,7 +56,7 @@ namespace FF
 
             if (_weaponManager != null)
             {
-                _weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
+                _weaponManager.OnWeaponChanged += HandleWeaponChanged;
             }
 
             if (_lockCursor)
@@ -69,7 +69,7 @@ namespace FF
         private void Start()
         {
             _screenLookPosition = _inputRouter != null ? _inputRouter.LookInput : Vector2.zero;
-            HandleWeaponEquipped(_weaponManager != null ? _weaponManager.CurrentWeapon : null);
+            HandleWeaponChanged(_weaponManager != null ? _weaponManager.CurrentInstance : null);
             ApplyCharacterSelection();
         }
 
@@ -87,7 +87,7 @@ namespace FF
 
             if (_weaponManager != null)
             {
-                _weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+                _weaponManager.OnWeaponChanged -= HandleWeaponChanged;
             }
         }
 
@@ -156,9 +156,9 @@ namespace FF
             _recoilTimer = 0f;
         }
 
-        private void HandleWeaponEquipped(Weapon weapon)
+        private void HandleWeaponChanged(WeaponInstance weaponInstance)
         {
-            _currentWeapon = weapon;
+            _currentWeapon = weaponInstance != null ? weaponInstance.Weapon : null;
             _currentRecoil = 0f;
             _recoilTimer = 0f;
 
