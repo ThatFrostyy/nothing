@@ -7,6 +7,7 @@ namespace FF
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(EnemyStats))]
     [RequireComponent(typeof(Health))]
+    [RequireComponent(typeof(DamageNumberListener))]
     public class Enemy : MonoBehaviour, IPoolable
     {
         public static event Action<Enemy> OnAnyEnemyKilled;
@@ -110,6 +111,14 @@ namespace FF
         private const float FacingDeadZone = 0.05f;
 
         public bool IsBoss => isBoss;
+        public AutoShooter AutoShooter => autoShooter;
+        public AudioClip[] DeathSounds => deathSound;
+        public GameObject DeathFx => deathFX;
+        public XPOrb XpOrbPrefab => xpOrbPrefab;
+        public int XpOrbValue => xpOrbValue;
+        public int XpOrbCount => xpOrbCount;
+        public float XpOrbSpreadRadius => xpOrbSpreadRadius;
+        public AudioSource AudioSource => _audioSource;
 
         public void Initialize(Transform player)
         {
@@ -355,7 +364,6 @@ namespace FF
         {
             if (_health != null)
             {
-                _health.OnDeath += HandleDeath;
                 _health.OnDamaged += HandleDamaged;
             }
 
@@ -373,7 +381,6 @@ namespace FF
         {
             if (_health != null)
             {
-                _health.OnDeath -= HandleDeath;
                 _health.OnDamaged -= HandleDamaged;
             }
 
@@ -865,27 +872,6 @@ namespace FF
 
             PlayHitSound();
         }
-
-        private void HandleDeath()
-        {
-            if (autoShooter)
-            {
-                autoShooter.SetFireHeld(false);
-            }
-
-            SpawnXPOrbs();
-
-            _dogAttackOffset = Vector3.zero;
-
-            var handler = OnAnyEnemyKilled;
-            if (handler != null)
-            {
-                handler(this);
-            }
-
-            PlayDeathSound();
-            SpawnDeathFx();
-        }
         #endregion Handlers
 
         #region Pooling
@@ -1045,19 +1031,6 @@ namespace FF
             }
         }
 
-        private void PlayDeathSound()
-        {
-            AudioClip clip = GetRandomClip(deathSound);
-            if (!clip) return;
-
-            float volume = _audioSource ? _audioSource.volume : 1f;
-            float pitch = _audioSource ? _audioSource.pitch : 1f;
-            float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
-            var mixerGroup = _audioSource ? _audioSource.outputAudioMixerGroup : null;
-
-            AudioPlaybackPool.PlayOneShot(clip, transform.position, mixerGroup, spatialBlend, volume, pitch);
-        }
-
         private void PlayDogAttackSound()
         {
             if (!dogAttackSound)
@@ -1075,49 +1048,5 @@ namespace FF
         }
         #endregion Audio
 
-        private void SpawnDeathFx()
-        {
-            if (!deathFX)
-            {
-                return;
-            }
-
-            GameObject spawned = PoolManager.Get(deathFX, transform.position, Quaternion.identity);
-            if (spawned && !spawned.TryGetComponent<PooledParticleSystem>(out var pooled))
-            {
-                pooled = spawned.AddComponent<PooledParticleSystem>();
-                pooled.OnTakenFromPool();
-            }
-        }
-
-        private void SpawnXPOrbs()
-        {
-            if (!xpOrbPrefab)
-            {
-                return;
-            }
-
-            if (xpOrbValue <= 0 || xpOrbCount <= 0)
-            {
-                return;
-            }
-
-            GameObjectPool orbPool = PoolManager.GetPool(xpOrbPrefab.gameObject, xpOrbCount);
-            for (int i = 0; i < xpOrbCount; i++)
-            {
-                Vector3 spawnPosition = transform.position;
-                if (xpOrbSpreadRadius > 0f)
-                {
-                    Vector2 offset = UnityEngine.Random.insideUnitCircle * xpOrbSpreadRadius;
-                    spawnPosition += (Vector3)offset;
-                }
-
-                XPOrb orb = orbPool.GetComponent<XPOrb>(spawnPosition, Quaternion.identity);
-                if (orb)
-                {
-                    orb.SetValue(xpOrbValue);
-                }
-            }
-        }
     }
 }
