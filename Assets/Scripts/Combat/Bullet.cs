@@ -74,6 +74,9 @@ namespace FF
         public void OnTakenFromPool()
         {
             t = 0f;
+            damage = 0;
+            teamTag = null;
+            speed = baseSpeed;
         }
 
         public void OnReturnedToPool()

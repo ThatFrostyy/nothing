@@ -11,6 +11,7 @@ namespace FF
 
         [Header("Shockwave")]
         [SerializeField] private Image shockwaveImage;
+        [SerializeField] private Camera sceneCamera;
         [SerializeField, Min(0.05f)] private float duration = 0.7f;
         [SerializeField] private AnimationCurve radiusCurve = AnimationCurve.EaseInOut(0f, 0.05f, 1f, 0.4f);
         [SerializeField] private AnimationCurve thicknessCurve = AnimationCurve.EaseInOut(0f, 0.15f, 1f, 0.04f);
@@ -57,6 +58,13 @@ namespace FF
                     shockwaveImage.enabled = false;
                 }
             }
+
+            if (!ValidateDependencies())
+            {
+                Debug.LogError($"{nameof(ShockwaveUI)} on {name} disabled due to missing dependencies.", this);
+                enabled = false;
+                return;
+            }
         }
 
         public static void Trigger(Vector3 worldPosition, float radiusScale = 1f)
@@ -74,6 +82,42 @@ namespace FF
             Trigger((Vector3)worldPosition, radiusScale);
         }
 
+        private void OnValidate()
+        {
+            if (!shockwaveImage)
+            {
+                shockwaveImage = GetComponent<Image>();
+            }
+
+            if (!sceneCamera)
+            {
+                Canvas canvas = GetComponentInParent<Canvas>();
+                if (canvas && canvas.worldCamera)
+                {
+                    sceneCamera = canvas.worldCamera;
+                }
+            }
+        }
+
+        private bool ValidateDependencies()
+        {
+            bool ok = true;
+
+            if (!shockwaveImage)
+            {
+                Debug.LogError("Missing shockwave image reference.", this);
+                ok = false;
+            }
+
+            if (!sceneCamera)
+            {
+                Debug.LogError("Missing scene camera reference.", this);
+                ok = false;
+            }
+
+            return ok;
+        }
+
         private void Play(Vector3 worldPosition, float radiusScale)
         {
             if (!shockwaveImage || !_runtimeMaterial)
@@ -82,10 +126,9 @@ namespace FF
             }
 
             Vector2 center = new Vector2(0.5f, 0.5f);
-            Camera mainCamera = Camera.main;
-            if (mainCamera)
+            if (sceneCamera)
             {
-                Vector3 viewport = mainCamera.WorldToViewportPoint(worldPosition);
+                Vector3 viewport = sceneCamera.WorldToViewportPoint(worldPosition);
                 center = new Vector2(viewport.x, viewport.y);
             }
 

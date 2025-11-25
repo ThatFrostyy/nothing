@@ -29,9 +29,18 @@ namespace FF
 
         public static void Shake(float dur = 0.08f, float inten = 0.1f)
         {
+            GameSettings settings = GameSettings.Instance;
+
+            if (settings && !settings.ScreenShakeEnabled)
+            {
+                return;
+            }
+
+            float intensityMultiplier = settings ? settings.ScreenShakeIntensity : 1f;
+
             if (!I) return;
-            I.duration = Mathf.Max(dur, I.duration);
-            I.intensity = Mathf.Max(inten, I.intensity);
+            I.duration = Mathf.Max(dur * intensityMultiplier, I.duration);
+            I.intensity = Mathf.Max(inten * intensityMultiplier, I.intensity);
             I.time = 0f;
         }
     }

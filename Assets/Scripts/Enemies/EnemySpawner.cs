@@ -45,9 +45,11 @@ namespace FF
 
         private void Awake()
         {
-            if (!spawnCamera)
+            if (!ValidateDependencies())
             {
-                spawnCamera = Camera.main;
+                Debug.LogError($"{nameof(EnemySpawner)} on {name} disabled due to missing dependencies.", this);
+                enabled = false;
+                return;
             }
 
             EnsureAudioSource();
@@ -87,8 +89,6 @@ namespace FF
 
         public void SpawnWave(int wave)
         {
-            Debug.Log("Wave from GM " + GameManager.I.GetInstanceID());
-
             if (!player)
             {
                 return;
@@ -493,8 +493,35 @@ namespace FF
             spawnRampDuration = Mathf.Max(0f, spawnRampDuration);
             sideSwapDelay = Mathf.Max(0f, sideSwapDelay);
             packSpawnBurst = Mathf.Max(1, packSpawnBurst);
+            if (!spawnCamera)
+            {
+                spawnCamera = GetComponentInChildren<Camera>();
+            }
+            if (!player && transform.parent)
+            {
+                player = transform.parent;
+            }
             EnsureAudioSource();
             EnsurePoolParent();
+        }
+
+        private bool ValidateDependencies()
+        {
+            bool ok = true;
+
+            if (!player)
+            {
+                Debug.LogError("Missing player reference.", this);
+                ok = false;
+            }
+
+            if (!spawnCamera)
+            {
+                Debug.LogError("Missing spawn camera reference.", this);
+                ok = false;
+            }
+
+            return ok;
         }
 
         #region Audio

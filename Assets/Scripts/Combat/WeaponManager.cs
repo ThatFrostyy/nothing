@@ -12,21 +12,20 @@ namespace FF
         [SerializeField] Transform gunPivot;
         [SerializeField] AutoShooter shooter;
 
-        readonly Weapon[] loadout = new Weapon[3];
+        readonly WeaponInstance[] loadout = new WeaponInstance[3];
         Weapon currentSO;
-        GameObject currentWeaponInstance;
-        Transform muzzle;
-        Transform eject;
+        WeaponInstance currentInstance;
         int currentSlotIndex;
         int lastPrimarySlotIndex;
 
         public Transform GunPivot => gunPivot;
         public AutoShooter Shooter => shooter;
         public Weapon CurrentWeapon => currentSO;
+        public WeaponInstance CurrentInstance => currentInstance;
         public int CurrentSlotIndex => currentSlotIndex;
         public int SlotCount => loadout.Length;
 
-        public event Action<Weapon> OnWeaponEquipped;
+        public event Action<WeaponInstance> OnWeaponChanged;
         public event Action OnInventoryChanged;
 
         public Weapon GetWeaponInSlot(int slotIndex)
@@ -36,7 +35,7 @@ namespace FF
                 return null;
             }
 
-            return loadout[slotIndex];
+            return loadout[slotIndex]?.Weapon;
         }
 
         public void Equip(Weapon newWeapon)
@@ -75,6 +74,33 @@ namespace FF
             SelectSlot(previous);
         }
 
+        void Awake()
+        {
+            if (!ValidateDependencies())
+            {
+                Debug.LogError($"{nameof(WeaponManager)} on {name} disabled due to missing dependencies.", this);
+                enabled = false;
+                return;
+            }
+        }
+
+        void OnValidate()
+        {
+            if (!gunPivot)
+            {
+                Transform foundPivot = transform.Find("GunPivot");
+                if (foundPivot)
+                {
+                    gunPivot = foundPivot;
+                }
+            }
+
+            if (!shooter)
+            {
+                shooter = GetComponentInChildren<AutoShooter>();
+            }
+        }
+
         public void SelectSlot(int slotIndex)
         {
             int clampedIndex = Mathf.Clamp(slotIndex, 0, loadout.Length - 1);
@@ -111,56 +137,117 @@ namespace FF
 
         void AssignWeaponToSlot(int slotIndex, Weapon weapon)
         {
-            loadout[slotIndex] = weapon;
+            WeaponInstance existing = loadout[slotIndex];
+
+            if (existing != null && existing.Weapon == weapon)
+            {
+                OnInventoryChanged?.Invoke();
+                return;
+            }
+
+            if (existing != null)
+            {
+                ReleaseInstance(existing);
+                loadout[slotIndex] = null;
+            }
+
+            loadout[slotIndex] = CreateInstance(weapon);
             OnInventoryChanged?.Invoke();
         }
 
         void EquipCurrentSlotWeapon()
         {
-            if (currentWeaponInstance != null)
+            if (currentInstance != null)
             {
-                Destroy(currentWeaponInstance);
+                currentInstance.SetActive(false);
             }
 
-            currentSO = loadout[currentSlotIndex];
+            currentInstance = loadout[currentSlotIndex];
+            currentSO = currentInstance?.Weapon;
 
-            if (!currentSO)
+            if (currentInstance == null || currentSO == null)
             {
-                if (shooter)
-                {
-                    shooter.ClearWeapon();
-                }
-
-                OnWeaponEquipped?.Invoke(currentSO);
+                shooter?.ClearWeapon();
+                OnWeaponChanged?.Invoke(null);
                 return;
             }
 
-            currentWeaponInstance = Instantiate(currentSO.weaponPrefab, gunPivot);
-            currentWeaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-
-            muzzle = currentWeaponInstance.transform.Find("Muzzle");
-            if (!muzzle)
-            {
-                Debug.LogError("Weapon prefab missing child named 'Muzzle'");
-            }
-
-            eject = currentWeaponInstance.transform.Find("Eject");
-            if (!eject)
-            {
-                Debug.LogError("Weapon prefab missing child named 'Eject'");
-            }
+            currentInstance.SetActive(true);
 
             if (shooter)
             {
-                shooter.InitializeRecoil(gunPivot);
-                shooter.SetWeapon(currentSO, muzzle, eject);
+                shooter.SetWeapon(currentInstance);
             }
             else
             {
                 Debug.LogWarning("WeaponManager is missing a shooter reference.");
             }
 
-            OnWeaponEquipped?.Invoke(currentSO);
+            OnWeaponChanged?.Invoke(currentInstance);
+        }
+
+        WeaponInstance CreateInstance(Weapon weapon)
+        {
+            if (!weapon)
+            {
+                return null;
+            }
+
+            if (!weapon.weaponPrefab)
+            {
+                Debug.LogError($"Weapon '{weapon.name}' is missing a weapon prefab.", this);
+                return null;
+            }
+
+            GameObjectPool pool = PoolManager.GetPool(weapon.weaponPrefab, 1, gunPivot);
+            GameObject instance = pool.Get(gunPivot.position, gunPivot.rotation);
+            instance.transform.SetParent(gunPivot, false);
+            instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+            instance.SetActive(false);
+
+            Transform muzzle = instance.transform.Find("Muzzle");
+            if (!muzzle)
+            {
+                Debug.LogError("Weapon prefab missing child named 'Muzzle'", instance);
+            }
+
+            Transform eject = instance.transform.Find("Eject");
+            if (!eject)
+            {
+                Debug.LogError("Weapon prefab missing child named 'Eject'", instance);
+            }
+
+            return new WeaponInstance(weapon, instance, muzzle, eject, pool);
+        }
+
+        void ReleaseInstance(WeaponInstance instance)
+        {
+            if (instance == null)
+            {
+                return;
+            }
+
+            instance.SetActive(false);
+            instance.Release();
+        }
+
+        bool ValidateDependencies()
+        {
+            bool ok = true;
+
+            if (!gunPivot)
+            {
+                Debug.LogError("Missing gun pivot reference.", this);
+                ok = false;
+            }
+
+            if (!shooter)
+            {
+                Debug.LogError("Missing AutoShooter reference.", this);
+                ok = false;
+            }
+
+            return ok;
         }
     }
 }
