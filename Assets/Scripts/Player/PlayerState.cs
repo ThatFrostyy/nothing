@@ -106,6 +106,12 @@ namespace FF
                 ok = false;
             }
 
+            if (!_weaponManager)
+            {
+                Debug.LogError("Missing WeaponManager reference.", this);
+                ok = false;
+            }
+
             return ok;
         }
     }

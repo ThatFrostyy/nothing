@@ -69,7 +69,7 @@ namespace FF
         {
             if (_inputRouter != null)
             {
-                _inputRouter.OnLookInput += HandleLook;
+                _inputRouter.OnLookInput -= HandleLook;
             }
 
             if (_autoShooter != null)
