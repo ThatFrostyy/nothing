@@ -24,6 +24,12 @@ namespace FF
 
         private void Awake()
         {
+            if (!_rigidbody) _rigidbody = GetComponent<Rigidbody2D>();
+            if (!_stats) _stats = GetComponent<PlayerStats>();
+            if (!_collider) _collider = GetComponent<Collider2D>();
+            if (!_inputRouter) _inputRouter = GetComponent<InputRouter>();
+            if (!_playerState) _playerState = GetComponent<PlayerState>();
+
             if (!ValidateDependencies())
             {
                 Debug.LogError($"{nameof(PlayerController)} on {name} disabled due to missing dependencies.", this);
@@ -34,11 +40,14 @@ namespace FF
 
         private void OnValidate()
         {
+#if UNITY_EDITOR
+            // Editor only convenience: fill references when editing.
             if (!_rigidbody) _rigidbody = GetComponent<Rigidbody2D>();
             if (!_stats) _stats = GetComponent<PlayerStats>();
             if (!_collider) _collider = GetComponent<Collider2D>();
             if (!_inputRouter) _inputRouter = GetComponent<InputRouter>();
             if (!_playerState) _playerState = GetComponent<PlayerState>();
+#endif
         }
 
         private bool ValidateDependencies()
