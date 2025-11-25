@@ -18,7 +18,7 @@ namespace FF
         public event Action OnUpgradeRequested;
         public event Action OnNextWeaponRequested;
         public event Action OnPreviousWeaponRequested;
-        public event Action<Vector2> OnLook;
+        public event Action<Vector2> OnLookInput;
 
         public Vector2 MoveInput { get; private set; }
         public bool FireHeld { get; private set; }
@@ -147,7 +147,7 @@ namespace FF
             }
 
             LookInput = value.Get<Vector2>();
-            OnLook?.Invoke(LookInput);
+            OnLookInput?.Invoke(LookInput);
         }
 
         private bool ValidateDependencies()
@@ -192,7 +192,7 @@ namespace FF
         private void ResetLookState()
         {
             LookInput = Vector2.zero;
-            OnLook?.Invoke(LookInput);
+            OnLookInput?.Invoke(LookInput);
         }
 
         private void HandleUpgradeVisibilityChanged(bool isVisible)

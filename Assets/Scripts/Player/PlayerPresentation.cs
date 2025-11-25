@@ -44,7 +44,7 @@ namespace FF
         {
             if (_inputRouter != null)
             {
-                _inputRouter.OnLook += HandleLook;
+                _inputRouter.OnLookInput += HandleLook;
             }
 
             if (_autoShooter != null)
@@ -69,7 +69,7 @@ namespace FF
         {
             if (_inputRouter != null)
             {
-                _inputRouter.OnLook -= HandleLook;
+                _inputRouter.OnLookInput += HandleLook;
             }
 
             if (_autoShooter != null)

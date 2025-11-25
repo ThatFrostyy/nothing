@@ -66,7 +66,7 @@ namespace FF
         {
             if (_enemy != null)
             {
-                Enemy.OnAnyEnemyKilled?.Invoke(_enemy);
+                _enemy.RaiseKilled();
             }
         }
 

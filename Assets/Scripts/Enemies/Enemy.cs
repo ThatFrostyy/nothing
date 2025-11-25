@@ -281,7 +281,11 @@ namespace FF
             presentation?.HandleDisable();
         }
 
-        #region Movement
+        public void RaiseKilled()
+        {
+            OnAnyEnemyKilled?.Invoke(this);
+        }
+
         private void UpdateMovement()
         {
             if (isDog && _movementBehaviour == null)
@@ -312,7 +316,6 @@ namespace FF
                 {
                     Vector2 direction = toPlayer / distance;
                     targetVelocity = direction * moveSpeed;
-                    _isFacingLeft = direction.x < 0f;
                 }
             }
 
@@ -641,13 +644,8 @@ namespace FF
 
         public void OnReturnedToPool()
         {
-            if (_dogJumpRoutine != null)
-            {
-                StopCoroutine(_dogJumpRoutine);
-                _dogJumpRoutine = null;
-            }
+            presentation?.HandleDisable();
 
-            _dogAttackOffset = Vector3.zero;
             _dogAttackCooldownTimer = 0f;
             _desiredVelocity = Vector2.zero;
             knockbackTimer = 0f;
