@@ -131,18 +131,27 @@ namespace FF
                 return;
             }
 
+            if (PauseMenuController.IsMenuOpen)
+            {
+                SetFireHeld(false);
+                sustainedFireTime = 0f;
+                return;
+            }
+
+            float deltaTime = Time.timeScale < 0.999f ? Time.unscaledDeltaTime : Time.deltaTime;
+
             if (_isFireHeld && _weapon.isAuto)
             {
-                sustainedFireTime += Time.deltaTime;
+                sustainedFireTime += deltaTime;
                 sustainedFireTime = Mathf.Clamp(sustainedFireTime, 0f, 1f);
             }
             else
             {
-                sustainedFireTime -= Time.deltaTime * 1.5f;
+                sustainedFireTime -= deltaTime * 1.5f;
                 sustainedFireTime = Mathf.Clamp(sustainedFireTime, 0f, 1f);
             }
 
-            _fireTimer += Time.deltaTime;
+            _fireTimer += deltaTime;
 
             float rpmMultiplier = 1f;
             if (_stats != null)
@@ -163,7 +172,7 @@ namespace FF
 
             if (_isGrenadeWeapon)
             {
-                HandleGrenadeCharging(interval);
+                HandleGrenadeCharging(interval, deltaTime);
             }
             else
             {
@@ -179,9 +188,9 @@ namespace FF
                 movementPenalty = _stats.GetMovementAccuracyPenalty();
             }
             float targetSpread = _weapon.baseSpread * (isMoving ? movementPenalty : 1f);
-            _currentSpread = Mathf.Lerp(_currentSpread, targetSpread, Time.deltaTime * _weapon.spreadRecoverySpeed);
+            _currentSpread = Mathf.Lerp(_currentSpread, targetSpread, deltaTime * _weapon.spreadRecoverySpeed);
 
-            UpdateRecoil();
+            UpdateRecoil(deltaTime);
         }
 
         #region Recoil & Shooting
@@ -323,7 +332,7 @@ namespace FF
             }
         }
 
-        private void UpdateRecoil()
+        private void UpdateRecoil(float deltaTime)
         {
             if (!_gunPivot)
             {
@@ -332,7 +341,7 @@ namespace FF
 
             _gunPivot.localPosition = _baseLocalPosition;
 
-            _recoilTimer += Time.deltaTime * 10f;
+            _recoilTimer += deltaTime * 10f;
             float kick = Mathf.Lerp(_currentRecoil, 0f, _recoilTimer);
 
             Vector3 recoilDirection = -_gunPivot.right * (kick * 0.1f);
@@ -341,7 +350,7 @@ namespace FF
 
             _gunPivot.localPosition = _baseLocalPosition + localRecoil;
 
-            _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, Time.deltaTime * _weapon.recoilRecoverySpeed);
+            _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, deltaTime * _weapon.recoilRecoverySpeed);
         }
 
         private float GetFinalDamageMultiplier(out bool isCrit)
@@ -385,7 +394,7 @@ namespace FF
             SetCooldownProgress(cooldownFraction);
         }
 
-        private void HandleGrenadeCharging(float interval)
+        private void HandleGrenadeCharging(float interval, float deltaTime)
         {
             if (_fireTimer < interval)
             {
@@ -406,7 +415,7 @@ namespace FF
                 }
 
                 float chargeDelta = grenadeChargeTime > 0.001f
-                    ? Time.deltaTime / grenadeChargeTime
+                    ? deltaTime / grenadeChargeTime
                     : 1f;
                 SetGrenadeChargeProgress(_currentChargeProgress + chargeDelta);
             }

@@ -23,6 +23,8 @@ namespace FF
         public event System.Action<XPWallet> OnWalletRgistered;
         public event System.Action<UpgradeUI> OnUIRegistered;
 
+        public int GetPendingUpgradeCount() => pendingUpgrades;
+
         Upgrade RandomUpgrade(System.Collections.Generic.List<Upgrade> pool)
         {
             if (pool == null || pool.Count == 0)

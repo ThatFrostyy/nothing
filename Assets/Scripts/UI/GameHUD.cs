@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using TMPro;
 
@@ -184,10 +185,13 @@ namespace FF
             SetWaveBannerVisible(0f);
             InitializeWaveFlash();
             RefreshUpgradePrompt();
+            BindSceneManagers();
         }
 
         void OnEnable()
         {
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+
             if (playerHealth != null)
             {
                 playerHealth.OnHealthChanged += HandleHealthChanged;
@@ -198,22 +202,13 @@ namespace FF
                 wallet.OnXPChanged += HandleXPChanged;
             }
 
-            if (gameManager != null)
-            {
-                gameManager.OnKillCountChanged += HandleKillCountChanged;
-                gameManager.OnWaveStarted += HandleWaveStarted;
-            }
-
             if (weaponManager != null)
             {
                 weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
                 weaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
             }
 
-            if (upgradeManager != null)
-            {
-                upgradeManager.OnPendingUpgradesChanged += HandlePendingUpgradesChanged;
-            }
+            BindSceneManagers();
 
             UpgradeUI.OnVisibilityChanged += HandleUpgradeVisibilityChanged;
             upgradeMenuVisible = UpgradeUI.IsShowing;
@@ -224,6 +219,8 @@ namespace FF
 
         void OnDisable()
         {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+
             if (playerHealth != null)
             {
                 playerHealth.OnHealthChanged -= HandleHealthChanged;
@@ -234,22 +231,13 @@ namespace FF
                 wallet.OnXPChanged -= HandleXPChanged;
             }
 
-            if (gameManager != null)
-            {
-                gameManager.OnKillCountChanged -= HandleKillCountChanged;
-                gameManager.OnWaveStarted -= HandleWaveStarted;
-            }
-
             if (weaponManager != null)
             {
                 weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
                 weaponManager.OnInventoryChanged -= HandleWeaponInventoryChanged;
             }
 
-            if (upgradeManager != null)
-            {
-                upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
-            }
+            UnbindSceneManagers();
 
             UpgradeUI.OnVisibilityChanged -= HandleUpgradeVisibilityChanged;
             upgradeMenuVisible = false;
@@ -271,6 +259,12 @@ namespace FF
             waveFlashElapsed = float.PositiveInfinity;
             SetWaveFlashAlpha(0f);
             RefreshUpgradePrompt();
+        }
+
+        void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            BindSceneManagers();
+            RefreshAll();
         }
 
         void Update()
@@ -297,6 +291,70 @@ namespace FF
             UpdateHeartbeatTimer(unscaledDeltaTime);
             UpdateWaveBanner(unscaledDeltaTime);
             UpdateWaveFlash(unscaledDeltaTime);
+        }
+
+        void BindSceneManagers()
+        {
+            RefreshGameManagerReference();
+            RefreshUpgradeManagerReference();
+        }
+
+        void UnbindSceneManagers()
+        {
+            if (gameManager != null)
+            {
+                gameManager.OnKillCountChanged -= HandleKillCountChanged;
+                gameManager.OnWaveStarted -= HandleWaveStarted;
+            }
+
+            if (upgradeManager != null)
+            {
+                upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
+            }
+        }
+
+        void RefreshGameManagerReference()
+        {
+            GameManager resolved = gameManager ? gameManager : GameManager.I;
+            if (resolved == gameManager)
+            {
+                return;
+            }
+
+            if (gameManager != null)
+            {
+                gameManager.OnKillCountChanged -= HandleKillCountChanged;
+                gameManager.OnWaveStarted -= HandleWaveStarted;
+            }
+
+            gameManager = resolved;
+            if (gameManager != null && isActiveAndEnabled)
+            {
+                gameManager.OnKillCountChanged += HandleKillCountChanged;
+                gameManager.OnWaveStarted += HandleWaveStarted;
+                HandleKillCountChanged(gameManager.KillCount);
+            }
+        }
+
+        void RefreshUpgradeManagerReference()
+        {
+            UpgradeManager resolved = upgradeManager ? upgradeManager : UpgradeManager.I;
+            if (resolved == upgradeManager)
+            {
+                return;
+            }
+
+            if (upgradeManager != null)
+            {
+                upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
+            }
+
+            upgradeManager = resolved;
+            if (upgradeManager != null && isActiveAndEnabled)
+            {
+                upgradeManager.OnPendingUpgradesChanged += HandlePendingUpgradesChanged;
+                HandlePendingUpgradesChanged(upgradeManager.GetPendingUpgradeCount());
+            }
         }
 
         void RefreshAll()

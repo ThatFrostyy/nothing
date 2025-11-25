@@ -42,6 +42,7 @@ namespace FF
             if (health != null)
             {
                 health.OnDamaged += HandleDamaged;
+                health.OnDeath += HandleDeath;
             }
 
             if (wallet != null)
@@ -55,6 +56,7 @@ namespace FF
             if (health != null)
             {
                 health.OnDamaged -= HandleDamaged;
+                health.OnDeath -= HandleDeath;
             }
 
             if (wallet != null)
@@ -93,6 +95,11 @@ namespace FF
             }
 
             audioSource.PlayOneShot(levelUpSound);
+        }
+
+        void HandleDeath()
+        {
+            PauseMenuController.ShowDeathMenu(transform.position);
         }
     }
 }
