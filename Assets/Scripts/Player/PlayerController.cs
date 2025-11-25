@@ -40,6 +40,10 @@ namespace FF
             _camera = _camera ? _camera : Camera.main;
             _collider = GetComponent<Collider2D>();
             _upgradeManager = _upgradeManager ? _upgradeManager : GetComponent<UpgradeManager>();
+            if (!_upgradeManager)
+            {
+                _upgradeManager = UpgradeManager.I;
+            }
             _weaponManager = _weaponManager ? _weaponManager : GetComponentInChildren<WeaponManager>();
             _cosmetics = _cosmetics ? _cosmetics : GetComponent<PlayerCosmetics>();
 
@@ -89,7 +93,19 @@ namespace FF
 
         private void FixedUpdate()
         {
+            float timeScale = Time.timeScale;
+            if (timeScale <= Mathf.Epsilon)
+            {
+                _rigidbody.linearVelocity = Vector2.zero;
+                return;
+            }
+
             float targetSpeed = _stats.GetMoveSpeed();
+            if (timeScale < 0.999f)
+            {
+                targetSpeed /= Mathf.Max(0.01f, timeScale);
+            }
+
             Vector2 targetVelocity = _moveInput.normalized * targetSpeed;
 
             _rigidbody.linearVelocity = Vector2.Lerp(
@@ -212,7 +228,7 @@ namespace FF
                 return;
             }
 
-            if (_upgradeMenuOpen)
+            if (_upgradeMenuOpen || PauseMenuController.IsMenuOpen)
             {
                 _autoShooter.SetFireHeld(false);
                 return;
@@ -223,13 +239,17 @@ namespace FF
 
         public void OnUpgrade(InputValue value)
         {
-            Debug.Log("press");
-            if (!value.isPressed || _upgradeManager == null)
+            if (!value.isPressed)
             {
                 return;
             }
 
-            _upgradeManager.TryOpenUpgradeMenu();
+            if (_upgradeManager == null)
+            {
+                _upgradeManager = UpgradeManager.I;
+            }
+
+            _upgradeManager?.TryOpenUpgradeMenu();
         }
 
         public void OnPrevious(InputValue value)
@@ -250,6 +270,26 @@ namespace FF
             }
 
             _weaponManager.SelectNextSlot();
+        }
+
+        public void OnSelectSpecial(InputValue value)
+        {
+            if (!value.isPressed || _weaponManager == null)
+            {
+                return;
+            }
+
+            _weaponManager.SelectSpecialSlot();
+        }
+
+        public void OnPause(InputValue value)
+        {
+            if (!value.isPressed)
+            {
+                return;
+            }
+
+            PauseMenuController.TogglePause();
         }
         #endregion Input System Callbacks
 

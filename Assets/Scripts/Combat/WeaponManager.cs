@@ -88,11 +88,24 @@ namespace FF
             EquipCurrentSlotWeapon();
         }
 
+        public void SelectSpecialSlot()
+        {
+            SelectSlot(SpecialSlotIndex);
+        }
+
         int ResolveTargetSlot(Weapon weapon)
         {
             if (weapon.isSpecial)
             {
                 return SpecialSlotIndex;
+            }
+
+            for (int i = 0; i < PrimarySlotCount; i++)
+            {
+                if (loadout[i] == null)
+                {
+                    return i;
+                }
             }
 
             return currentSlotIndex >= PrimarySlotCount ? lastPrimarySlotIndex : currentSlotIndex;
