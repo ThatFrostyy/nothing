@@ -28,6 +28,11 @@ namespace FF
 
         private void Awake()
         {
+            if (!_upgradeManager && UpgradeManager.I != null)
+            {
+                _upgradeManager = UpgradeManager.I;
+            }
+
             if (!ValidateDependencies())
             {
                 Debug.LogError($"{nameof(InputRouter)} on {name} disabled due to missing dependencies.", this);

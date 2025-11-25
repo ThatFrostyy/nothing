@@ -43,6 +43,12 @@ GameObject:
   - component: {fileID: 3905552623909107986}
   - component: {fileID: 5985841820440995128}
   - component: {fileID: 4092019642368032325}
+  - component: {fileID: 634138366752818233}
+  - component: {fileID: 1563207416997013210}
+  - component: {fileID: 7481688000526943024}
+  - component: {fileID: 8989941061072009030}
+  - component: {fileID: 3588202577123653892}
+  - component: {fileID: 8618473348918410633}
   m_Layer: 7
   m_Name: WeaponRig
   m_TagString: Untagged
@@ -78,35 +84,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d221d6788c88f149a3c30cdd493439e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.AutoShooter
-  grenadeMinThrowSpeed: 8
-  grenadeMaxThrowSpeed: 22
-  grenadeChargeTime: 1.1
-  grenadeChargeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  _cameraShakeEnabled: 1
-  maxSustainedShake: 0
+  _weapon: {fileID: 0}
+  _muzzle: {fileID: 0}
+  _ejectPos: {fileID: 0}
+  _statsProvider: {fileID: 5705564791498569716}
+  _audioSource: {fileID: 4092019642368032325}
+  _playerBody: {fileID: 1949322839833706233}
+  _inputRouter: {fileID: 0}
+  _weaponManager: {fileID: 5985841820440995128}
+  _fireController: {fileID: 8618473348918410633}
+  _accuracyController: {fileID: 3588202577123653892}
+  _projectileSpawner: {fileID: 8989941061072009030}
+  _recoilPresenter: {fileID: 7481688000526943024}
+  _audioController: {fileID: 1563207416997013210}
 --- !u!114 &5985841820440995128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -218,6 +208,110 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &634138366752818233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5512546226804845844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98468be5d988f514b9b2dc1fde259a0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponManager
+  gunPivot: {fileID: 3650370905618874034}
+  shooter: {fileID: 3905552623909107986}
+--- !u!114 &1563207416997013210
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5512546226804845844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccaf454839eca2e4d90d369b849896de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.AudioController
+--- !u!114 &7481688000526943024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5512546226804845844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41826ca5edd45574b8d4e784657bd978, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.RecoilPresenter
+  _gameSettings: {fileID: 11400000, guid: 0bca1fbe0ea14137b043a6e13e66006c, type: 2}
+  _cameraShakeEnabled: 0
+  maxSustainedShake: 0.35
+--- !u!114 &8989941061072009030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5512546226804845844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c980ebfdb0db5f4a9160d0d11b7c2fc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.ProjectileSpawner
+--- !u!114 &3588202577123653892
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5512546226804845844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9cf86c0c1268b8e429ec1f9b8bd41adf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.AccuracyController
+--- !u!114 &8618473348918410633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5512546226804845844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70c65ea4e0c056b44a1db9887d46f0ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.FireController
+  grenadeMinThrowSpeed: 8
+  grenadeMaxThrowSpeed: 22
+  grenadeChargeTime: 1.1
+  grenadeChargeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &6336262217329046510
 GameObject:
   m_ObjectHideFlags: 0
@@ -263,6 +357,8 @@ GameObject:
   - component: {fileID: 2329570480403992263}
   - component: {fileID: 6719414553482591076}
   - component: {fileID: 8420919759142757581}
+  - component: {fileID: 9179570122618434702}
+  - component: {fileID: 3706407158521850958}
   m_Layer: 7
   m_Name: German
   m_TagString: Enemy
@@ -283,9 +379,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7556550191872587613}
-  - {fileID: 3060269664654068321}
   - {fileID: 1204020067789453179}
+  - {fileID: 3060269664654068321}
+  - {fileID: 7556550191872587613}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &1949322839833706233
@@ -369,24 +465,11 @@ MonoBehaviour:
   startingWeapon: {fileID: 11400000, guid: 93a8e85db9419b74b82edb2b6d3797bb, type: 2}
   weaponManager: {fileID: 5985841820440995128}
   autoShooter: {fileID: 3905552623909107986}
-  gunPivot: {fileID: 3650370905618874034}
-  gunOffsetRight: {x: 0.3, y: -0.35, z: 0}
-  gunOffsetLeft: {x: -0.3, y: -0.35, z: 0}
-  enemyVisual: {fileID: 3060269664654068321}
-  walkBobFrequency: 7.2
-  walkBobAmplitude: 0.09
-  walkSquashAmount: 0.06
-  idleSwayFrequency: 1.5
-  idleSwayAmplitude: 6
+  presentation: {fileID: 3706407158521850958}
   moveWhileShootingChance: 0.35
   moveWhileShootingSpeedMultiplier: 0.5
   weaveFrequency: 1.2
   weaveStrength: 0.15
-  helmetAnchor: {fileID: 7556550191872587613}
-  helmetPrefabs:
-  - {fileID: 8131325469464129517, guid: f2cb7e4b55a73c84db6d08a6218c3a7f, type: 3}
-  - {fileID: 8177723574371877624, guid: 77246d0ebb9f6ab419ef84021246fcb1, type: 3}
-  chanceForNoHelmet: 0.25
   audioSource: {fileID: 4092019642368032325}
   hitSound:
   - {fileID: 8300000, guid: e375acb7908dc354b88d454e6f37f804, type: 3}
@@ -448,6 +531,48 @@ CapsuleCollider2D:
   m_Offset: {x: 0.0048520565, y: -0.126154}
   m_Size: {x: 1.3442614, y: 1.6353861}
   m_Direction: 0
+--- !u!114 &9179570122618434702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7386967301448027551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 297925893454390419feec8980be9e7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.DamageNumberListener
+  _health: {fileID: 2329570480403992263}
+  _enemy: {fileID: 6719414553482591076}
+  _emphasizedThresholdFraction: 0.35
+  _minimumEmphasizedDamage: 10
+--- !u!114 &3706407158521850958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7386967301448027551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70dea1f7beca7054485624ff7644ab93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.EnemyPresentation
+  gunPivot: {fileID: 3650370905618874034}
+  gunOffsetRight: {x: 0.35, y: -0.1, z: 0}
+  gunOffsetLeft: {x: -0.35, y: -0.1, z: 0}
+  enemyVisual: {fileID: 3060269664654068321}
+  walkBobFrequency: 6
+  walkBobAmplitude: 0.12
+  walkSquashAmount: 0.08
+  idleSwayFrequency: 1.5
+  idleSwayAmplitude: 3
+  helmetAnchor: {fileID: 7556550191872587613}
+  helmetPrefabs:
+  - {fileID: 8177723574371877624, guid: 77246d0ebb9f6ab419ef84021246fcb1, type: 3}
+  - {fileID: 8131325469464129517, guid: f2cb7e4b55a73c84db6d08a6218c3a7f, type: 3}
+  chanceForNoHelmet: 0.25
 --- !u!1 &7973867906123970147
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,7 +598,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7973867906123970147}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

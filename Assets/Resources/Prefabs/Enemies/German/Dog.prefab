@@ -15,6 +15,8 @@ GameObject:
   - component: {fileID: 2852162090894186090}
   - component: {fileID: 176378015501586402}
   - component: {fileID: 6948851067300768603}
+  - component: {fileID: 8247684361742985677}
+  - component: {fileID: 2148618059529478408}
   m_Layer: 7
   m_Name: Dog
   m_TagString: Enemy
@@ -115,25 +117,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f67e22903008e4e8c6c8f3c6ec685b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
+  simpleFollowTest: 0
   startingWeapon: {fileID: 0}
   weaponManager: {fileID: 0}
   autoShooter: {fileID: 0}
-  gunPivot: {fileID: 0}
-  gunOffsetRight: {x: 0.35, y: -0.1, z: 0}
-  gunOffsetLeft: {x: -0.35, y: -0.1, z: 0}
-  enemyVisual: {fileID: 265158592845213640}
-  walkBobFrequency: 8
-  walkBobAmplitude: 0.12
-  walkSquashAmount: 0.08
-  idleSwayFrequency: 1.5
-  idleSwayAmplitude: 5
+  presentation: {fileID: 2148618059529478408}
   moveWhileShootingChance: 0.4
   moveWhileShootingSpeedMultiplier: 0.55
   weaveFrequency: 0.9
   weaveStrength: 0.35
-  helmetAnchor: {fileID: 0}
-  helmetPrefabs: []
-  chanceForNoHelmet: 0.25
   audioSource: {fileID: 6948851067300768603}
   hitSound:
   - {fileID: 8300000, guid: e375acb7908dc354b88d454e6f37f804, type: 3}
@@ -292,6 +284,46 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &8247684361742985677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3282402498340923105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 297925893454390419feec8980be9e7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.DamageNumberListener
+  _health: {fileID: 6604130605338716362}
+  _enemy: {fileID: 2852162090894186090}
+  _emphasizedThresholdFraction: 0.35
+  _minimumEmphasizedDamage: 10
+--- !u!114 &2148618059529478408
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3282402498340923105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70dea1f7beca7054485624ff7644ab93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.EnemyPresentation
+  gunPivot: {fileID: 0}
+  gunOffsetRight: {x: 0.35, y: -0.1, z: 0}
+  gunOffsetLeft: {x: -0.35, y: -0.1, z: 0}
+  enemyVisual: {fileID: 265158592845213640}
+  walkBobFrequency: 6
+  walkBobAmplitude: 0.12
+  walkSquashAmount: 0.08
+  idleSwayFrequency: 1.5
+  idleSwayAmplitude: 3
+  helmetAnchor: {fileID: 0}
+  helmetPrefabs: []
+  chanceForNoHelmet: 0.25
 --- !u!1 &3538867346542348996
 GameObject:
   m_ObjectHideFlags: 0
