@@ -30,16 +30,20 @@ namespace FF
         public void LoadMainMenuScene()
         {
             ResetPersistentState();
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
             LoadScene(mainMenuSceneName);
         }
 
         public void LoadGameplayScene()
         {
+            ResetPersistentState();
             LoadScene(gameplaySceneName);
         }
 
         public void ReloadCurrentScene()
         {
+            ResetPersistentState();
             LoadScene(SceneManager.GetActiveScene().name);
         }
 

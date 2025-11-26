@@ -958,6 +958,10 @@ namespace FF
             waveFlashBaseAlpha = Mathf.Clamp01(waveFlashColor.a);
             waveFlashElapsed = float.PositiveInfinity;
             SetWaveFlashAlpha(0f);
+            if (waveFlashImage)
+            {
+                waveFlashImage.enabled = false;
+            }
         }
 
         void TriggerWaveFlash()
@@ -969,6 +973,7 @@ namespace FF
 
             waveFlashElapsed = 0f;
             SetWaveFlashAlpha(EvaluateWaveFlashAlpha(0f));
+            waveFlashImage.enabled = true;
         }
 
         void UpdateWaveFlash(float deltaTime)
@@ -1014,6 +1019,7 @@ namespace FF
             Color color = waveFlashColor;
             color.a = alpha;
             waveFlashImage.color = color;
+            waveFlashImage.enabled = alpha > 0f;
         }
 
         void InitializeAudio()
