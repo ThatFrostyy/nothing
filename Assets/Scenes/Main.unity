@@ -9648,9 +9648,9 @@ MonoBehaviour:
   mouseInfluence: 0.2
   enableZoom: 1
   zoomStep: 0.5
-  minZoom: 4
+  minZoom: 8
   maxZoom: 12
-  zoomLerpSpeed: 6
+  zoomLerpSpeed: 10
 --- !u!4 &2091572886
 Transform:
   m_ObjectHideFlags: 0
