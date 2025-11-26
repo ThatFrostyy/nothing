@@ -67,8 +67,12 @@ namespace FF
             if (string.IsNullOrWhiteSpace(sceneName))
                 return;
 
+            var controller = EnsureInstance();
+            if (!controller)
+                return;
+
             Time.timeScale = 1f;
-            Instance.StartCoroutine(LoadSceneAsyncRoutine(sceneName));
+            controller.StartCoroutine(LoadSceneAsyncRoutine(sceneName));
         }
 
         private static IEnumerator LoadSceneAsyncRoutine(string sceneName)
@@ -78,6 +82,25 @@ namespace FF
 
             while (!op.isDone)
                 yield return null;
+        }
+
+        public static SceneFlowController EnsureInstance()
+        {
+            if (Instance)
+                return Instance;
+
+            var existing = FindAnyObjectByType<SceneFlowController>();
+            if (existing)
+            {
+                Instance = existing;
+                return Instance;
+            }
+
+            var host = new GameObject("SceneFlowController");
+            var controller = host.AddComponent<SceneFlowController>();
+            Instance = controller;
+
+            return controller;
         }
 
         IEnumerator Start()

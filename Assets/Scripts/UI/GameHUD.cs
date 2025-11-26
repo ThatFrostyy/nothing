@@ -192,22 +192,7 @@ namespace FF
         {
             SceneManager.sceneLoaded += HandleSceneLoaded;
 
-            if (playerHealth != null)
-            {
-                playerHealth.OnHealthChanged += HandleHealthChanged;
-            }
-
-            if (wallet != null)
-            {
-                wallet.OnXPChanged += HandleXPChanged;
-            }
-
-            if (weaponManager != null)
-            {
-                weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
-                weaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
-            }
-
+            RefreshPlayerReferences();
             BindSceneManagers();
 
             UpgradeUI.OnVisibilityChanged += HandleUpgradeVisibilityChanged;
@@ -221,22 +206,7 @@ namespace FF
         {
             SceneManager.sceneLoaded -= HandleSceneLoaded;
 
-            if (playerHealth != null)
-            {
-                playerHealth.OnHealthChanged -= HandleHealthChanged;
-            }
-
-            if (wallet != null)
-            {
-                wallet.OnXPChanged -= HandleXPChanged;
-            }
-
-            if (weaponManager != null)
-            {
-                weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
-                weaponManager.OnInventoryChanged -= HandleWeaponInventoryChanged;
-            }
-
+            UnbindPlayerReferences();
             UnbindSceneManagers();
 
             UpgradeUI.OnVisibilityChanged -= HandleUpgradeVisibilityChanged;
@@ -263,12 +233,15 @@ namespace FF
 
         void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            RefreshPlayerReferences();
             BindSceneManagers();
             RefreshAll();
         }
 
         void Update()
         {
+            EnsureSceneManagers();
+
             float deltaTime = Time.deltaTime;
             float unscaledDeltaTime = Time.unscaledDeltaTime;
 
@@ -291,6 +264,19 @@ namespace FF
             UpdateHeartbeatTimer(unscaledDeltaTime);
             UpdateWaveBanner(unscaledDeltaTime);
             UpdateWaveFlash(unscaledDeltaTime);
+        }
+
+        void EnsureSceneManagers()
+        {
+            if (!gameManager)
+            {
+                RefreshGameManagerReference();
+            }
+
+            if (!upgradeManager)
+            {
+                RefreshUpgradeManagerReference();
+            }
         }
 
         void BindSceneManagers()
@@ -333,6 +319,88 @@ namespace FF
                 gameManager.OnKillCountChanged += HandleKillCountChanged;
                 gameManager.OnWaveStarted += HandleWaveStarted;
                 HandleKillCountChanged(gameManager.KillCount);
+            }
+        }
+
+        void RefreshPlayerReferences()
+        {
+            GameObject playerObject = GameObject.FindWithTag("Player");
+
+            var resolvedHealth = playerObject ? playerObject.GetComponent<Health>() : null;
+            var resolvedWallet = resolvedHealth ? resolvedHealth.GetComponent<XPWallet>() : null;
+            var resolvedWeaponManager = playerObject ? playerObject.GetComponentInChildren<WeaponManager>() : null;
+            if (!resolvedWeaponManager && resolvedHealth)
+            {
+                resolvedWeaponManager = resolvedHealth.GetComponent<WeaponManager>();
+            }
+
+            if (resolvedHealth != playerHealth)
+            {
+                if (playerHealth != null)
+                {
+                    playerHealth.OnHealthChanged -= HandleHealthChanged;
+                }
+
+                playerHealth = resolvedHealth;
+
+                if (playerHealth != null && isActiveAndEnabled)
+                {
+                    playerHealth.OnHealthChanged += HandleHealthChanged;
+                    HandleHealthChanged(playerHealth.CurrentHP, playerHealth.MaxHP);
+                }
+            }
+
+            if (resolvedWallet != wallet)
+            {
+                if (wallet != null)
+                {
+                    wallet.OnXPChanged -= HandleXPChanged;
+                }
+
+                wallet = resolvedWallet;
+
+                if (wallet != null && isActiveAndEnabled)
+                {
+                    wallet.OnXPChanged += HandleXPChanged;
+                    HandleXPChanged(wallet.Level, wallet.XP, wallet.Next);
+                }
+            }
+
+            if (resolvedWeaponManager != weaponManager)
+            {
+                if (weaponManager != null)
+                {
+                    weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+                    weaponManager.OnInventoryChanged -= HandleWeaponInventoryChanged;
+                }
+
+                weaponManager = resolvedWeaponManager;
+
+                if (weaponManager != null && isActiveAndEnabled)
+                {
+                    weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
+                    weaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
+                    UpdateWeaponDisplay(weaponManager.CurrentWeapon);
+                }
+            }
+        }
+
+        void UnbindPlayerReferences()
+        {
+            if (playerHealth != null)
+            {
+                playerHealth.OnHealthChanged -= HandleHealthChanged;
+            }
+
+            if (wallet != null)
+            {
+                wallet.OnXPChanged -= HandleXPChanged;
+            }
+
+            if (weaponManager != null)
+            {
+                weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+                weaponManager.OnInventoryChanged -= HandleWeaponInventoryChanged;
             }
         }
 

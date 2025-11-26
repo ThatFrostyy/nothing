@@ -9,18 +9,15 @@ namespace FF
 
         void Awake()
         {
-            if (!sceneFlow)
-            {
-                sceneFlow = FindAnyObjectByType<SceneFlowController>();
-            }
+            sceneFlow = sceneFlow ? sceneFlow : SceneFlowController.EnsureInstance();
         }
 
         public void StartGame()
         {
+            sceneFlow = sceneFlow ? sceneFlow : SceneFlowController.EnsureInstance();
+
             if (sceneFlow)
-            {
                 sceneFlow.LoadGameplayScene();
-            }
         }
 
         public void QuitGame()
