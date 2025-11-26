@@ -11,6 +11,11 @@ namespace FF
         [SerializeField] private string mainMenuSceneName = "MainMenu";
         [SerializeField] private string gameplaySceneName = "Main";
         [SerializeField] private bool persistAcrossScenes = true;
+        [Header("Defaults")]
+        [SerializeField] private CharacterDefinition defaultCharacter;
+        [SerializeField] private HatDefinition defaultHat;
+        [SerializeField] private Weapon defaultWeapon;
+        [SerializeField] private bool applyDefaultSelection = true;
 
         void Awake()
         {
@@ -35,11 +40,13 @@ namespace FF
         public void LoadMainMenuScene()
         {
             ResetPersistentState();
+            SetCursorVisibility(true);
             LoadScene(mainMenuSceneName);
         }
 
         public void LoadGameplayScene()
         {
+            ApplyDefaultCharacterSelection();
             LoadScene(gameplaySceneName);
         }
 
@@ -66,6 +73,22 @@ namespace FF
             {
                 UpgradeManager.I.ResetState();
             }
+        }
+
+        void ApplyDefaultCharacterSelection()
+        {
+            if (!applyDefaultSelection || CharacterSelectionState.HasSelection)
+            {
+                return;
+            }
+
+            CharacterSelectionState.SetSelection(defaultCharacter, defaultHat, defaultWeapon);
+        }
+
+        static void SetCursorVisibility(bool visible)
+        {
+            Cursor.visible = visible;
+            Cursor.lockState = visible ? CursorLockMode.None : CursorLockMode.Confined;
         }
 
         private static void LoadScene(string sceneName)

@@ -12,7 +12,22 @@ namespace FF
 
         void Awake()
         {
-            I = this; basePos = transform.localPosition;
+            if (I != null && I != this)
+            {
+                Destroy(this);
+                return;
+            }
+
+            I = this;
+            basePos = transform.localPosition;
+        }
+
+        void OnDestroy()
+        {
+            if (I == this)
+            {
+                I = null;
+            }
         }
 
         void Update()
@@ -30,8 +45,8 @@ namespace FF
         public static void Shake(float dur = 0.08f, float inten = 0.1f)
         {
             if (!I) return;
-            I.duration = Mathf.Max(dur, I.duration);
-            I.intensity = Mathf.Max(inten, I.intensity);
+            I.duration = dur;
+            I.intensity = inten;
             I.time = 0f;
         }
     }
