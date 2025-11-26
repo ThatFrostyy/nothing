@@ -171,6 +171,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameManager
       objectReference: {fileID: 0}
+    - target: {fileID: 7492380447983614614, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
+      propertyPath: defaultHat
+      value: 
+      objectReference: {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
+    - target: {fileID: 7492380447983614614, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
+      propertyPath: defaultWeapon
+      value: 
+      objectReference: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
+    - target: {fileID: 7492380447983614614, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
+      propertyPath: defaultCharacter
+      value: 
+      objectReference: {fileID: 11400000, guid: 968fc4a4a96a8ca429344ced2ac63fb0, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

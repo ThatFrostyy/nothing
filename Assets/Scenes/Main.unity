@@ -5322,7 +5322,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   _cameraShakeEnabled: 1
-  maxSustainedShake: 0.1
+  maxSustainedShake: 0.35
 --- !u!114 &1207903155
 MonoBehaviour:
   m_ObjectHideFlags: 0
