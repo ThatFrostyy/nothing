@@ -88,6 +88,11 @@ namespace FF
 
         private void Update()
         {
+            if (PauseMenuController.IsMenuOpen)
+            {
+                return;
+            }
+
             AimGunAtPointer();
         }
 

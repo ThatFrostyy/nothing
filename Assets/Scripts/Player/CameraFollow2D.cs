@@ -31,7 +31,7 @@ namespace FF
 
         void LateUpdate()
         {
-            if (!target) return;
+            if (!target || PauseMenuController.IsMenuOpen) return;
 
             UpdateZoom();
 
@@ -65,7 +65,7 @@ namespace FF
 
         void UpdateZoom()
         {
-            if (!enableZoom || cam == null || !cam.orthographic)
+            if (!enableZoom || cam == null || !cam.orthographic || PauseMenuController.IsMenuOpen)
             {
                 return;
             }
