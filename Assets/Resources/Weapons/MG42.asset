@@ -23,7 +23,7 @@ MonoBehaviour:
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
   weaponPrefab: {fileID: 804488306062599741, guid: 55e8cc0cad3399349b1a806c48a5e6cb, type: 3}
   rpm: 500
-  damage: 7
+  damage: 6
   recoilKick: 7
   isAuto: 1
   fireCooldown: 0.1

@@ -2170,12 +2170,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterSelectionUI
   availableCharacters:
   - {fileID: 11400000, guid: 968fc4a4a96a8ca429344ced2ac63fb0, type: 2}
+  - {fileID: 11400000, guid: dc51787375708514994f826b7c8d0f1a, type: 2}
+  - {fileID: 11400000, guid: 2a8929ff60f8de8489580f6f4ffd153b, type: 2}
   nameText: {fileID: 423339882}
   descriptionText: {fileID: 1937666109}
   abilityText: {fileID: 0}
   portraitImage: {fileID: 219154102}
   availableHats:
   - {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
+  - {fileID: 11400000, guid: b0c38d26c188c6747b10d403bd016f61, type: 2}
+  - {fileID: 11400000, guid: 1d5f8028d62e0544388964a158543185, type: 2}
   hatNameText: {fileID: 1565012089}
   hatIconImage: {fileID: 1097028446}
   weaponNameText: {fileID: 0}

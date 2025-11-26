@@ -82,12 +82,12 @@ SpriteRenderer:
   m_SortingLayerID: 838621829
   m_SortingLayer: 5
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 8d818f816ad76db48936fc2de5e5f54d, type: 3}
+  m_Sprite: {fileID: 21300000, guid: e5f7992254e78cc468a945c0f7b88b4c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 2.56, y: 2.56}
+  m_Size: {x: 2, y: 2}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 535d2730c382ea441a34ada841a678ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponPickup
-  weaponData: {fileID: 0}
+  weaponData: {fileID: 11400000, guid: 2b9ec3c6f8023bb4fb57fb21b7bbcd95, type: 2}
   hoverAmplitude: 0.25
   hoverSpeed: 2
   rotationAmplitude: 5

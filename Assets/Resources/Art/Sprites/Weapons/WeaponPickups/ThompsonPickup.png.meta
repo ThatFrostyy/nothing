@@ -116,10 +116,10 @@ TextureImporter:
       name: ThompsonPickup_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 16
-        width: 247
-        height: 234
+        x: 12
+        y: 37
+        width: 233
+        height: 210
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

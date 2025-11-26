@@ -116,9 +116,9 @@ TextureImporter:
       name: MG42Pickup_0
       rect:
         serializedVersion: 2
-        x: 2
+        x: 20
         y: 37
-        width: 250
+        width: 224
         height: 210
       alignment: 0
       pivot: {x: 0, y: 0}

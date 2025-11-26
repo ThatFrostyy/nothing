@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 122255b8daa858e4da9b93acb771bd1d
+guid: 74670c89a1f639c45982179bc0df8d1f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2893674238495817350
-    second: PPSH41Pickup_0
+      213: -2850707533075056667
+    second: ranger_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 128
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PPSH41Pickup_0
+      name: ranger_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 2
-        width: 256
-        height: 254
+        x: 62
+        y: 43
+        width: 125
+        height: 159
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 68efd397365682820800000000000000
-      internalID: 2893674238495817350
+      spriteID: 5e7f7843a904078d0800000000000000
+      internalID: -2850707533075056667
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PPSH41Pickup_0: 2893674238495817350
+      ranger_0: -2850707533075056667
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
