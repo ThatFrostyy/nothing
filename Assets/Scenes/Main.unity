@@ -1055,7 +1055,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawner
   player: {fileID: 1207903152}
-  spawnRadius: 24
+  spawnRadius: 20
   spawnBuffer: 2
   maxSpawnAttempts: 8
   spawnCamera: {fileID: 1147590089}

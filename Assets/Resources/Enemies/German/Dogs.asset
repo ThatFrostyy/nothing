@@ -16,7 +16,7 @@ MonoBehaviour:
   - {fileID: 3282402498340923105, guid: 943a250ae05bb894eb865c90f38fa653, type: 3}
   startWave: 8
   endWave: -1
-  spawnInterval: 3
+  spawnInterval: 2
   spawnOnlyOnBossWaves: 0
   isBoss: 0
   spawnCountByWave:
@@ -82,6 +82,7 @@ MonoBehaviour:
   spawnChance: 0.65
   spawnInPacks: 1
   packRadius: 3
+  poolPrewarmCount: 4
   attributeScalingOverride:
     healthMultiplierByWave:
       serializedVersion: 2

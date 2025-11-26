@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.HatDefinition
   DisplayName: Ranger M1 Helmet
   Icon: {fileID: 21300000, guid: 84269ee36aecdd7438484316be887b7c, type: 3}
-  HatPrefab: {fileID: 8177723574371877624, guid: f94259d5edbc60144b447c7b3c6f157c, type: 3}
+  HatPrefab: {fileID: 1034890427689786710, guid: 2d9467be2454cb14d83227ed21abe6d7, type: 3}

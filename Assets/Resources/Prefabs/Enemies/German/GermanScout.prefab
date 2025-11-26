@@ -173,7 +173,7 @@ MonoBehaviour:
   acceleration: 0.7
   retreatSpeedMultiplier: 0.6
   bodyTiltDegrees: 7
-  shootingDistance: 6
+  shootingDistance: 7
   distanceBuffer: 2
   fireRateMultiplier: 1
   damageMultiplier: 1
@@ -207,6 +207,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f67e22903008e4e8c6c8f3c6ec685b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
+  simpleFollowTest: 0
   startingWeapon: {fileID: 11400000, guid: b21c7128157945e4d88dfb3f887e9560, type: 2}
   weaponManager: {fileID: 1658971313263623551}
   autoShooter: {fileID: 1439886904676790072}
