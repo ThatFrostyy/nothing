@@ -67,10 +67,6 @@ namespace FF
                 restartButton.onClick.AddListener(RestartScene);
                 mainMenuButton.onClick.AddListener(ReturnToMainMenu);
             }
-            else
-            {
-                BuildUIIfNeeded();
-            }
 
             ApplyVisibility(0f, true);
         }
@@ -223,56 +219,6 @@ namespace FF
             }
         }
 
-        private void BuildUIIfNeeded()
-        {
-            if (canvasGroup)
-            {
-                return;
-            }
-
-            var canvasObject = new GameObject("PauseMenuCanvas", typeof(RectTransform));
-            canvasObject.transform.SetParent(transform, false);
-            var canvas = canvasObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 999;
-            canvasObject.AddComponent<CanvasScaler>();
-            canvasObject.AddComponent<GraphicRaycaster>();
-
-            var group = canvasObject.AddComponent<CanvasGroup>();
-            group.alpha = 0f;
-            canvasGroup = group;
-
-            var backdropGo = new GameObject("Backdrop", typeof(RectTransform));
-            backdropGo.transform.SetParent(canvasObject.transform, false);
-            var backdropRect = backdropGo.GetComponent<RectTransform>();
-            backdropRect.anchorMin = Vector2.zero;
-            backdropRect.anchorMax = Vector2.one;
-            backdropRect.offsetMin = Vector2.zero;
-            backdropRect.offsetMax = Vector2.zero;
-            var bgImage = backdropGo.AddComponent<Image>();
-            bgImage.color = new Color(0f, 0f, 0f, backdropAlpha);
-            backdrop = bgImage;
-
-            var panel = new GameObject("Panel", typeof(RectTransform));
-            panel.transform.SetParent(canvasObject.transform, false);
-            var panelRect = panel.GetComponent<RectTransform>();
-            panelRect.sizeDelta = new Vector2(420f, 320f);
-            panelRect.anchorMin = new Vector2(0.5f, 0.5f);
-            panelRect.anchorMax = new Vector2(0.5f, 0.5f);
-            panelRect.anchoredPosition = Vector2.zero;
-            var panelImage = panel.AddComponent<Image>();
-            panelImage.color = new Color(0.1f, 0.1f, 0.1f, 0.85f);
-
-            titleText = BuildLabel(panelRect, "Title", 28f, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -24f));
-            resumeButton = BuildButton(panelRect, "Resume", "Resume", new Vector2(0.5f, 0.66f));
-            restartButton = BuildButton(panelRect, "Restart", "Restart", new Vector2(0.5f, 0.4f));
-            mainMenuButton = BuildButton(panelRect, "MainMenu", "Main Menu", new Vector2(0.5f, 0.18f));
-
-            resumeButton.onClick.AddListener(HideMenu);
-            restartButton.onClick.AddListener(RestartScene);
-            mainMenuButton.onClick.AddListener(ReturnToMainMenu);
-        }
-
         private TextMeshProUGUI BuildLabel(RectTransform parent, string name, float size, Vector2 anchorMin, Vector2 anchorMax, Vector2 offset)
         {
             var go = new GameObject(name, typeof(RectTransform));
@@ -290,35 +236,6 @@ namespace FF
             label.text = pauseTitle;
             label.textWrappingMode = TextWrappingModes.NoWrap;
             return label;
-        }
-
-        private Button BuildButton(RectTransform parent, string name, string label, Vector2 anchor)
-        {
-            var go = new GameObject(name, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = anchor;
-            rect.anchorMax = anchor;
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.sizeDelta = new Vector2(240f, 56f);
-            rect.anchoredPosition = Vector2.zero;
-
-            var image = go.AddComponent<Image>();
-            image.color = new Color(0.2f, 0.2f, 0.2f, 0.9f);
-            image.raycastTarget = true;
-
-            var button = go.AddComponent<Button>();
-            var colors = button.colors;
-            colors.normalColor = image.color;
-            colors.highlightedColor = new Color(0.35f, 0.35f, 0.35f, 0.95f);
-            colors.pressedColor = new Color(0.15f, 0.15f, 0.15f, 0.95f);
-            button.colors = colors;
-
-            var text = BuildLabel(rect, "Label", 22f, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero);
-            text.text = label;
-            text.raycastTarget = false;
-
-            return button;
         }
 
         private void HideInstant()

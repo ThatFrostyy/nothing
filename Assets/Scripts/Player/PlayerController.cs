@@ -1,11 +1,15 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Playables;
 
 namespace FF
 {
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
+        public static event Action<PlayerController> OnPlayerReady;
+
         [Header("References")]
         [SerializeField] private Camera _camera;
         [SerializeField] private AutoShooter _autoShooter;
@@ -74,6 +78,8 @@ namespace FF
             {
                 _weaponManager.Equip(_startingWeapon);
             }
+
+            OnPlayerReady?.Invoke(this);
         }
 
         private void OnEnable()

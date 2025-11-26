@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2037912364196150008}
   - component: {fileID: 7721843222088791118}
   - component: {fileID: 5457090804296160985}
+  - component: {fileID: 7492380447983614614}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -75,3 +76,18 @@ MonoBehaviour:
   wallet: {fileID: 0}
   ui: {fileID: 0}
   maxUpgradeSelections: 30
+--- !u!114 &7492380447983614614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3100446154709895051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 56749d7fb6f746d6aca2fcb357ae26f5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainMenuSceneName: MainMenu
+  gameplaySceneName: Main
+  persistAcrossScenes: 1

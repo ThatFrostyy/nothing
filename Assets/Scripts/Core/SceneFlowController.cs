@@ -27,6 +27,11 @@ namespace FF
             }
         }
 
+        public static void PlayGame()
+        {
+            Instance?.LoadGameplayScene();
+        }
+
         public void LoadMainMenuScene()
         {
             ResetPersistentState();
@@ -40,8 +45,13 @@ namespace FF
 
         public void ReloadCurrentScene()
         {
-            LoadScene(SceneManager.GetActiveScene().name);
+            if (GameManager.I != null)
+            {
+                GameManager.I.ResetGameState();
+            }
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
+
 
         void ResetPersistentState()
         {

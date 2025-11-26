@@ -1,12 +1,14 @@
 using System;
+using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
 namespace FF
 {
-    public class GameHUD : MonoBehaviour
+    public class GameHUD : MonoBehaviour, ISceneReferenceHandler
     {
         [Header("Data Sources")]
         [SerializeField] private GameManager gameManager;
@@ -114,6 +116,8 @@ namespace FF
 
         void Awake()
         {
+            SceneReferenceRegistry.Register(this);
+
             if (!gameManager)
             {
                 gameManager = GameManager.I;
@@ -185,33 +189,47 @@ namespace FF
             SetWaveBannerVisible(0f);
             InitializeWaveFlash();
             RefreshUpgradePrompt();
+        }
+
+        void OnDestroy()
+        {
+            SceneReferenceRegistry.Unregister(this);
+        }
+
+        public void ClearSceneReferences()
+        {
+            playerHealth = null;
+            wallet = null;
+            weaponManager = null;
+            gameManager = null;
+            upgradeManager = null;
+        }
+
+        public void RebindSceneReferences()
+        {
+            RefreshGameManagerReference();
+            RefreshUpgradeManagerReference();
+        }
+
+        private void Start()
+        {
             BindSceneManagers();
         }
 
         void OnEnable()
         {
-            SceneManager.sceneLoaded += HandleSceneLoaded;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            PlayerController.OnPlayerReady += HandlePlayerReady;
 
+            if (gameManager != null)
+            {
+                gameManager.OnKillCountChanged += HandleKillCountChanged;
+                gameManager.OnWaveStarted += HandleWaveStarted;
+            }
             if (playerHealth != null)
-            {
                 playerHealth.OnHealthChanged += HandleHealthChanged;
-            }
-
             if (wallet != null)
-            {
                 wallet.OnXPChanged += HandleXPChanged;
-            }
-
-            if (weaponManager != null)
-            {
-                weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
-                weaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
-            }
-
-            BindSceneManagers();
-
-            UpgradeUI.OnVisibilityChanged += HandleUpgradeVisibilityChanged;
-            upgradeMenuVisible = UpgradeUI.IsShowing;
 
             RefreshAll();
             SyncFillImmediately();
@@ -219,52 +237,65 @@ namespace FF
 
         void OnDisable()
         {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            PlayerController.OnPlayerReady -= HandlePlayerReady;
+
+            if (gameManager != null)
+            {
+                gameManager.OnKillCountChanged -= HandleKillCountChanged;
+                gameManager.OnWaveStarted -= HandleWaveStarted;
+            }
+            if (playerHealth != null)
+                playerHealth.OnHealthChanged -= HandleHealthChanged;
+            if (wallet != null)
+                wallet.OnXPChanged -= HandleXPChanged;
+        }
+
+        private void HandlePlayerReady(PlayerController player)
+        {
+            var playerObject = player.gameObject;
+
+            playerHealth = playerObject.GetComponent<Health>();
+            wallet = playerObject.GetComponent<XPWallet>();
+            weaponManager = playerObject.GetComponentInChildren<WeaponManager>();
 
             if (playerHealth != null)
-            {
-                playerHealth.OnHealthChanged -= HandleHealthChanged;
-            }
+                playerHealth.OnHealthChanged += HandleHealthChanged;
 
             if (wallet != null)
-            {
-                wallet.OnXPChanged -= HandleXPChanged;
-            }
+                wallet.OnXPChanged += HandleXPChanged;
 
             if (weaponManager != null)
             {
-                weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
-                weaponManager.OnInventoryChanged -= HandleWeaponInventoryChanged;
+                weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
+                weaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
             }
 
-            UnbindSceneManagers();
-
-            UpgradeUI.OnVisibilityChanged -= HandleUpgradeVisibilityChanged;
-            upgradeMenuVisible = false;
-
-            SetHeartbeatActive(false);
-            SetXPFillSoundActive(false);
-            lowHealthPulseActive = false;
-            xpIsFilling = false;
-            if (upgradePromptFadeRoutine != null)
-            {
-                StopCoroutine(upgradePromptFadeRoutine);
-                upgradePromptFadeRoutine = null;
-            }
-            lowHealthHeartbeatTimer = 0f;
-            ResetHealthPulse();
-            ResetXPPulse();
-            waveBannerTimer = 0f;
-            SetWaveBannerVisible(0f);
-            waveFlashElapsed = float.PositiveInfinity;
-            SetWaveFlashAlpha(0f);
-            RefreshUpgradePrompt();
+            RefreshAll();
+            SyncFillImmediately();
         }
 
-        void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            BindSceneManagers();
+            TryBindAll();
             RefreshAll();
+            SyncFillImmediately();
+        }
+
+        private void TryBindAll()
+        {
+            gameManager = GameManager.I;
+            playerHealth = FindFirstObjectByType<Health>();
+            wallet = playerHealth ? playerHealth.GetComponent<XPWallet>() : null;
+            weaponManager = FindFirstObjectByType<WeaponManager>();
+            upgradeManager = FindFirstObjectByType<UpgradeManager>();
+
+            if (gameManager == null) Debug.LogWarning("[HUD] Could not find GameManager on bind.");
+            if (playerHealth == null) Debug.LogWarning("[HUD] Could not find Player Health on bind.");
+            if (wallet == null) Debug.LogWarning("[HUD] Could not find XPWallet.");
+            if (weaponManager == null) Debug.LogWarning("[HUD] Could not find WeaponManager.");
+            if (upgradeManager == null) Debug.LogWarning("[HUD] Could not find UpgradeManager.");
         }
 
         void Update()
@@ -299,27 +330,9 @@ namespace FF
             RefreshUpgradeManagerReference();
         }
 
-        void UnbindSceneManagers()
-        {
-            if (gameManager != null)
-            {
-                gameManager.OnKillCountChanged -= HandleKillCountChanged;
-                gameManager.OnWaveStarted -= HandleWaveStarted;
-            }
-
-            if (upgradeManager != null)
-            {
-                upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
-            }
-        }
-
         void RefreshGameManagerReference()
         {
             GameManager resolved = gameManager ? gameManager : GameManager.I;
-            if (resolved == gameManager)
-            {
-                return;
-            }
 
             if (gameManager != null)
             {
@@ -328,11 +341,11 @@ namespace FF
             }
 
             gameManager = resolved;
+
             if (gameManager != null && isActiveAndEnabled)
             {
                 gameManager.OnKillCountChanged += HandleKillCountChanged;
                 gameManager.OnWaveStarted += HandleWaveStarted;
-                HandleKillCountChanged(gameManager.KillCount);
             }
         }
 
@@ -1122,6 +1135,7 @@ namespace FF
             {
                 uiAudioSource.PlayOneShot(waveMilestoneClip);
             }
+
         }
 
         void ResetHealthPulse()

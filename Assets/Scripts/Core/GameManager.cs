@@ -7,8 +7,6 @@ namespace FF
 {
     public class GameManager : MonoBehaviour, ISceneReferenceHandler
     {
-        public static GameManager I;
-
         public float CurrentWaveInterval => currentWaveInterval;
 
         [SerializeField] private EnemySpawner spawner;
@@ -28,18 +26,27 @@ namespace FF
 
         public event Action<EnemySpawner> OnSpawnerRegistered;
 
+        private static GameManager _instance;
+        public static GameManager I
+        {
+            get
+            {
+                if (_instance == null)
+                    _instance = FindFirstObjectByType<GameManager>();
+                return _instance;
+            }
+        }
+
         void Awake()
         {
             Application.targetFrameRate = -1;
-            if (I != null)
+            if (_instance != null && _instance != this)
             {
-                Destroy(gameObject); 
+                Destroy(gameObject);
                 return;
             }
-
-            I = this;
+            _instance = this;
             DontDestroyOnLoad(gameObject);
-
             ResetGameState();
         }
 
