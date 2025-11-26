@@ -61,7 +61,17 @@ namespace FF
                 deathEffectPrefab = Resources.Load<GameObject>("Prefabs/FX/Death");
             }
 
-            BuildUIIfNeeded();
+            if (resumeButton && restartButton && mainMenuButton)
+            {
+                resumeButton.onClick.AddListener(HideMenu);
+                restartButton.onClick.AddListener(RestartScene);
+                mainMenuButton.onClick.AddListener(ReturnToMainMenu);
+            }
+            else
+            {
+                BuildUIIfNeeded();
+            }
+
             ApplyVisibility(0f, true);
         }
 
@@ -278,7 +288,7 @@ namespace FF
             label.alignment = TextAlignmentOptions.Center;
             label.fontSize = size;
             label.text = pauseTitle;
-            label.enableWordWrapping = false;
+            label.textWrappingMode = TextWrappingModes.NoWrap;
             return label;
         }
 
