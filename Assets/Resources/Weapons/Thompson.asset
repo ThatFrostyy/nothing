@@ -27,6 +27,8 @@ MonoBehaviour:
   recoilKick: 4
   isAuto: 1
   fireCooldown: 0.1
+  knockbackStrength: 0.5
+  knockbackDuration: 0.2
   baseSpread: 1.5
   maxSpread: 6
   spreadIncreasePerShot: 0.5

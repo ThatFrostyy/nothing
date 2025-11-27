@@ -2292,6 +2292,7 @@ MonoBehaviour:
   targetCamera: {fileID: 1147590089}
   indicatorContainer: {fileID: 453743317}
   pickupIndicatorPrefab: {fileID: 56872829242539298, guid: 07345d6c28189454f87b625097a09e90, type: 3}
+  weaponCrateIndicatorPrefab: {fileID: 5093402718758186666, guid: 86b86962adc859548a468b97c8eabf29, type: 3}
   bossIndicatorPrefab: {fileID: 2041305932292860979, guid: 362aa3034ad7fe54a93075084098e66d, type: 3}
   screenEdgeBuffer: 32
   minimumDistanceFromCenter: 48
@@ -2737,6 +2738,7 @@ GameObject:
   m_Component:
   - component: {fileID: 592156656}
   - component: {fileID: 592156655}
+  - component: {fileID: 592156657}
   m_Layer: 0
   m_Name: PickupSpawner
   m_TagString: Untagged
@@ -2965,6 +2967,128 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &592156657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 592156654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b3e080c8923ada4f8637415b640bce9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponCrateSpawner
+  crateConfigs:
+  - cratePrefab: {fileID: 2065102623061516545, guid: 25a4740d49a0ca044b84e8f425a25379, type: 3}
+    weaponPool:
+    - {fileID: 11400000, guid: 5fdcf8ba9e391ba4f9db389ee623ce59, type: 2}
+    - {fileID: 11400000, guid: 2b9ec3c6f8023bb4fb57fb21b7bbcd95, type: 2}
+    - {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
+    - {fileID: 11400000, guid: e76dd7a110e39f040bbc5990947e921e, type: 2}
+    - {fileID: 11400000, guid: 59004b20c34904b499fe859f8e5fc176, type: 2}
+    - {fileID: 11400000, guid: 342bc86ba1595354c82750fb4f82c10a, type: 2}
+    - {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
+    initialSpawnDelay: 60
+    spawnOnStart: 1
+    useRespawnDelay: 0
+    respawnDelay: 0
+    spawnIntervalCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 120
+        inSlope: -0.28333333
+        outSlope: -0.28333333
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 35
+        inSlope: -0.125
+        outSlope: -0.125
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 45
+        inSlope: 0.033333335
+        outSlope: 0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    cratesPerSpawnCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    maxActiveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0.006666667
+        outSlope: 0.006666667
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 3
+        inSlope: 0.005
+        outSlope: 0.005
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 4
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    crateLifetimeSeconds: 45
+    pickupLifetimeSeconds: 30
+    timeoutSpawnRadius: 10
+  player: {fileID: 1207903152}
+  offscreenPadding: 2
+  minSpawnRadius: 8
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -5428,6 +5552,7 @@ MonoBehaviour:
   _tiltSmoothTime: 0.07
   _idleSwayFrequency: 6
   _idleSwayAmplitude: 1.2
+  _enableTilt: 0
   _boundsPadding: 0.05
 --- !u!70 &1207903157
 CapsuleCollider2D:

@@ -52,6 +52,8 @@ namespace FF
 
         void OnTriggerEnter2D(Collider2D other)
         {
+            Debug.Log("Bullet hit: " + other.name + " layer=" + other.gameObject.layer);
+
             if (other.CompareTag(teamTag)) return;
             if (((1 << other.gameObject.layer) & hitMask) == 0) return;
 
