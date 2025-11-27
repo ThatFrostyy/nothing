@@ -9,6 +9,10 @@ namespace FF
         [Header("Weapon Data")]
         [SerializeField] Weapon weaponData;
 
+        [Header("Lifetime")]
+        [SerializeField, Min(0f)] float lifetimeSeconds = 20f;
+        [SerializeField] bool despawnWhenUncollected = true;
+
         [Header("Visual Settings")]
         [SerializeField] float hoverAmplitude = 0.25f;  // how high it floats
         [SerializeField] float hoverSpeed = 2f;         // speed of bob
@@ -29,9 +33,25 @@ namespace FF
         Vector3 startPos;
         Vector3 startScale;
         SpriteRenderer sr;
-        Light2D glow; 
-        bool isPickedUp = false;
+        Light2D glow;
+        Collider2D pickupCollider;
+        bool isDespawning;
+        bool playPickupEffects;
         float timer = 0f;
+        float lifetimeTimer;
+
+        public event System.Action<WeaponPickup> OnCollected;
+        public event System.Action<WeaponPickup> OnExpired;
+
+        public void SetWeaponData(Weapon weapon)
+        {
+            weaponData = weapon;
+        }
+
+        public void SetLifetime(float seconds)
+        {
+            lifetimeSeconds = Mathf.Max(0f, seconds);
+        }
 
         void Awake()
         {
@@ -39,13 +59,37 @@ namespace FF
             startScale = transform.localScale;
             sr = GetComponent<SpriteRenderer>();
             glow = GetComponentInChildren<Light2D>();
+            pickupCollider = GetComponent<Collider2D>();
+        }
+
+        void OnEnable()
+        {
+            timer = 0f;
+            lifetimeTimer = 0f;
+            isDespawning = false;
+            playPickupEffects = false;
+            startPos = transform.localPosition;
+            startScale = transform.localScale;
+
+            if (pickupCollider)
+            {
+                pickupCollider.enabled = true;
+            }
+
+            if (sr)
+            {
+                Color color = sr.color;
+                color.a = 1f;
+                sr.color = color;
+            }
         }
 
         void Update()
         {
-            if (!isPickedUp)
+            if (!isDespawning)
             {
                 IdleAnimation();
+                HandleLifetime();
             }
             else
             {
@@ -79,7 +123,10 @@ namespace FF
                 sr.color = c;
             }
 
-            CameraShake.Shake(shakeDuration, shakeMagnitude);
+            if (playPickupEffects)
+            {
+                CameraShake.Shake(shakeDuration, shakeMagnitude);
+            }
 
             if (transform.localScale.magnitude < 0.05f)
             {
@@ -87,9 +134,21 @@ namespace FF
             }
         }
 
-        private void TriggerPickupAnimation()
+        private void TriggerPickupAnimation(bool withEffects)
         {
-            isPickedUp = true;
+            if (isDespawning)
+            {
+                return;
+            }
+
+            isDespawning = true;
+            playPickupEffects = withEffects;
+
+            if (pickupCollider)
+            {
+                pickupCollider.enabled = false;
+            }
+
             if (glow) StartCoroutine(FadeLight2D(glow));
         }
         #endregion Animations
@@ -103,7 +162,7 @@ namespace FF
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (isPickedUp) return;
+            if (isDespawning) return;
 
             if (!weaponData)
             {
@@ -112,11 +171,36 @@ namespace FF
 
             if (other.TryGetComponent<WeaponManager>(out var wm) && wm.TryEquip(weaponData))
             {
-                isPickedUp = true;
                 PlayPickupSound();
                 SpawnPickupFx();
-                TriggerPickupAnimation();
+                TriggerPickupAnimation(true);
+                OnCollected?.Invoke(this);
             }
+        }
+
+        private void HandleLifetime()
+        {
+            if (!despawnWhenUncollected || lifetimeSeconds <= 0f)
+            {
+                return;
+            }
+
+            lifetimeTimer += Time.deltaTime;
+            if (lifetimeTimer >= lifetimeSeconds)
+            {
+                TriggerExpired();
+            }
+        }
+
+        private void TriggerExpired()
+        {
+            if (isDespawning)
+            {
+                return;
+            }
+
+            TriggerPickupAnimation(false);
+            OnExpired?.Invoke(this);
         }
 
         #region Light Fade

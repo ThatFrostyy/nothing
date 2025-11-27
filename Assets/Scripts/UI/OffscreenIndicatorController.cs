@@ -8,6 +8,7 @@ namespace FF
         [SerializeField] private Camera targetCamera;
         [SerializeField] private RectTransform indicatorContainer;
         [SerializeField] private RectTransform pickupIndicatorPrefab;
+        [SerializeField] private RectTransform weaponCrateIndicatorPrefab;
         [SerializeField] private RectTransform bossIndicatorPrefab;
         [SerializeField, Min(0f)] private float screenEdgeBuffer = 32f;
         [SerializeField, Min(0f)] private float minimumDistanceFromCenter = 48f;
@@ -40,6 +41,7 @@ namespace FF
 
             seenThisFrame.Clear();
             RefreshIndicators(UpgradePickup.ActivePickups, pickupIndicatorPrefab);
+            RefreshIndicators(WeaponCrate.ActiveCrates, weaponCrateIndicatorPrefab);
             RefreshIndicators(Enemy.ActiveBosses, bossIndicatorPrefab);
             CleanupUnusedIndicators();
         }
@@ -83,6 +85,24 @@ namespace FF
                 }
 
                 EnsureIndicator(pickup.transform, prefab);
+            }
+        }
+
+        private void RefreshIndicators(IEnumerable<WeaponCrate> crates, RectTransform prefab)
+        {
+            if (prefab == null || crates == null)
+            {
+                return;
+            }
+
+            foreach (var crate in crates)
+            {
+                if (!crate)
+                {
+                    continue;
+                }
+
+                EnsureIndicator(crate.transform, prefab);
             }
         }
 
