@@ -8,7 +8,7 @@ namespace FF
     public class WeaponCrateSpawnConfig
     {
         public WeaponCrate cratePrefab;
-        public Weapon[] weaponPool;
+        public WeaponPickup[] pickupPool;
         [SerializeField, Min(0f)] public float initialSpawnDelay = 0f;
         [SerializeField] public bool spawnOnStart = true;
         [SerializeField] public bool useRespawnDelay = true;
@@ -203,7 +203,7 @@ namespace FF
             }
 
             var crate = Instantiate(cratePrefab, spawnPos, Quaternion.identity);
-            crate.ConfigureWeapons(state.Config.weaponPool);
+            crate.ConfigurePickups(state.Config.pickupPool);
             crate.SetPickupLifetime(state.Config.pickupLifetimeSeconds);
             crate.SetLifetime(state.Config.crateLifetimeSeconds);
 

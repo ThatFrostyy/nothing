@@ -2981,14 +2981,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponCrateSpawner
   crateConfigs:
   - cratePrefab: {fileID: 2065102623061516545, guid: 25a4740d49a0ca044b84e8f425a25379, type: 3}
-    weaponPool:
-    - {fileID: 11400000, guid: 5fdcf8ba9e391ba4f9db389ee623ce59, type: 2}
-    - {fileID: 11400000, guid: 2b9ec3c6f8023bb4fb57fb21b7bbcd95, type: 2}
-    - {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
-    - {fileID: 11400000, guid: e76dd7a110e39f040bbc5990947e921e, type: 2}
-    - {fileID: 11400000, guid: 59004b20c34904b499fe859f8e5fc176, type: 2}
-    - {fileID: 11400000, guid: 342bc86ba1595354c82750fb4f82c10a, type: 2}
-    - {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
+    pickupPool:
+    - {fileID: 5464304506579632199, guid: 453b3ff7d25e6a64687efcc1cc0aadaf, type: 3}
+    - {fileID: 8041796474199530670, guid: a50d0c54f4e8d084fb95c194f4ef9c9c, type: 3}
+    - {fileID: 2918078933888443673, guid: 4a95b463607cd1f4c9165152abe50192, type: 3}
+    - {fileID: 6611012969518936712, guid: 3652e60c26aae624c8306b56bde1dbb3, type: 3}
+    - {fileID: 6114283723824905712, guid: b8432984aa5b1d94ab26f175c01ba71e, type: 3}
+    - {fileID: 7785297196771200664, guid: 6600a5c3edfd2e24f9869ff09e610790, type: 3}
+    - {fileID: 3785600660565315841, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
     initialSpawnDelay: 60
     spawnOnStart: 1
     useRespawnDelay: 0

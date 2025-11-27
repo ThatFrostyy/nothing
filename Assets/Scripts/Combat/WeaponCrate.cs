@@ -7,11 +7,10 @@ namespace FF
     public class WeaponCrate : MonoBehaviour
     {
         [Header("References")]
-        [SerializeField] private WeaponPickup weaponPickupPrefab;
         [SerializeField] private Transform dropPoint;
 
         [Header("Drops")]
-        [SerializeField] private Weapon[] weaponPool;
+        [SerializeField] private WeaponPickup[] pickupPool;
         [SerializeField, Min(0f)] private float pickupLifetimeSeconds = 20f;
 
         [Header("Lifetime")]
@@ -33,9 +32,9 @@ namespace FF
 
         public static IReadOnlyCollection<WeaponCrate> ActiveCrates => activeCrates;
 
-        public void ConfigureWeapons(Weapon[] pool)
+        public void ConfigurePickups(WeaponPickup[] pool)
         {
-            weaponPool = pool;
+            pickupPool = pool;
         }
 
         public void SetPickupLifetime(float seconds)
@@ -131,27 +130,26 @@ namespace FF
 
         void SpawnWeaponPickup()
         {
-            Weapon weaponToDrop = GetRandomWeapon();
-            if (!weaponToDrop || !weaponPickupPrefab)
+            WeaponPickup pickupPrefab = GetRandomPickup();
+            if (!pickupPrefab)
             {
                 return;
             }
 
             Vector3 spawnPos = dropPoint ? dropPoint.position : transform.position;
-            var pickup = Instantiate(weaponPickupPrefab, spawnPos, Quaternion.identity);
-            pickup.SetWeaponData(weaponToDrop);
+            var pickup = Instantiate(pickupPrefab, spawnPos, Quaternion.identity);
             pickup.SetLifetime(pickupLifetimeSeconds);
         }
 
-        Weapon GetRandomWeapon()
+        WeaponPickup GetRandomPickup()
         {
-            if (weaponPool == null || weaponPool.Length == 0)
+            if (pickupPool == null || pickupPool.Length == 0)
             {
                 return null;
             }
 
-            int index = Random.Range(0, weaponPool.Length);
-            return weaponPool[index];
+            int index = Random.Range(0, pickupPool.Length);
+            return pickupPool[index];
         }
 
         void PlayBreakFx()
