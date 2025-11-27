@@ -35,9 +35,13 @@ namespace FF
         private bool consumed;
         private Coroutine despawnRoutine;
 
+        private static readonly System.Collections.Generic.HashSet<UpgradePickup> activePickups = new();
+
         public event Action<UpgradePickup> OnCollected;
         public event Action<UpgradePickup> OnExpired;
         public static event Action<UpgradePickupEffect> OnEffectApplied;
+
+        public static System.Collections.Generic.IReadOnlyCollection<UpgradePickup> ActivePickups => activePickups;
 
         void Awake()
         {
@@ -64,6 +68,7 @@ namespace FF
             }
             consumed = false;
             isDespawning = false;
+            activePickups.Add(this);
         }
 
         void Update()
@@ -101,6 +106,16 @@ namespace FF
             PlayPickupSound();
             SpawnPickupFx();
             TriggerCollected();
+        }
+
+        void OnDisable()
+        {
+            activePickups.Remove(this);
+        }
+
+        void OnDestroy()
+        {
+            activePickups.Remove(this);
         }
 
         public UpgradePickupEffect Effect => effect;
