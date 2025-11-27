@@ -264,6 +264,7 @@ namespace FF
                 string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
                 bullet.SetOwner(ownerTag);
                 bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
+                bullet.SetKnockback(_weapon.knockbackStrength, _weapon.knockbackDuration);
             }
         }
 

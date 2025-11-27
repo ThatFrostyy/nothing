@@ -10,6 +10,8 @@ namespace FF
         [SerializeField] float lifetime = 2f;
         [SerializeField] GameObject bloodFX;
         [SerializeField] LayerMask hitMask;
+        [SerializeField] float knockbackStrength = 0f;
+        [SerializeField] float knockbackDuration = 0.2f;
 
         int damage;
         float t;
@@ -20,6 +22,11 @@ namespace FF
         public void SetDamage(int d) => damage = d;
         public void SetOwner(string tag) => teamTag = tag;
         public void SetSpeed(float newSpeed) => speed = Mathf.Max(0.01f, newSpeed);
+        public void SetKnockback(float strength, float duration)
+        {
+            knockbackStrength = Mathf.Max(0f, strength);
+            knockbackDuration = Mathf.Max(0f, duration);
+        }
         public float BaseSpeed => baseSpeed;
 
         void Awake()
@@ -52,6 +59,13 @@ namespace FF
             {
                 hp.Damage(damage);
 
+                if (knockbackStrength > 0f && other.TryGetComponent<Enemy>(out var enemy) && teamTag == "Player")
+                {
+                    Vector2 direction = transform.right;
+                    Vector2 force = direction.normalized * knockbackStrength;
+                    enemy.ApplyKnockback(force, knockbackDuration);
+                }
+
                 if (bloodFX)
                 {
                     GameObject fx = PoolManager.Get(bloodFX, transform.position, Quaternion.identity);
@@ -82,6 +96,7 @@ namespace FF
             damage = 0;
             teamTag = null;
             speed = baseSpeed;
+            knockbackStrength = 0f;
         }
         #endregion Pooling
     }

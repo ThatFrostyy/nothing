@@ -192,11 +192,9 @@ namespace FF
             float targetTilt = speed > 0.1f ? -_bodyTiltDegrees * normalizedSpeed : _bodyTiltDegrees * 0.3f;
             if (velocity.sqrMagnitude > 0.01f)
             {
-                float moveX = velocity.normalized.x;
+                float moveX = Mathf.Clamp(velocity.normalized.x, -1f, 1f);
 
-                float facing = _playerVisual.localScale.x < 0f ? -1f : 1f;
-
-                float sideTilt = moveX * facing * (_bodyTiltDegrees * 0.5f);
+                float sideTilt = moveX * (_bodyTiltDegrees * 0.5f);
                 targetTilt += sideTilt;
             }
 

@@ -31,6 +31,10 @@ namespace FF
         public bool isAuto = true;
         public float fireCooldown = 0.1f; // for semi-auto
 
+        [Header("Impact")]
+        public float knockbackStrength = 0f;
+        public float knockbackDuration = 0.2f;
+
         [Header("Accuracy / Spread")]
         public float baseSpread = 1.5f;           // degrees
         public float maxSpread = 6f;              // degrees (auto increases up to this)

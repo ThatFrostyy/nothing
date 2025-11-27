@@ -107,9 +107,13 @@ namespace FF
         private Vector2 knockbackVelocity;
         private Vector2 _lastAimDirection = Vector2.right;
 
+        private static readonly System.Collections.Generic.HashSet<Enemy> activeBosses = new();
+
         private const float FacingDeadZone = 0.05f;
 
         public bool IsBoss => isBoss;
+
+        public static System.Collections.Generic.IReadOnlyCollection<Enemy> ActiveBosses => activeBosses;
 
         public void Initialize(Transform player)
         {
@@ -119,7 +123,20 @@ namespace FF
 
         public void SetIsBoss(bool value)
         {
+            UpdateBossRegistration(value);
             isBoss = value;
+        }
+
+        private void UpdateBossRegistration(bool targetState)
+        {
+            if (targetState)
+            {
+                activeBosses.Add(this);
+            }
+            else
+            {
+                activeBosses.Remove(this);
+            }
         }
 
         public void ApplyWaveModifiers(EnemyWaveModifiers modifiers)
@@ -359,6 +376,11 @@ namespace FF
                 _health.OnDamaged += HandleDamaged;
             }
 
+            if (isBoss)
+            {
+                activeBosses.Add(this);
+            }
+
             if (_dogJumpRoutine != null)
             {
                 StopCoroutine(_dogJumpRoutine);
@@ -377,6 +399,8 @@ namespace FF
                 _health.OnDamaged -= HandleDamaged;
             }
 
+            activeBosses.Remove(this);
+
             if (_dogJumpRoutine != null)
             {
                 StopCoroutine(_dogJumpRoutine);
@@ -384,6 +408,11 @@ namespace FF
             }
 
             _dogAttackOffset = Vector3.zero;
+        }
+
+        void OnDestroy()
+        {
+            activeBosses.Remove(this);
         }
 
         #region Movement
