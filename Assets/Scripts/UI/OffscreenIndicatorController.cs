@@ -44,6 +44,30 @@ namespace FF
             CleanupUnusedIndicators();
         }
 
+        void OnEnable()
+        {
+            foreach (var kvp in activeIndicators)
+            {
+                if (kvp.Value)
+                    Destroy(kvp.Value.gameObject);
+            }
+
+            activeIndicators.Clear();
+            seenThisFrame.Clear();
+        }
+
+        void OnDisable()
+        {
+            foreach (var kvp in activeIndicators)
+            {
+                if (kvp.Value)
+                    Destroy(kvp.Value.gameObject);
+            }
+
+            activeIndicators.Clear();
+            seenThisFrame.Clear();
+        }
+
         private void RefreshIndicators(IEnumerable<UpgradePickup> pickups, RectTransform prefab)
         {
             if (prefab == null || pickups == null)

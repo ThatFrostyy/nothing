@@ -26,6 +26,7 @@ namespace FF
         [SerializeField] private float _tiltSmoothTime = 0.07f;
         [SerializeField] private float _idleSwayFrequency = 6f;
         [SerializeField] private float _idleSwayAmplitude = 1.2f;
+        [SerializeField] private bool _enableTilt = true;
 
         [Header("Bounds Settings")]
         [SerializeField] private float _boundsPadding = 0.05f;
@@ -183,6 +184,13 @@ namespace FF
         private void UpdateBodyTilt()
         {
             if (!_playerVisual) return;
+
+            // NEW: allow tilt to be completely disabled
+            if (!_enableTilt)
+            {
+                _playerVisual.localRotation = Quaternion.Euler(0f, 0f, 0f);
+                return;
+            }
 
             Vector2 velocity = _rigidbody.linearVelocity;
             float speed = velocity.magnitude;
