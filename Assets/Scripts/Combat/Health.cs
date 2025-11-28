@@ -137,7 +137,7 @@ namespace FF
             {
                 hp = Mathf.Clamp(hp, 0, baseMaxHP);
             }
-            OnHealthChanged?.Invoke(hp, baseMaxHP);
+            OnHealthChanged?.Invoke(hp, maxHP);
         }
         #endregion Resetting
 

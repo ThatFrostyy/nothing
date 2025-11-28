@@ -429,7 +429,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98d3a625de20a5a4e964bb3d8eb1c036, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Health
-  maxHP: 1
+  maxHP: 50
 --- !u!114 &2065102623061516545
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -440,7 +440,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 28ae2bbb4980db943a3c230b25f65a8a, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponCrate
   dropPoint: {fileID: 8732419302471801801}
   pickupPool:
@@ -454,7 +454,7 @@ MonoBehaviour:
   pickupLifetimeSeconds: 30
   lifetimeSeconds: 45
   breakFx: {fileID: 0}
-  breakSfx: {fileID: 0}
+  breakSfx: {fileID: 8300000, guid: 4edcebeef040c57458dda659d0ea90c5, type: 3}
 --- !u!61 &7582976024857831151
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -538,7 +538,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3893357492255255288}
   - component: {fileID: 7176364513568103986}
-  - component: {fileID: 4619581486637716275}
+  - component: {fileID: 5116806420268807479}
   m_Layer: 5
   m_Name: HP
   m_TagString: Untagged
@@ -579,7 +579,7 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 0
   m_IgnoreParentGroups: 0
---- !u!114 &4619581486637716275
+--- !u!114 &5116806420268807479
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

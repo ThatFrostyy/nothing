@@ -135,7 +135,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98d3a625de20a5a4e964bb3d8eb1c036, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Health
-  maxHP: 65
+  maxHP: 100
 --- !u!114 &4581896921814132004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,6 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f67e22903008e4e8c6c8f3c6ec685b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
+  simpleFollowTest: 0
   startingWeapon: {fileID: 11400000, guid: 31af79cde5fc25d448a3e2b57ed482a6, type: 2}
   weaponManager: {fileID: 2732250641099454731}
   autoShooter: {fileID: 9105323423674479412}

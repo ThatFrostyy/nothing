@@ -43,7 +43,14 @@ namespace FF
                 health.OnHealthChanged += HandleHealthChanged;
                 HandleHealthChanged(health.CurrentHP, health.MaxHP);
             }
+
+            if (canvasGroup)
+            {
+                canvasGroup.alpha = 1f;
+                _lastVisibleTime = Time.time;
+            }
         }
+
 
         void OnDisable()
         {
@@ -86,23 +93,9 @@ namespace FF
 
         void UpdateVisibility()
         {
-            if (!canvasGroup)
-            {
-                return;
-            }
-
-            float targetAlpha = 0f;
-
-            if (fillImage && fillImage.fillAmount < 0.999f)
-            {
-                targetAlpha = 1f;
-            }
-            else if (Time.time - _lastVisibleTime < hideDelay)
-            {
-                targetAlpha = 1f;
-            }
-
-            canvasGroup.alpha = Mathf.MoveTowards(canvasGroup.alpha, targetAlpha, Time.deltaTime * fadeSpeed);
+            if (!canvasGroup) return;
+            canvasGroup.alpha = 1f;  
         }
+
     }
 }
