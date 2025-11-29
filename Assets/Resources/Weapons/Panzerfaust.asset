@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
-  m_Name: RocketLauncher
+  m_Name: Panzerfaust
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: Rocket Launcher
-  fireSFX: {fileID: 0}
-  muzzleFlash: {fileID: 0}
+  weaponName: Panzerfaust
+  fireSFX: {fileID: 8300000, guid: 2dbfacb69e26e6943b3a7244026c1f1f, type: 3}
+  muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
   ejectParticles: {fileID: 0}
   recoilAmount: 8
   recoilRecoverySpeed: 8
@@ -24,10 +24,12 @@ MonoBehaviour:
   bulletPrefab: {fileID: 1314581820453278891, guid: 3f94969adeca4d6bbf0eeebb0a86d6ed, type: 3}
   weaponPrefab: {fileID: 4828527644075721740, guid: 91a17dd89e5496640b35866ba7e2f9a2, type: 3}
   rpm: 75
-  damage: 75
+  damage: 50
   recoilKick: 5
   isAuto: 0
-  fireCooldown: 1.2
+  fireCooldown: 1.5
+  knockbackStrength: 0
+  knockbackDuration: 0.2
   baseSpread: 1.2
   maxSpread: 3.5
   spreadIncreasePerShot: 0.5

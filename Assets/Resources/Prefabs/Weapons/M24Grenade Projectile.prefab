@@ -169,7 +169,9 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   explosionFX: {fileID: 2433282508537954060, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
-  explosionSFX: {fileID: 8300000, guid: 0a6b52a818f5223479c5efb0195913c0, type: 3}
+  explosionSFX: {fileID: 8300000, guid: 4fc5950ffa93aed4792036b38200ffd0, type: 3}
+  explodeOnImpact: 0
+  explodeOnLanding: 0
   landingFX: {fileID: 3432958286849152088, guid: 87ee7299dd44ed747af24dbb91bcd33b, type: 3}
   landingSFX: {fileID: 8300000, guid: ca7816b0159d12446a5ff3a1b304fb70, type: 3}
 --- !u!70 &-3617111360095100745

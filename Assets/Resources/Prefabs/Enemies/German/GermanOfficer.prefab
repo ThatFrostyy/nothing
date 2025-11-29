@@ -189,6 +189,9 @@ MonoBehaviour:
   xpOrbValue: 3
   xpOrbCount: 4
   xpOrbSpreadRadius: 1
+  bossWeaponDropPrefabs:
+  - {fileID: 2392108840699155933, guid: 35df915de39386444912f19c26a57108, type: 3}
+  - {fileID: 954479531348738314, guid: 10611e9bd10067340b08a734943f0066, type: 3}
   avoidanceLayers:
     serializedVersion: 2
     m_Bits: 128

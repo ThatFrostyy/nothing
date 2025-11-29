@@ -117,7 +117,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f67e22903008e4e8c6c8f3c6ec685b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
-  startingWeapon: {fileID: 0}
+  simpleFollowTest: 0
+  startingWeapon: {fileID: 11400000, guid: 1d694cc740c04310a81cae732b2c2b3c, type: 2}
   weaponManager: {fileID: 5683427355363540241}
   autoShooter: {fileID: 533273636657755474}
   gunPivot: {fileID: 2574021181978823624}
@@ -157,6 +158,7 @@ MonoBehaviour:
   xpOrbValue: 2
   xpOrbCount: 2
   xpOrbSpreadRadius: 1
+  bossWeaponDropPrefabs: []
   avoidanceLayers:
     serializedVersion: 2
     m_Bits: 128
