@@ -129,6 +129,8 @@ namespace FF
             stats = null;
             wallet = null;
             ui = null;
+
+            UpgradeUI.ResetStaticState();
         }
 
         public void ResetState()

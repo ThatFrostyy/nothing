@@ -31,6 +31,11 @@ namespace FF
             panel.SetActive(false);
         }
 
+        void OnDestroy()
+        {
+            ResetStaticState();
+        }
+
         void Pick(Upgrade u)
         {
             callback?.Invoke(u);
@@ -85,6 +90,20 @@ namespace FF
             {
                 IsShowing = false;
                 OnVisibilityChanged?.Invoke(false);
+            }
+        }
+
+        internal static void ResetStaticState()
+        {
+            if (IsShowing)
+            {
+                IsShowing = false;
+                OnVisibilityChanged?.Invoke(false);
+            }
+
+            if (Mathf.Abs(Time.timeScale) < Mathf.Epsilon)
+            {
+                Time.timeScale = 1f;
             }
         }
     }
