@@ -52,10 +52,7 @@ namespace FF
 
         public void ReloadCurrentScene()
         {
-            if (GameManager.I != null)
-            {
-                GameManager.I.ResetGameState();
-            }
+            ResetPersistentState();
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
