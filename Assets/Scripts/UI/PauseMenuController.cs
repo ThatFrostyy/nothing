@@ -160,6 +160,8 @@ namespace FF
         {
             float targetScale = Mathf.Approximately(_previousTimeScale, 0f) ? 1f : _previousTimeScale;
             Time.timeScale = targetScale;
+
+            KillSlowMotion.EnsureRestoredAfterPause();
         }
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)

@@ -116,6 +116,19 @@ namespace FF
             _restoreDeferred = false;
         }
 
+        public static void EnsureRestoredAfterPause()
+        {
+            if (_instance == null)
+            {
+                return;
+            }
+
+            if (_instance._restoreDeferred)
+            {
+                _instance.RestoreTimeScale();
+            }
+        }
+
         private void Update()
         {
             if (_restoreDeferred && !PauseMenuController.IsMenuOpen)
