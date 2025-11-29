@@ -77,6 +77,7 @@ namespace FF
             I = this;
             DontDestroyOnLoad(gameObject);
 
+            TryResolveUI();
             NotifyPendingChanged();
         }
 
@@ -108,6 +109,18 @@ namespace FF
         {
             ui = upgradeUI;
             OnUIRegistered?.Invoke(upgradeUI);
+        }
+
+        void TryResolveUI()
+        {
+            if (ui == null)
+            {
+                ui = FindFirstObjectByType<UpgradeUI>();
+                if (ui != null)
+                {
+                    OnUIRegistered?.Invoke(ui);
+                }
+            }
         }
 
         public void ClearSceneReferences()
@@ -162,6 +175,8 @@ namespace FF
 
         public void TryOpenUpgradeMenu()
         {
+            TryResolveUI();
+
             if (ui == null || UpgradeUI.IsShowing)
             {
                 return;

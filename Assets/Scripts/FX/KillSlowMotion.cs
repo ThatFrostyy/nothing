@@ -27,6 +27,7 @@ namespace FF
         private readonly List<float> _recentKillTimes = new();
         private Coroutine _slowmoRoutine;
         private Coroutine _bannerRoutine;
+        private bool _restoreDeferred;
 
         private CanvasGroup _bannerGroup;
         private TextMeshProUGUI _bannerText;
@@ -105,7 +106,22 @@ namespace FF
 
         private void RestoreTimeScale()
         {
+            if (PauseMenuController.IsMenuOpen)
+            {
+                _restoreDeferred = true;
+                return;
+            }
+
             Time.timeScale = 1f;
+            _restoreDeferred = false;
+        }
+
+        private void Update()
+        {
+            if (_restoreDeferred && !PauseMenuController.IsMenuOpen)
+            {
+                RestoreTimeScale();
+            }
         }
 
         private void BuildBannerUI()
