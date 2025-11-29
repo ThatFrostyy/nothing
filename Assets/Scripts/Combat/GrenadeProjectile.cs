@@ -23,6 +23,10 @@ namespace FF
         [SerializeField] private GameObject explosionFX;
         [SerializeField] private AudioClip explosionSFX;
 
+        [Header("Audio")]
+        [SerializeField] private AudioClip flightLoopSFX;
+        [SerializeField, Range(0f, 1f)] private float flightLoopVolume = 0.8f;
+
         [Header("Impact Behaviour")]
         [SerializeField] private bool explodeOnImpact = false;
         [SerializeField] private bool explodeOnLanding = false;
@@ -49,6 +53,7 @@ namespace FF
         private float _activeSlowdown;
         private Vector2 _movementDirection;
         private float _baseLaunchSpeed;
+        private AudioSource _flightLoopSource;
 
         public int BaseDamage => baseDamage;
 
@@ -60,6 +65,14 @@ namespace FF
             {
                 _poolToken = gameObject.AddComponent<PoolToken>();
             }
+
+            _flightLoopSource = GetComponent<AudioSource>();
+            if (!_flightLoopSource)
+            {
+                _flightLoopSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            ConfigureFlightLoopSource();
 
             _baseLaunchSpeed = Mathf.Max(0.1f, launchSpeed);
         }
@@ -102,6 +115,8 @@ namespace FF
                 _currentSpeed = speed;
                 _body.linearVelocity = _movementDirection * _currentSpeed;
             }
+
+            StartFlightLoop();
         }
 
         private void Update()
@@ -200,6 +215,8 @@ namespace FF
 
             _hasPlayedLanding = true;
 
+            StopFlightLoop();
+
             if (landingFX)
             {
                 GameObject fx = PoolManager.Get(landingFX, point, Quaternion.identity);
@@ -225,6 +242,8 @@ namespace FF
 
             _hasExploded = true;
             Vector3 position = transform.position;
+
+            StopFlightLoop();
 
             if (explosionFX)
             {
@@ -325,6 +344,7 @@ namespace FF
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
+            StopFlightLoop();
             if (_body)
             {
                 _body.linearVelocity = Vector2.zero;
@@ -343,11 +363,49 @@ namespace FF
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
+            StopFlightLoop();
             if (_body)
             {
                 _body.linearVelocity = Vector2.zero;
                 _body.angularVelocity = 0f;
             }
+        }
+
+        private void StartFlightLoop()
+        {
+            if (!_flightLoopSource || !flightLoopSFX)
+            {
+                return;
+            }
+
+            _flightLoopSource.outputAudioMixerGroup = _audioMixer;
+            _flightLoopSource.clip = flightLoopSFX;
+            _flightLoopSource.loop = true;
+            _flightLoopSource.spatialBlend = Mathf.Clamp01(_audioSpatialBlend);
+            _flightLoopSource.volume = Mathf.Clamp01(flightLoopVolume * _audioVolume);
+            _flightLoopSource.pitch = _audioPitch;
+            _flightLoopSource.Play();
+        }
+
+        private void StopFlightLoop()
+        {
+            if (_flightLoopSource)
+            {
+                _flightLoopSource.Stop();
+            }
+        }
+
+        private void ConfigureFlightLoopSource()
+        {
+            if (!_flightLoopSource)
+            {
+                return;
+            }
+
+            _flightLoopSource.playOnAwake = false;
+            _flightLoopSource.loop = true;
+            _flightLoopSource.spatialBlend = 0f;
+            _flightLoopSource.volume = Mathf.Clamp01(flightLoopVolume);
         }
 
         private static bool IsLayerInMask(int layer, LayerMask mask)
