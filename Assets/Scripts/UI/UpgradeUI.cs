@@ -23,10 +23,20 @@ namespace FF
 
         void Start()
         {
-            if (UpgradeManager.I != null)
-                UpgradeManager.I.RegisterUI(this);
-
             panel.SetActive(false);
+        }
+
+        void OnEnable()
+        {
+            if (UpgradeManager.I != null)
+            {
+                UpgradeManager.I.RegisterUI(this);
+                Debug.Log("UpgradeUI registered with UpgradeManager.");
+            }
+            else
+            {
+                Debug.LogWarning("UpgradeManager instance not found when UpgradeUI enabled.");
+            }
         }
 
         void Pick(Upgrade u)

@@ -170,6 +170,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   explosionFX: {fileID: 2433282508537954060, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
   explosionSFX: {fileID: 8300000, guid: 0a6b52a818f5223479c5efb0195913c0, type: 3}
+  flightLoopSFX: {fileID: 8300000, guid: 9b527a2506468874080fc967374b5c88, type: 3}
+  flightLoopVolume: 1
   explodeOnImpact: 1
   explodeOnLanding: 1
   landingFX: {fileID: 3432958286849152088, guid: 87ee7299dd44ed747af24dbb91bcd33b, type: 3}

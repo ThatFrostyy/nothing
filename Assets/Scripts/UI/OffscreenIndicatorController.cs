@@ -54,6 +54,11 @@ namespace FF
                     Destroy(kvp.Value.gameObject);
             }
 
+            if (!targetCamera)
+            {
+                targetCamera = Camera.main;
+            }
+
             activeIndicators.Clear();
             seenThisFrame.Clear();
         }

@@ -46,6 +46,7 @@ namespace FF
 
         public void LoadGameplayScene()
         {
+            UpgradeManager.I?.ClearSceneReferences();
             ApplyDefaultCharacterSelection();
             LoadScene(gameplaySceneName);
         }
