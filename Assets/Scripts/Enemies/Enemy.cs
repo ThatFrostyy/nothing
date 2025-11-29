@@ -65,6 +65,9 @@ namespace FF
         [SerializeField, Min(1)] private int xpOrbCount = 1;
         [SerializeField, Range(0f, 2f)] private float xpOrbSpreadRadius = 0.35f;
 
+        [Header("Boss Drops")]
+        [SerializeField] private WeaponPickup[] bossWeaponDropPrefabs;
+
         private int _baseXpOrbValue;
 
         [Header("Avoidance")]
@@ -904,6 +907,11 @@ namespace FF
 
             SpawnXPOrbs();
 
+            if (isBoss)
+            {
+                SpawnBossWeaponDrop();
+            }
+
             _dogAttackOffset = Vector3.zero;
 
             var handler = OnAnyEnemyKilled;
@@ -914,6 +922,34 @@ namespace FF
 
             PlayDeathSound();
             SpawnDeathFx();
+        }
+
+        private void SpawnBossWeaponDrop()
+        {
+            if (bossWeaponDropPrefabs == null || bossWeaponDropPrefabs.Length == 0)
+            {
+                return;
+            }
+
+            WeaponPickup selected = null;
+            int attempts = 0;
+            while (attempts < bossWeaponDropPrefabs.Length && !selected)
+            {
+                WeaponPickup candidate = bossWeaponDropPrefabs[UnityEngine.Random.Range(0, bossWeaponDropPrefabs.Length)];
+                if (candidate)
+                {
+                    selected = candidate;
+                }
+
+                attempts++;
+            }
+
+            if (!selected)
+            {
+                return;
+            }
+
+            Instantiate(selected, transform.position, Quaternion.identity);
         }
         #endregion Handlers
 

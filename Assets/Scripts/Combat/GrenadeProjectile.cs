@@ -23,6 +23,10 @@ namespace FF
         [SerializeField] private GameObject explosionFX;
         [SerializeField] private AudioClip explosionSFX;
 
+        [Header("Impact Behaviour")]
+        [SerializeField] private bool explodeOnImpact = false;
+        [SerializeField] private bool explodeOnLanding = false;
+
         [Header("Landing FX")]
         [SerializeField] private GameObject landingFX;
         [SerializeField] private AudioClip landingSFX;
@@ -140,12 +144,51 @@ namespace FF
                 return;
             }
 
-            if (((1 << collision.gameObject.layer) & landingLayers.value) == 0)
+            int layer = collision.gameObject.layer;
+
+            if (explodeOnImpact && IsLayerInMask(layer, damageLayers))
+            {
+                Explode();
+                return;
+            }
+
+            if (!IsLayerInMask(layer, landingLayers))
             {
                 return;
             }
 
-            PlayLanding(collision.GetContact(0).point);
+            if (explodeOnLanding)
+            {
+                Explode();
+            }
+            else
+            {
+                Vector2 contactPoint = collision.contactCount > 0
+                    ? collision.GetContact(0).point
+                    : collision.transform.position;
+                PlayLanding(contactPoint);
+            }
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (_hasExploded || !_isArmed)
+            {
+                return;
+            }
+
+            int layer = other.gameObject.layer;
+
+            if (explodeOnImpact && IsLayerInMask(layer, damageLayers))
+            {
+                Explode();
+                return;
+            }
+
+            if (explodeOnLanding && IsLayerInMask(layer, landingLayers))
+            {
+                Explode();
+            }
         }
 
         private void PlayLanding(Vector3 point)
@@ -305,6 +348,11 @@ namespace FF
                 _body.linearVelocity = Vector2.zero;
                 _body.angularVelocity = 0f;
             }
+        }
+
+        private static bool IsLayerInMask(int layer, LayerMask mask)
+        {
+            return ((1 << layer) & mask.value) != 0;
         }
 
 #if UNITY_EDITOR

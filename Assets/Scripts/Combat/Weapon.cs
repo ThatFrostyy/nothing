@@ -20,6 +20,9 @@ namespace FF
         public Sprite weaponIcon;
         public bool isSpecial;
 
+        [Header("Grenades")]
+        public bool useGrenadeCharging = true;
+
         [Header("Prefabs & Assets")]
         public GameObject bulletPrefab;
         public GameObject weaponPrefab;

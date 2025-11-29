@@ -20,6 +20,13 @@ namespace FF
         [SerializeField] private WeaponManager _weaponManager;
         [SerializeField] private Weapon _startingWeapon;
 
+        [Header("Aiming Line")]
+        [SerializeField] private bool _showAimingLine = true;
+        [SerializeField, Min(0.1f)] private float _aimLineLength = 2.5f;
+        [SerializeField, Min(0.01f)] private float _aimLineDashLength = 0.2f;
+        [SerializeField, Min(0.01f)] private float _aimLineGapLength = 0.12f;
+        [SerializeField, Min(0.005f)] private float _aimLineWidth = 0.05f;
+
         [Header("Movement Settings")]
         [SerializeField] private float _acceleration = 0.18f;
         [SerializeField] private float _bodyTiltDegrees = 15f;
@@ -37,6 +44,8 @@ namespace FF
         private Collider2D _collider;
         private bool _upgradeMenuOpen;
         private float _tiltVelocity;
+        private LineRenderer _aimLine;
+        private Vector2 _lastAimDirection = Vector2.right;
 
         private void Awake()
         {
@@ -69,6 +78,8 @@ namespace FF
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
+
+            InitializeAimLine();
         }
 
         private void Start()
@@ -177,6 +188,86 @@ namespace FF
             if (_playerVisual)
             {
                 _playerVisual.localScale = isAimingLeft ? new Vector3(-1f, 1f, 1f) : Vector3.one;
+            }
+
+            if (direction.sqrMagnitude > 0.0001f)
+            {
+                _lastAimDirection = direction.normalized;
+            }
+
+            UpdateAimLine();
+        }
+
+        private void InitializeAimLine()
+        {
+            if (!_showAimingLine || !_gunPivot)
+            {
+                return;
+            }
+
+            GameObject aimLineObject = new GameObject("AimLine");
+            aimLineObject.transform.SetParent(_gunPivot, false);
+            _aimLine = aimLineObject.AddComponent<LineRenderer>();
+            _aimLine.useWorldSpace = true;
+            _aimLine.textureMode = LineTextureMode.Tile;
+            _aimLine.alignment = LineAlignment.TransformZ;
+            _aimLine.numCapVertices = 0;
+            _aimLine.numCornerVertices = 0;
+            _aimLine.widthMultiplier = _aimLineWidth;
+            _aimLine.sortingOrder = 20;
+            _aimLine.enabled = false;
+
+            Material material = new Material(Shader.Find("Sprites/Default"));
+            material.color = new Color(1f, 1f, 1f, 0.85f);
+            material.mainTexture = CreateDottedTexture();
+            material.hideFlags = HideFlags.DontSave;
+            if (material.mainTexture)
+            {
+                material.mainTexture.wrapMode = TextureWrapMode.Repeat;
+                material.mainTexture.filterMode = FilterMode.Point;
+            }
+
+            _aimLine.material = material;
+        }
+
+        private Texture2D CreateDottedTexture()
+        {
+            Texture2D texture = new Texture2D(2, 1, TextureFormat.RGBA32, false);
+            texture.SetPixel(0, 0, Color.white);
+            texture.SetPixel(1, 0, new Color(1f, 1f, 1f, 0f));
+            texture.Apply();
+            texture.name = "AimLine_Dots";
+            texture.hideFlags = HideFlags.DontSave;
+            return texture;
+        }
+
+        private void UpdateAimLine()
+        {
+            if (_aimLine == null)
+            {
+                return;
+            }
+
+            bool hasWeaponEquipped = _weaponManager && _weaponManager.CurrentWeapon;
+            _aimLine.enabled = hasWeaponEquipped;
+            if (!hasWeaponEquipped)
+            {
+                return;
+            }
+
+            Transform origin = _weaponManager.CurrentMuzzle ? _weaponManager.CurrentMuzzle : _gunPivot;
+            Vector3 start = origin ? origin.position : _gunPivot.position;
+            Vector3 end = start + (Vector3)(_lastAimDirection.normalized * _aimLineLength);
+
+            _aimLine.positionCount = 2;
+            _aimLine.SetPosition(0, start);
+            _aimLine.SetPosition(1, end);
+
+            if (_aimLine.material && _aimLine.material.mainTexture)
+            {
+                float patternLength = Mathf.Max(0.01f, _aimLineDashLength + _aimLineGapLength);
+                float repeatCount = _aimLineLength / patternLength;
+                _aimLine.material.mainTextureScale = new Vector2(repeatCount, 1f);
             }
         }
 

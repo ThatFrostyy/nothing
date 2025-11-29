@@ -25,6 +25,7 @@ namespace FF
         public Weapon CurrentWeapon => currentSO;
         public int CurrentSlotIndex => currentSlotIndex;
         public int SlotCount => loadout.Length;
+        public Transform CurrentMuzzle => muzzle;
 
         public event Action<Weapon> OnWeaponEquipped;
         public event Action OnInventoryChanged;
