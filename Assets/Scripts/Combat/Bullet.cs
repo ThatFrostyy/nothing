@@ -9,6 +9,7 @@ namespace FF
         [SerializeField] float speed = 26f;
         [SerializeField] float lifetime = 2f;
         [SerializeField] GameObject bloodFX;
+        [SerializeField] GameObject crateFX;
         [SerializeField] LayerMask hitMask;
         [SerializeField] float knockbackStrength = 0f;
         [SerializeField] float knockbackDuration = 0.2f;
@@ -52,8 +53,6 @@ namespace FF
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            Debug.Log("Bullet hit: " + other.name + " layer=" + other.gameObject.layer);
-
             if (other.CompareTag(teamTag)) return;
             if (((1 << other.gameObject.layer) & hitMask) == 0) return;
 
@@ -68,7 +67,16 @@ namespace FF
                     enemy.ApplyKnockback(force, knockbackDuration);
                 }
 
-                if (bloodFX)
+                if (other.gameObject.layer.ToString() == "Crate" && crateFX)
+                {
+                    GameObject fx = PoolManager.Get(crateFX, transform.position, Quaternion.identity);
+                    if (fx && !fx.TryGetComponent<PooledParticleSystem>(out var pooled))
+                    {
+                        pooled = fx.AddComponent<PooledParticleSystem>();
+                        pooled.OnTakenFromPool();
+                    }
+                }
+                else if (bloodFX)
                 {
                     GameObject fx = PoolManager.Get(bloodFX, transform.position, Quaternion.identity);
                     if (fx && !fx.TryGetComponent<PooledParticleSystem>(out var pooled))

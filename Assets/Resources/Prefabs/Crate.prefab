@@ -335,7 +335,7 @@ GameObject:
   - component: {fileID: 2065102623061516545}
   - component: {fileID: 7582976024857831151}
   - component: {fileID: 8893735416255773986}
-  m_Layer: 7
+  m_Layer: 10
   m_Name: Crate
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -453,7 +453,7 @@ MonoBehaviour:
   - {fileID: 3785600660565315841, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
   pickupLifetimeSeconds: 30
   lifetimeSeconds: 45
-  breakFx: {fileID: 0}
+  breakFx: {fileID: 4374216279115908777, guid: f76c37ad9af25104bbc4acde32b01fa2, type: 3}
   breakSfx: {fileID: 8300000, guid: 4edcebeef040c57458dda659d0ea90c5, type: 3}
 --- !u!61 &7582976024857831151
 BoxCollider2D:
