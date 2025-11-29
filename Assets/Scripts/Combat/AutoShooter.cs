@@ -39,6 +39,7 @@ namespace FF
         private float _currentChargeProgress;
         private bool _isGrenadeWeapon;
         private bool _isChargingGrenade;
+        private bool _useGrenadeCharging;
 
         public event Action<float> OnCooldownChanged;
         public event Action<float> OnGrenadeChargeChanged;
@@ -71,7 +72,9 @@ namespace FF
             _ejectPos = eject;
             _currentSpread = _weapon.baseSpread;
             _isGrenadeWeapon = _weapon && _weapon.bulletPrefab && _weapon.bulletPrefab.TryGetComponent<GrenadeProjectile>(out _);
+            _useGrenadeCharging = _weapon && _weapon.useGrenadeCharging;
             SetGrenadeChargeProgress(0f);
+            _isChargingGrenade = false;
 
             SetCooldownProgress(1f);
 
@@ -92,6 +95,8 @@ namespace FF
             _muzzle = null;
             _ejectPos = null;
             _isGrenadeWeapon = false;
+            _useGrenadeCharging = false;
+            _isChargingGrenade = false;
             SetCooldownProgress(1f);
             SetGrenadeChargeProgress(0f);
         }
@@ -170,7 +175,7 @@ namespace FF
                 interval *= Mathf.Max(0.1f, cooldownMultiplier);
             }
 
-            if (_isGrenadeWeapon)
+            if (_isGrenadeWeapon && _useGrenadeCharging)
             {
                 HandleGrenadeCharging(interval, deltaTime);
             }

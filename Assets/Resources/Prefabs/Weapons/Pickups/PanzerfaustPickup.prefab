@@ -105,7 +105,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 535d2730c382ea441a34ada841a678ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponPickup
-  weaponData: {fileID: 0}
+  weaponData: {fileID: 11400000, guid: 1d694cc740c04310a81cae732b2c2b3c, type: 2}
   hoverAmplitude: 0.25
   hoverSpeed: 2
   rotationAmplitude: 5
