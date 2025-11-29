@@ -29,11 +29,6 @@ namespace FF
             }
         }
 
-        void OnEnable()
-        {
-            ResolveCamera();
-        }
-
         void LateUpdate()
         {
             if (!targetCamera)
@@ -55,15 +50,12 @@ namespace FF
 
         void OnEnable()
         {
+            ResolveCamera();
+
             foreach (var kvp in activeIndicators)
             {
                 if (kvp.Value)
                     Destroy(kvp.Value.gameObject);
-            }
-
-            if (!targetCamera)
-            {
-                targetCamera = Camera.main;
             }
 
             activeIndicators.Clear();
