@@ -19,10 +19,7 @@ namespace FF
 
         void Awake()
         {
-            if (!targetCamera)
-            {
-                targetCamera = Camera.main;
-            }
+            ResolveCamera();
 
             parentCanvas = indicatorContainer ? indicatorContainer.GetComponentInParent<Canvas>() : GetComponentInParent<Canvas>();
 
@@ -32,8 +29,18 @@ namespace FF
             }
         }
 
+        void OnEnable()
+        {
+            ResolveCamera();
+        }
+
         void LateUpdate()
         {
+            if (!targetCamera)
+            {
+                ResolveCamera();
+            }
+
             if (!targetCamera || indicatorContainer == null)
             {
                 return;
@@ -212,6 +219,14 @@ namespace FF
 
             float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
             indicator.localRotation = Quaternion.Euler(0f, 0f, angle);
+        }
+
+        void ResolveCamera()
+        {
+            if (targetCamera == null)
+            {
+                targetCamera = Camera.main;
+            }
         }
     }
 }
