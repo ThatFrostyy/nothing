@@ -5382,6 +5382,8 @@ MonoBehaviour:
   _aimLineDashLength: 0.2
   _aimLineGapLength: 0.12
   _aimLineWidth: 0.05
+  _aimLineOffsetX: 0.1
+  _aimLineOffsetY: 0.05
   _acceleration: 0.18
   _bodyTiltDegrees: 10
   _tiltSmoothTime: 0.07
