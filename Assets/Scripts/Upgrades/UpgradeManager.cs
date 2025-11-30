@@ -120,7 +120,6 @@ namespace FF
             }
         }
 
-
         public void RegisterPlayerStats(PlayerStats playerStats)
         {
             stats = playerStats;
@@ -520,26 +519,61 @@ namespace FF
             return baseBonus + killBonus + stackBonus;
         }
 
-        WeaponUpgradeOption CreateWeaponUpgradeOption(Weapon weapon, WeaponUpgradeType type, float magnitude, int killCount, int cardsTaken)
+        WeaponUpgradeOption CreateWeaponUpgradeOption(
+    Weapon weapon,
+    WeaponUpgradeType type,
+    float magnitude,
+    int killCount,
+    int cardsTaken)
         {
-            string weaponName = weapon != null && !string.IsNullOrEmpty(weapon.weaponName)
-                ? weapon.weaponName
-                : weapon != null ? weapon.name : "Weapon";
-
-            string statLabel = type switch
-            {
-                WeaponUpgradeType.Damage => "Damage",
-                WeaponUpgradeType.FireRate => "Fire Rate",
-                WeaponUpgradeType.ProjectileSpeed => "Projectile Speed",
-                _ => "Power"
-            };
+            string weaponName = weapon != null ? weapon.weaponName : "Weapon";
 
             int percentage = Mathf.RoundToInt(magnitude * 100f);
-            string title = $"{weaponName} {statLabel}+";
-            string description = $"Boost {weaponName} {statLabel.ToLower()} by {percentage}% (kills: {killCount}, stacks: {cardsTaken + 1}).";
 
-            return new WeaponUpgradeOption(weapon, type, magnitude, title, description);
+            // Titles (NO COLOR — clean text)
+            string baseTitle = type switch
+            {
+                WeaponUpgradeType.Damage => "Damage Boost",
+                WeaponUpgradeType.FireRate => "Fire Rate Boost",
+                WeaponUpgradeType.ProjectileSpeed => "Bullet Speed Boost",
+                _ => "Upgrade"
+            };
+
+            // Base descriptions (default UI color)
+            string baseDescription = type switch
+            {
+                WeaponUpgradeType.Damage => "Increase weapon damage by ",
+                WeaponUpgradeType.FireRate => "Shoot faster by ",
+                WeaponUpgradeType.ProjectileSpeed => "Increase bullet velocity by ",
+                _ => "Boost weapon performance by "
+            };
+
+            // Choose % color per upgrade type
+            string percentColor = type switch
+            {
+                WeaponUpgradeType.Damage => "#FF4040",         
+                WeaponUpgradeType.FireRate => "#D17A22",       
+                WeaponUpgradeType.ProjectileSpeed => "#DBBE50",
+                _ => "#FFD966"
+            };
+
+            // Build the colored % value
+            string coloredPercent = $"<color={percentColor}>+{percentage}%</color>.";
+
+            // Kills (default UI color)
+            string extra = $"(Kills: {killCount})";
+
+            return new WeaponUpgradeOption(
+                weapon,
+                type,
+                magnitude,
+                baseTitle,
+                baseDescription + coloredPercent,   // but UI uses this only in main description
+                baseTitle,                          // final title = same as base title (NO COLOR)
+                extra                                // final description shown in EXTRA field
+            );
         }
+
 
         WeaponUpgradeState GetOrCreateWeaponState(Weapon weapon)
         {

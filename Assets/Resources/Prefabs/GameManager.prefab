@@ -75,6 +75,7 @@ MonoBehaviour:
   stats: {fileID: 0}
   wallet: {fileID: 0}
   ui: {fileID: 0}
+  weaponManager: {fileID: 0}
   maxUpgradeSelections: 30
 --- !u!114 &7492380447983614614
 MonoBehaviour:
@@ -91,3 +92,7 @@ MonoBehaviour:
   mainMenuSceneName: MainMenu
   gameplaySceneName: Main
   persistAcrossScenes: 1
+  defaultCharacter: {fileID: 0}
+  defaultHat: {fileID: 0}
+  defaultWeapon: {fileID: 0}
+  applyDefaultSelection: 1

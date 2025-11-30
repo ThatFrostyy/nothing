@@ -15,18 +15,32 @@ namespace FF
         public Weapon Weapon;
         public WeaponUpgradeType Type;
         public float Magnitude;
-        public string Title;
-        public string Description;
 
-        public WeaponUpgradeOption(Weapon weapon, WeaponUpgradeType type, float magnitude, string title, string description)
+        public string BaseTitle;       // YOU fill this in inspector or code
+        public string BaseDescription; // YOU fill this
+        public string FinalTitle;      // auto-generated output
+        public string FinalDescription;
+
+        public WeaponUpgradeOption(
+            Weapon weapon,
+            WeaponUpgradeType type,
+            float magnitude,
+            string baseTitle,
+            string baseDescription,
+            string finalTitle,
+            string finalDescription)
         {
             Weapon = weapon;
             Type = type;
             Magnitude = magnitude;
-            Title = title;
-            Description = description;
+
+            BaseTitle = baseTitle;
+            BaseDescription = baseDescription;
+            FinalTitle = finalTitle;
+            FinalDescription = finalDescription;
         }
     }
+
 
     public class WeaponUpgradeState
     {

@@ -11,6 +11,7 @@ namespace FF
         [SerializeField] Button aBtn, bBtn, cBtn;
         [SerializeField] TMPro.TMP_Text aTitle, bTitle, cTitle;
         [SerializeField] TMPro.TMP_Text aTxt, bTxt, cTxt;
+        [SerializeField] TMPro.TMP_Text aExtra, bExtra, cExtra; // NEW
         [SerializeField] TMPro.TMP_Text upgradesRemainingText;
         [SerializeField] TMPro.TMP_Text phaseTitleText;
         [SerializeField] RectTransform[] cardRoots;
@@ -66,6 +67,10 @@ namespace FF
 
         public void Show(Upgrade A, Upgrade B, Upgrade C, Action<Upgrade> onPick, int pendingUpgrades)
         {
+            aExtra.gameObject.SetActive(false);
+            bExtra.gameObject.SetActive(false);
+            cExtra.gameObject.SetActive(false);
+
             showingWeaponCards = false;
             a = A; b = B; c = C; callback = onPick;
 
@@ -107,13 +112,24 @@ namespace FF
 
             string weaponName = weapon != null && !string.IsNullOrEmpty(weapon.weaponName) ? weapon.weaponName : weapon != null ? weapon.name : "Weapon";
 
-            aTitle.text = $"{A.Title}\n";
-            bTitle.text = $"{B.Title}\n";
-            cTitle.text = $"{C.Title}\n";
+            // Normal text (keeps user-made formatting)
+            aTitle.text = A.BaseTitle;
+            bTitle.text = B.BaseTitle;
+            cTitle.text = C.BaseTitle;
 
-            aTxt.text = A.Description;
-            bTxt.text = B.Description;
-            cTxt.text = C.Description;
+            aTxt.text = A.BaseDescription;
+            bTxt.text = B.BaseDescription;
+            cTxt.text = C.BaseDescription;
+
+            // Show only the bonus line in the new 'Extra' fields
+            aExtra.gameObject.SetActive(true);
+            bExtra.gameObject.SetActive(true);
+            cExtra.gameObject.SetActive(true);
+
+            aExtra.text = A.FinalDescription; // only % and kills
+            bExtra.text = B.FinalDescription;
+            cExtra.text = C.FinalDescription;
+
 
             UpdatePhaseHeader(weaponName);
             UpdateRemainingLabel(pendingUpgrades);
