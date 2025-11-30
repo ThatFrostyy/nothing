@@ -12,7 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 639b2135e5fe44a489165be878c19319, type: 3}
   m_Name: WeaponFireRate
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
-  Title: Damage Upgrade
-  DescriptionPrefix: 'Increase weapon damage by '
-  Type: 0
-  percentColor: '#FF4040'
+  Title: Fire Rate Upgrade
+  DescriptionPrefix: 'Increase weapon fire rate by '
+  Type: 1
+  percentColor: '#D17A22'
+  allowedClasses: -1
+  onlyForSemiAuto: 0

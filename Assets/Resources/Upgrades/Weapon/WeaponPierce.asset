@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 639b2135e5fe44a489165be878c19319, type: 3}
-  m_Name: WeaponBulletSpeed
+  m_Name: WeaponPierce
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
-  Title: Bullet Speed Upgrade
-  DescriptionPrefix: 'Increase weapon projectile speed by '
-  Type: 2
-  percentColor: '#DBBE50'
-  allowedClasses: -1
+  Title: Pierce Upgrade
+  DescriptionPrefix: 'Increase weapon pierce count by '
+  Type: 3
+  percentColor: '#0060BC'
+  allowedClasses: 6
   onlyForSemiAuto: 0

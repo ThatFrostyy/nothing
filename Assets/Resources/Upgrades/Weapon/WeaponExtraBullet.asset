@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 639b2135e5fe44a489165be878c19319, type: 3}
-  m_Name: WeaponBulletSpeed
+  m_Name: WeaponExtraBullet
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
-  Title: Bullet Speed Upgrade
-  DescriptionPrefix: 'Increase weapon projectile speed by '
-  Type: 2
-  percentColor: '#DBBE50'
-  allowedClasses: -1
+  Title: Extra Projectile Upgrade
+  DescriptionPrefix: 'Increase weapon projectile count by '
+  Type: 4
+  percentColor: '#D17A22'
+  allowedClasses: 18
   onlyForSemiAuto: 0

@@ -18,6 +18,7 @@ MonoBehaviour:
   ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
   recoilAmount: 6
   recoilRecoverySpeed: 10
+  weaponClass: 2
   weaponIcon: {fileID: 21300000, guid: 84655ba3141087b4da2985f59fdac5c0, type: 3}
   isSpecial: 0
   useGrenadeCharging: 1
