@@ -15,13 +15,18 @@ namespace FF
         [SerializeField] float knockbackDuration = 0.2f;
 
         int damage;
+        bool isCriticalDamage;
         float t;
         string teamTag;
         PoolToken poolToken;
         float baseSpeed;
         Weapon sourceWeapon;
 
-        public void SetDamage(int d) => damage = d;
+        public void SetDamage(int d, bool isCritical = false)
+        {
+            damage = d;
+            isCriticalDamage = isCritical;
+        }
         public void SetOwner(string tag) => teamTag = tag;
         public void SetSpeed(float newSpeed) => speed = Mathf.Max(0.01f, newSpeed);
         public void SetSourceWeapon(Weapon weapon) => sourceWeapon = weapon;
@@ -60,7 +65,7 @@ namespace FF
 
             if (other.TryGetComponent<Health>(out var hp))
             {
-                hp.Damage(damage, sourceWeapon);
+                hp.Damage(damage, sourceWeapon, isCriticalDamage);
 
                 if (knockbackStrength > 0f && other.TryGetComponent<Enemy>(out var enemy) && teamTag == "Player")
                 {
@@ -106,6 +111,7 @@ namespace FF
         {
             t = 0f;
             damage = 0;
+            isCriticalDamage = false;
             teamTag = null;
             speed = baseSpeed;
             knockbackStrength = 0f;

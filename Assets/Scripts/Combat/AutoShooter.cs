@@ -136,7 +136,7 @@ namespace FF
                 return;
             }
 
-            if (PauseMenuController.IsMenuOpen)
+            if (PauseMenuController.IsMenuOpen || Time.timeScale <= Mathf.Epsilon)
             {
                 SetFireHeld(false);
                 sustainedFireTime = 0f;
@@ -263,13 +263,13 @@ namespace FF
 
             if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
             {
-                float damageMultiplier = GetFinalDamageMultiplier(out _);
+                float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
                 float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
                 if (UpgradeManager.I != null)
                 {
                     projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
                 }
-                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier));
+                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier), isCrit);
                 string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
                 bullet.SetOwner(ownerTag);
                 bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
@@ -296,7 +296,7 @@ namespace FF
                 return false;
             }
 
-            float damageMultiplier = GetFinalDamageMultiplier(out _);
+            float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
             Vector2 direction = spreadRotation * Vector3.right;
             string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
             AudioMixerGroup mixer = _audioSource ? _audioSource.outputAudioMixerGroup : null;
@@ -314,7 +314,7 @@ namespace FF
                 ? Mathf.Max(0.1f, speedOverride.Value * projectileSpeedMultiplier)
                 : Mathf.Max(0.1f, baseLaunchSpeed * projectileSpeedMultiplier);
 
-            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch, null, finalLaunchSpeed, null, _weapon);
+            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch, null, finalLaunchSpeed, null, _weapon, isCrit);
             return true;
         }
 

@@ -43,6 +43,7 @@ namespace FF
         private bool _hasExploded;
         private bool _hasPlayedLanding;
         private int _pendingDamage;
+        private bool _isCriticalDamage;
         private string _ownerTag;
         private AudioMixerGroup _audioMixer;
         private float _audioSpatialBlend;
@@ -92,10 +93,12 @@ namespace FF
             float? fuseOverride = null,
             float? speedOverride = null,
             float? slowdownOverride = null,
-            Weapon sourceWeapon = null)
+            Weapon sourceWeapon = null,
+            bool isCriticalHit = false)
         {
             int sourceDamage = damageOverride >= 0 ? damageOverride : baseDamage;
             _pendingDamage = Mathf.Max(0, Mathf.RoundToInt(sourceDamage * Mathf.Max(0f, damageMultiplier)));
+            _isCriticalDamage = isCriticalHit;
             _ownerTag = ownerTag;
             _audioMixer = mixer;
             _audioSpatialBlend = spatialBlend;
@@ -304,7 +307,7 @@ namespace FF
 
                 if (_pendingDamage > 0 && hit.TryGetComponent<Health>(out var health))
                 {
-                    health.Damage(_pendingDamage, _sourceWeapon);
+                    health.Damage(_pendingDamage, _sourceWeapon, _isCriticalDamage);
                 }
 
                 Rigidbody2D hitBody = hit.attachedRigidbody;
@@ -343,6 +346,7 @@ namespace FF
             _fuseTimer = fuseDuration;
             _hasExploded = false;
             _hasPlayedLanding = false;
+            _isCriticalDamage = false;
             _isArmed = false;
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
@@ -361,6 +365,7 @@ namespace FF
             _ownerTag = null;
             _hasExploded = false;
             _hasPlayedLanding = false;
+            _isCriticalDamage = false;
             _fuseTimer = 0f;
             _isArmed = false;
             _currentSpeed = 0f;

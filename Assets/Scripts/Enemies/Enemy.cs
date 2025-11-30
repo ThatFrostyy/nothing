@@ -325,6 +325,15 @@ namespace FF
 
         private void Update()
         {
+            if (Time.timeScale <= Mathf.Epsilon)
+            {
+                if (autoShooter)
+                {
+                    autoShooter.SetFireHeld(false);
+                }
+                return;
+            }
+
             EnsurePlayerReference();
             AimAtPlayer();
             float deltaTime = Time.deltaTime;
