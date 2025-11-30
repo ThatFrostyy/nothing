@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Fresh Barrel
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Fresh Barrel
-  Description: <b>Your weapons cooldown rate is <color=#0060BC>+10%</color> faster.</b>
+  Description: Your weapons cooldown<color=#0060BC>+10%</color> faster.
   Type: 3
   Magnitude: 0.1
   Cap: 0.1
   MinValue: 0
   MaxStacks: 5
+  HealAmount: 25
   rarity: 1
   rarityWeightOverride: 0

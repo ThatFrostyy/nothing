@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Combat Sprint
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Combat Sprint
-  Description: <b>You move <color=#0060BC>+10%</color> faster.</b>
+  Description: You move <color=#0060BC>+10%</color> faster.
   Type: 2
   Magnitude: 0.1
   Cap: 0
   MinValue: 0
   MaxStacks: 8
+  HealAmount: 25
   rarity: 0
   rarityWeightOverride: 0

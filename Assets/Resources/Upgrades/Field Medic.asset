@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Field Medic
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Field Medic
-  Description: <b>Restore <color=#62BE50>35 HP</color>.</b>
+  Description: Restore <color=#62BE50>35 HP</color>.
   Type: 8
   Magnitude: 0
   Cap: 0

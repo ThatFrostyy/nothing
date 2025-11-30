@@ -15,4 +15,4 @@ MonoBehaviour:
   Title: Damage Upgrade
   DescriptionPrefix: 'Increase weapon damage by '
   Type: 0
-  percentColor: '#FFD966'
+  percentColor: '#FF4040'

@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Resilience
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Resilience
-  Description: <b>You gain <color=#62BE50>+10%</color> max HP.</b>
+  Description: You gain <color=#62BE50>+10%</color> max HP.
   Type: 7
   Magnitude: 0.1
   Cap: 0
   MinValue: 0
   MaxStacks: 8
+  HealAmount: 25
   rarity: 0
   rarityWeightOverride: 0

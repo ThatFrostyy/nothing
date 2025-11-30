@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Stopping Power
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Stopping Power
-  Description: <b>Your weapons deal <color=#FF4040>+10%</color> more damage.</b>
+  Description: Your weapons deal <color=#FF4040>+10%</color> more damage.
   Type: 0
   Magnitude: 0.1
   Cap: 750
   MinValue: 0
   MaxStacks: 8
+  HealAmount: 25
   rarity: 0
   rarityWeightOverride: 0

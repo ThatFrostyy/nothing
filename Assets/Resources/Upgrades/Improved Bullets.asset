@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Improved Bullets
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Improved Bullets
-  Description: <b>Your bullets move <color=#DBBE50>+10%</color> faster.</b>
+  Description: Your bullets move <color=#DBBE50>+10%</color> faster.
   Type: 4
   Magnitude: 0.1
   Cap: 0
   MinValue: 0
   MaxStacks: 8
+  HealAmount: 25
   rarity: 0
   rarityWeightOverride: 0

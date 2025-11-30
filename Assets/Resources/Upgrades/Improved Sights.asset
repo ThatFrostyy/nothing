@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Improved Sights
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Improved Sights
-  Description: <b>Your critical hits deal <color=#FF4040>+10%</color> more damage.</b>
+  Description: Your critical hits deal <color=#FF4040>+10%</color> more damage.
   Type: 6
   Magnitude: 0.1
   Cap: 0
   MinValue: 0
   MaxStacks: 5
+  HealAmount: 25
   rarity: 1
   rarityWeightOverride: 0
