@@ -47,7 +47,7 @@ namespace FF
                 if (TryGetComponent<Enemy>(out var enemy))
                 {
                     bool emphasize = isCritical || enemy.IsBoss || damageApplied >= Mathf.Max(10, maxHP * 0.35f);
-                    DamageNumberManager.ShowDamage(transform.position, damageApplied, emphasize);
+                    DamageNumberManager.ShowDamage(transform.position, amount, emphasize);
                 }
             }
 

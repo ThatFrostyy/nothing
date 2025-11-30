@@ -950,7 +950,7 @@ MonoBehaviour:
   damageNumberPrefab: {fileID: 6316204345962202603, guid: 3f65cb749f2e7dd47a6902e4057ff8b3, type: 3}
   normalColor: {r: 1, g: 0.366525, b: 0.06132078, a: 1}
   highlightColor: {r: 1, g: 0, b: 0, a: 1}
-  emphasizedScale: 0.5
+  emphasizedScale: 1
 --- !u!4 &301909244
 Transform:
   m_ObjectHideFlags: 0
