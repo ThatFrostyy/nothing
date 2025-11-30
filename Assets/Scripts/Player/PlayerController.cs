@@ -82,6 +82,11 @@ namespace FF
             Cursor.lockState = CursorLockMode.Confined;
 
             InitializeAimLine();
+
+            if (_upgradeManager && _weaponManager)
+            {
+                _upgradeManager.RegisterWeaponManager(_weaponManager);
+            }
         }
 
         private void Start()

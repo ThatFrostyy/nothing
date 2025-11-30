@@ -10,6 +10,7 @@ namespace FF
 
         int hp;
         int baseMaxHP;
+        Weapon lastDamageSourceWeapon;
 
         public System.Action<int> OnDamaged;
         public System.Action OnDeath;
@@ -24,12 +25,19 @@ namespace FF
             ResetHealth(true);
         }
 
-        public void Damage(int amount)
+        public Weapon LastDamageSourceWeapon => lastDamageSourceWeapon;
+
+        public void Damage(int amount, Weapon sourceWeapon = null)
         {
             if (amount <= 0) return;
 
             int previousHp = hp;
             hp = Mathf.Max(0, hp - amount);
+
+            if (sourceWeapon)
+            {
+                lastDamageSourceWeapon = sourceWeapon;
+            }
 
             int damageApplied = Mathf.Min(amount, previousHp);
             if (damageApplied > 0)
@@ -128,6 +136,8 @@ namespace FF
             {
                 CacheBaseValues();
             }
+
+            lastDamageSourceWeapon = null;
 
             if (refill)
             {

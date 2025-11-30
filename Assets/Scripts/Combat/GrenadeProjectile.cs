@@ -48,6 +48,7 @@ namespace FF
         private float _audioSpatialBlend;
         private float _audioVolume = 1f;
         private float _audioPitch = 1f;
+        private Weapon _sourceWeapon;
         private bool _isArmed;
         private float _currentSpeed;
         private float _activeSlowdown;
@@ -90,7 +91,8 @@ namespace FF
             float pitch = 1f,
             float? fuseOverride = null,
             float? speedOverride = null,
-            float? slowdownOverride = null)
+            float? slowdownOverride = null,
+            Weapon sourceWeapon = null)
         {
             int sourceDamage = damageOverride >= 0 ? damageOverride : baseDamage;
             _pendingDamage = Mathf.Max(0, Mathf.RoundToInt(sourceDamage * Mathf.Max(0f, damageMultiplier)));
@@ -104,6 +106,7 @@ namespace FF
             _hasExploded = false;
             _hasPlayedLanding = false;
             _activeSlowdown = Mathf.Max(0f, slowdownOverride ?? slowdownRate);
+            _sourceWeapon = sourceWeapon;
 
             float speed = Mathf.Max(0.1f, speedOverride ?? launchSpeed);
             if (_body)
@@ -301,7 +304,7 @@ namespace FF
 
                 if (_pendingDamage > 0 && hit.TryGetComponent<Health>(out var health))
                 {
-                    health.Damage(_pendingDamage);
+                    health.Damage(_pendingDamage, _sourceWeapon);
                 }
 
                 Rigidbody2D hitBody = hit.attachedRigidbody;
@@ -363,6 +366,7 @@ namespace FF
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
+            _sourceWeapon = null;
             StopFlightLoop();
             if (_body)
             {

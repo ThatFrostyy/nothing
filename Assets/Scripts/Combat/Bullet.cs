@@ -19,10 +19,12 @@ namespace FF
         string teamTag;
         PoolToken poolToken;
         float baseSpeed;
+        Weapon sourceWeapon;
 
         public void SetDamage(int d) => damage = d;
         public void SetOwner(string tag) => teamTag = tag;
         public void SetSpeed(float newSpeed) => speed = Mathf.Max(0.01f, newSpeed);
+        public void SetSourceWeapon(Weapon weapon) => sourceWeapon = weapon;
         public void SetKnockback(float strength, float duration)
         {
             knockbackStrength = Mathf.Max(0f, strength);
@@ -58,7 +60,7 @@ namespace FF
 
             if (other.TryGetComponent<Health>(out var hp))
             {
-                hp.Damage(damage);
+                hp.Damage(damage, sourceWeapon);
 
                 if (knockbackStrength > 0f && other.TryGetComponent<Enemy>(out var enemy) && teamTag == "Player")
                 {
@@ -107,6 +109,7 @@ namespace FF
             teamTag = null;
             speed = baseSpeed;
             knockbackStrength = 0f;
+            sourceWeapon = null;
         }
         #endregion Pooling
     }
