@@ -6,6 +6,15 @@ namespace FF
     [CreateAssetMenu(menuName = "FF/Weapon", fileName = "Weapon_")]
     public class Weapon : ScriptableObject
     {
+        public enum WeaponClass
+        {
+            General,
+            SemiRifle,
+            MG,
+            SMG,
+            Special
+        }
+
         [Header("Name")]
         public string weaponName;
 
@@ -15,6 +24,9 @@ namespace FF
         public GameObject ejectParticles;
         public float recoilAmount = 6f;
         public float recoilRecoverySpeed = 10f;
+
+        [Header("Classification")]
+        public WeaponClass weaponClass = WeaponClass.General;
 
         [Header("UI")]
         public Sprite weaponIcon;

@@ -6,7 +6,9 @@ namespace FF
     {
         Damage,
         FireRate,
-        ProjectileSpeed
+        ProjectileSpeed,
+        Pierce,
+        ExtraProjectiles
     }
 
     [System.Serializable]
@@ -50,6 +52,8 @@ namespace FF
         float damageBonus;
         float fireRateBonus;
         float projectileSpeedBonus;
+        int pierceCount;
+        int extraProjectiles;
 
         public WeaponUpgradeState(Weapon weapon)
         {
@@ -58,6 +62,8 @@ namespace FF
             damageBonus = 0f;
             fireRateBonus = 0f;
             projectileSpeedBonus = 0f;
+            pierceCount = 0;
+            extraProjectiles = 0;
         }
 
         public void Apply(WeaponUpgradeOption option)
@@ -76,11 +82,19 @@ namespace FF
                 case WeaponUpgradeType.ProjectileSpeed:
                     projectileSpeedBonus += amount;
                     break;
+                case WeaponUpgradeType.Pierce:
+                    pierceCount += Mathf.RoundToInt(amount);
+                    break;
+                case WeaponUpgradeType.ExtraProjectiles:
+                    extraProjectiles += Mathf.RoundToInt(amount);
+                    break;
             }
         }
 
         public float GetDamageMultiplier() => 1f + damageBonus;
         public float GetFireRateMultiplier() => 1f + fireRateBonus;
         public float GetProjectileSpeedMultiplier() => 1f + projectileSpeedBonus;
+        public int GetPierceCount() => pierceCount;
+        public int GetExtraProjectiles() => extraProjectiles;
     }
 }

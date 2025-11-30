@@ -428,7 +428,7 @@ namespace FF
                 int killCount = weaponKillCounts.TryGetValue(request.Weapon, out int kills) ? kills : 0;
                 float magnitude = CalculateWeaponUpgradeMagnitude(killCount, state != null ? state.CardsTaken : 0);
 
-                var localPool = new System.Collections.Generic.List<WeaponUpgradeCard>(cardPool);
+                var localPool = FilterCardPool(cardPool, request.Weapon);
                 int fallbackIndex = 0;
 
                 for (int i = 0; i < request.CardCount && selections.Count < totalCount; i++)
@@ -601,11 +601,114 @@ namespace FF
             return pool;
         }
 
+        System.Collections.Generic.List<WeaponUpgradeCard> FilterCardPool(System.Collections.Generic.List<WeaponUpgradeCard> pool, Weapon weapon)
+        {
+            var filtered = new System.Collections.Generic.List<WeaponUpgradeCard>();
+            if (pool == null)
+            {
+                return filtered;
+            }
+
+            foreach (var card in pool)
+            {
+                if (card == null)
+                {
+                    continue;
+                }
+
+                if (!DoesCardAllowWeapon(card, weapon))
+                {
+                    continue;
+                }
+
+                filtered.Add(card);
+            }
+
+            return filtered;
+        }
+
+        bool DoesCardAllowWeapon(WeaponUpgradeCard card, Weapon weapon)
+        {
+            if (card == null || weapon == null)
+            {
+                return false;
+            }
+
+            if (card.OnlyForSemiAuto && weapon.isAuto)
+            {
+                return false;
+            }
+
+            Weapon.WeaponClass resolvedClass = ResolveWeaponClass(weapon);
+            WeaponUpgradeCard.WeaponClassFilter weaponMask = ToFilter(resolvedClass);
+
+            if (card.AllowedClasses != WeaponUpgradeCard.WeaponClassFilter.All
+                && (card.AllowedClasses & weaponMask) == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        Weapon.WeaponClass ResolveWeaponClass(Weapon weapon)
+        {
+            if (weapon == null)
+            {
+                return Weapon.WeaponClass.General;
+            }
+
+            if (weapon.weaponClass != Weapon.WeaponClass.General)
+            {
+                if (weapon.weaponClass == Weapon.WeaponClass.Special || weapon.isSpecial)
+                {
+                    return Weapon.WeaponClass.Special;
+                }
+
+                return weapon.weaponClass;
+            }
+
+            if (weapon.isSpecial)
+            {
+                return Weapon.WeaponClass.Special;
+            }
+
+            if (!weapon.isAuto)
+            {
+                return Weapon.WeaponClass.SemiRifle;
+            }
+
+            return Weapon.WeaponClass.General;
+        }
+
+        WeaponUpgradeCard.WeaponClassFilter ToFilter(Weapon.WeaponClass weaponClass)
+        {
+            return weaponClass switch
+            {
+                Weapon.WeaponClass.SemiRifle => WeaponUpgradeCard.WeaponClassFilter.SemiRifle,
+                Weapon.WeaponClass.MG => WeaponUpgradeCard.WeaponClassFilter.MG,
+                Weapon.WeaponClass.SMG => WeaponUpgradeCard.WeaponClassFilter.SMG,
+                Weapon.WeaponClass.Special => WeaponUpgradeCard.WeaponClassFilter.Special,
+                _ => WeaponUpgradeCard.WeaponClassFilter.General
+            };
+        }
+
+        float AdjustMagnitudeForType(WeaponUpgradeType type, float magnitude)
+        {
+            return type switch
+            {
+                WeaponUpgradeType.Pierce => Mathf.Max(1f, Mathf.Round(magnitude)),
+                WeaponUpgradeType.ExtraProjectiles => Mathf.Max(1f, Mathf.Round(magnitude)),
+                _ => magnitude
+            };
+        }
+
         WeaponUpgradeOption BuildWeaponUpgradeOption(WeaponUpgradeCard card, Weapon weapon, float magnitude, int killCount, int cardsTaken)
         {
             if (card != null)
             {
-                return card.BuildOption(weapon, magnitude, killCount, cardsTaken);
+                float adjustedMagnitude = AdjustMagnitudeForType(card.Type, magnitude);
+                return card.BuildOption(weapon, adjustedMagnitude, killCount, cardsTaken);
             }
 
             return CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.Damage, magnitude, killCount, cardsTaken);
@@ -733,6 +836,7 @@ namespace FF
             string weaponName = GetWeaponDisplayName(weapon);
 
             int percentage = Mathf.RoundToInt(magnitude * 100f);
+            int flatAmount = Mathf.RoundToInt(magnitude);
 
             // Titles (NO COLOR  clean text)
             string baseTitle = type switch
@@ -740,6 +844,8 @@ namespace FF
                 WeaponUpgradeType.Damage => "Damage Boost",
                 WeaponUpgradeType.FireRate => "Fire Rate Boost",
                 WeaponUpgradeType.ProjectileSpeed => "Bullet Speed Boost",
+                WeaponUpgradeType.Pierce => "Piercing Rounds",
+                WeaponUpgradeType.ExtraProjectiles => "Multi-Shot",
                 _ => "Upgrade"
             };
 
@@ -754,20 +860,30 @@ namespace FF
                 WeaponUpgradeType.Damage => "Increase weapon damage by ",
                 WeaponUpgradeType.FireRate => "Shoot faster by ",
                 WeaponUpgradeType.ProjectileSpeed => "Increase bullet velocity by ",
+                WeaponUpgradeType.Pierce => $"Pierce {flatAmount} additional enemies.",
+                WeaponUpgradeType.ExtraProjectiles => $"Fire {flatAmount} extra bullet{(flatAmount == 1 ? string.Empty : "s")}.",
                 _ => "Boost weapon performance by "
             };
 
             // Choose % color per upgrade type
             string percentColor = type switch
             {
-                WeaponUpgradeType.Damage => "#FF4040",         
-                WeaponUpgradeType.FireRate => "#D17A22",       
+                WeaponUpgradeType.Damage => "#FF4040",
+                WeaponUpgradeType.FireRate => "#D17A22",
                 WeaponUpgradeType.ProjectileSpeed => "#DBBE50",
+                WeaponUpgradeType.Pierce => "#7EC8E3",
+                WeaponUpgradeType.ExtraProjectiles => "#A36FF0",
                 _ => "#FFD966"
             };
 
             // Build the colored % value
             string coloredPercent = $"<color={percentColor}>+{percentage}%</color>.";
+            string finalDescription = type switch
+            {
+                WeaponUpgradeType.Pierce => baseDescription,
+                WeaponUpgradeType.ExtraProjectiles => baseDescription,
+                _ => baseDescription + coloredPercent
+            };
 
             // Kills (default UI color)
             string extra = $"(Kills: {killCount})";
@@ -777,7 +893,7 @@ namespace FF
                 type,
                 magnitude,
                 titledWithWeapon,
-                baseDescription + coloredPercent,   // but UI uses this only in main description
+                finalDescription,                   // but UI uses this only in main description
                 titledWithWeapon,                   // final title = same as base title (NO COLOR)
                 extra                                // final description shown in EXTRA field
             );
@@ -829,6 +945,16 @@ namespace FF
         public float GetWeaponProjectileSpeedMultiplier(Weapon weapon)
         {
             return TryGetWeaponState(weapon, out var state) ? state.GetProjectileSpeedMultiplier() : 1f;
+        }
+
+        public int GetWeaponPierceCount(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetPierceCount() : 0;
+        }
+
+        public int GetWeaponExtraProjectiles(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetExtraProjectiles() : 0;
         }
     }
 }

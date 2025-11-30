@@ -21,6 +21,7 @@ namespace FF
         PoolToken poolToken;
         float baseSpeed;
         Weapon sourceWeapon;
+        int pierceRemaining;
 
         public void SetDamage(int d, bool isCritical = false)
         {
@@ -35,6 +36,7 @@ namespace FF
             knockbackStrength = Mathf.Max(0f, strength);
             knockbackDuration = Mathf.Max(0f, duration);
         }
+        public void SetPierceCount(int count) => pierceRemaining = Mathf.Max(0, count);
         public float BaseSpeed => baseSpeed;
 
         void Awake()
@@ -94,7 +96,11 @@ namespace FF
                 }
 
                 CameraShake.Shake(0.05f, 0.05f);
-                if (poolToken != null)
+                if (pierceRemaining > 0)
+                {
+                    pierceRemaining--;
+                }
+                else if (poolToken != null)
                 {
                     poolToken.Release();
                 }
@@ -116,6 +122,7 @@ namespace FF
             speed = baseSpeed;
             knockbackStrength = 0f;
             sourceWeapon = null;
+            pierceRemaining = 0;
         }
         #endregion Pooling
     }
