@@ -101,7 +101,7 @@ namespace FF
             OpenPanel(false);
         }
 
-        public void ShowWeaponUpgrades(Weapon weapon, WeaponUpgradeOption A, WeaponUpgradeOption B, WeaponUpgradeOption C, Action<WeaponUpgradeOption> onPick, int pendingUpgrades)
+        public void ShowWeaponUpgrades(Weapon weapon, WeaponUpgradeOption A, WeaponUpgradeOption B, WeaponUpgradeOption C, Action<WeaponUpgradeOption> onPick, int pendingUpgrades, string phaseTitleOverride = null)
         {
             showingWeaponCards = true;
             weaponCallback = onPick;
@@ -131,7 +131,7 @@ namespace FF
             cExtra.text = C.FinalDescription;
 
 
-            UpdatePhaseHeader(weaponName);
+            UpdatePhaseHeader(string.IsNullOrEmpty(phaseTitleOverride) ? weaponName : phaseTitleOverride);
             UpdateRemainingLabel(pendingUpgrades);
 
             ClearButtonListeners();
