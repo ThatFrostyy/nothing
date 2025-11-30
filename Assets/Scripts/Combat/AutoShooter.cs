@@ -158,10 +158,10 @@ namespace FF
 
             _fireTimer += deltaTime;
 
-            float rpmMultiplier = 1f;
-            if (_stats != null)
+            float rpmMultiplier = _stats != null ? _stats.GetFireRateMultiplier() : 1f;
+            if (UpgradeManager.I != null)
             {
-                rpmMultiplier = _stats.GetFireRateMultiplier();
+                rpmMultiplier *= UpgradeManager.I.GetWeaponFireRateMultiplier(_weapon);
             }
             float rpm = Mathf.Max(_weapon.rpm * rpmMultiplier, 0.01f);
             float interval = 60f / rpm;
@@ -265,10 +265,15 @@ namespace FF
             {
                 float damageMultiplier = GetFinalDamageMultiplier(out _);
                 float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
+                if (UpgradeManager.I != null)
+                {
+                    projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
+                }
                 bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier));
                 string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
                 bullet.SetOwner(ownerTag);
                 bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
+                bullet.SetSourceWeapon(_weapon);
                 bullet.SetKnockback(_weapon.knockbackStrength, _weapon.knockbackDuration);
             }
         }
@@ -300,12 +305,16 @@ namespace FF
             float pitch = _audioSource ? _audioSource.pitch : 1f;
 
             float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
+            if (UpgradeManager.I != null)
+            {
+                projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
+            }
             float baseLaunchSpeed = grenade.BaseLaunchSpeed;
             float finalLaunchSpeed = speedOverride.HasValue
                 ? Mathf.Max(0.1f, speedOverride.Value * projectileSpeedMultiplier)
                 : Mathf.Max(0.1f, baseLaunchSpeed * projectileSpeedMultiplier);
 
-            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch, null, finalLaunchSpeed);
+            grenade.Launch(direction, _weapon.damage, damageMultiplier, ownerTag, mixer, spatialBlend, volume, pitch, null, finalLaunchSpeed, null, _weapon);
             return true;
         }
 
@@ -362,6 +371,10 @@ namespace FF
         private float GetFinalDamageMultiplier(out bool isCrit)
         {
             float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
+            if (UpgradeManager.I != null)
+            {
+                damageMultiplier *= UpgradeManager.I.GetWeaponDamageMultiplier(_weapon);
+            }
             float critChance = _stats != null ? _stats.GetCritChance() : 0f;
             float critDamageMultiplier = _stats != null ? _stats.GetCritDamageMultiplier() : 1f;
 

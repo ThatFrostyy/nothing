@@ -10,6 +10,7 @@ namespace FF
     public class Enemy : MonoBehaviour, IPoolable
     {
         public static event Action<Enemy> OnAnyEnemyKilled;
+        public static event Action<Enemy, Weapon> OnAnyEnemyKilledByWeapon;
 
         [Header("Debug")]
         [SerializeField] private bool simpleFollowTest = false;
@@ -918,6 +919,12 @@ namespace FF
             if (handler != null)
             {
                 handler(this);
+            }
+
+            Weapon killingWeapon = _health ? _health.LastDamageSourceWeapon : null;
+            if (killingWeapon)
+            {
+                OnAnyEnemyKilledByWeapon?.Invoke(this, killingWeapon);
             }
 
             PlayDeathSound();

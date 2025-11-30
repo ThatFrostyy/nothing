@@ -11,11 +11,14 @@ namespace FF
         [SerializeField] PlayerStats stats;
         [SerializeField] XPWallet wallet;
         [SerializeField] UpgradeUI ui;
+        [SerializeField] WeaponManager weaponManager;
         [SerializeField, Min(0)] int maxUpgradeSelections = 0;
 
         int upgradesTaken;
         int pendingUpgrades;
         readonly System.Collections.Generic.Dictionary<Upgrade, int> upgradeCounts = new();
+        readonly System.Collections.Generic.Dictionary<Weapon, int> weaponKillCounts = new();
+        readonly System.Collections.Generic.Dictionary<Weapon, WeaponUpgradeState> weaponUpgradeStates = new();
 
         public System.Action<int> OnPendingUpgradesChanged;
 
@@ -87,16 +90,23 @@ namespace FF
             {
                 TryAutoFindWallet();
             }
+
+            if (weaponManager == null)
+            {
+                weaponManager = FindAnyObjectByType<WeaponManager>();
+            }
         }
 
 
         void OnEnable()
         {
+            Enemy.OnAnyEnemyKilledByWeapon += HandleWeaponKill;
             SceneReferenceRegistry.Register(this);
         }
 
         void OnDisable()
         {
+            Enemy.OnAnyEnemyKilledByWeapon -= HandleWeaponKill;
             SceneReferenceRegistry.Unregister(this);
         }
 
@@ -127,6 +137,11 @@ namespace FF
             wallet.OnLevelUp += OnLevel;
         }
 
+        public void RegisterWeaponManager(WeaponManager manager)
+        {
+            weaponManager = manager;
+        }
+
         public void RegisterUI(UpgradeUI upgradeUI)
         {
             ui = upgradeUI;
@@ -151,6 +166,7 @@ namespace FF
             UnsubscribeWalletEvents();
             stats = null;
             wallet = null;
+            weaponManager = null;
 
             // FIX: Only clear UI if it is actually destroyed (equals null). 
             // If the UI is DontDestroyOnLoad, we keep the reference.
@@ -172,6 +188,8 @@ namespace FF
             upgradesTaken = 0;
             pendingUpgrades = 0;
             upgradeCounts.Clear();
+            weaponKillCounts.Clear();
+            weaponUpgradeStates.Clear();
 
             NotifyPendingChanged();
         }
@@ -206,8 +224,12 @@ namespace FF
             upgradesTaken++;
             IncrementUpgradeCount(u);
             pendingUpgrades = Mathf.Max(0, pendingUpgrades - 1);
-            ui.Hide();
             NotifyPendingChanged();
+
+            if (!TryShowWeaponUpgradeFollowups())
+            {
+                ui.Hide();
+            }
         }
 
         public void TryOpenUpgradeMenu()
@@ -249,6 +271,46 @@ namespace FF
             }
 
             ui.Show(options[0], options.Count > 1 ? options[1] : options[0], options.Count > 2 ? options[2] : options[0], Pick, pendingUpgrades);
+        }
+
+        bool TryShowWeaponUpgradeFollowups()
+        {
+            if (ui == null)
+            {
+                return false;
+            }
+
+            Weapon focusWeapon = ResolveFocusWeapon();
+            if (!focusWeapon)
+            {
+                return false;
+            }
+
+            var options = BuildWeaponUpgradeOptions(focusWeapon, 3);
+            if (options.Count == 0)
+            {
+                return false;
+            }
+
+            while (options.Count > 0 && options.Count < 3)
+            {
+                WeaponUpgradeOption duplicate = options[Random.Range(0, options.Count)];
+                options.Add(duplicate);
+            }
+
+            ui.ShowWeaponUpgrades(focusWeapon,
+                options[0],
+                options.Count > 1 ? options[1] : options[0],
+                options.Count > 2 ? options[2] : options[0],
+                PickWeaponUpgrade,
+                pendingUpgrades);
+            return true;
+        }
+
+        void PickWeaponUpgrade(WeaponUpgradeOption option)
+        {
+            ApplyWeaponUpgrade(option);
+            ui.Hide();
         }
 
         int GetRemainingSelections()
@@ -327,6 +389,39 @@ namespace FF
             return selections;
         }
 
+        System.Collections.Generic.List<WeaponUpgradeOption> BuildWeaponUpgradeOptions(Weapon weapon, int count)
+        {
+            var selections = new System.Collections.Generic.List<WeaponUpgradeOption>();
+            if (weapon == null || count <= 0)
+            {
+                return selections;
+            }
+
+            WeaponUpgradeState state = GetOrCreateWeaponState(weapon);
+            int killCount = weaponKillCounts.TryGetValue(weapon, out int kills) ? kills : 0;
+            float magnitude = CalculateWeaponUpgradeMagnitude(killCount, state != null ? state.CardsTaken : 0);
+
+            var pool = new System.Collections.Generic.List<WeaponUpgradeOption>
+            {
+                CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.Damage, magnitude, killCount, state?.CardsTaken ?? 0),
+                CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.FireRate, magnitude, killCount, state?.CardsTaken ?? 0),
+                CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.ProjectileSpeed, magnitude, killCount, state?.CardsTaken ?? 0)
+            };
+
+            for (int i = 0; i < count && pool.Count > 0; i++)
+            {
+                int pickIndex = Random.Range(0, pool.Count);
+                selections.Add(pool[pickIndex]);
+
+                if (pool.Count > 1)
+                {
+                    pool.RemoveAt(pickIndex);
+                }
+            }
+
+            return selections;
+        }
+
         bool IsUpgradeAvailable(Upgrade upgrade)
         {
             if (upgrade == null)
@@ -353,6 +448,144 @@ namespace FF
             {
                 upgradeCounts.Add(upgrade, 1);
             }
+        }
+
+        Weapon ResolveFocusWeapon()
+        {
+            Weapon bestWeapon = null;
+            int bestKills = -1;
+
+            foreach (var pair in weaponKillCounts)
+            {
+                if (pair.Key == null)
+                {
+                    continue;
+                }
+
+                if (pair.Value > bestKills)
+                {
+                    bestWeapon = pair.Key;
+                    bestKills = pair.Value;
+                }
+            }
+
+            if (bestWeapon != null)
+            {
+                return bestWeapon;
+            }
+
+            if (weaponManager != null && weaponManager.CurrentWeapon != null)
+            {
+                return weaponManager.CurrentWeapon;
+            }
+
+            return null;
+        }
+
+        void HandleWeaponKill(Enemy enemy, Weapon weapon)
+        {
+            if (weapon == null)
+            {
+                return;
+            }
+
+            if (weaponKillCounts.ContainsKey(weapon))
+            {
+                weaponKillCounts[weapon]++;
+            }
+            else
+            {
+                weaponKillCounts.Add(weapon, 1);
+            }
+
+            GetOrCreateWeaponState(weapon);
+        }
+
+        void ApplyWeaponUpgrade(WeaponUpgradeOption option)
+        {
+            if (option.Weapon == null)
+            {
+                return;
+            }
+
+            WeaponUpgradeState state = GetOrCreateWeaponState(option.Weapon);
+            state?.Apply(option);
+        }
+
+        float CalculateWeaponUpgradeMagnitude(int killCount, int cardsTaken)
+        {
+            float baseBonus = 0.08f;
+            float killBonus = Mathf.Clamp(killCount, 0, 250) * 0.0008f;
+            float stackBonus = Mathf.Min(0.05f, cardsTaken * 0.01f);
+            return baseBonus + killBonus + stackBonus;
+        }
+
+        WeaponUpgradeOption CreateWeaponUpgradeOption(Weapon weapon, WeaponUpgradeType type, float magnitude, int killCount, int cardsTaken)
+        {
+            string weaponName = weapon != null && !string.IsNullOrEmpty(weapon.weaponName)
+                ? weapon.weaponName
+                : weapon != null ? weapon.name : "Weapon";
+
+            string statLabel = type switch
+            {
+                WeaponUpgradeType.Damage => "Damage",
+                WeaponUpgradeType.FireRate => "Fire Rate",
+                WeaponUpgradeType.ProjectileSpeed => "Projectile Speed",
+                _ => "Power"
+            };
+
+            int percentage = Mathf.RoundToInt(magnitude * 100f);
+            string title = $"{weaponName} {statLabel}+";
+            string description = $"Boost {weaponName} {statLabel.ToLower()} by {percentage}% (kills: {killCount}, stacks: {cardsTaken + 1}).";
+
+            return new WeaponUpgradeOption(weapon, type, magnitude, title, description);
+        }
+
+        WeaponUpgradeState GetOrCreateWeaponState(Weapon weapon)
+        {
+            if (weapon == null)
+            {
+                return null;
+            }
+
+            if (!weaponUpgradeStates.TryGetValue(weapon, out WeaponUpgradeState state) || state == null)
+            {
+                state = new WeaponUpgradeState(weapon);
+                weaponUpgradeStates[weapon] = state;
+            }
+
+            return state;
+        }
+
+        bool TryGetWeaponState(Weapon weapon, out WeaponUpgradeState state)
+        {
+            state = null;
+            if (weapon == null)
+            {
+                return false;
+            }
+
+            if (weaponUpgradeStates.TryGetValue(weapon, out state) && state != null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public float GetWeaponDamageMultiplier(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetDamageMultiplier() : 1f;
+        }
+
+        public float GetWeaponFireRateMultiplier(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetFireRateMultiplier() : 1f;
+        }
+
+        public float GetWeaponProjectileSpeedMultiplier(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetProjectileSpeedMultiplier() : 1f;
         }
     }
 }
