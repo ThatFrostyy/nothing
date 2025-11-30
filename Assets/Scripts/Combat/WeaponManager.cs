@@ -91,6 +91,26 @@ namespace FF
 
         public void SelectSpecialSlot()
         {
+            if (currentSlotIndex == SpecialSlotIndex)
+            {
+                int targetPrimary = lastPrimarySlotIndex;
+
+                if (loadout[targetPrimary] == null)
+                {
+                    for (int i = 0; i < PrimarySlotCount; i++)
+                    {
+                        if (loadout[i] != null)
+                        {
+                            targetPrimary = i;
+                            break;
+                        }
+                    }
+                }
+
+                SelectSlot(targetPrimary);
+                return;
+            }
+
             SelectSlot(SpecialSlotIndex);
         }
 

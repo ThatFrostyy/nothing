@@ -178,6 +178,11 @@ namespace FF
         {
             if (!_gunPivot || _camera == null) return;
 
+            if (_upgradeMenuOpen || PauseMenuController.IsMenuOpen)
+            {
+                return;
+            }
+
             Vector2 mousePosition = Mouse.current != null ? Mouse.current.position.ReadValue() : Vector2.zero;
             Vector3 worldMouse = _camera.ScreenToWorldPoint(mousePosition);
             Vector2 direction = worldMouse - _gunPivot.position;

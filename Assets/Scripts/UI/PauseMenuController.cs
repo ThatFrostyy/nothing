@@ -96,6 +96,9 @@ namespace FF
             _previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
 
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
+
             if (titleText) titleText.text = isDeath ? deathTitle : pauseTitle;
             if (resumeButton) resumeButton.gameObject.SetActive(!isDeath);
 
