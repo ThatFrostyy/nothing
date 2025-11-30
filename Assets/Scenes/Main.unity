@@ -7934,7 +7934,6 @@ GameObject:
   - component: {fileID: 1526323690}
   - component: {fileID: 1526323693}
   - component: {fileID: 1526323692}
-  - component: {fileID: 1526323691}
   m_Layer: 5
   m_Name: WeaponUI
   m_TagString: Untagged
@@ -7963,29 +7962,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1526323691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1526323689}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 19517319abeae2f4fb4fbb1903e0c37b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FF.UpgradeUI
-  panel: {fileID: 1526323689}
-  aBtn: {fileID: 0}
-  bBtn: {fileID: 0}
-  cBtn: {fileID: 0}
-  aTitle: {fileID: 0}
-  bTitle: {fileID: 0}
-  cTitle: {fileID: 0}
-  aTxt: {fileID: 0}
-  bTxt: {fileID: 0}
-  cTxt: {fileID: 0}
-  upgradesRemainingText: {fileID: 0}
 --- !u!114 &1526323692
 MonoBehaviour:
   m_ObjectHideFlags: 0
