@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
@@ -17,6 +18,9 @@ namespace FF
         private float _fireTimer;
         private bool _isFireHeld;
         private bool _isFirePressed;
+
+        [Header("Extra Projectiles")]
+        [SerializeField, Min(0f)] private float extraProjectileDelay = 0.05f;
 
         [Header("Grenade Charging")]
         [SerializeField, Min(0.1f)] private float grenadeMinThrowSpeed = 8f;
@@ -167,12 +171,17 @@ namespace FF
             float interval = 60f / rpm;
 
             float cooldownMultiplier = _stats != null ? _stats.GetFireCooldownMultiplier() : 1f;
-            interval *= Mathf.Max(0.1f, cooldownMultiplier);
+            if (UpgradeManager.I != null)
+            {
+                cooldownMultiplier *= UpgradeManager.I.GetWeaponFireCooldownMultiplier(_weapon);
+            }
+            cooldownMultiplier = Mathf.Max(0.1f, cooldownMultiplier);
+            interval *= cooldownMultiplier;
 
             if (!_weapon.isAuto && _weapon.fireCooldown > 0f)
             {
                 interval = _weapon.fireCooldown / rpmMultiplier;
-                interval *= Mathf.Max(0.1f, cooldownMultiplier);
+                interval *= cooldownMultiplier;
             }
 
             if (_isGrenadeWeapon && _useGrenadeCharging)
@@ -217,11 +226,11 @@ namespace FF
 
             SpawnEjectParticles();
 
-            bool launchedGrenade = TryLaunchGrenade(spreadRotation, grenadeSpeedOverride);
-            if (!launchedGrenade)
-            {
-                SpawnStandardBullet(spreadRotation);
-            }
+            int extraProjectiles = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponExtraProjectiles(_weapon) : 0;
+            int totalProjectiles = Mathf.Max(1, 1 + extraProjectiles);
+            int pierceCount = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponPierceCount(_weapon) : 0;
+
+            StartCoroutine(FireProjectilesRoutine(totalProjectiles, spreadRotation, pierceCount, grenadeSpeedOverride));
 
             PlayFireAudio();
             SpawnMuzzleFlash();
@@ -252,40 +261,57 @@ namespace FF
             }
         }
 
-        private void SpawnStandardBullet(Quaternion spreadRotation)
+        private void SpawnStandardBullet(Quaternion spreadRotation, int pierceCount)
         {
             if (!_weapon.bulletPrefab)
             {
                 return;
             }
 
-            int extraProjectiles = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponExtraProjectiles(_weapon) : 0;
-            int totalProjectiles = Mathf.Max(1, 1 + extraProjectiles);
-            int pierceCount = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponPierceCount(_weapon) : 0;
+            GameObject bulletInstance = PoolManager.Get(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
+
+            if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
+            {
+                float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
+                float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
+                if (UpgradeManager.I != null)
+                {
+                    projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
+                }
+                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier), isCrit);
+                string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
+                bullet.SetOwner(ownerTag);
+                bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
+                bullet.SetSourceWeapon(_weapon);
+                bullet.SetKnockback(_weapon.knockbackStrength, _weapon.knockbackDuration);
+                bullet.SetPierceCount(pierceCount);
+            }
+        }
+
+        private IEnumerator FireProjectilesRoutine(int totalProjectiles, Quaternion baseRotation, int pierceCount, float? grenadeSpeedOverride)
+        {
+            if (_weapon == null || _muzzle == null)
+            {
+                yield break;
+            }
+
+            bool staggerShots = _isGrenadeWeapon || (_weapon != null && (_weapon.isSpecial || _weapon.weaponClass == Weapon.WeaponClass.Special));
 
             for (int i = 0; i < totalProjectiles; i++)
             {
                 Quaternion shotRotation = i == 0
-                    ? spreadRotation
-                    : spreadRotation * Quaternion.AngleAxis(UnityEngine.Random.Range(-_currentSpread, _currentSpread), Vector3.forward);
+                    ? baseRotation
+                    : baseRotation * Quaternion.AngleAxis(UnityEngine.Random.Range(-_currentSpread, _currentSpread), Vector3.forward);
 
-                GameObject bulletInstance = PoolManager.Get(_weapon.bulletPrefab, _muzzle.position, shotRotation);
-
-                if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
+                bool launchedGrenade = TryLaunchGrenade(shotRotation, grenadeSpeedOverride);
+                if (!launchedGrenade)
                 {
-                    float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
-                    float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
-                    if (UpgradeManager.I != null)
-                    {
-                        projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
-                    }
-                    bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier), isCrit);
-                    string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
-                    bullet.SetOwner(ownerTag);
-                    bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
-                    bullet.SetSourceWeapon(_weapon);
-                    bullet.SetKnockback(_weapon.knockbackStrength, _weapon.knockbackDuration);
-                    bullet.SetPierceCount(pierceCount);
+                    SpawnStandardBullet(shotRotation, pierceCount);
+                }
+
+                if (staggerShots && i < totalProjectiles - 1 && extraProjectileDelay > 0f)
+                {
+                    yield return new WaitForSeconds(extraProjectileDelay);
                 }
             }
         }

@@ -41,11 +41,13 @@ namespace FF
                 ? baseTitle
                 : $"{baseTitle} ({weaponName})";
 
-            string coloredPercent = $"<color={percentColor}>+{percentage}%</color>.";
+            string percentText = Type == WeaponUpgradeType.FireCooldownReduction ? $"{percentage}%" : $"+{percentage}%";
+            string coloredPercent = $"<color={percentColor}>{percentText}</color>.";
             string baseDescription = Type switch
             {
                 WeaponUpgradeType.Pierce => $"Pierce {flatValue} additional enemies.",
                 WeaponUpgradeType.ExtraProjectiles => $"Fire {flatValue} extra bullet{(flatValue == 1 ? string.Empty : "s")}.",
+                WeaponUpgradeType.FireCooldownReduction => $"Reduce weapon cooldown by {coloredPercent}",
                 _ => $"{DescriptionPrefix}{coloredPercent}",
             };
 

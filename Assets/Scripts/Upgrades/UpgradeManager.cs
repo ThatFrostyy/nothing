@@ -414,7 +414,8 @@ namespace FF
             {
                 WeaponUpgradeType.Damage,
                 WeaponUpgradeType.FireRate,
-                WeaponUpgradeType.ProjectileSpeed
+                WeaponUpgradeType.ProjectileSpeed,
+                WeaponUpgradeType.FireCooldownReduction
             };
 
             foreach (var request in requests)
@@ -846,6 +847,7 @@ namespace FF
                 WeaponUpgradeType.ProjectileSpeed => "Bullet Speed Boost",
                 WeaponUpgradeType.Pierce => "Piercing Rounds",
                 WeaponUpgradeType.ExtraProjectiles => "Multi-Shot",
+                WeaponUpgradeType.FireCooldownReduction => "Cooldown Reduction",
                 _ => "Upgrade"
             };
 
@@ -862,6 +864,7 @@ namespace FF
                 WeaponUpgradeType.ProjectileSpeed => "Increase bullet velocity by ",
                 WeaponUpgradeType.Pierce => $"Pierce {flatAmount} additional enemies.",
                 WeaponUpgradeType.ExtraProjectiles => $"Fire {flatAmount} extra projectile{(flatAmount == 1 ? string.Empty : "s")}.",
+                WeaponUpgradeType.FireCooldownReduction => "Reduce weapon cooldown by ",
                 _ => "Boost weapon performance by "
             };
 
@@ -873,11 +876,13 @@ namespace FF
                 WeaponUpgradeType.ProjectileSpeed => "#DBBE50",
                 WeaponUpgradeType.Pierce => "#7EC8E3",
                 WeaponUpgradeType.ExtraProjectiles => "#A36FF0",
+                WeaponUpgradeType.FireCooldownReduction => "#7FD1C9",
                 _ => "#FFD966"
             };
 
             // Build the colored % value
-            string coloredPercent = $"<color={percentColor}>+{percentage}%</color>.";
+            string percentText = type == WeaponUpgradeType.FireCooldownReduction ? $"{percentage}%" : $"+{percentage}%";
+            string coloredPercent = $"<color={percentColor}>{percentText}</color>.";
             string finalDescription = type switch
             {
                 WeaponUpgradeType.Pierce => baseDescription,
@@ -945,6 +950,11 @@ namespace FF
         public float GetWeaponProjectileSpeedMultiplier(Weapon weapon)
         {
             return TryGetWeaponState(weapon, out var state) ? state.GetProjectileSpeedMultiplier() : 1f;
+        }
+
+        public float GetWeaponFireCooldownMultiplier(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetFireCooldownMultiplier() : 1f;
         }
 
         public int GetWeaponPierceCount(Weapon weapon)
