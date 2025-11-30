@@ -81,6 +81,15 @@ namespace FF
             NotifyPendingChanged();
         }
 
+        void Update()
+        {
+            if (wallet == null)
+            {
+                TryAutoFindWallet();
+            }
+        }
+
+
         void OnEnable()
         {
             SceneReferenceRegistry.Register(this);
@@ -90,6 +99,17 @@ namespace FF
         {
             SceneReferenceRegistry.Unregister(this);
         }
+
+        void TryAutoFindWallet()
+        {
+            var found = FindAnyObjectByType<XPWallet>();
+            if (found != null)
+            {
+                RegisterWallet(found);
+                Debug.Log("[UM] Auto-bound XPWallet");
+            }
+        }
+
 
         public void RegisterPlayerStats(PlayerStats playerStats)
         {
@@ -102,6 +122,8 @@ namespace FF
             UnsubscribeWalletEvents();
             this.wallet = wallet;
             OnWalletRgistered?.Invoke(wallet);
+
+            Debug.Log($"[UM] RegisterWallet ? bound wallet on {wallet.gameObject.name}");
             wallet.OnLevelUp += OnLevel;
         }
 
@@ -115,7 +137,8 @@ namespace FF
         {
             if (ui == null)
             {
-                ui = FindFirstObjectByType<UpgradeUI>();
+                ui = FindAnyObjectByType<UpgradeUI>(FindObjectsInactive.Include);
+
                 if (ui != null)
                 {
                     OnUIRegistered?.Invoke(ui);
@@ -128,7 +151,13 @@ namespace FF
             UnsubscribeWalletEvents();
             stats = null;
             wallet = null;
-            ui = null;
+
+            // FIX: Only clear UI if it is actually destroyed (equals null). 
+            // If the UI is DontDestroyOnLoad, we keep the reference.
+            if (ui == null)
+            {
+                ui = null;
+            }
 
             UpgradeUI.ResetStaticState();
         }
@@ -136,6 +165,9 @@ namespace FF
         public void ResetState()
         {
             ClearSceneReferences();
+
+            ui = null;
+            TryResolveUI();
 
             upgradesTaken = 0;
             pendingUpgrades = 0;
@@ -154,12 +186,15 @@ namespace FF
 
         void OnLevel(int lvl)
         {
+            Debug.Log($"[UM] OnLevel({lvl}) called. CanReceiveUpgrades() = {CanReceiveUpgrades()} (ui != null: {ui != null}, all len: {(all != null ? all.Length : -1)}, maxUpgradeSelections: {maxUpgradeSelections}, upgradesTaken: {upgradesTaken})");
+
             if (!CanReceiveUpgrades())
             {
                 return;
             }
 
             pendingUpgrades = Mathf.Min(pendingUpgrades + 1, GetRemainingSelections());
+            Debug.Log($"[UM] pendingUpgrades now = {pendingUpgrades}, GetRemainingSelections() = {GetRemainingSelections()}");
             NotifyPendingChanged();
         }
 
@@ -245,6 +280,9 @@ namespace FF
 
         void NotifyPendingChanged()
         {
+            var listeners = OnPendingUpgradesChanged?.GetInvocationList();
+            int count = listeners?.Length ?? 0;
+            Debug.Log($"[UM] NotifyPendingChanged ? pendingUpgrades={pendingUpgrades}, listeners={count}");
             OnPendingUpgradesChanged?.Invoke(pendingUpgrades);
         }
 

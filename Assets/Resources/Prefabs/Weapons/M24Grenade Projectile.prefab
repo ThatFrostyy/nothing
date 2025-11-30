@@ -135,7 +135,7 @@ MonoBehaviour:
   baseDamage: 25
   damageLayers:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 192
   launchSpeed: 15
   slowdownRate: 15
   fuseDuration: 1.5
@@ -170,6 +170,8 @@ MonoBehaviour:
     m_RotationOrder: 4
   explosionFX: {fileID: 2433282508537954060, guid: 3ef3ae421f71c5c4e97fe12dc2fc6312, type: 3}
   explosionSFX: {fileID: 8300000, guid: 4fc5950ffa93aed4792036b38200ffd0, type: 3}
+  flightLoopSFX: {fileID: 0}
+  flightLoopVolume: 0.8
   explodeOnImpact: 0
   explodeOnLanding: 0
   landingFX: {fileID: 3432958286849152088, guid: 87ee7299dd44ed747af24dbb91bcd33b, type: 3}

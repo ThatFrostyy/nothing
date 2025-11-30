@@ -14,11 +14,19 @@ namespace FF
         void OnEnable()
         {
             UpgradePickup.OnEffectApplied += HandleEffectApplied;
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded += OnSceneUnloaded;
         }
 
         void OnDisable()
         {
             UpgradePickup.OnEffectApplied -= HandleEffectApplied;
+            UnityEngine.SceneManagement.SceneManager.sceneUnloaded -= OnSceneUnloaded;
+
+            ClearEntries();
+        }
+
+        private void OnSceneUnloaded(UnityEngine.SceneManagement.Scene scene)
+        {
             ClearEntries();
         }
 

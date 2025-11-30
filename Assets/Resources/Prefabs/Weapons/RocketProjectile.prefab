@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3672453003041997172}
   - component: {fileID: 7510763720582015139}
   - component: {fileID: -3617111360095100745}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: RocketProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -135,7 +135,7 @@ MonoBehaviour:
   baseDamage: 50
   damageLayers:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 192
   launchSpeed: 22
   slowdownRate: 4
   fuseDuration: 1.1

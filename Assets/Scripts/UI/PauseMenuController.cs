@@ -46,20 +46,9 @@ namespace FF
             Instance = this;
             DontDestroyOnLoad(gameObject);
 
-            if (!sceneFlow)
-            {
-                sceneFlow = FindAnyObjectByType<SceneFlowController>();
-            }
-
-            if (!deathClip)
-            {
-                deathClip = Resources.Load<AudioClip>("Sounds/death1");
-            }
-
-            if (!deathEffectPrefab)
-            {
-                deathEffectPrefab = Resources.Load<GameObject>("Prefabs/FX/Death");
-            }
+            if (!sceneFlow) sceneFlow = FindAnyObjectByType<SceneFlowController>();
+            if (!deathClip) deathClip = Resources.Load<AudioClip>("Sounds/death1");
+            if (!deathEffectPrefab) deathEffectPrefab = Resources.Load<GameObject>("Prefabs/FX/Death");
 
             if (resumeButton && restartButton && mainMenuButton)
             {
@@ -83,38 +72,19 @@ namespace FF
 
         public static void TogglePause()
         {
-            if (UpgradeUI.IsShowing)
-            {
-                return;
-            }
-
-            if (Instance == null)
-            {
-                CreateRuntimeInstance();
-            }
-
-            if (Instance._isDeathMenu)
-            {
-                return;
-            }
+            if (UpgradeUI.IsShowing) return;
+            if (Instance == null) CreateRuntimeInstance();
+            if (Instance._isDeathMenu) return;
 
             if (Instance._isVisible && !Instance._isDeathMenu)
-            {
                 Instance.HideMenu();
-            }
             else
-            {
                 Instance.ShowMenu(false);
-            }
         }
 
         public static void ShowDeathMenu(Vector3 deathPosition)
         {
-            if (Instance == null)
-            {
-                CreateRuntimeInstance();
-            }
-
+            if (Instance == null) CreateRuntimeInstance();
             Instance.PlayDeathFeedback(deathPosition);
             Instance.ShowMenu(true);
         }
@@ -126,30 +96,16 @@ namespace FF
             _previousTimeScale = Time.timeScale;
             Time.timeScale = 0f;
 
-            if (titleText)
-            {
-                titleText.text = isDeath ? deathTitle : pauseTitle;
-            }
+            if (titleText) titleText.text = isDeath ? deathTitle : pauseTitle;
+            if (resumeButton) resumeButton.gameObject.SetActive(!isDeath);
 
-            if (resumeButton)
-            {
-                resumeButton.gameObject.SetActive(!isDeath);
-            }
-
-            if (_fadeRoutine != null)
-            {
-                StopCoroutine(_fadeRoutine);
-            }
-
+            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
             _fadeRoutine = StartCoroutine(FadeCanvas(1f));
         }
 
         private void HideMenu()
         {
-            if (_fadeRoutine != null)
-            {
-                StopCoroutine(_fadeRoutine);
-            }
+            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
 
             _isVisible = false;
             _isDeathMenu = false;
@@ -158,7 +114,18 @@ namespace FF
 
         private void RestoreTimeScale()
         {
+            // FIX: Check if Slow Motion is still active. 
+            // If KillSlowMotion isn't active (meaning it finished while we were paused),
+            // we should NOT revert to _previousTimeScale (which might be 0.45).
+            // We should reset to 1.0f.
+
             float targetScale = Mathf.Approximately(_previousTimeScale, 0f) ? 1f : _previousTimeScale;
+
+            if (KillSlowMotion.Instance != null && !KillSlowMotion.Instance.IsActive)
+            {
+                targetScale = 1f;
+            }
+
             Time.timeScale = targetScale;
 
             KillSlowMotion.EnsureRestoredAfterPause();
@@ -166,11 +133,7 @@ namespace FF
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (!sceneFlow)
-            {
-                sceneFlow = FindAnyObjectByType<SceneFlowController>();
-            }
-
+            if (!sceneFlow) sceneFlow = FindAnyObjectByType<SceneFlowController>();
             HideInstant();
         }
 
@@ -221,25 +184,6 @@ namespace FF
             }
         }
 
-        private TextMeshProUGUI BuildLabel(RectTransform parent, string name, float size, Vector2 anchorMin, Vector2 anchorMax, Vector2 offset)
-        {
-            var go = new GameObject(name, typeof(RectTransform));
-            go.transform.SetParent(parent, false);
-            var rect = go.GetComponent<RectTransform>();
-            rect.anchorMin = anchorMin;
-            rect.anchorMax = anchorMax;
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = offset;
-            rect.sizeDelta = new Vector2(380f, 48f);
-
-            var label = go.AddComponent<TextMeshProUGUI>();
-            label.alignment = TextAlignmentOptions.Center;
-            label.fontSize = size;
-            label.text = pauseTitle;
-            label.textWrappingMode = TextWrappingModes.NoWrap;
-            return label;
-        }
-
         private void HideInstant()
         {
             _isVisible = false;
@@ -256,49 +200,29 @@ namespace FF
 
         private void RestartScene()
         {
-            if (sceneFlow == null)
-            {
-                sceneFlow = FindAnyObjectByType<SceneFlowController>();
-            }
-
+            if (sceneFlow == null) sceneFlow = FindAnyObjectByType<SceneFlowController>();
             StartCoroutine(LoadWithFade(() => sceneFlow?.ReloadCurrentScene()));
         }
 
         private void ReturnToMainMenu()
         {
-            if (sceneFlow == null)
-            {
-                sceneFlow = FindAnyObjectByType<SceneFlowController>();
-            }
-
+            if (sceneFlow == null) sceneFlow = FindAnyObjectByType<SceneFlowController>();
             StartCoroutine(LoadWithFade(() => sceneFlow?.LoadMainMenuScene()));
         }
 
         private IEnumerator LoadWithFade(System.Action loadAction)
         {
-            if (_fadeRoutine != null)
-            {
-                StopCoroutine(_fadeRoutine);
-            }
-
+            if (_fadeRoutine != null) StopCoroutine(_fadeRoutine);
             _isVisible = true;
             _fadeRoutine = StartCoroutine(FadeCanvas(1f));
             yield return new WaitForSecondsRealtime(fadeDuration);
-
             loadAction?.Invoke();
         }
 
         private void PlayDeathFeedback(Vector3 position)
         {
-            if (deathEffectPrefab)
-            {
-                PoolManager.Get(deathEffectPrefab, position, Quaternion.identity);
-            }
-
-            if (deathClip)
-            {
-                AudioPlaybackPool.PlayOneShot(deathClip, position);
-            }
+            if (deathEffectPrefab) PoolManager.Get(deathEffectPrefab, position, Quaternion.identity);
+            if (deathClip) AudioPlaybackPool.PlayOneShot(deathClip, position);
         }
     }
 }

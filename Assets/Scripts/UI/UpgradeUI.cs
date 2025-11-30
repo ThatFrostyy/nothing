@@ -23,12 +23,21 @@ namespace FF
 
         void Start()
         {
+            RegisterWithManager();
+            panel.SetActive(false);
+        }
+
+        void OnEnable()
+        {
+            RegisterWithManager();
+        }
+
+        void RegisterWithManager()
+        {
             if (UpgradeManager.I != null)
             {
                 UpgradeManager.I.RegisterUI(this);
-                Debug.Log("UpgradeUI registered with UpgradeManager.");
             }
-            panel.SetActive(false);
         }
 
         void OnDestroy()

@@ -118,9 +118,16 @@ namespace FF
         {
             SceneReferenceRegistry.Register(this);
 
-            if (!gameManager)
+            if (!gameManager) gameManager = GameManager.I;
+
+            // FIX: Aggressively prefer the Singleton for UpgradeManager
+            if (UpgradeManager.I != null)
             {
-                gameManager = GameManager.I;
+                upgradeManager = UpgradeManager.I;
+            }
+            else if (!upgradeManager)
+            {
+                upgradeManager = FindFirstObjectByType<UpgradeManager>();
             }
 
             if (!playerHealth)
@@ -129,27 +136,12 @@ namespace FF
                 if (playerObject)
                 {
                     playerHealth = playerObject.GetComponent<Health>();
-                    if (!weaponManager)
-                    {
-                        weaponManager = playerObject.GetComponentInChildren<WeaponManager>();
-                    }
+                    if (!weaponManager) weaponManager = playerObject.GetComponentInChildren<WeaponManager>();
                 }
             }
 
-            if (!wallet && playerHealth)
-            {
-                wallet = playerHealth.GetComponent<XPWallet>();
-            }
-
-            if (!weaponManager && playerHealth)
-            {
-                weaponManager = playerHealth.GetComponent<WeaponManager>();
-            }
-
-            if (!upgradeManager)
-            {
-                upgradeManager = FindFirstObjectByType<UpgradeManager>();
-            }
+            if (!wallet && playerHealth) wallet = playerHealth.GetComponent<XPWallet>();
+            if (!weaponManager && playerHealth) weaponManager = playerHealth.GetComponent<WeaponManager>();
 
             if (!upgradePromptGroup && upgradePromptText)
             {
@@ -172,16 +164,12 @@ namespace FF
             healthPulseBaseAnchoredPosition = healthPulseTarget ? healthPulseTarget.anchoredPosition : Vector2.zero;
             xpPulseBaseAnchoredPosition = xpPulseTarget ? xpPulseTarget.anchoredPosition : Vector2.zero;
 
-            if (weaponNameText)
-            {
-                weaponNameBaseColor = weaponNameText.color;
-            }
+            if (weaponNameText) weaponNameBaseColor = weaponNameText.color;
 
             CacheSlotBaseScales();
 
             healthFillCurrent = healthFillImage ? healthFillImage.fillAmount : 0f;
             healthFillTarget = healthFillCurrent;
-
             xpFillCurrent = xpFillImage ? xpFillImage.fillAmount : 0f;
             xpFillTarget = xpFillCurrent;
 
@@ -214,6 +202,7 @@ namespace FF
         private void Start()
         {
             BindSceneManagers();
+            RefreshAll();
         }
 
         void OnEnable()
@@ -226,10 +215,11 @@ namespace FF
                 gameManager.OnKillCountChanged += HandleKillCountChanged;
                 gameManager.OnWaveStarted += HandleWaveStarted;
             }
-            if (playerHealth != null)
-                playerHealth.OnHealthChanged += HandleHealthChanged;
-            if (wallet != null)
-                wallet.OnXPChanged += HandleXPChanged;
+            if (playerHealth != null) playerHealth.OnHealthChanged += HandleHealthChanged;
+            if (wallet != null) wallet.OnXPChanged += HandleXPChanged;
+
+            // FIX: Ensure we are bound to the correct manager on enable
+            RefreshUpgradeManagerReference();
 
             RefreshAll();
             SyncFillImmediately();
@@ -245,10 +235,10 @@ namespace FF
                 gameManager.OnKillCountChanged -= HandleKillCountChanged;
                 gameManager.OnWaveStarted -= HandleWaveStarted;
             }
-            if (playerHealth != null)
-                playerHealth.OnHealthChanged -= HandleHealthChanged;
-            if (wallet != null)
-                wallet.OnXPChanged -= HandleXPChanged;
+            if (playerHealth != null) playerHealth.OnHealthChanged -= HandleHealthChanged;
+            if (wallet != null) wallet.OnXPChanged -= HandleXPChanged;
+
+            if (upgradeManager != null) upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
         }
 
         private void HandlePlayerReady(PlayerController player)
@@ -263,7 +253,10 @@ namespace FF
                 playerHealth.OnHealthChanged += HandleHealthChanged;
 
             if (wallet != null)
+            {
                 wallet.OnXPChanged += HandleXPChanged;
+                UpgradeManager.I?.RegisterWallet(wallet);   
+            }
 
             if (weaponManager != null)
             {
@@ -273,6 +266,7 @@ namespace FF
 
             RefreshAll();
             SyncFillImmediately();
+            RefreshUpgradeManagerReference();
         }
 
 
@@ -289,13 +283,18 @@ namespace FF
             playerHealth = FindFirstObjectByType<Health>();
             wallet = playerHealth ? playerHealth.GetComponent<XPWallet>() : null;
             weaponManager = FindFirstObjectByType<WeaponManager>();
-            upgradeManager = FindFirstObjectByType<UpgradeManager>();
+
+            // FIX: Prefer singleton
+            upgradeManager = UpgradeManager.I;
+            if (!upgradeManager) upgradeManager = FindFirstObjectByType<UpgradeManager>();
 
             if (gameManager == null) Debug.LogWarning("[HUD] Could not find GameManager on bind.");
             if (playerHealth == null) Debug.LogWarning("[HUD] Could not find Player Health on bind.");
             if (wallet == null) Debug.LogWarning("[HUD] Could not find XPWallet.");
             if (weaponManager == null) Debug.LogWarning("[HUD] Could not find WeaponManager.");
             if (upgradeManager == null) Debug.LogWarning("[HUD] Could not find UpgradeManager.");
+
+            RefreshUpgradeManagerReference();
         }
 
         void Update()
@@ -305,8 +304,7 @@ namespace FF
 
             if (upgradePromptTimer > 0f)
             {
-                upgradePromptTimer -= Time.deltaTime;
-
+                upgradePromptTimer -= unscaledDeltaTime;
                 if (upgradePromptTimer <= 0f)
                 {
                     StartUpgradePromptFade(0f);
@@ -326,6 +324,7 @@ namespace FF
 
         void BindSceneManagers()
         {
+            Debug.Log("Binding managers");
             RefreshGameManagerReference();
             RefreshUpgradeManagerReference();
         }
@@ -351,22 +350,22 @@ namespace FF
 
         void RefreshUpgradeManagerReference()
         {
-            UpgradeManager resolved = upgradeManager ? upgradeManager : UpgradeManager.I;
-            if (resolved == upgradeManager)
-            {
-                return;
-            }
+            Debug.Log($"[HUD] Attempting Subscription. Manager found: {upgradeManager != null}, isActive: {isActiveAndEnabled}");
 
+            // FIX: Robustly switch to Singleton if the current reference is stale or wron
+   
             if (upgradeManager != null)
             {
                 upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
+                Debug.Log("[HUD] Unsubscribed from UpgradeManager.OnPendingUpgradesChanged");
             }
 
-            upgradeManager = resolved;
             if (upgradeManager != null && isActiveAndEnabled)
             {
                 upgradeManager.OnPendingUpgradesChanged += HandlePendingUpgradesChanged;
+                // Force immediate sync
                 HandlePendingUpgradesChanged(upgradeManager.GetPendingUpgradeCount());
+                Debug.Log("[HUD] Subscribed to UpgradeManager.OnPendingUpgradesChanged");
             }
         }
 
@@ -378,7 +377,12 @@ namespace FF
             UpdateWeaponDisplay();
             UpdateWaveDisplay();
             UpdateTimeDisplay();
-            RefreshUpgradePrompt();
+
+            // FIX: Explicitly refresh prompt from manager state
+            if (upgradeManager)
+                HandlePendingUpgradesChanged(upgradeManager.GetPendingUpgradeCount());
+            else
+                RefreshUpgradePrompt();
         }
 
         void HandleHealthChanged(int current, int max)
@@ -452,6 +456,7 @@ namespace FF
         void HandlePendingUpgradesChanged(int pending)
         {
             pendingUpgrades = Mathf.Max(0, pending);
+            Debug.Log($"[GameHUD] Pending upgrades changed: {pendingUpgrades}. Upgrade Menu is visible: {upgradeMenuVisible}");
 
             if (pendingUpgrades > 0)
             {
@@ -539,9 +544,11 @@ namespace FF
 
         void StartUpgradePromptFade(float targetAlpha, bool instant = false)
         {
-            if (upgradePromptFadeRoutine != null)
+            if (upgradePromptFadeRoutine != null) StopCoroutine(upgradePromptFadeRoutine);
+
+            if (targetAlpha > 0f && upgradePromptGroup && !upgradePromptGroup.gameObject.activeSelf)
             {
-                StopCoroutine(upgradePromptFadeRoutine);
+                upgradePromptGroup.gameObject.SetActive(true);
             }
 
             if (targetAlpha > 0f && upgradePromptText && !upgradePromptText.gameObject.activeSelf)
@@ -561,10 +568,7 @@ namespace FF
 
         System.Collections.IEnumerator FadeUpgradePrompt(float targetAlpha)
         {
-            if (!upgradePromptGroup)
-            {
-                yield break;
-            }
+            if (!upgradePromptGroup) yield break;
 
             float duration = Mathf.Max(0.01f, upgradePromptFadeDuration);
             float startAlpha = upgradePromptGroup.alpha;
@@ -576,7 +580,7 @@ namespace FF
 
             while (elapsed < duration)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
                 upgradePromptGroup.alpha = Mathf.Lerp(startAlpha, targetAlpha, t);
                 yield return null;
@@ -584,27 +588,19 @@ namespace FF
 
             upgradePromptGroup.alpha = targetAlpha;
             ApplyUpgradePromptVisibility(targetAlpha);
-
             upgradePromptFadeRoutine = null;
         }
 
         void ApplyUpgradePromptVisibility(float targetAlpha)
         {
-            if (!upgradePromptGroup)
-            {
-                return;
-            }
-
+            if (!upgradePromptGroup) return;
             bool isVisible = targetAlpha > 0f;
             upgradePromptGroup.alpha = Mathf.Max(0f, targetAlpha);
             upgradePromptGroup.interactable = isVisible;
             upgradePromptGroup.blocksRaycasts = isVisible;
             upgradePromptGroup.gameObject.SetActive(isVisible);
 
-            if (!isVisible && upgradePromptText)
-            {
-                upgradePromptText.gameObject.SetActive(false);
-            }
+            if (!isVisible && upgradePromptText) upgradePromptText.gameObject.SetActive(false);
         }
 
         void UpdateWeaponDisplay(Weapon weaponOverride = null)

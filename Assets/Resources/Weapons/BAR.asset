@@ -13,13 +13,14 @@ MonoBehaviour:
   m_Name: BAR
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
   weaponName: BAR M-1918
-  fireSFX: {fileID: 8300000, guid: 53927b112fb025949ae0690991b6b739, type: 3}
+  fireSFX: {fileID: 8300000, guid: 6bf0472e73a7ab04ebc331ddea7d1e45, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
   ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
   recoilAmount: 6
   recoilRecoverySpeed: 10
   weaponIcon: {fileID: 21300000, guid: 84655ba3141087b4da2985f59fdac5c0, type: 3}
   isSpecial: 0
+  useGrenadeCharging: 1
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
   weaponPrefab: {fileID: 6193801330327674161, guid: 13b9af9708b07f74bb4ddd1541ffbece, type: 3}
   rpm: 400

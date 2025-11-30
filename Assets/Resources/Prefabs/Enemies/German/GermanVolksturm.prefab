@@ -118,7 +118,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Enemy
   simpleFollowTest: 0
-  startingWeapon: {fileID: 11400000, guid: 1d694cc740c04310a81cae732b2c2b3c, type: 2}
+  startingWeapon: {fileID: 11400000, guid: 3c1d34c031892764fa99c3d7a6b50241, type: 2}
   weaponManager: {fileID: 5683427355363540241}
   autoShooter: {fileID: 533273636657755474}
   gunPivot: {fileID: 2574021181978823624}

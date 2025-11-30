@@ -40,6 +40,9 @@ namespace FF
 
             XP += v;
 
+            Debug.Log($"[XP] Add({v}) ? XP={XP}, Level={Level}, Next={Next}");
+
+
             ProcessPendingLevels(true);
 
             NotifyXPChanged();
@@ -82,11 +85,13 @@ namespace FF
         {
             while (XP >= Next)
             {
+                Debug.Log($"[XP] Level-up pending: XP={XP}, Next={Next}, Level={Level}");
                 XP -= Next;
                 Level++;
 
                 if (raiseEvents)
                 {
+                    Debug.Log($"[XP] Raising OnLevelUp(Level={Level})");
                     OnLevelUp?.Invoke(Level);
                 }
             }

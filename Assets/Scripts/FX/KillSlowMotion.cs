@@ -8,6 +8,10 @@ namespace FF
     public class KillSlowMotion : MonoBehaviour
     {
         private static KillSlowMotion _instance;
+        public static KillSlowMotion Instance => _instance;
+
+        // Required by PauseMenuController
+        public bool IsActive => _slowmoRoutine != null;
 
         [Header("Slowmo")]
         [SerializeField, Range(0.05f, 1f)] private float multiKillTimeScale = 0.45f;
@@ -118,19 +122,13 @@ namespace FF
 
         public static void EnsureRestoredAfterPause()
         {
-            if (_instance == null)
-            {
-                return;
-            }
-
-            if (_instance._restoreDeferred)
-            {
-                _instance.RestoreTimeScale();
-            }
+            if (_instance == null) return;
+            if (_instance._restoreDeferred) _instance.RestoreTimeScale();
         }
 
         private void Update()
         {
+            // If the menu closed (fade finished) but we deferred, restore now.
             if (_restoreDeferred && !PauseMenuController.IsMenuOpen)
             {
                 RestoreTimeScale();
@@ -139,10 +137,8 @@ namespace FF
 
         private void BuildBannerUI()
         {
-            if (_bannerGroup)
-                return;
+            if (_bannerGroup) return;
 
-            // Canvas
             var canvasGo = new GameObject("SlowmoCanvas", typeof(RectTransform));
             DontDestroyOnLoad(canvasGo);
             var canvas = canvasGo.AddComponent<Canvas>();
@@ -151,7 +147,6 @@ namespace FF
             canvasGo.AddComponent<CanvasScaler>();
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            // Banner
             var bannerGo = new GameObject("SlowmoBanner", typeof(RectTransform));
             bannerGo.transform.SetParent(canvasGo.transform, false);
             var rect = bannerGo.GetComponent<RectTransform>();
@@ -169,10 +164,8 @@ namespace FF
             _bannerText.raycastTarget = false;
 
             TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF");
-            if (!font)
-                font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF 2");
-            if (font)
-                _bannerText.font = font;
+            if (!font) font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF 2");
+            if (font) _bannerText.font = font;
 
             _bannerGroup = bannerGo.AddComponent<CanvasGroup>();
             _bannerGroup.alpha = 0f;
@@ -180,20 +173,14 @@ namespace FF
 
         private void PlayBanner(string message)
         {
-            if (!_bannerGroup || !_bannerText)
-                return;
-
+            if (!_bannerGroup || !_bannerText) return;
             _bannerText.text = message;
-
-            if (_bannerRoutine != null)
-                StopCoroutine(_bannerRoutine);
-
+            if (_bannerRoutine != null) StopCoroutine(_bannerRoutine);
             _bannerRoutine = StartCoroutine(BannerRoutine());
         }
 
         private System.Collections.IEnumerator BannerRoutine()
         {
-            // Fade in
             float elapsed = 0f;
             while (elapsed < bannerFadeTime)
             {
@@ -201,13 +188,8 @@ namespace FF
                 _bannerGroup.alpha = Mathf.Clamp01(elapsed / bannerFadeTime);
                 yield return null;
             }
-
             _bannerGroup.alpha = 1f;
-
-            // Hold
             yield return new WaitForSecondsRealtime(bannerHoldTime);
-
-            // Fade out
             elapsed = 0f;
             while (elapsed < bannerFadeTime)
             {
@@ -215,7 +197,6 @@ namespace FF
                 _bannerGroup.alpha = 1f - Mathf.Clamp01(elapsed / bannerFadeTime);
                 yield return null;
             }
-
             _bannerGroup.alpha = 0f;
             _bannerRoutine = null;
         }
