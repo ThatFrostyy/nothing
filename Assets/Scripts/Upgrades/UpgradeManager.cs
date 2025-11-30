@@ -8,11 +8,14 @@ namespace FF
         public static UpgradeManager I { get; private set; }
 
         [SerializeField] Upgrade[] all;
+        [SerializeField] WeaponUpgradeCard[] weaponUpgradeCards;
         [SerializeField] PlayerStats stats;
         [SerializeField] XPWallet wallet;
         [SerializeField] UpgradeUI ui;
         [SerializeField] WeaponManager weaponManager;
         [SerializeField, Min(0)] int maxUpgradeSelections = 0;
+
+        const int WeaponCardsPerSelection = 3;
 
         int upgradesTaken;
         int pendingUpgrades;
@@ -279,30 +282,27 @@ namespace FF
                 return false;
             }
 
-            Weapon focusWeapon = ResolveFocusWeapon();
-            if (!focusWeapon)
-            {
-                return false;
-            }
-
-            var options = BuildWeaponUpgradeOptions(focusWeapon, 3);
+            var options = BuildWeaponUpgradeOptions(WeaponCardsPerSelection, out string phaseTitle);
             if (options.Count == 0)
             {
                 return false;
             }
 
-            while (options.Count > 0 && options.Count < 3)
+            while (options.Count > 0 && options.Count < WeaponCardsPerSelection)
             {
                 WeaponUpgradeOption duplicate = options[Random.Range(0, options.Count)];
                 options.Add(duplicate);
             }
 
-            ui.ShowWeaponUpgrades(focusWeapon,
+            Weapon headerWeapon = options[0].Weapon != null ? options[0].Weapon : ResolveFocusWeapon();
+
+            ui.ShowWeaponUpgrades(headerWeapon,
                 options[0],
                 options.Count > 1 ? options[1] : options[0],
                 options.Count > 2 ? options[2] : options[0],
                 PickWeaponUpgrade,
-                pendingUpgrades);
+                pendingUpgrades,
+                phaseTitle);
             return true;
         }
 
@@ -388,37 +388,241 @@ namespace FF
             return selections;
         }
 
-        System.Collections.Generic.List<WeaponUpgradeOption> BuildWeaponUpgradeOptions(Weapon weapon, int count)
+        System.Collections.Generic.List<WeaponUpgradeOption> BuildWeaponUpgradeOptions(int totalCount, out string phaseTitle)
         {
+            phaseTitle = null;
             var selections = new System.Collections.Generic.List<WeaponUpgradeOption>();
-            if (weapon == null || count <= 0)
+            if (totalCount <= 0)
             {
                 return selections;
             }
 
-            WeaponUpgradeState state = GetOrCreateWeaponState(weapon);
-            int killCount = weaponKillCounts.TryGetValue(weapon, out int kills) ? kills : 0;
-            float magnitude = CalculateWeaponUpgradeMagnitude(killCount, state != null ? state.CardsTaken : 0);
-
-            var pool = new System.Collections.Generic.List<WeaponUpgradeOption>
+            var requests = BuildWeaponCardRequests(totalCount);
+            if (requests.Count == 0)
             {
-                CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.Damage, magnitude, killCount, state?.CardsTaken ?? 0),
-                CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.FireRate, magnitude, killCount, state?.CardsTaken ?? 0),
-                CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.ProjectileSpeed, magnitude, killCount, state?.CardsTaken ?? 0)
+                Weapon fallbackWeapon = ResolveFocusWeapon();
+                if (fallbackWeapon != null)
+                {
+                    requests.Add(new WeaponCardRequest(fallbackWeapon, totalCount));
+                }
+            }
+
+            phaseTitle = BuildPhaseTitle(requests);
+
+            var cardPool = GetWeaponUpgradeCardPool();
+            WeaponUpgradeType[] fallbackTypes =
+            {
+                WeaponUpgradeType.Damage,
+                WeaponUpgradeType.FireRate,
+                WeaponUpgradeType.ProjectileSpeed
             };
 
-            for (int i = 0; i < count && pool.Count > 0; i++)
+            foreach (var request in requests)
             {
-                int pickIndex = Random.Range(0, pool.Count);
-                selections.Add(pool[pickIndex]);
-
-                if (pool.Count > 1)
+                if (request.Weapon == null)
                 {
-                    pool.RemoveAt(pickIndex);
+                    continue;
+                }
+
+                WeaponUpgradeState state = GetOrCreateWeaponState(request.Weapon);
+                int killCount = weaponKillCounts.TryGetValue(request.Weapon, out int kills) ? kills : 0;
+                float magnitude = CalculateWeaponUpgradeMagnitude(killCount, state != null ? state.CardsTaken : 0);
+
+                var localPool = new System.Collections.Generic.List<WeaponUpgradeCard>(cardPool);
+                int fallbackIndex = 0;
+
+                for (int i = 0; i < request.CardCount && selections.Count < totalCount; i++)
+                {
+                    WeaponUpgradeOption option;
+
+                    if (localPool.Count > 0)
+                    {
+                        int pickIndex = Random.Range(0, localPool.Count);
+                        WeaponUpgradeCard card = localPool[pickIndex];
+                        option = BuildWeaponUpgradeOption(card, request.Weapon, magnitude, killCount, state?.CardsTaken ?? 0);
+
+                        if (localPool.Count > 1)
+                        {
+                            localPool.RemoveAt(pickIndex);
+                        }
+                    }
+                    else
+                    {
+                        WeaponUpgradeType type = fallbackTypes[fallbackIndex % fallbackTypes.Length];
+                        option = CreateWeaponUpgradeOption(request.Weapon, type, magnitude, killCount, state?.CardsTaken ?? 0);
+                        fallbackIndex++;
+                    }
+
+                    selections.Add(option);
                 }
             }
 
             return selections;
+        }
+
+        System.Collections.Generic.List<WeaponCardRequest> BuildWeaponCardRequests(int totalCount)
+        {
+            var requests = new System.Collections.Generic.List<WeaponCardRequest>();
+            if (totalCount <= 0)
+            {
+                return requests;
+            }
+
+            var rankedWeapons = new System.Collections.Generic.List<WeaponCardRequest>();
+            foreach (var pair in weaponKillCounts)
+            {
+                if (pair.Key == null)
+                {
+                    continue;
+                }
+
+                rankedWeapons.Add(new WeaponCardRequest(pair.Key, pair.Value));
+            }
+
+            if (weaponManager != null && weaponManager.CurrentWeapon != null && !rankedWeapons.Exists(r => r.Weapon == weaponManager.CurrentWeapon))
+            {
+                rankedWeapons.Add(new WeaponCardRequest(weaponManager.CurrentWeapon, 0));
+            }
+
+            rankedWeapons.Sort((a, b) => b.KillCount.CompareTo(a.KillCount));
+            if (rankedWeapons.Count == 0)
+            {
+                return requests;
+            }
+
+            int weaponSlots = Mathf.Min(totalCount, rankedWeapons.Count);
+            int baseCardsPerWeapon = weaponSlots > 0 ? Mathf.Max(1, totalCount / weaponSlots) : 0;
+            int cardsRemaining = totalCount;
+
+            for (int i = 0; i < weaponSlots; i++)
+            {
+                WeaponCardRequest weaponRequest = rankedWeapons[i];
+                int assigned = Mathf.Min(baseCardsPerWeapon, cardsRemaining);
+                requests.Add(new WeaponCardRequest(weaponRequest.Weapon, assigned, weaponRequest.KillCount));
+                cardsRemaining -= assigned;
+            }
+
+            if (cardsRemaining > 0)
+            {
+                DistributeExtraCards(requests, cardsRemaining);
+            }
+
+            return requests;
+        }
+
+        void DistributeExtraCards(System.Collections.Generic.List<WeaponCardRequest> requests, int extras)
+        {
+            if (requests == null || requests.Count == 0 || extras <= 0)
+            {
+                return;
+            }
+
+            int totalKills = 0;
+            foreach (var request in requests)
+            {
+                totalKills += Mathf.Max(0, request.KillCount);
+            }
+
+            if (totalKills <= 0)
+            {
+                totalKills = requests.Count;
+            }
+
+            var fractions = new System.Collections.Generic.List<(int index, float fraction)>();
+            for (int i = 0; i < requests.Count; i++)
+            {
+                float share = (float)Mathf.Max(0, requests[i].KillCount) / Mathf.Max(1, totalKills);
+                fractions.Add((i, share));
+            }
+
+            while (extras > 0)
+            {
+                fractions.Sort((a, b) => b.fraction.CompareTo(a.fraction));
+                int targetIndex = fractions[0].index;
+                WeaponCardRequest target = requests[targetIndex];
+                requests[targetIndex] = new WeaponCardRequest(target.Weapon, target.CardCount + 1, target.KillCount);
+                extras--;
+            }
+        }
+
+        string BuildPhaseTitle(System.Collections.Generic.List<WeaponCardRequest> requests)
+        {
+            if (requests == null || requests.Count == 0)
+            {
+                return null;
+            }
+
+            var builder = new System.Text.StringBuilder();
+            builder.Append("Top weapons: ");
+
+            for (int i = 0; i < requests.Count; i++)
+            {
+                string name = GetWeaponDisplayName(requests[i].Weapon);
+                if (string.IsNullOrEmpty(name))
+                {
+                    continue;
+                }
+
+                builder.Append(name);
+
+                if (i < requests.Count - 1)
+                {
+                    builder.Append(", ");
+                }
+            }
+
+            string built = builder.ToString();
+            return built.Trim().EndsWith(":", System.StringComparison.Ordinal) ? null : built;
+        }
+
+        string GetWeaponDisplayName(Weapon weapon)
+        {
+            if (weapon == null)
+            {
+                return string.Empty;
+            }
+
+            if (!string.IsNullOrEmpty(weapon.weaponName))
+            {
+                return weapon.weaponName;
+            }
+
+            return weapon.name;
+        }
+
+        System.Collections.Generic.List<WeaponUpgradeCard> GetWeaponUpgradeCardPool()
+        {
+            var pool = new System.Collections.Generic.List<WeaponUpgradeCard>();
+            if (weaponUpgradeCards != null && weaponUpgradeCards.Length > 0)
+            {
+                pool.AddRange(weaponUpgradeCards);
+            }
+
+            return pool;
+        }
+
+        WeaponUpgradeOption BuildWeaponUpgradeOption(WeaponUpgradeCard card, Weapon weapon, float magnitude, int killCount, int cardsTaken)
+        {
+            if (card != null)
+            {
+                return card.BuildOption(weapon, magnitude, killCount, cardsTaken);
+            }
+
+            return CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.Damage, magnitude, killCount, cardsTaken);
+        }
+
+        struct WeaponCardRequest
+        {
+            public Weapon Weapon { get; }
+            public int CardCount { get; }
+            public int KillCount { get; }
+
+            public WeaponCardRequest(Weapon weapon, int cardCount, int killCount = 0)
+            {
+                Weapon = weapon;
+                CardCount = Mathf.Max(0, cardCount);
+                KillCount = Mathf.Max(0, killCount);
+            }
         }
 
         bool IsUpgradeAvailable(Upgrade upgrade)
@@ -526,11 +730,11 @@ namespace FF
     int killCount,
     int cardsTaken)
         {
-            string weaponName = weapon != null ? weapon.weaponName : "Weapon";
+            string weaponName = GetWeaponDisplayName(weapon);
 
             int percentage = Mathf.RoundToInt(magnitude * 100f);
 
-            // Titles (NO COLOR — clean text)
+            // Titles (NO COLOR Â— clean text)
             string baseTitle = type switch
             {
                 WeaponUpgradeType.Damage => "Damage Boost",
@@ -538,6 +742,11 @@ namespace FF
                 WeaponUpgradeType.ProjectileSpeed => "Bullet Speed Boost",
                 _ => "Upgrade"
             };
+
+            // Append weapon name to the title
+            string titledWithWeapon = string.IsNullOrEmpty(weaponName)
+                ? baseTitle
+                : $"{baseTitle} ({weaponName})";
 
             // Base descriptions (default UI color)
             string baseDescription = type switch
@@ -567,9 +776,9 @@ namespace FF
                 weapon,
                 type,
                 magnitude,
-                baseTitle,
+                titledWithWeapon,
                 baseDescription + coloredPercent,   // but UI uses this only in main description
-                baseTitle,                          // final title = same as base title (NO COLOR)
+                titledWithWeapon,                   // final title = same as base title (NO COLOR)
                 extra                                // final description shown in EXTRA field
             );
         }
