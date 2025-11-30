@@ -16,5 +16,5 @@ MonoBehaviour:
   DescriptionPrefix: 'Increase weapon fire rate by '
   Type: 1
   percentColor: '#D17A22'
-  allowedClasses: -1
+  allowedClasses: 15
   onlyForSemiAuto: 0
