@@ -27,7 +27,7 @@ namespace FF
 
         public Weapon LastDamageSourceWeapon => lastDamageSourceWeapon;
 
-        public void Damage(int amount, Weapon sourceWeapon = null)
+        public void Damage(int amount, Weapon sourceWeapon = null, bool isCritical = false)
         {
             if (amount <= 0) return;
 
@@ -46,7 +46,7 @@ namespace FF
 
                 if (TryGetComponent<Enemy>(out var enemy))
                 {
-                    bool emphasize = enemy.IsBoss || damageApplied >= Mathf.Max(10, maxHP * 0.35f);
+                    bool emphasize = isCritical || enemy.IsBoss || damageApplied >= Mathf.Max(10, maxHP * 0.35f);
                     DamageNumberManager.ShowDamage(transform.position, damageApplied, emphasize);
                 }
             }
