@@ -852,7 +852,7 @@ namespace FF
             // Append weapon name to the title
             string titledWithWeapon = string.IsNullOrEmpty(weaponName)
                 ? baseTitle
-                : $"{baseTitle}\n({weaponName})";
+                : $"{baseTitle}\n\n({weaponName})";
 
             // Base descriptions (default UI color)
             string baseDescription = type switch
@@ -861,7 +861,7 @@ namespace FF
                 WeaponUpgradeType.FireRate => "Shoot faster by ",
                 WeaponUpgradeType.ProjectileSpeed => "Increase bullet velocity by ",
                 WeaponUpgradeType.Pierce => $"Pierce {flatAmount} additional enemies.",
-                WeaponUpgradeType.ExtraProjectiles => $"Fire {flatAmount} extra bullet{(flatAmount == 1 ? string.Empty : "s")}.",
+                WeaponUpgradeType.ExtraProjectiles => $"Fire {flatAmount} extra projectile{(flatAmount == 1 ? string.Empty : "s")}.",
                 _ => "Boost weapon performance by "
             };
 
