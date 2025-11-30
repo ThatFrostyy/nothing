@@ -259,22 +259,34 @@ namespace FF
                 return;
             }
 
-            GameObject bulletInstance = PoolManager.Get(_weapon.bulletPrefab, _muzzle.position, spreadRotation);
+            int extraProjectiles = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponExtraProjectiles(_weapon) : 0;
+            int totalProjectiles = Mathf.Max(1, 1 + extraProjectiles);
+            int pierceCount = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponPierceCount(_weapon) : 0;
 
-            if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
+            for (int i = 0; i < totalProjectiles; i++)
             {
-                float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
-                float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
-                if (UpgradeManager.I != null)
+                Quaternion shotRotation = i == 0
+                    ? spreadRotation
+                    : spreadRotation * Quaternion.AngleAxis(UnityEngine.Random.Range(-_currentSpread, _currentSpread), Vector3.forward);
+
+                GameObject bulletInstance = PoolManager.Get(_weapon.bulletPrefab, _muzzle.position, shotRotation);
+
+                if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
                 {
-                    projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
+                    float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
+                    float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
+                    if (UpgradeManager.I != null)
+                    {
+                        projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
+                    }
+                    bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier), isCrit);
+                    string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
+                    bullet.SetOwner(ownerTag);
+                    bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
+                    bullet.SetSourceWeapon(_weapon);
+                    bullet.SetKnockback(_weapon.knockbackStrength, _weapon.knockbackDuration);
+                    bullet.SetPierceCount(pierceCount);
                 }
-                bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier), isCrit);
-                string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
-                bullet.SetOwner(ownerTag);
-                bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
-                bullet.SetSourceWeapon(_weapon);
-                bullet.SetKnockback(_weapon.knockbackStrength, _weapon.knockbackDuration);
             }
         }
 
