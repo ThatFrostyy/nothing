@@ -8,7 +8,8 @@ namespace FF
         FireRate,
         ProjectileSpeed,
         Pierce,
-        ExtraProjectiles
+        ExtraProjectiles,
+        FireCooldownReduction
     }
 
     [System.Serializable]
@@ -54,6 +55,7 @@ namespace FF
         float projectileSpeedBonus;
         int pierceCount;
         int extraProjectiles;
+        float fireCooldownReduction;
 
         public WeaponUpgradeState(Weapon weapon)
         {
@@ -64,6 +66,7 @@ namespace FF
             projectileSpeedBonus = 0f;
             pierceCount = 0;
             extraProjectiles = 0;
+            fireCooldownReduction = 0f;
         }
 
         public void Apply(WeaponUpgradeOption option)
@@ -88,6 +91,9 @@ namespace FF
                 case WeaponUpgradeType.ExtraProjectiles:
                     extraProjectiles += Mathf.RoundToInt(amount);
                     break;
+                case WeaponUpgradeType.FireCooldownReduction:
+                    fireCooldownReduction += amount;
+                    break;
             }
         }
 
@@ -96,5 +102,6 @@ namespace FF
         public float GetProjectileSpeedMultiplier() => 1f + projectileSpeedBonus;
         public int GetPierceCount() => pierceCount;
         public int GetExtraProjectiles() => extraProjectiles;
+        public float GetFireCooldownMultiplier() => Mathf.Max(0.1f, 1f - fireCooldownReduction);
     }
 }
