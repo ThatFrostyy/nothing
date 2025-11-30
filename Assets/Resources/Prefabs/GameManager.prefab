@@ -72,6 +72,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a1f0644a5653a4543b409d340bd308d5, type: 2}
   - {fileID: 11400000, guid: 93e55faaf9c56ed49a43b899ec7c8016, type: 2}
   - {fileID: 11400000, guid: d90c6410465143d3a0bde11e01a409de, type: 2}
+  weaponUpgradeCards:
+  - {fileID: 11400000, guid: c6c0d8e1462e04c4d88bb65962f31c0b, type: 2}
   stats: {fileID: 0}
   wallet: {fileID: 0}
   ui: {fileID: 0}

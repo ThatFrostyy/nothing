@@ -177,7 +177,7 @@ namespace FF
             }
             else
             {
-                phaseTitleText.text = $"Weapon focus: {weaponName}";
+                phaseTitleText.text = $"{weaponName}";
             }
         }
 
