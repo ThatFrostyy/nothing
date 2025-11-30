@@ -26,6 +26,8 @@ namespace FF
         [SerializeField, Min(0.01f)] private float _aimLineDashLength = 0.2f;
         [SerializeField, Min(0.01f)] private float _aimLineGapLength = 0.12f;
         [SerializeField, Min(0.005f)] private float _aimLineWidth = 0.05f;
+        [SerializeField] private float _aimLineOffsetX = 0f;
+        [SerializeField] private float _aimLineOffsetY = 0f;
 
         [Header("Movement Settings")]
         [SerializeField] private float _acceleration = 0.18f;
@@ -256,7 +258,8 @@ namespace FF
             }
 
             Transform origin = _weaponManager.CurrentMuzzle ? _weaponManager.CurrentMuzzle : _gunPivot;
-            Vector3 start = origin ? origin.position : _gunPivot.position;
+            Vector3 offset = new Vector3(_aimLineOffsetX, _aimLineOffsetY, 0f);
+            Vector3 start = (origin ? origin.position : _gunPivot.position) + _gunPivot.TransformVector(offset);
             Vector3 end = start + (Vector3)(_lastAimDirection.normalized * _aimLineLength);
 
             _aimLine.positionCount = 2;
