@@ -398,6 +398,21 @@ namespace FF
             _weaponManager.SelectSpecialSlot();
         }
 
+        public void OnInteract(InputValue value)
+        {
+            if (!value.isPressed || _weaponManager == null)
+            {
+                return;
+            }
+
+            if (_upgradeMenuOpen || PauseMenuController.IsMenuOpen)
+            {
+                return;
+            }
+
+            _weaponManager.TryCollectNearbyPickup();
+        }
+
         public void OnPause(InputValue value)
         {
             if (!value.isPressed)

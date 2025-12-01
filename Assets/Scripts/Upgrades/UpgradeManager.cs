@@ -72,6 +72,47 @@ namespace FF
             return pool[pool.Count - 1];
         }
 
+        WeaponUpgradeCard RandomWeaponUpgradeCard(System.Collections.Generic.List<WeaponUpgradeCard> pool)
+        {
+            if (pool == null || pool.Count == 0)
+            {
+                return null;
+            }
+
+            int totalWeight = 0;
+            for (int i = 0; i < pool.Count; i++)
+            {
+                WeaponUpgradeCard candidate = pool[i];
+                if (candidate != null)
+                {
+                    totalWeight += Mathf.Max(1, candidate.GetWeight());
+                }
+            }
+
+            if (totalWeight <= 0)
+            {
+                return null;
+            }
+
+            int roll = Random.Range(0, totalWeight);
+            for (int i = 0; i < pool.Count; i++)
+            {
+                WeaponUpgradeCard candidate = pool[i];
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                roll -= Mathf.Max(1, candidate.GetWeight());
+                if (roll < 0)
+                {
+                    return candidate;
+                }
+            }
+
+            return pool[pool.Count - 1];
+        }
+
         void Awake()
         {
             if (I != null && I != this)
@@ -438,19 +479,19 @@ namespace FF
 
                     if (localPool.Count > 0)
                     {
-                        int pickIndex = Random.Range(0, localPool.Count);
-                        WeaponUpgradeCard card = localPool[pickIndex];
+                        WeaponUpgradeCard card = RandomWeaponUpgradeCard(localPool);
                         option = BuildWeaponUpgradeOption(card, request.Weapon, magnitude, killCount, state?.CardsTaken ?? 0);
 
-                        if (localPool.Count > 1)
+                        if (localPool.Count > 1 && card != null)
                         {
-                            localPool.RemoveAt(pickIndex);
+                            localPool.Remove(card);
                         }
                     }
                     else
                     {
                         WeaponUpgradeType type = fallbackTypes[fallbackIndex % fallbackTypes.Length];
-                        option = CreateWeaponUpgradeOption(request.Weapon, type, magnitude, killCount, state?.CardsTaken ?? 0);
+                        option = CreateWeaponUpgradeOption(request.Weapon, type, magnitude, killCount, state?.CardsTaken ?? 0,
+                            Upgrade.Rarity.Common);
                         fallbackIndex++;
                     }
 
@@ -712,7 +753,7 @@ namespace FF
                 return card.BuildOption(weapon, adjustedMagnitude, killCount, cardsTaken);
             }
 
-            return CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.Damage, magnitude, killCount, cardsTaken);
+            return CreateWeaponUpgradeOption(weapon, WeaponUpgradeType.Damage, magnitude, killCount, cardsTaken, Upgrade.Rarity.Common);
         }
 
         struct WeaponCardRequest
@@ -832,7 +873,8 @@ namespace FF
     WeaponUpgradeType type,
     float magnitude,
     int killCount,
-    int cardsTaken)
+    int cardsTaken,
+    Upgrade.Rarity rarity)
         {
             string weaponName = GetWeaponDisplayName(weapon);
 
@@ -900,7 +942,8 @@ namespace FF
                 titledWithWeapon,
                 finalDescription,                   // but UI uses this only in main description
                 titledWithWeapon,                   // final title = same as base title (NO COLOR)
-                extra                                // final description shown in EXTRA field
+                extra,                               // final description shown in EXTRA field
+                rarity
             );
         }
 

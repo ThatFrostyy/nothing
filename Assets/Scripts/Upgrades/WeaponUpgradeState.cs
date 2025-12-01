@@ -18,6 +18,7 @@ namespace FF
         public Weapon Weapon;
         public WeaponUpgradeType Type;
         public float Magnitude;
+        public Upgrade.Rarity Rarity;
 
         public string BaseTitle;       // YOU fill this in inspector or code
         public string BaseDescription; // YOU fill this
@@ -31,11 +32,13 @@ namespace FF
             string baseTitle,
             string baseDescription,
             string finalTitle,
-            string finalDescription)
+            string finalDescription,
+            Upgrade.Rarity rarity)
         {
             Weapon = weapon;
             Type = type;
             Magnitude = magnitude;
+            Rarity = rarity;
 
             BaseTitle = baseTitle;
             BaseDescription = baseDescription;
