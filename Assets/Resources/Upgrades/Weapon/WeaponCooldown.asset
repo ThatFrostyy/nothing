@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 639b2135e5fe44a489165be878c19319, type: 3}
-  m_Name: WeaponPierce
+  m_Name: WeaponCooldown
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
-  Title: Pierce Upgrade<br>
-  DescriptionPrefix: 'Increase weapon pierce count by '
-  Type: 3
+  Title: Weapon Cooldown Upgrade<br>
+  DescriptionPrefix: 'Decrease weapon cooldown by '
+  Type: 5
   percentColor: '#0060BC'
-  allowedClasses: 6
+  allowedClasses: 19
   onlyForSemiAuto: 0

@@ -158,9 +158,17 @@ namespace FF
         {
             if (upgradesRemainingText)
             {
-                upgradesRemainingText.text = showingWeaponCards
-                    ? "Weapon mastery bonus"
-                    : $"Upgrades left: {Mathf.Max(0, pendingUpgrades)}";
+                if (showingWeaponCards)
+                {
+                    upgradesRemainingText.text = phaseTitleText != null
+                        ? phaseTitleText.text
+                        : "Weapon";
+                }
+                else
+                {
+                    upgradesRemainingText.text = $"Upgrades left: {Mathf.Max(0, pendingUpgrades)}";
+                }
+
             }
         }
 
@@ -171,14 +179,18 @@ namespace FF
                 return;
             }
 
-            if (string.IsNullOrEmpty(weaponName))
+            if (showingWeaponCards)
             {
-                phaseTitleText.text = "Choose an upgrade";
+                phaseTitleText.text = "Weapon mastery bonus";
             }
             else
             {
-                phaseTitleText.text = $"{weaponName}";
+                if (string.IsNullOrEmpty(weaponName))
+                    phaseTitleText.text = "Choose an upgrade";
+                else
+                    phaseTitleText.text = $"{weaponName}";
             }
+
         }
 
         void EnsureCardRoots()

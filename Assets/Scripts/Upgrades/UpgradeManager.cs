@@ -854,7 +854,7 @@ namespace FF
             // Append weapon name to the title
             string titledWithWeapon = string.IsNullOrEmpty(weaponName)
                 ? baseTitle
-                : $"{baseTitle}\n\n({weaponName})";
+                : $"{baseTitle}\n({weaponName})";
 
             // Base descriptions (default UI color)
             string baseDescription = type switch
