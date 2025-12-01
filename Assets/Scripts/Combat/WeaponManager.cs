@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace FF
@@ -13,6 +14,7 @@ namespace FF
         [SerializeField] AutoShooter shooter;
 
         readonly Weapon[] loadout = new Weapon[3];
+        readonly List<WeaponPickup> nearbyPickups = new();
         Weapon currentSO;
         GameObject currentWeaponInstance;
         Transform muzzle;
@@ -42,11 +44,15 @@ namespace FF
 
         public void Equip(Weapon newWeapon)
         {
-            TryEquip(newWeapon);
+            TryEquip(newWeapon, out _);
         }
 
-        public bool TryEquip(Weapon newWeapon)
+        public bool TryEquip(Weapon newWeapon) => TryEquip(newWeapon, out _);
+
+        public bool TryEquip(Weapon newWeapon, out Weapon replacedWeapon)
         {
+            replacedWeapon = null;
+
             if (!newWeapon)
             {
                 return false;
@@ -59,8 +65,16 @@ namespace FF
                 return false;
             }
 
+            Weapon previous = loadout[targetSlot];
+
             AssignWeaponToSlot(targetSlot, newWeapon);
             SelectSlot(targetSlot);
+
+            if (previous && previous != newWeapon)
+            {
+                replacedWeapon = previous;
+            }
+
             return true;
         }
 
@@ -114,6 +128,45 @@ namespace FF
             SelectSlot(SpecialSlotIndex);
         }
 
+        public void RegisterNearbyPickup(WeaponPickup pickup)
+        {
+            if (!pickup)
+            {
+                return;
+            }
+
+            if (!nearbyPickups.Contains(pickup))
+            {
+                nearbyPickups.Add(pickup);
+            }
+
+            CleanupNearbyPickups();
+        }
+
+        public void UnregisterNearbyPickup(WeaponPickup pickup)
+        {
+            if (pickup == null)
+            {
+                nearbyPickups.RemoveAll(p => p == null);
+                return;
+            }
+
+            nearbyPickups.Remove(pickup);
+        }
+
+        public bool TryCollectNearbyPickup()
+        {
+            CleanupNearbyPickups();
+
+            WeaponPickup closest = GetClosestPickup();
+            if (!closest)
+            {
+                return false;
+            }
+
+            return closest.TryCollect(this);
+        }
+
         int ResolveTargetSlot(Weapon weapon)
         {
             if (weapon.isSpecial)
@@ -141,6 +194,40 @@ namespace FF
 
             bool slotIsSpecial = slotIndex == SpecialSlotIndex;
             return slotIsSpecial == weapon.isSpecial;
+        }
+
+        void CleanupNearbyPickups()
+        {
+            nearbyPickups.RemoveAll(p => p == null);
+        }
+
+        WeaponPickup GetClosestPickup()
+        {
+            if (nearbyPickups.Count == 0)
+            {
+                return null;
+            }
+
+            WeaponPickup closest = null;
+            float closestSqrDist = float.MaxValue;
+            Vector3 origin = transform.position;
+
+            foreach (var pickup in nearbyPickups)
+            {
+                if (!pickup)
+                {
+                    continue;
+                }
+
+                float sqrDist = (pickup.transform.position - origin).sqrMagnitude;
+                if (sqrDist < closestSqrDist)
+                {
+                    closestSqrDist = sqrDist;
+                    closest = pickup;
+                }
+            }
+
+            return closest;
         }
 
         void AssignWeaponToSlot(int slotIndex, Weapon weapon)

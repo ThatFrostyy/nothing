@@ -20,6 +20,7 @@ namespace FF
         [SerializeField, Min(0.1f)] private float bossKillDuration = 1.75f;
         [SerializeField, Min(0.1f)] private float killWindow = 2.2f;
         [SerializeField, Min(2)] private int killsNeededForSlowmo = 4;
+        [SerializeField, Min(0f)] private float slowmoCooldown = 1f;
 
         [Header("UI")]
         [SerializeField] private string multiKillMessage = "BULLET TIME";
@@ -32,6 +33,7 @@ namespace FF
         private Coroutine _slowmoRoutine;
         private Coroutine _bannerRoutine;
         private bool _restoreDeferred;
+        private float _cooldownUntil;
 
         private CanvasGroup _bannerGroup;
         private TextMeshProUGUI _bannerText;
@@ -83,6 +85,11 @@ namespace FF
 
         private void TriggerSlowmo(float scale, float duration, string message)
         {
+            if (_slowmoRoutine == null && Time.unscaledTime < _cooldownUntil)
+            {
+                return;
+            }
+
             scale = Mathf.Clamp(scale, 0.05f, 1f);
             duration = Mathf.Max(0.05f, duration);
 
@@ -105,6 +112,7 @@ namespace FF
             }
 
             RestoreTimeScale();
+            _cooldownUntil = Time.unscaledTime + slowmoCooldown;
             _slowmoRoutine = null;
         }
 

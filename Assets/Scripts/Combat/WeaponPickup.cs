@@ -12,6 +12,7 @@ namespace FF
         [Header("Lifetime")]
         [SerializeField, Min(0f)] float lifetimeSeconds = 20f;
         [SerializeField] bool despawnWhenUncollected = true;
+        [SerializeField, Min(0f)] float droppedWeaponLifetimeSeconds = 15f;
 
         [Header("Visual Settings")]
         [SerializeField] float hoverAmplitude = 0.25f;  // how high it floats
@@ -39,6 +40,7 @@ namespace FF
         bool playPickupEffects;
         float timer = 0f;
         float lifetimeTimer;
+        WeaponManager nearbyManager;
 
         public event System.Action<WeaponPickup> OnCollected;
         public event System.Action<WeaponPickup> OnExpired;
@@ -46,6 +48,7 @@ namespace FF
         public void SetWeaponData(Weapon weapon)
         {
             weaponData = weapon;
+            ApplyWeaponVisuals();
         }
 
         public void SetLifetime(float seconds)
@@ -70,6 +73,7 @@ namespace FF
             playPickupEffects = false;
             startPos = transform.localPosition;
             startScale = transform.localScale;
+            nearbyManager = null;
 
             if (pickupCollider)
             {
@@ -82,6 +86,13 @@ namespace FF
                 color.a = 1f;
                 sr.color = color;
             }
+
+            ApplyWeaponVisuals();
+        }
+
+        void OnDisable()
+        {
+            CleanupNearbyManager();
         }
 
         void Update()
@@ -141,6 +152,7 @@ namespace FF
                 return;
             }
 
+            CleanupNearbyManager();
             isDespawning = true;
             playPickupEffects = withEffects;
 
@@ -162,20 +174,57 @@ namespace FF
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (isDespawning) return;
+            if (isDespawning)
+            {
+                return;
+            }
 
             if (!weaponData)
             {
                 return;
             }
 
-            if (other.TryGetComponent<WeaponManager>(out var wm) && wm.TryEquip(weaponData))
+            if (other.TryGetComponent<WeaponManager>(out var wm))
             {
-                PlayPickupSound();
-                SpawnPickupFx();
-                TriggerPickupAnimation(true);
-                OnCollected?.Invoke(this);
+                nearbyManager = wm;
+                wm.RegisterNearbyPickup(this);
             }
+        }
+
+        void OnTriggerExit2D(Collider2D other)
+        {
+            if (other.TryGetComponent<WeaponManager>(out var wm) && wm == nearbyManager)
+            {
+                wm.UnregisterNearbyPickup(this);
+                nearbyManager = null;
+            }
+        }
+
+        public bool TryCollect(WeaponManager wm)
+        {
+            if (wm == null || isDespawning || !weaponData)
+            {
+                return false;
+            }
+
+            if (!wm.TryEquip(weaponData, out Weapon droppedWeapon))
+            {
+                return false;
+            }
+
+            if (droppedWeapon)
+            {
+                SpawnDroppedPickup(droppedWeapon);
+            }
+
+            wm.UnregisterNearbyPickup(this);
+            nearbyManager = null;
+
+            PlayPickupSound();
+            SpawnPickupFx();
+            TriggerPickupAnimation(true);
+            OnCollected?.Invoke(this);
+            return true;
         }
 
         private void HandleLifetime()
@@ -199,6 +248,7 @@ namespace FF
                 return;
             }
 
+            CleanupNearbyManager();
             TriggerPickupAnimation(false);
             OnExpired?.Invoke(this);
         }
@@ -227,6 +277,48 @@ namespace FF
             }
 
             PoolManager.Get(pickupFx, transform.position, Quaternion.identity);
+        }
+
+        private void SpawnDroppedPickup(Weapon droppedWeapon)
+        {
+            if (!droppedWeapon || droppedWeaponLifetimeSeconds <= 0f)
+            {
+                return;
+            }
+
+            var droppedInstance = Instantiate(gameObject, transform.position, Quaternion.identity);
+            var droppedPickup = droppedInstance.GetComponent<WeaponPickup>();
+            if (!droppedPickup)
+            {
+                Destroy(droppedInstance);
+                return;
+            }
+
+            droppedPickup.SetWeaponData(droppedWeapon);
+            droppedPickup.SetLifetime(droppedWeaponLifetimeSeconds);
+            droppedPickup.RefreshVisuals();
+        }
+
+        private void CleanupNearbyManager()
+        {
+            if (nearbyManager)
+            {
+                nearbyManager.UnregisterNearbyPickup(this);
+                nearbyManager = null;
+            }
+        }
+
+        public void RefreshVisuals()
+        {
+            ApplyWeaponVisuals();
+        }
+
+        private void ApplyWeaponVisuals()
+        {
+            if (weaponData != null && sr != null && weaponData.weaponIcon != null)
+            {
+                sr.sprite = weaponData.weaponIcon;
+            }
         }
     }
 }

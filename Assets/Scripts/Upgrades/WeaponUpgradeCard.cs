@@ -20,6 +20,8 @@ namespace FF
         [Header("Card Data")]
         public string Title = "Weapon Upgrade";
         [TextArea] public string DescriptionPrefix = "Boost weapon performance by ";
+        [SerializeField] private Upgrade.Rarity rarity = Upgrade.Rarity.Common;
+        [SerializeField, Min(0)] private int rarityWeightOverride = 0;
 
         [Header("Effect")]
         public WeaponUpgradeType Type = WeaponUpgradeType.Damage;
@@ -29,6 +31,7 @@ namespace FF
 
         public WeaponClassFilter AllowedClasses => allowedClasses;
         public bool OnlyForSemiAuto => onlyForSemiAuto;
+        public Upgrade.Rarity Rarity => rarity;
 
         public WeaponUpgradeOption BuildOption(Weapon weapon, float magnitude, int killCount, int cardsTaken)
         {
@@ -60,8 +63,27 @@ namespace FF
                 appendedTitle,
                 baseDescription,
                 appendedTitle,
-                extra
+                extra,
+                rarity
             );
+        }
+
+        public int GetWeight()
+        {
+            if (rarityWeightOverride > 0)
+            {
+                return rarityWeightOverride;
+            }
+
+            return rarity switch
+            {
+                Upgrade.Rarity.Common => 8,
+                Upgrade.Rarity.Uncommon => 5,
+                Upgrade.Rarity.Rare => 3,
+                Upgrade.Rarity.Epic => 2,
+                Upgrade.Rarity.Legendary => 1,
+                _ => 1
+            };
         }
 
         static string GetWeaponName(Weapon weapon)
