@@ -18,10 +18,17 @@ namespace FF
         [SerializeField] private Button resumeButton;
         [SerializeField] private Button restartButton;
         [SerializeField] private Button mainMenuButton;
+        [SerializeField] private Button settingsButton;
+        [SerializeField] private Button closeSettingsButton;
         [SerializeField] private string pauseTitle = "Paused";
         [SerializeField] private string deathTitle = "Defeated";
         [SerializeField, Min(0f)] private float fadeDuration = 0.25f;
         [SerializeField, Range(0f, 1f)] private float backdropAlpha = 0.7f;
+
+        [Header("Settings")]
+        [SerializeField] private CanvasGroup settingsGroup;
+        [SerializeField] private GameObject settingsRoot;
+        [SerializeField] private MusicSettingsUI musicSettingsUI;
 
         [Header("Flow")]
         [SerializeField] private SceneFlowController sceneFlow;
@@ -50,12 +57,7 @@ namespace FF
             if (!deathClip) deathClip = Resources.Load<AudioClip>("Sounds/death1");
             if (!deathEffectPrefab) deathEffectPrefab = Resources.Load<GameObject>("Prefabs/FX/Death");
 
-            if (resumeButton && restartButton && mainMenuButton)
-            {
-                resumeButton.onClick.AddListener(HideMenu);
-                restartButton.onClick.AddListener(RestartScene);
-                mainMenuButton.onClick.AddListener(ReturnToMainMenu);
-            }
+            BindButtons();
 
             ApplyVisibility(0f, true);
         }
@@ -68,6 +70,26 @@ namespace FF
         private void OnDisable()
         {
             SceneManager.sceneLoaded -= HandleSceneLoaded;
+        }
+
+        private void BindButtons()
+        {
+            if (resumeButton && restartButton && mainMenuButton)
+            {
+                resumeButton.onClick.AddListener(HideMenu);
+                restartButton.onClick.AddListener(RestartScene);
+                mainMenuButton.onClick.AddListener(ReturnToMainMenu);
+            }
+
+            if (settingsButton)
+            {
+                settingsButton.onClick.AddListener(ShowSettings);
+            }
+
+            if (closeSettingsButton)
+            {
+                closeSettingsButton.onClick.AddListener(HideSettings);
+            }
         }
 
         public static void TogglePause()
@@ -99,6 +121,9 @@ namespace FF
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
 
+            HideSettings();
+            RefreshSettingsUI();
+
             if (titleText) titleText.text = isDeath ? deathTitle : pauseTitle;
             if (resumeButton) resumeButton.gameObject.SetActive(!isDeath);
 
@@ -112,6 +137,7 @@ namespace FF
 
             _isVisible = false;
             _isDeathMenu = false;
+            HideSettings();
             _fadeRoutine = StartCoroutine(FadeCanvas(0f, RestoreTimeScale));
         }
 
@@ -191,8 +217,49 @@ namespace FF
         {
             _isVisible = false;
             _isDeathMenu = false;
+            HideSettings();
             ApplyVisibility(0f, true);
             RestoreTimeScale();
+        }
+
+        private void ShowSettings()
+        {
+            if (settingsRoot)
+            {
+                settingsRoot.SetActive(true);
+            }
+
+            if (settingsGroup)
+            {
+                settingsGroup.alpha = 1f;
+                settingsGroup.blocksRaycasts = true;
+                settingsGroup.interactable = true;
+            }
+
+            RefreshSettingsUI();
+        }
+
+        private void HideSettings()
+        {
+            if (settingsGroup)
+            {
+                settingsGroup.alpha = 0f;
+                settingsGroup.blocksRaycasts = false;
+                settingsGroup.interactable = false;
+            }
+
+            if (settingsRoot)
+            {
+                settingsRoot.SetActive(false);
+            }
+        }
+
+        private void RefreshSettingsUI()
+        {
+            if (musicSettingsUI)
+            {
+                musicSettingsUI.RefreshDisplay();
+            }
         }
 
         private static void CreateRuntimeInstance()
