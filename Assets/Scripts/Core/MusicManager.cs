@@ -23,6 +23,8 @@ namespace FF
         [SerializeField, Min(1f)] private float waveForMaxIntensity = 16f;
         [SerializeField, Min(1)] private int bossWaveIntervalHint = 5;
         [SerializeField, Range(0f, 1f)] private float introVolumeScale = 0.15f;
+        [SerializeField, Range(0f, 1f)] private float menuExitIntensity = 0.05f;
+        [SerializeField, Range(0f, 1f)] private float intenseIntensityThreshold = 0.55f;
 
         private AudioSource _activeSource;
         private AudioSource _standbySource;
@@ -35,6 +37,8 @@ namespace FF
         private int _lastWave;
         private bool _isBossWave;
         private float _smoothedIntensity;
+        private float _waveElapsed;
+        private bool _hasLeftMenu;
 
         public static void SetVolume(float value)
         {
@@ -83,6 +87,8 @@ namespace FF
             _smoothedIntensity = 0f;
             _isBossWave = false;
             _lastWave = 0;
+            _waveElapsed = 0f;
+            _hasLeftMenu = false;
             ApplyStateFromIntensity(true);
         }
 
@@ -111,6 +117,7 @@ namespace FF
         private void HandleWaveStarted(int wave)
         {
             _lastWave = wave;
+            _waveElapsed = 0f;
             _isBossWave = bossWaveIntervalHint > 0 && wave > 0 && wave % bossWaveIntervalHint == 0;
             if (_isBossWave)
             {
@@ -123,11 +130,16 @@ namespace FF
             if (_gameManager == null)
             {
                 _smoothedIntensity = Mathf.MoveTowards(_smoothedIntensity, 0f, Time.unscaledDeltaTime * intensitySmoothing);
+                _hasLeftMenu = false;
                 return;
             }
 
-            float waveIntensity = Mathf.InverseLerp(1f, Mathf.Max(1f, waveForMaxIntensity), Mathf.Max(1, _lastWave));
-            float target = waveIntensity;
+            _waveElapsed += Time.unscaledDeltaTime;
+            float waveInterval = Mathf.Max(0.01f, _gameManager.CurrentWaveInterval);
+            float waveProgress = Mathf.Clamp01(_waveElapsed / waveInterval);
+
+            float wavePosition = Mathf.Max(0f, (_lastWave > 0 ? _lastWave - 1f : 0f) + waveProgress);
+            float target = Mathf.Clamp01(wavePosition / Mathf.Max(1f, waveForMaxIntensity));
 
             if (_isBossWave)
             {
@@ -135,6 +147,11 @@ namespace FF
             }
 
             _smoothedIntensity = Mathf.MoveTowards(_smoothedIntensity, Mathf.Clamp01(target), Time.unscaledDeltaTime * intensitySmoothing);
+
+            if (_lastWave > 0 && _smoothedIntensity >= menuExitIntensity)
+            {
+                _hasLeftMenu = true;
+            }
         }
 
         private void ApplyStateFromIntensity(bool force = false)
@@ -155,17 +172,17 @@ namespace FF
                 return menuMusic;
             }
 
+            if (_lastWave <= 0 || !_hasLeftMenu)
+            {
+                return menuMusic;
+            }
+
             if (_isBossWave && bossMusic)
             {
                 return bossMusic;
             }
 
-            if (_smoothedIntensity < 0.35f)
-            {
-                return menuMusic;
-            }
-
-            if (_smoothedIntensity < 0.7f)
+            if (_smoothedIntensity < intenseIntensityThreshold)
             {
                 return actionMusic ? actionMusic : menuMusic;
             }
