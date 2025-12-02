@@ -13,7 +13,6 @@ namespace FF
 
         [Header("Clips")]
         [SerializeField] private AudioClip menuMusic;
-        [SerializeField] private AudioClip calmMusic;
         [SerializeField] private AudioClip actionMusic;
         [SerializeField] private AudioClip intenseMusic;
         [SerializeField] private AudioClip bossMusic;
@@ -22,9 +21,8 @@ namespace FF
         [SerializeField, Min(0.1f)] private float crossfadeDuration = 1.5f;
         [SerializeField, Min(0.01f)] private float intensitySmoothing = 1.5f;
         [SerializeField, Min(1f)] private float waveForMaxIntensity = 16f;
-        [SerializeField, Range(0f, 1f)] private float lowHealthThreshold = 0.35f;
-        [SerializeField, Range(0f, 1f)] private float lowHealthIntensityBoost = 0.3f;
         [SerializeField, Min(1)] private int bossWaveIntervalHint = 5;
+        [SerializeField, Range(0f, 1f)] private float introVolumeScale = 0.15f;
 
         private AudioSource _activeSource;
         private AudioSource _standbySource;
@@ -34,7 +32,6 @@ namespace FF
         private Coroutine _crossfadeRoutine;
 
         private GameManager _gameManager;
-        private Health _playerHealth;
         private int _lastWave;
         private bool _isBossWave;
         private float _smoothedIntensity;
@@ -97,11 +94,8 @@ namespace FF
             if (_gameManager != null)
             {
                 _gameManager.OnWaveStarted += HandleWaveStarted;
-                _gameManager.OnKillCountChanged += HandleKillCountChanged;
                 _lastWave = _gameManager.Wave;
             }
-
-            _playerHealth = FindAnyObjectByType<PlayerController>()?.GetComponent<Health>();
         }
 
         private void ReleaseSceneBindings()
@@ -109,11 +103,9 @@ namespace FF
             if (_gameManager != null)
             {
                 _gameManager.OnWaveStarted -= HandleWaveStarted;
-                _gameManager.OnKillCountChanged -= HandleKillCountChanged;
                 _gameManager = null;
             }
 
-            _playerHealth = null;
         }
 
         private void HandleWaveStarted(int wave)
@@ -126,12 +118,6 @@ namespace FF
             }
         }
 
-        private void HandleKillCountChanged(int killCount)
-        {
-            // Small nudge so frequent kills gently raise the intensity over time.
-            _smoothedIntensity = Mathf.Clamp01(_smoothedIntensity + 0.01f);
-        }
-
         private void UpdateIntensity()
         {
             if (_gameManager == null)
@@ -142,16 +128,6 @@ namespace FF
 
             float waveIntensity = Mathf.InverseLerp(1f, Mathf.Max(1f, waveForMaxIntensity), Mathf.Max(1, _lastWave));
             float target = waveIntensity;
-
-            if (_playerHealth != null && _playerHealth.MaxHP > 0)
-            {
-                float healthFraction = Mathf.Clamp01((float)_playerHealth.CurrentHP / _playerHealth.MaxHP);
-                if (healthFraction <= lowHealthThreshold)
-                {
-                    float t = Mathf.Clamp01(lowHealthIntensityBoost + (1f - healthFraction));
-                    target = Mathf.Max(target, Mathf.Lerp(0.6f, 1f, t));
-                }
-            }
 
             if (_isBossWave)
             {
@@ -176,7 +152,7 @@ namespace FF
         {
             if (_gameManager == null)
             {
-                return menuMusic ? menuMusic : calmMusic;
+                return menuMusic;
             }
 
             if (_isBossWave && bossMusic)
@@ -186,12 +162,12 @@ namespace FF
 
             if (_smoothedIntensity < 0.35f)
             {
-                return calmMusic ? calmMusic : actionMusic;
+                return menuMusic;
             }
 
             if (_smoothedIntensity < 0.7f)
             {
-                return actionMusic ? actionMusic : calmMusic;
+                return actionMusic ? actionMusic : menuMusic;
             }
 
             return intenseMusic ? intenseMusic : actionMusic;
@@ -309,14 +285,15 @@ namespace FF
         private void ApplyVolume(float value, bool persist)
         {
             MusicVolume = Mathf.Clamp01(value);
+            float intensityVolumeScale = _gameManager == null ? 1f : Mathf.Lerp(introVolumeScale, 1f, _smoothedIntensity);
             if (_activeSource)
             {
-                _activeSource.volume = MusicVolume * _activeMix;
+                _activeSource.volume = MusicVolume * _activeMix * intensityVolumeScale;
             }
 
             if (_standbySource)
             {
-                _standbySource.volume = MusicVolume * _standbyMix;
+                _standbySource.volume = MusicVolume * _standbyMix * intensityVolumeScale;
             }
 
             if (persist)
