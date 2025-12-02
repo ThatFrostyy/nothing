@@ -61,7 +61,6 @@ namespace FF
             int targetSlot = ResolveTargetSlot(newWeapon);
             if (!IsSlotValidForWeapon(targetSlot, newWeapon))
             {
-                Debug.LogWarning($"Weapon '{newWeapon.name}' does not fit in slot {targetSlot}.");
                 return false;
             }
 

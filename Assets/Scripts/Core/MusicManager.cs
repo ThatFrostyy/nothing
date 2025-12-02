@@ -39,30 +39,12 @@ namespace FF
         private bool _isBossWave;
         private float _smoothedIntensity;
 
-        public static void EnsureInstance()
-        {
-            if (Instance != null)
-            {
-                return;
-            }
-
-            var host = new GameObject(nameof(MusicManager));
-            host.AddComponent<MusicManager>();
-        }
-
         public static void SetVolume(float value)
         {
-            EnsureInstance();
             if (Instance != null)
             {
                 Instance.ApplyVolume(value, true);
             }
-        }
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Initialize()
-        {
-            EnsureInstance();
         }
 
         private void Awake()

@@ -12,7 +12,6 @@ namespace FF
 
         private void Awake()
         {
-            MusicManager.EnsureInstance();
             BindSlider();
             RefreshDisplay();
         }
