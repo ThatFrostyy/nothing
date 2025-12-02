@@ -45,13 +45,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.MusicManager
   menuMusic: {fileID: 8300000, guid: 061c10c5b7911724b8c0d05f0f310b9b, type: 3}
-  calmMusic: {fileID: 0}
   actionMusic: {fileID: 8300000, guid: 4ba332d512468d046a6ec2f835f2d1e3, type: 3}
   intenseMusic: {fileID: 8300000, guid: 15c3dec19fd6a484bb4b2198c5b6ecc5, type: 3}
   bossMusic: {fileID: 0}
   crossfadeDuration: 1.5
   intensitySmoothing: 1.5
   waveForMaxIntensity: 16
-  lowHealthThreshold: 0.35
-  lowHealthIntensityBoost: 0.3
   bossWaveIntervalHint: 5
+  introVolumeScale: 0.15
