@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
   Title: Fire Rate Upgrade<br>
   DescriptionPrefix: 'Increase weapon fire rate by '
+  rarity: 1
+  rarityWeightOverride: 0
   Type: 1
   percentColor: '#D17A22'
   allowedClasses: 15

@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
   Title: Pierce Upgrade<br>
   DescriptionPrefix: 'Increase weapon pierce count by '
+  rarity: 3
+  rarityWeightOverride: 0
   Type: 3
   percentColor: '#0060BC'
   allowedClasses: 6

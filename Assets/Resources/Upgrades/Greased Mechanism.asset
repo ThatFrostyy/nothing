@@ -20,5 +20,5 @@ MonoBehaviour:
   MinValue: 0
   MaxStacks: 8
   HealAmount: 25
-  rarity: 0
+  rarity: 1
   rarityWeightOverride: 0
