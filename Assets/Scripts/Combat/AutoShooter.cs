@@ -550,6 +550,8 @@ namespace FF
 
             if (shouldPlay)
             {
+                UpdateLoopingVfxTransform();
+
                 if (ShouldUseLoopingAudio())
                 {
                     StartLoopingAudio();
@@ -600,6 +602,24 @@ namespace FF
             StopLoopSource(_fireLoopSource);
         }
 
+        private void UpdateLoopingVfxTransform()
+        {
+            if (_activeLoopingVfx == null || _muzzle == null || _weapon == null)
+            {
+                return;
+            }
+
+            Transform vfxTransform = _activeLoopingVfx.transform;
+            vfxTransform.SetParent(null, true);
+
+            Vector3 offset = _weapon.loopingVfxOffset;
+            vfxTransform.SetPositionAndRotation(
+                _muzzle.position + _muzzle.TransformVector(offset),
+                _muzzle.rotation
+            );
+            vfxTransform.localScale = Vector3.one;
+        }
+
         private void StartLoopingVfx()
         {
             if (_activeLoopingVfx || _muzzle == null || _weapon.loopingFireVfx == null)
@@ -607,16 +627,16 @@ namespace FF
                 return;
             }
 
-            Transform parent = _muzzle;
-            Vector3 position = parent.position + parent.TransformVector(_weapon.loopingVfxOffset);
-            Quaternion rotation = parent.rotation;
+            Vector3 position = _muzzle.position + _muzzle.TransformVector(_weapon.loopingVfxOffset);
+            Quaternion rotation = _muzzle.rotation;
 
             GameObject instance = PoolManager.Get(_weapon.loopingFireVfx, position, rotation);
             if (instance)
             {
-                instance.transform.SetParent(parent);
-                instance.transform.localPosition = _weapon.loopingVfxOffset;
-                instance.transform.localRotation = Quaternion.identity;
+                instance.transform.SetParent(null, true);
+                instance.transform.position = position;
+                instance.transform.rotation = rotation;
+                instance.transform.localScale = Vector3.one;
 
                 if (instance.TryGetComponent<PooledParticleSystem>(out var pooled))
                 {
@@ -630,6 +650,8 @@ namespace FF
             }
 
             _activeLoopingVfx = instance;
+
+            UpdateLoopingVfxTransform();
         }
 
         private void StopLoopingVfx()
