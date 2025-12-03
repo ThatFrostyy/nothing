@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,41 +12,52 @@ namespace FF
         public static MusicManager Instance { get; private set; }
         public static float MusicVolume { get; private set; } = DefaultVolume;
 
+        private enum MusicState { Action, Intense, Boss }
+        private MusicState _currentState = MusicState.Action;
+
         [Header("Clips")]
         [SerializeField] private AudioClip menuMusic;
         [SerializeField] private AudioClip actionMusic;
         [SerializeField] private AudioClip intenseMusic;
         [SerializeField] private AudioClip bossMusic;
 
-        [Header("Dynamics")]
-        [SerializeField, Min(0.1f)] private float crossfadeDuration = 1.5f;
-        [SerializeField, Min(0.01f)] private float intensitySmoothing = 1.5f;
-        [SerializeField, Min(1f)] private float waveForMaxIntensity = 16f;
-        [SerializeField, Min(1)] private int bossWaveIntervalHint = 5;
-        [SerializeField, Range(0f, 1f)] private float introVolumeScale = 0.15f;
-        [SerializeField, Range(0f, 1f)] private float menuExitIntensity = 0.05f;
-        [SerializeField, Range(0f, 1f)] private float intenseIntensityThreshold = 0.55f;
+        [Header("Durations")]
+        [SerializeField] private float menuFadeDuration = 1.5f;
+        [SerializeField] private float crossfadeDuration = 1.5f;
+        [SerializeField] private float intensityRiseDuration = 8f;
 
-        private AudioSource _activeSource;
-        private AudioSource _standbySource;
-        private float _activeMix = 1f;
-        private float _standbyMix = 0f;
+        [Header("Tier Settings")]
+        [SerializeField] private int intenseWave = 4;
+        [SerializeField] private int bossWaveInterval = 10;
+
+        // Pause system
+        private bool _isPaused = false;
+        private Coroutine _pauseFadeRoutine;
+        [SerializeField] private float pauseFadeDuration = 0.5f;
+        [SerializeField, Range(0f, 1f)] private float pauseVolumeScale = 0.25f;
+
+        private AudioSource _active;
+        private AudioSource _standby;
+
+        private bool _inMenu = true;
+        private bool _gameStarted = false;
+
+        private bool _firstWaveStarted = false;
+        private bool _fullVolumeReached = false;
+        private float _intensityFadeTimer = 0f;
+
         private AudioClip _currentClip;
         private Coroutine _crossfadeRoutine;
+        private Coroutine _menuRoutine;
 
-        private GameManager _gameManager;
-        private int _lastWave;
-        private bool _isBossWave;
-        private float _smoothedIntensity;
-        private float _waveElapsed;
-        private bool _hasLeftMenu;
+        private GameManager _gm;
+
+        private float _lastAppliedVolume = DefaultVolume;
 
         public static void SetVolume(float value)
         {
             if (Instance != null)
-            {
                 Instance.ApplyVolume(value, true);
-            }
         }
 
         private void Awake()
@@ -58,260 +70,316 @@ namespace FF
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            EnsureSources();
+            CreateSources();
+
             LoadSavedVolume();
-            ApplyVolume(MusicVolume, false);
+            _lastAppliedVolume = MusicVolume;
         }
 
         private void OnEnable()
         {
-            SceneManager.sceneLoaded += HandleSceneLoaded;
-            RefreshSceneBindings();
+            SceneManager.sceneLoaded += OnSceneLoaded;
+            TryBindGameManager();
         }
 
         private void OnDisable()
         {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;
-            ReleaseSceneBindings();
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+            UnbindGameManager();
         }
 
         private void Update()
         {
-            UpdateIntensity();
-            ApplyStateFromIntensity();
+            if (_gameStarted && _firstWaveStarted && !_fullVolumeReached)
+                FadeGameIntensityUp();
         }
 
-        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            RefreshSceneBindings();
-            _smoothedIntensity = 0f;
-            _isBossWave = false;
-            _lastWave = 0;
-            _waveElapsed = 0f;
-            _hasLeftMenu = false;
-            ApplyStateFromIntensity(true);
-        }
+            TryBindGameManager();
 
-        private void RefreshSceneBindings()
-        {
-            ReleaseSceneBindings();
-
-            _gameManager = GameManager.I;
-            if (_gameManager != null)
+            if (scene.name.Contains("Menu"))
             {
-                _gameManager.OnWaveStarted += HandleWaveStarted;
-                _lastWave = _gameManager.Wave;
+                _inMenu = true;
+                _gameStarted = false;
+                _firstWaveStarted = false;
+                _fullVolumeReached = false;
+
+                if (_menuRoutine != null) StopCoroutine(_menuRoutine);
+                _menuRoutine = StartCoroutine(MenuFadeInRoutine());
+            }
+            else
+            {
+                _inMenu = false;
+                _gameStarted = true;
+                _firstWaveStarted = false;
+                _fullVolumeReached = false;
+                _currentState = MusicState.Action;
+
+                PlayImmediate(actionMusic, startVolume: 0f);
             }
         }
 
-        private void ReleaseSceneBindings()
+        public void SetPaused(bool paused)
         {
-            if (_gameManager != null)
-            {
-                _gameManager.OnWaveStarted -= HandleWaveStarted;
-                _gameManager = null;
-            }
+            if (_isPaused == paused)
+                return;
 
+            _isPaused = paused;
+
+            if (_pauseFadeRoutine != null)
+                StopCoroutine(_pauseFadeRoutine);
+
+            _pauseFadeRoutine = StartCoroutine(PauseFadeRoutine(paused));
         }
 
-        private void HandleWaveStarted(int wave)
+        private IEnumerator PauseFadeRoutine(bool paused)
         {
-            _lastWave = wave;
-            _waveElapsed = 0f;
-            _isBossWave = bossWaveIntervalHint > 0 && wave > 0 && wave % bossWaveIntervalHint == 0;
-            if (_isBossWave)
+            float t = 0f;
+
+            float startA = _active != null ? _active.volume : 0f;
+            float startB = _standby != null ? _standby.volume : 0f;
+
+            float target = paused ? MusicVolume * pauseVolumeScale : MusicVolume;
+
+            while (t < pauseFadeDuration)
             {
-                _smoothedIntensity = Mathf.Max(_smoothedIntensity, 0.9f);
+                t += Time.unscaledDeltaTime;
+                float p = t / pauseFadeDuration;
+
+                if (_active != null)
+                    _active.volume = Mathf.Lerp(startA, target, p);
+
+                if (_standby != null)
+                    _standby.volume = Mathf.Lerp(startB, target, p);
+
+                yield return null;
             }
+
+            if (_active != null) _active.volume = target;
+            if (_standby != null) _standby.volume = target;
         }
 
-        private void UpdateIntensity()
+        private void TryBindGameManager()
         {
-            if (_gameManager == null)
+            UnbindGameManager();
+            _gm = GameManager.I;
+
+            if (_gm != null)
+                _gm.OnWaveStarted += HandleWaveStart;
+        }
+
+        private void UnbindGameManager()
+        {
+            if (_gm != null)
+                _gm.OnWaveStarted -= HandleWaveStart;
+
+            _gm = null;
+        }
+
+        private void HandleWaveStart(int wave)
+        {
+            if (wave == 1)
             {
-                _smoothedIntensity = Mathf.MoveTowards(_smoothedIntensity, 0f, Time.unscaledDeltaTime * intensitySmoothing);
-                _hasLeftMenu = false;
+                _firstWaveStarted = true;
+                _intensityFadeTimer = 0f;
                 return;
             }
 
-            _waveElapsed += Time.unscaledDeltaTime;
-            float waveInterval = Mathf.Max(0.01f, _gameManager.CurrentWaveInterval);
-            float waveProgress = Mathf.Clamp01(_waveElapsed / waveInterval);
-
-            float wavePosition = Mathf.Max(0f, (_lastWave > 0 ? _lastWave - 1f : 0f) + waveProgress);
-            float target = Mathf.Clamp01(wavePosition / Mathf.Max(1f, waveForMaxIntensity));
-
-            if (_isBossWave)
-            {
-                target = 1f;
-            }
-
-            _smoothedIntensity = Mathf.MoveTowards(_smoothedIntensity, Mathf.Clamp01(target), Time.unscaledDeltaTime * intensitySmoothing);
-
-            if (_lastWave > 0 && _smoothedIntensity >= menuExitIntensity)
-            {
-                _hasLeftMenu = true;
-            }
-        }
-
-        private void ApplyStateFromIntensity(bool force = false)
-        {
-            AudioClip desiredClip = SelectClip();
-            if (desiredClip == _currentClip && !force)
-            {
+            if (!_fullVolumeReached)
                 return;
-            }
 
-            PlayMusic(desiredClip);
+            // ?? After full volume, waves now control tier switching:
+            if (wave % bossWaveInterval == 0)
+                SwitchState(MusicState.Boss);
+            else if (wave >= intenseWave)
+                SwitchState(MusicState.Intense);
+            else
+                SwitchState(MusicState.Action);
         }
 
-        private AudioClip SelectClip()
+        // ------------------------------
+        // MENU MUSIC LOGIC
+        // ------------------------------
+
+        private IEnumerator MenuFadeInRoutine()
         {
-            if (_gameManager == null)
+            PlayImmediate(menuMusic, startVolume: 0f);
+
+            float t = 0f;
+            while (t < menuFadeDuration)
             {
-                return menuMusic;
+                t += Time.unscaledDeltaTime;
+                float v = Mathf.Lerp(0f, MusicVolume, t / menuFadeDuration);
+                if (_active != null)
+                    _active.volume = v;
+                yield return null;
             }
 
-            if (_lastWave <= 0 || !_hasLeftMenu)
+            if (_active != null)
+                _active.volume = MusicVolume;
+        }
+
+        public void FadeOutMenuAndStartGame()
+        {
+            if (_menuRoutine != null) StopCoroutine(_menuRoutine);
+            StartCoroutine(MenuFadeOutRoutine());
+        }
+
+        private IEnumerator MenuFadeOutRoutine()
+        {
+            float t = 0f;
+            float startVol = _active != null ? _active.volume : 0f;
+
+            while (t < menuFadeDuration)
             {
-                return menuMusic;
+                t += Time.unscaledDeltaTime;
+                float v = Mathf.Lerp(startVol, 0f, t / menuFadeDuration);
+                if (_active != null)
+                    _active.volume = v;
+                yield return null;
             }
 
-            if (_isBossWave && bossMusic)
-            {
-                return bossMusic;
-            }
+            if (_active != null)
+                _active.volume = 0f;
+        }
 
-            if (_smoothedIntensity < intenseIntensityThreshold)
-            {
-                return actionMusic ? actionMusic : menuMusic;
-            }
+        // ------------------------------
+        // GAME INTENSITY FADE-UP
+        // ------------------------------
 
-            return intenseMusic ? intenseMusic : actionMusic;
+        private void FadeGameIntensityUp()
+        {
+            if (_active == null)
+                return;
+
+            _intensityFadeTimer += Time.unscaledDeltaTime;
+
+            float t = Mathf.Clamp01(_intensityFadeTimer / intensityRiseDuration);
+            float v = Mathf.Lerp(0.15f * MusicVolume, MusicVolume, t);
+
+            _active.volume = v;
+
+            if (t >= 1f)
+                _fullVolumeReached = true;
+        }
+
+        // ------------------------------
+        // MUSIC PLAYBACK
+        // ------------------------------
+
+        private void SwitchState(MusicState newState)
+        {
+            if (_currentState == newState)
+                return;
+
+            _currentState = newState;
+
+            AudioClip target = newState switch
+            {
+                MusicState.Action => actionMusic,
+                MusicState.Intense => intenseMusic,
+                MusicState.Boss => bossMusic,
+                _ => actionMusic
+            };
+
+            PlayMusic(target);
+        }
+
+        private void PlayImmediate(AudioClip clip, float startVolume)
+        {
+            if (_active == null)
+                return;
+
+            _active.clip = clip;
+            _active.volume = startVolume;
+            _active.loop = true;
+            _active.Play();
+            _currentClip = clip;
         }
 
         private void PlayMusic(AudioClip clip)
         {
-            if (!clip)
-            {
-                StopAllMusic();
-                _currentClip = null;
+            if (_currentClip == clip || clip == null)
                 return;
-            }
-
-            if (_currentClip == clip && _activeSource && _activeSource.isPlaying)
-            {
-                return;
-            }
 
             if (_crossfadeRoutine != null)
-            {
                 StopCoroutine(_crossfadeRoutine);
-            }
 
-            _crossfadeRoutine = StartCoroutine(CrossfadeToClip(clip));
-            _currentClip = clip;
+            _crossfadeRoutine = StartCoroutine(CrossfadeRoutine(clip));
         }
 
-        private System.Collections.IEnumerator CrossfadeToClip(AudioClip clip)
+        private IEnumerator CrossfadeRoutine(AudioClip clip)
         {
-            _standbySource.clip = clip;
-            _standbySource.loop = true;
-            _standbySource.Play();
+            if (_standby == null || _active == null)
+                yield break;
 
-            _standbyMix = 0f;
+            _standby.clip = clip;
+            _standby.loop = true;
+            _standby.volume = 0f;
+            _standby.Play();
 
-            float duration = Mathf.Max(0.01f, crossfadeDuration);
-            float elapsed = 0f;
-            float startActive = _activeMix;
-            float startStandby = _standbyMix;
+            float t = 0f;
+            float startA = _active.volume;
 
-            while (elapsed < duration)
+            while (t < crossfadeDuration)
             {
-                elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / duration);
-                _activeMix = Mathf.Lerp(startActive, 0f, t);
-                _standbyMix = Mathf.Lerp(startStandby, 1f, t);
-                ApplyVolume(MusicVolume, false);
+                t += Time.unscaledDeltaTime;
+                float p = t / crossfadeDuration;
+
+                _active.volume = Mathf.Lerp(startA, 0f, p);
+                _standby.volume = Mathf.Lerp(0f, MusicVolume, p);
+
                 yield return null;
             }
 
-            _activeMix = 0f;
-            _standbyMix = 1f;
-            ApplyVolume(MusicVolume, false);
+            _active.volume = 0f;
+            _standby.volume = MusicVolume;
 
-            var previousActive = _activeSource;
-            _activeSource = _standbySource;
-            _standbySource = previousActive;
+            var tmp = _active;
+            _active = _standby;
+            _standby = tmp;
 
-            if (_standbySource)
-            {
-                _standbySource.Stop();
-                _standbySource.clip = null;
-            }
-
-            _activeMix = 1f;
-            _standbyMix = 0f;
-            _crossfadeRoutine = null;
+            _standby.Stop();
+            _currentClip = clip;
         }
 
-        private void StopAllMusic()
+        private void CreateSources()
         {
-            if (_activeSource)
-            {
-                _activeSource.Stop();
-            }
-
-            if (_standbySource)
-            {
-                _standbySource.Stop();
-            }
-        }
-
-        private void EnsureSources()
-        {
-            if (!_activeSource)
-            {
-                _activeSource = CreateSource("MusicSource (A)");
-            }
-
-            if (!_standbySource)
-            {
-                _standbySource = CreateSource("MusicSource (B)");
-            }
+            _active = CreateSource("Music A");
+            _standby = CreateSource("Music B");
         }
 
         private AudioSource CreateSource(string name)
         {
             var go = new GameObject(name);
             go.transform.SetParent(transform);
-            var source = go.AddComponent<AudioSource>();
-            source.loop = true;
-            source.playOnAwake = false;
-            source.spatialBlend = 0f;
-            source.ignoreListenerPause = true;
-            return source;
+            var src = go.AddComponent<AudioSource>();
+            src.spatialBlend = 0f;
+            src.playOnAwake = false;
+            src.ignoreListenerPause = true;
+            return src;
         }
 
         private void LoadSavedVolume()
         {
-            MusicVolume = PlayerPrefs.GetFloat(VolumePrefKey, DefaultVolume);
-            MusicVolume = Mathf.Clamp01(MusicVolume);
+            MusicVolume = Mathf.Clamp01(PlayerPrefs.GetFloat(VolumePrefKey, DefaultVolume));
         }
 
         private void ApplyVolume(float value, bool persist)
         {
-            MusicVolume = Mathf.Clamp01(value);
-            float intensityVolumeScale = _gameManager == null ? 1f : Mathf.Lerp(introVolumeScale, 1f, _smoothedIntensity);
-            if (_activeSource)
-            {
-                _activeSource.volume = MusicVolume * _activeMix * intensityVolumeScale;
-            }
+            float newVol = Mathf.Clamp01(value);
 
-            if (_standbySource)
-            {
-                _standbySource.volume = MusicVolume * _standbyMix * intensityVolumeScale;
-            }
+            float factor = (_lastAppliedVolume <= 0.0001f) ? newVol : newVol / _lastAppliedVolume;
+
+            if (_active != null)
+                _active.volume *= factor;
+
+            if (_standby != null)
+                _standby.volume *= factor;
+
+            MusicVolume = newVol;
+            _lastAppliedVolume = newVol;
 
             if (persist)
             {

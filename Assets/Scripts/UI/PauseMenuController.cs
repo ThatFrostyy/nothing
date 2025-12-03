@@ -113,6 +113,8 @@ namespace FF
 
         private void ShowMenu(bool isDeath)
         {
+            MusicManager.Instance.SetPaused(true);
+
             _isVisible = true;
             _isDeathMenu = isDeath;
             _previousTimeScale = Time.timeScale;
