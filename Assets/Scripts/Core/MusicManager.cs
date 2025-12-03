@@ -136,7 +136,17 @@ namespace FF
             float startA = _active != null ? _active.volume : 0f;
             float startB = _standby != null ? _standby.volume : 0f;
 
-            float target = paused ? MusicVolume * pauseVolumeScale : MusicVolume;
+            float target;
+
+            if (paused)
+            {
+                // Only fade down to 20% if the music was above that level.
+                target = MusicVolume > 0.2f ? 0.2f : MusicVolume;
+            }
+            else
+            {
+                target = MusicVolume;
+            }
 
             while (t < pauseFadeDuration)
             {
@@ -196,12 +206,12 @@ namespace FF
             }
             else if (wave >= 8)
             {
-                // Wave 8–11 = Intense music
+                // Wave 8â€“11 = Intense music
                 SwitchState(MusicState.Intense);
             }
             else
             {
-                // Wave 2–7 = Action music
+                // Wave 2â€“7 = Action music
                 SwitchState(MusicState.Action);
             }
         }
