@@ -623,19 +623,18 @@ namespace FF
         private void StartLoopingVfx()
         {
             if (_activeLoopingVfx || _muzzle == null || _weapon.loopingFireVfx == null)
-            {
                 return;
-            }
 
             Vector3 position = _muzzle.position + _muzzle.TransformVector(_weapon.loopingVfxOffset);
             Quaternion rotation = _muzzle.rotation;
 
             GameObject instance = PoolManager.Get(_weapon.loopingFireVfx, position, rotation);
+
             if (instance)
             {
-                instance.transform.SetParent(parent);
-                instance.transform.localPosition = _weapon.loopingVfxOffset;
-                instance.transform.localRotation = Quaternion.identity;
+                instance.transform.SetParent(null);   // Not a child ? no flipping issues
+                instance.transform.position = position;
+                instance.transform.rotation = rotation;
                 instance.transform.localScale = Vector3.one;
 
                 if (instance.TryGetComponent<PooledParticleSystem>(out var pooled))
@@ -653,6 +652,7 @@ namespace FF
 
             UpdateLoopingVfxTransform();
         }
+
 
         private void StopLoopingVfx()
         {
