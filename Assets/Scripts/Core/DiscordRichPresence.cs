@@ -36,6 +36,8 @@ namespace FF
         private bool hasCustomPresence;
         private string customDetails;
         private string customState;
+        private GameManager subscribedGameManager;
+        private bool hasLoggedMissingGameManager;
 
         void Awake()
         {
@@ -71,6 +73,14 @@ namespace FF
             InitializeClient();
             RefreshPresence();
             TrySubscribeToGameplay();
+        }
+
+        void Update()
+        {
+            if (subscribedGameManager == null && SceneManager.GetActiveScene().name == gameplaySceneName)
+            {
+                TrySubscribeToGameplay();
+            }
         }
 
         void OnDestroy()
@@ -142,10 +152,19 @@ namespace FF
 
         void TrySubscribeToGameplay()
         {
+            if (subscribedGameManager != null)
+            {
+                return;
+            }
+
             var gameManager = GameManager.I;
             if (gameManager == null)
             {
-                Debug.LogWarning("DiscordRichPresence: GameManager instance not found.");
+                if (!hasLoggedMissingGameManager)
+                {
+                    Debug.LogWarning("DiscordRichPresence: GameManager instance not found.");
+                    hasLoggedMissingGameManager = true;
+                }
                 return;
             }
 
@@ -155,20 +174,23 @@ namespace FF
             }
 
             Debug.Log("DiscordRichPresence: Subscribing to gameplay events.");
-            gameManager.OnWaveStarted += HandleWaveStarted;
-            gameManager.OnKillCountChanged += HandleKillCountChanged;
+            subscribedGameManager = gameManager;
+            subscribedGameManager.OnWaveStarted += HandleWaveStarted;
+            subscribedGameManager.OnKillCountChanged += HandleKillCountChanged;
+            hasLoggedMissingGameManager = false;
         }
 
         void UnsubscribeFromGameplay()
         {
-            var gameManager = GameManager.I;
-            if (gameManager == null)
+            if (subscribedGameManager == null)
             {
                 return;
             }
 
-            gameManager.OnWaveStarted -= HandleWaveStarted;
-            gameManager.OnKillCountChanged -= HandleKillCountChanged;
+            subscribedGameManager.OnWaveStarted -= HandleWaveStarted;
+            subscribedGameManager.OnKillCountChanged -= HandleKillCountChanged;
+            subscribedGameManager = null;
+            hasLoggedMissingGameManager = false;
         }
 
         void HandleWaveStarted(int _)
