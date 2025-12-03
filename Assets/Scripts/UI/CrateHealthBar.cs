@@ -13,8 +13,6 @@ namespace FF
 
         [Header("Appearance")]
         [SerializeField] private Vector3 worldOffset = new(0f, -0.75f, 0f);
-        [SerializeField, Min(0f)] private float hideDelay = 0.35f;
-        [SerializeField, Min(0.01f)] private float fadeSpeed = 6f;
 
         float _lastVisibleTime;
 

@@ -2268,10 +2268,15 @@ MonoBehaviour:
   resumeButton: {fileID: 808557941}
   restartButton: {fileID: 1041959960}
   mainMenuButton: {fileID: 1262527579}
+  settingsButton: {fileID: 0}
+  closeSettingsButton: {fileID: 0}
   pauseTitle: Paused
   deathTitle: Defeated
   fadeDuration: 0.25
   backdropAlpha: 0.7
+  settingsGroup: {fileID: 0}
+  settingsRoot: {fileID: 0}
+  musicSettingsUI: {fileID: 0}
   sceneFlow: {fileID: 0}
   deathClip: {fileID: 0}
   deathEffectPrefab: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
@@ -2993,9 +2998,9 @@ MonoBehaviour:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 120
-        inSlope: -0.25
-        outSlope: -0.25
+        value: 100
+        inSlope: -0.18333334
+        outSlope: -0.18333334
         tangentMode: 34
         weightedMode: 0
         inWeight: 0
@@ -3003,8 +3008,8 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 300
         value: 45
-        inSlope: -0.14166667
-        outSlope: -0.14166667
+        inSlope: -0.108333334
+        outSlope: -0.108333334
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334

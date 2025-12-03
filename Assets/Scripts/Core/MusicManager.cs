@@ -27,10 +27,6 @@ namespace FF
         [SerializeField] private float intensityRiseDuration = 10f;
         [SerializeField, Min(0f)] private float firstWaveStartDelay = 1.5f;
 
-        [Header("Tier Settings")]
-        [SerializeField] private int intenseWave = 4;
-        [SerializeField] private int bossWaveInterval = 10;
-
         // Pause system
         private bool _isPaused = false;
         private Coroutine _pauseFadeRoutine;
@@ -40,10 +36,8 @@ namespace FF
         private AudioSource _active;
         private AudioSource _standby;
 
-        private bool _inMenu = true;
         private bool _gameStarted = false;
 
-        private bool _firstWaveStarted = false;
         private bool _actionMusicStarted = false;
         private bool _fullVolumeReached = false;
         private float _intensityFadeTimer = 0f;
@@ -104,9 +98,7 @@ namespace FF
 
             if (scene.name.Contains("Menu"))
             {
-                _inMenu = true;
                 _gameStarted = false;
-                _firstWaveStarted = false;
                 _actionMusicStarted = false;
                 _fullVolumeReached = false;
 
@@ -115,9 +107,7 @@ namespace FF
             }
             else
             {
-                _inMenu = false;
                 _gameStarted = true;
-                _firstWaveStarted = false;
                 _actionMusicStarted = false;
                 _fullVolumeReached = false;
                 _currentState = MusicState.Action;
@@ -187,7 +177,6 @@ namespace FF
         {
             if (wave == 1)
             {
-                _firstWaveStarted = true;
                 _intensityFadeTimer = 0f;
                 _fullVolumeReached = false;
                 if (_firstWaveRoutine != null) StopCoroutine(_firstWaveRoutine);
@@ -195,17 +184,28 @@ namespace FF
                 return;
             }
 
+            // Don't switch until intensity is at full volume
             if (!_fullVolumeReached)
                 return;
 
-            // ?? After full volume, waves now control tier switching:
-            if (wave % bossWaveInterval == 0)
+            // ---- CUSTOM WAVE RULES ----
+            if (wave >= 13)
+            {
+                // Wave 13+ = Boss music
                 SwitchState(MusicState.Boss);
-            else if (wave >= intenseWave)
+            }
+            else if (wave >= 8)
+            {
+                // Wave 8–11 = Intense music
                 SwitchState(MusicState.Intense);
+            }
             else
+            {
+                // Wave 2–7 = Action music
                 SwitchState(MusicState.Action);
+            }
         }
+
 
         // ------------------------------
         // MENU MUSIC LOGIC
