@@ -550,6 +550,8 @@ namespace FF
 
             if (shouldPlay)
             {
+                UpdateLoopingVfxTransform();
+
                 if (ShouldUseLoopingAudio())
                 {
                     StartLoopingAudio();
@@ -600,6 +602,24 @@ namespace FF
             StopLoopSource(_fireLoopSource);
         }
 
+        private void UpdateLoopingVfxTransform()
+        {
+            if (_activeLoopingVfx == null || _muzzle == null || _weapon == null)
+            {
+                return;
+            }
+
+            Transform vfxTransform = _activeLoopingVfx.transform;
+            vfxTransform.SetParent(_muzzle, false);
+
+            Vector3 offset = _weapon.loopingVfxOffset;
+            vfxTransform.SetPositionAndRotation(
+                _muzzle.position + _muzzle.TransformVector(offset),
+                _muzzle.rotation
+            );
+            vfxTransform.localScale = Vector3.one;
+        }
+
         private void StartLoopingVfx()
         {
             if (_activeLoopingVfx || _muzzle == null || _weapon.loopingFireVfx == null)
@@ -617,6 +637,7 @@ namespace FF
                 instance.transform.SetParent(parent);
                 instance.transform.localPosition = _weapon.loopingVfxOffset;
                 instance.transform.localRotation = Quaternion.identity;
+                instance.transform.localScale = Vector3.one;
 
                 if (instance.TryGetComponent<PooledParticleSystem>(out var pooled))
                 {
@@ -630,6 +651,8 @@ namespace FF
             }
 
             _activeLoopingVfx = instance;
+
+            UpdateLoopingVfxTransform();
         }
 
         private void StopLoopingVfx()
