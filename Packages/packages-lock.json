@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "com.discord.partnersdk": {
-      "version": "file:com.discord.partnersdk",
+      "version": "file:C:/Users/Frostyy/Downloads/com.discord.partnersdk",
       "depth": 0,
-      "source": "embedded",
+      "source": "local",
       "dependencies": {}
     },
     "com.unity.2d.animation": {
