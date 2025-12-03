@@ -610,7 +610,7 @@ namespace FF
             }
 
             Transform vfxTransform = _activeLoopingVfx.transform;
-            vfxTransform.SetParent(null, true);
+            vfxTransform.SetParent(_muzzle, false);
 
             Vector3 offset = _weapon.loopingVfxOffset;
             vfxTransform.SetPositionAndRotation(
@@ -633,9 +633,9 @@ namespace FF
             GameObject instance = PoolManager.Get(_weapon.loopingFireVfx, position, rotation);
             if (instance)
             {
-                instance.transform.SetParent(null, true);
-                instance.transform.position = position;
-                instance.transform.rotation = rotation;
+                instance.transform.SetParent(parent);
+                instance.transform.localPosition = _weapon.loopingVfxOffset;
+                instance.transform.localRotation = Quaternion.identity;
                 instance.transform.localScale = Vector3.one;
 
                 if (instance.TryGetComponent<PooledParticleSystem>(out var pooled))
