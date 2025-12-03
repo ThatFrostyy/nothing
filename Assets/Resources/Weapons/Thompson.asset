@@ -18,10 +18,14 @@ MonoBehaviour:
   ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
   recoilAmount: 6
   recoilRecoverySpeed: 10
+  attackLoopSFX: {fileID: 0}
+  fireLoopSFX: {fileID: 0}
+  loopingFireVfx: {fileID: 0}
+  loopingVfxOffset: {x: 0, y: 0, z: 0}
   weaponClass: 3
   weaponIcon: {fileID: 21300000, guid: a1e6f9d83ef7f0e4b8dc601b22c05cc1, type: 3}
   isSpecial: 0
-  useGrenadeCharging: 1
+  useGrenadeCharging: 0
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
   weaponPrefab: {fileID: 7922939727332240829, guid: 88b3a3721e66f0e4894347f48bdb0069, type: 3}
   rpm: 450
@@ -31,6 +35,12 @@ MonoBehaviour:
   fireCooldown: 0.1
   knockbackStrength: 0.3
   knockbackDuration: 0.2
+  appliesBurn: 0
+  burnDuration: 3
+  burnDamagePerSecond: 5
+  burnTickInterval: 0.35
+  burnTargetVfx: {fileID: 0}
+  burnImpactVfx: {fileID: 0}
   baseSpread: 1.5
   maxSpread: 6
   spreadIncreasePerShot: 0.5
