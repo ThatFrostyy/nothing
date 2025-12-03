@@ -627,9 +627,8 @@ namespace FF
                 return;
             }
 
-            Transform parent = _muzzle;
-            Vector3 position = parent.position + parent.TransformVector(_weapon.loopingVfxOffset);
-            Quaternion rotation = parent.rotation;
+            Vector3 position = _muzzle.position + _muzzle.TransformVector(_weapon.loopingVfxOffset);
+            Quaternion rotation = _muzzle.rotation;
 
             GameObject instance = PoolManager.Get(_weapon.loopingFireVfx, position, rotation);
             if (instance)
