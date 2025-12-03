@@ -614,7 +614,7 @@ namespace FF
             Vector3 offset = _weapon.loopingVfxOffset;
             vfxTransform.SetPositionAndRotation(
                 _muzzle.position + _muzzle.TransformVector(offset),
-                _muzzle.rotation
+                GetLoopingVfxRotation()
             );
             vfxTransform.localScale = Vector3.one;
         }
@@ -625,7 +625,7 @@ namespace FF
                 return;
 
             Vector3 position = _muzzle.position + _muzzle.TransformVector(_weapon.loopingVfxOffset);
-            Quaternion rotation = _muzzle.rotation;
+            Quaternion rotation = GetLoopingVfxRotation();
 
             GameObject instance = PoolManager.Get(_weapon.loopingFireVfx, position, rotation);
 
@@ -650,6 +650,40 @@ namespace FF
             _activeLoopingVfx = instance;
 
             UpdateLoopingVfxTransform();
+        }
+
+        private Quaternion GetLoopingVfxRotation()
+        {
+            Quaternion baseRotation = _muzzle ? _muzzle.rotation : Quaternion.identity;
+
+            if (!IsFlamethrowerLoopingVfx())
+            {
+                return baseRotation;
+            }
+
+            float zRotation = IsFacingLeft() ? 90f : -90f;
+            return baseRotation * Quaternion.AngleAxis(zRotation, Vector3.forward);
+        }
+
+        private bool IsFacingLeft()
+        {
+            if (!_gunPivot)
+            {
+                return false;
+            }
+
+            return _gunPivot.lossyScale.y < 0f;
+        }
+
+        private bool IsFlamethrowerLoopingVfx()
+        {
+            if (_weapon == null || !_weapon.loopingFireVfx)
+            {
+                return false;
+            }
+
+            return !string.IsNullOrEmpty(_weapon.weaponName)
+                && _weapon.weaponName.IndexOf("flamethrower", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
 
