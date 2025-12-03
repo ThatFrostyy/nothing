@@ -14,6 +14,9 @@ namespace FF
         private ICombatStats _stats;
         private AudioSource _audioSource;
         private Rigidbody2D _playerBody;
+        private AudioSource _attackLoopSource;
+        private AudioSource _fireLoopSource;
+        private GameObject _activeLoopingVfx;
 
         private float _fireTimer;
         private bool _isFireHeld;
@@ -71,6 +74,7 @@ namespace FF
 
         public void SetWeapon(Weapon weapon, Transform muzzleTransform, Transform eject)
         {
+            StopLoopingFeedback();
             _weapon = weapon;
             _muzzle = muzzleTransform;
             _ejectPos = eject;
@@ -95,6 +99,7 @@ namespace FF
 
         public void ClearWeapon()
         {
+            StopLoopingFeedback();
             _weapon = null;
             _muzzle = null;
             _ejectPos = null;
@@ -137,6 +142,7 @@ namespace FF
             {
                 SetCooldownProgress(1f);
                 SetGrenadeChargeProgress(0f);
+                StopLoopingFeedback();
                 return;
             }
 
@@ -144,6 +150,7 @@ namespace FF
             {
                 SetFireHeld(false);
                 sustainedFireTime = 0f;
+                StopLoopingFeedback();
                 return;
             }
 
@@ -205,6 +212,7 @@ namespace FF
             _currentSpread = Mathf.Lerp(_currentSpread, targetSpread, deltaTime * _weapon.spreadRecoverySpeed);
 
             UpdateRecoil(deltaTime);
+            UpdateLoopingFeedback();
         }
 
         #region Recoil & Shooting
@@ -358,6 +366,12 @@ namespace FF
 
         private void PlayFireAudio()
         {
+            if (ShouldUseLoopingAudio())
+            {
+                StartLoopingAudio();
+                return;
+            }
+
             if (!_weapon.fireSFX)
             {
                 return;
@@ -518,6 +532,183 @@ namespace FF
         void NotifyCooldownChanged()
         {
             OnCooldownChanged?.Invoke(_currentCooldownProgress);
+        }
+
+        private bool ShouldUseLoopingAudio()
+        {
+            return _weapon != null && (_weapon.attackLoopSFX || _weapon.fireLoopSFX);
+        }
+
+        private bool ShouldUseLoopingVfx()
+        {
+            return _weapon != null && _weapon.loopingFireVfx;
+        }
+
+        private void UpdateLoopingFeedback()
+        {
+            bool shouldPlay = _isFireHeld && _weapon != null && _muzzle != null;
+
+            if (shouldPlay)
+            {
+                if (ShouldUseLoopingAudio())
+                {
+                    StartLoopingAudio();
+                }
+
+                if (ShouldUseLoopingVfx())
+                {
+                    StartLoopingVfx();
+                }
+            }
+            else
+            {
+                StopLoopingFeedback();
+            }
+        }
+
+        private void StartLoopingAudio()
+        {
+            AudioMixerGroup mixer = _audioSource ? _audioSource.outputAudioMixerGroup : null;
+            float spatialBlend = _audioSource ? _audioSource.spatialBlend : 0f;
+            float volume = _audioSource ? _audioSource.volume : 1f;
+            float pitch = _audioSource ? _audioSource.pitch : 1f;
+
+            if (_weapon.attackLoopSFX)
+            {
+                AudioSource attackSource = GetOrCreateLoopSource(ref _attackLoopSource, "AttackLoopSource");
+                ConfigureLoopSource(attackSource, mixer, spatialBlend, volume, pitch);
+                PlayLoopIfNeeded(attackSource, _weapon.attackLoopSFX);
+            }
+
+            if (_weapon.fireLoopSFX)
+            {
+                AudioSource fireSource = GetOrCreateLoopSource(ref _fireLoopSource, "FireLoopSource");
+                ConfigureLoopSource(fireSource, mixer, spatialBlend, volume, pitch);
+                PlayLoopIfNeeded(fireSource, _weapon.fireLoopSFX);
+            }
+        }
+
+        private void StopLoopingFeedback()
+        {
+            StopLoopingAudio();
+            StopLoopingVfx();
+        }
+
+        private void StopLoopingAudio()
+        {
+            StopLoopSource(_attackLoopSource);
+            StopLoopSource(_fireLoopSource);
+        }
+
+        private void StartLoopingVfx()
+        {
+            if (_activeLoopingVfx || _muzzle == null || _weapon.loopingFireVfx == null)
+            {
+                return;
+            }
+
+            Transform parent = _muzzle;
+            Vector3 position = parent.position + parent.TransformVector(_weapon.loopingVfxOffset);
+            Quaternion rotation = parent.rotation;
+
+            GameObject instance = PoolManager.Get(_weapon.loopingFireVfx, position, rotation);
+            if (instance)
+            {
+                instance.transform.SetParent(parent);
+                instance.transform.localPosition = _weapon.loopingVfxOffset;
+                instance.transform.localRotation = Quaternion.identity;
+
+                if (instance.TryGetComponent<PooledParticleSystem>(out var pooled))
+                {
+                    pooled.OnTakenFromPool();
+                }
+                else
+                {
+                    pooled = instance.AddComponent<PooledParticleSystem>();
+                    pooled.OnTakenFromPool();
+                }
+            }
+
+            _activeLoopingVfx = instance;
+        }
+
+        private void StopLoopingVfx()
+        {
+            if (_activeLoopingVfx == null)
+            {
+                return;
+            }
+
+            if (_activeLoopingVfx.TryGetComponent<PoolToken>(out var token))
+            {
+                token.Release();
+            }
+            else
+            {
+                Destroy(_activeLoopingVfx);
+            }
+
+            _activeLoopingVfx = null;
+        }
+
+        private AudioSource GetOrCreateLoopSource(ref AudioSource source, string name)
+        {
+            if (source)
+            {
+                return source;
+            }
+
+            source = gameObject.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = true;
+            source.spatialBlend = 0f;
+            source.ignoreListenerPause = true;
+            source.name = name;
+            return source;
+        }
+
+        private static void ConfigureLoopSource(AudioSource source, AudioMixerGroup mixer, float spatialBlend, float volume, float pitch)
+        {
+            if (!source)
+            {
+                return;
+            }
+
+            source.outputAudioMixerGroup = mixer;
+            source.spatialBlend = spatialBlend;
+            source.volume = volume;
+            source.pitch = pitch;
+        }
+
+        private static void StopLoopSource(AudioSource source)
+        {
+            if (!source)
+            {
+                return;
+            }
+
+            if (source.isPlaying)
+            {
+                source.Stop();
+            }
+
+            source.clip = null;
+        }
+
+        private static void PlayLoopIfNeeded(AudioSource source, AudioClip clip)
+        {
+            if (!source || !clip)
+            {
+                return;
+            }
+
+            if (source.clip == clip && source.isPlaying)
+            {
+                return;
+            }
+
+            source.clip = clip;
+            source.Play();
         }
         #endregion Cooldown
     }

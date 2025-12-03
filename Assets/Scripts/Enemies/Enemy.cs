@@ -48,6 +48,9 @@ namespace FF
         [SerializeField] private AudioClip[] deathSound;
         [SerializeField] private GameObject deathFX;
 
+        [Header("Status Effects")]
+        [SerializeField] private GameObject defaultBurningVfx;
+
         [Header("Behaviour Flags")]
         [SerializeField] private bool isDog;
         [SerializeField] private bool isBoss;
@@ -110,6 +113,13 @@ namespace FF
         private float knockbackTimer = 0f;
         private Vector2 knockbackVelocity;
         private Vector2 _lastAimDirection = Vector2.right;
+        private float _burnTimer;
+        private float _burnTickTimer;
+        private float _burnTickInterval = 0.35f;
+        private int _burnDamagePerSecond;
+        private Weapon _burnSourceWeapon;
+        private GameObject _activeBurningVfx;
+        private GameObject _burningVfxPrefab;
 
         private static readonly System.Collections.Generic.HashSet<Enemy> activeBosses = new();
 
@@ -349,6 +359,8 @@ namespace FF
             {
                 HandleFiring();
             }
+
+            UpdateBurning(deltaTime);
         }
 
         private void FixedUpdate()
@@ -421,6 +433,8 @@ namespace FF
             }
 
             _dogAttackOffset = Vector3.zero;
+
+            ClearBurning(true);
         }
 
         void OnDestroy()
@@ -908,8 +922,119 @@ namespace FF
             PlayHitSound();
         }
 
+        public void ApplyBurn(float duration, int damagePerSecond, float tickInterval, GameObject vfxPrefab, Weapon sourceWeapon)
+        {
+            if (_health == null || duration <= 0f || damagePerSecond <= 0)
+            {
+                return;
+            }
+
+            _burnTimer = Mathf.Max(_burnTimer, duration);
+            _burnDamagePerSecond = Mathf.Max(1, damagePerSecond);
+            _burnTickInterval = Mathf.Max(0.05f, tickInterval);
+            _burnTickTimer = Mathf.Min(_burnTickTimer, _burnTickInterval);
+            if (sourceWeapon)
+            {
+                _burnSourceWeapon = sourceWeapon;
+            }
+
+            EnsureBurningVfx(vfxPrefab);
+        }
+
+        private void UpdateBurning(float deltaTime)
+        {
+            if (_burnTimer <= 0f || _health == null)
+            {
+                return;
+            }
+
+            _burnTimer -= deltaTime;
+            _burnTickTimer -= deltaTime;
+
+            if (_burnTickTimer <= 0f)
+            {
+                int damage = Mathf.Max(1, Mathf.CeilToInt(_burnDamagePerSecond * _burnTickInterval));
+                _burnTickTimer += _burnTickInterval;
+                _health.Damage(damage, _burnSourceWeapon);
+            }
+
+            if (_burnTimer <= 0f)
+            {
+                ClearBurning(true);
+            }
+        }
+
+        private void EnsureBurningVfx(GameObject preferredPrefab)
+        {
+            GameObject prefab = preferredPrefab ? preferredPrefab : defaultBurningVfx;
+            if (!prefab)
+            {
+                return;
+            }
+
+            if (_activeBurningVfx && _burningVfxPrefab == prefab)
+            {
+                return;
+            }
+
+            ClearBurningVfx();
+
+            Transform anchor = enemyVisual ? enemyVisual : transform;
+            GameObject fx = PoolManager.Get(prefab, anchor.position, anchor.rotation);
+            if (fx)
+            {
+                fx.transform.SetParent(anchor);
+                fx.transform.localPosition = Vector3.zero;
+                fx.transform.localRotation = Quaternion.identity;
+
+                if (fx.TryGetComponent<PooledParticleSystem>(out var pooled))
+                {
+                    pooled.OnTakenFromPool();
+                }
+                else
+                {
+                    pooled = fx.AddComponent<PooledParticleSystem>();
+                    pooled.OnTakenFromPool();
+                }
+            }
+
+            _activeBurningVfx = fx;
+            _burningVfxPrefab = prefab;
+        }
+
+        private void ClearBurning(bool clearVfx)
+        {
+            _burnTimer = 0f;
+            _burnTickTimer = 0f;
+            _burnDamagePerSecond = 0;
+            _burnTickInterval = 0.35f;
+            _burnSourceWeapon = null;
+
+            if (clearVfx)
+            {
+                ClearBurningVfx();
+            }
+        }
+
+        private void ClearBurningVfx()
+        {
+            if (_activeBurningVfx && _activeBurningVfx.TryGetComponent<PoolToken>(out var token))
+            {
+                token.Release();
+            }
+            else if (_activeBurningVfx)
+            {
+                Destroy(_activeBurningVfx);
+            }
+
+            _activeBurningVfx = null;
+            _burningVfxPrefab = null;
+        }
+
         private void HandleDeath()
         {
+            ClearBurning(true);
+
             if (autoShooter)
             {
                 autoShooter.SetFireHeld(false);
@@ -1010,6 +1135,8 @@ namespace FF
             {
                 autoShooter.SetFireHeld(false);
             }
+
+            ClearBurning(true);
         }
 
         public void OnReturnedToPool()

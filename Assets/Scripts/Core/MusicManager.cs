@@ -24,7 +24,8 @@ namespace FF
         [Header("Durations")]
         [SerializeField] private float menuFadeDuration = 1.5f;
         [SerializeField] private float crossfadeDuration = 1.5f;
-        [SerializeField] private float intensityRiseDuration = 8f;
+        [SerializeField] private float intensityRiseDuration = 10f;
+        [SerializeField, Min(0f)] private float firstWaveStartDelay = 1.5f;
 
         [Header("Tier Settings")]
         [SerializeField] private int intenseWave = 4;
@@ -43,8 +44,11 @@ namespace FF
         private bool _gameStarted = false;
 
         private bool _firstWaveStarted = false;
+        private bool _actionMusicStarted = false;
         private bool _fullVolumeReached = false;
         private float _intensityFadeTimer = 0f;
+
+        private Coroutine _firstWaveRoutine;
 
         private AudioClip _currentClip;
         private Coroutine _crossfadeRoutine;
@@ -90,7 +94,7 @@ namespace FF
 
         private void Update()
         {
-            if (_gameStarted && _firstWaveStarted && !_fullVolumeReached)
+            if (_gameStarted && _actionMusicStarted && !_fullVolumeReached)
                 FadeGameIntensityUp();
         }
 
@@ -103,6 +107,7 @@ namespace FF
                 _inMenu = true;
                 _gameStarted = false;
                 _firstWaveStarted = false;
+                _actionMusicStarted = false;
                 _fullVolumeReached = false;
 
                 if (_menuRoutine != null) StopCoroutine(_menuRoutine);
@@ -113,10 +118,11 @@ namespace FF
                 _inMenu = false;
                 _gameStarted = true;
                 _firstWaveStarted = false;
+                _actionMusicStarted = false;
                 _fullVolumeReached = false;
                 _currentState = MusicState.Action;
-
-                PlayImmediate(actionMusic, startVolume: 0f);
+                StopAllCoroutines();
+                StopAllMusic();
             }
         }
 
@@ -183,6 +189,9 @@ namespace FF
             {
                 _firstWaveStarted = true;
                 _intensityFadeTimer = 0f;
+                _fullVolumeReached = false;
+                if (_firstWaveRoutine != null) StopCoroutine(_firstWaveRoutine);
+                _firstWaveRoutine = StartCoroutine(StartFirstWaveMusicRoutine());
                 return;
             }
 
@@ -256,7 +265,7 @@ namespace FF
             _intensityFadeTimer += Time.unscaledDeltaTime;
 
             float t = Mathf.Clamp01(_intensityFadeTimer / intensityRiseDuration);
-            float v = Mathf.Lerp(0.15f * MusicVolume, MusicVolume, t);
+            float v = Mathf.Lerp(0f, MusicVolume, t);
 
             _active.volume = v;
 
@@ -294,8 +303,36 @@ namespace FF
             _active.clip = clip;
             _active.volume = startVolume;
             _active.loop = true;
+            _active.time = 0f;
             _active.Play();
             _currentClip = clip;
+        }
+
+        private void StopAllMusic()
+        {
+            if (_active != null)
+            {
+                _active.Stop();
+                _active.clip = null;
+            }
+
+            if (_standby != null)
+            {
+                _standby.Stop();
+                _standby.clip = null;
+            }
+        }
+
+        private IEnumerator StartFirstWaveMusicRoutine()
+        {
+            if (firstWaveStartDelay > 0f)
+                yield return new WaitForSeconds(firstWaveStartDelay);
+
+            _actionMusicStarted = true;
+            PlayImmediate(actionMusic, startVolume: 0f);
+            _intensityFadeTimer = 0f;
+            _fullVolumeReached = false;
+            _firstWaveRoutine = null;
         }
 
         private void PlayMusic(AudioClip clip)

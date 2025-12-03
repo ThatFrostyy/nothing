@@ -76,23 +76,20 @@ namespace FF
                     enemy.ApplyKnockback(force, knockbackDuration);
                 }
 
+                TryApplyBurn(other);
+
                 if (other.gameObject.layer.ToString() == "Crate" && crateFX)
                 {
-                    GameObject fx = PoolManager.Get(crateFX, transform.position, Quaternion.identity);
-                    if (fx && !fx.TryGetComponent<PooledParticleSystem>(out var pooled))
-                    {
-                        pooled = fx.AddComponent<PooledParticleSystem>();
-                        pooled.OnTakenFromPool();
-                    }
+                    SpawnImpactVfx(crateFX);
                 }
                 else if (bloodFX)
                 {
-                    GameObject fx = PoolManager.Get(bloodFX, transform.position, Quaternion.identity);
-                    if (fx && !fx.TryGetComponent<PooledParticleSystem>(out var pooled))
-                    {
-                        pooled = fx.AddComponent<PooledParticleSystem>();
-                        pooled.OnTakenFromPool();
-                    }
+                    SpawnImpactVfx(bloodFX);
+                }
+
+                if (sourceWeapon && sourceWeapon.burnImpactVfx)
+                {
+                    SpawnImpactVfx(sourceWeapon.burnImpactVfx);
                 }
 
                 CameraShake.Shake(0.05f, 0.05f);
@@ -125,5 +122,44 @@ namespace FF
             pierceRemaining = 0;
         }
         #endregion Pooling
+
+        private void TryApplyBurn(Collider2D other)
+        {
+            if (sourceWeapon == null || !sourceWeapon.appliesBurn)
+            {
+                return;
+            }
+
+            if (!other.TryGetComponent<Enemy>(out var enemy))
+            {
+                return;
+            }
+
+            enemy.ApplyBurn(
+                Mathf.Max(0f, sourceWeapon.burnDuration),
+                Mathf.Max(0, sourceWeapon.burnDamagePerSecond),
+                Mathf.Max(0.05f, sourceWeapon.burnTickInterval),
+                sourceWeapon.burnTargetVfx,
+                sourceWeapon);
+        }
+
+        private void SpawnImpactVfx(GameObject prefab)
+        {
+            if (!prefab)
+            {
+                return;
+            }
+
+            GameObject fx = PoolManager.Get(prefab, transform.position, Quaternion.identity);
+            if (fx && !fx.TryGetComponent<PooledParticleSystem>(out var pooled))
+            {
+                pooled = fx.AddComponent<PooledParticleSystem>();
+                pooled.OnTakenFromPool();
+            }
+            else if (fx && fx.TryGetComponent<PooledParticleSystem>(out var pooledFx))
+            {
+                pooledFx.OnTakenFromPool();
+            }
+        }
     }
 }

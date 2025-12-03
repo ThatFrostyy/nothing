@@ -25,6 +25,12 @@ namespace FF
         public float recoilAmount = 6f;
         public float recoilRecoverySpeed = 10f;
 
+        [Header("Looping Audio & VFX")]
+        public AudioClip attackLoopSFX;
+        public AudioClip fireLoopSFX;
+        public GameObject loopingFireVfx;
+        public Vector3 loopingVfxOffset = Vector3.zero;
+
         [Header("Classification")]
         public WeaponClass weaponClass = WeaponClass.General;
 
@@ -49,6 +55,14 @@ namespace FF
         [Header("Impact")]
         public float knockbackStrength = 0f;
         public float knockbackDuration = 0.2f;
+
+        [Header("Damage Over Time")]
+        public bool appliesBurn = false;
+        [Min(0f)] public float burnDuration = 3f;
+        [Min(0)] public int burnDamagePerSecond = 5;
+        [Min(0.05f)] public float burnTickInterval = 0.35f;
+        public GameObject burnTargetVfx;
+        public GameObject burnImpactVfx;
 
         [Header("Accuracy / Spread")]
         public float baseSpread = 1.5f;           // degrees
