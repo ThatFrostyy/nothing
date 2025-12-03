@@ -110,7 +110,8 @@ namespace FF
 
             try
             {
-                client = new Client(applicationId);
+                client = new Client();
+                client.SetApplicationId(applicationId);
                 startTimestamp = (ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
             catch (Exception ex)
@@ -144,6 +145,7 @@ namespace FF
             var gameManager = GameManager.I;
             if (gameManager == null)
             {
+                Debug.LogWarning("DiscordRichPresence: GameManager instance not found.");
                 return;
             }
 
@@ -152,6 +154,7 @@ namespace FF
                 return;
             }
 
+            Debug.Log("DiscordRichPresence: Subscribing to gameplay events.");
             gameManager.OnWaveStarted += HandleWaveStarted;
             gameManager.OnKillCountChanged += HandleKillCountChanged;
         }
@@ -210,6 +213,7 @@ namespace FF
         void UpdatePresence(string details, string state)
         {
             var activity = new Activity();
+            activity.SetName(Application.productName);
             activity.SetType(ActivityTypes.Playing);
             activity.SetDetails(details);
             activity.SetState(state);

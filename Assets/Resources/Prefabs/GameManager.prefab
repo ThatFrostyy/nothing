@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7721843222088791118}
   - component: {fileID: 5457090804296160985}
   - component: {fileID: 7492380447983614614}
+  - component: {fileID: 6172420153196284239}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -103,3 +104,27 @@ MonoBehaviour:
   defaultHat: {fileID: 0}
   defaultWeapon: {fileID: 0}
   applyDefaultSelection: 1
+--- !u!114 &6172420153196284239
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3100446154709895051}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a68ce2a46c443c3a77d2a29246da45f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.DiscordRichPresence
+  applicationId: 1445899300805804177
+  persistAcrossScenes: 1
+  menuSceneName: MainMenu
+  gameplaySceneName: Main
+  menuDetails: In Menu
+  menuState: Idle
+  gameplayDetailsFormat: Wave {0}
+  gameplayStateFormat: Kills {0}
+  largeImageKey: icon
+  largeImageText: Frontline Frenzy
+  smallImageKey: 
+  smallImageText: 
