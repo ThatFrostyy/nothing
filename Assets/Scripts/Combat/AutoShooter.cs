@@ -610,7 +610,6 @@ namespace FF
             }
 
             Transform vfxTransform = _activeLoopingVfx.transform;
-            vfxTransform.SetParent(_muzzle, false);
 
             Vector3 offset = _weapon.loopingVfxOffset;
             vfxTransform.SetPositionAndRotation(
