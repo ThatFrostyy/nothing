@@ -51,7 +51,6 @@ namespace FF
         private GameManager _gm;
 
         private float _lastAppliedVolume = DefaultVolume;
-        private bool _isResumingFromPause;
 
         public static void SetVolume(float value)
         {
@@ -197,7 +196,6 @@ namespace FF
             if (_standby != null) _standby.volume = target;
 
             // We are done fading. Let Update() take over again.
-            _isResumingFromPause = false;
         }
 
         // Add this helper method inside the MusicManager class
