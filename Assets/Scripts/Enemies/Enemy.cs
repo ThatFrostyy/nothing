@@ -68,6 +68,7 @@ namespace FF
         [SerializeField, Min(0)] private int xpOrbValue = 1;
         [SerializeField, Min(1)] private int xpOrbCount = 1;
         [SerializeField, Range(0f, 2f)] private float xpOrbSpreadRadius = 0.35f;
+        [SerializeField, Min(1f)] private float slowmoKillXpMultiplier = 1.25f;
 
         [Header("Boss Drops")]
         [SerializeField] private WeaponPickup[] bossWeaponDropPrefabs;
@@ -1311,6 +1312,9 @@ namespace FF
             }
 
             GameObjectPool orbPool = PoolManager.GetPool(xpOrbPrefab.gameObject, xpOrbCount);
+            float slowmoBonus = KillSlowMotion.Instance != null && KillSlowMotion.Instance.IsActive
+                ? slowmoKillXpMultiplier
+                : 1f;
             for (int i = 0; i < xpOrbCount; i++)
             {
                 Vector3 spawnPosition = transform.position;
@@ -1323,7 +1327,8 @@ namespace FF
                 XPOrb orb = orbPool.GetComponent<XPOrb>(spawnPosition, Quaternion.identity);
                 if (orb)
                 {
-                    orb.SetValue(xpOrbValue);
+                    int adjustedValue = Mathf.Max(1, Mathf.RoundToInt(xpOrbValue * slowmoBonus));
+                    orb.SetValue(adjustedValue);
                 }
             }
         }

@@ -36,6 +36,7 @@ namespace FF
         [SerializeField] private float _idleSwayFrequency = 6f;
         [SerializeField] private float _idleSwayAmplitude = 1.2f;
         [SerializeField] private bool _enableTilt = true;
+        [SerializeField, Min(1f)] private float _slowmoMoveSpeedMultiplier = 1.2f;
 
         [Header("Bounds Settings")]
         [SerializeField] private float _boundsPadding = 0.05f;
@@ -128,7 +129,8 @@ namespace FF
             float targetSpeed = _stats.GetMoveSpeed();
             if (timeScale < 0.999f)
             {
-                targetSpeed /= Mathf.Max(0.01f, timeScale);
+                float compensation = 1f / Mathf.Max(0.01f, timeScale);
+                targetSpeed *= compensation * _slowmoMoveSpeedMultiplier;
             }
 
             Vector2 targetVelocity = _moveInput.normalized * targetSpeed;

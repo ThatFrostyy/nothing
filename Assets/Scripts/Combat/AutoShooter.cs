@@ -173,6 +173,7 @@ namespace FF
             if (UpgradeManager.I != null)
             {
                 rpmMultiplier *= UpgradeManager.I.GetWeaponFireRateMultiplier(_weapon);
+                rpmMultiplier = UpgradeManager.I.ClampFireRateMultiplier(rpmMultiplier);
             }
             float rpm = Mathf.Max(_weapon.rpm * rpmMultiplier, 0.01f);
             float interval = 60f / rpm;
@@ -181,6 +182,7 @@ namespace FF
             if (UpgradeManager.I != null)
             {
                 cooldownMultiplier *= UpgradeManager.I.GetWeaponFireCooldownMultiplier(_weapon);
+                cooldownMultiplier = UpgradeManager.I.ClampCooldownMultiplier(cooldownMultiplier);
             }
             cooldownMultiplier = Mathf.Max(0.1f, cooldownMultiplier);
             interval *= cooldownMultiplier;

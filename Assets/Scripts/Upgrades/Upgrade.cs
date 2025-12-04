@@ -72,11 +72,21 @@ namespace FF
             switch (Type)
             {
                 case Kind.DamageMult: stats.DamageMult += Magnitude; break;
-                case Kind.FireRateMult: stats.FireRateMult += Magnitude; break;
+                case Kind.FireRateMult:
+                    stats.FireRateMult += Magnitude;
+                    if (UpgradeManager.I != null)
+                    {
+                        stats.FireRateMult = UpgradeManager.I.ClampFireRateMultiplier(stats.FireRateMult);
+                    }
+                    break;
                 case Kind.MoveMult: stats.MoveMult += Magnitude; break;
                 case Kind.FireCooldownReduction:
                     float minCooldown = MinValue > 0f ? MinValue : 0.1f;
                     stats.FireCooldownMult = Mathf.Max(minCooldown, stats.FireCooldownMult - Magnitude);
+                    if (UpgradeManager.I != null)
+                    {
+                        stats.FireCooldownMult = UpgradeManager.I.ClampCooldownMultiplier(stats.FireCooldownMult);
+                    }
                     break;
                 case Kind.ProjectileSpeedMult:
                     stats.ProjectileSpeedMult = ApplyCap(stats.ProjectileSpeedMult + Magnitude, Cap);

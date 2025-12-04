@@ -15,6 +15,17 @@ namespace FF
         [SerializeField] WeaponManager weaponManager;
         [SerializeField, Min(0)] int maxUpgradeSelections = 0;
 
+        [Header("Global Upgrade Limits")]
+        [SerializeField, Min(1f)] float maxFireRateMultiplier = 3f;
+        [SerializeField, Min(0.05f)] float minFireCooldownMultiplier = 0.2f;
+
+        [Header("Weapon Upgrade Scaling")]
+        [SerializeField, Min(0f)] float baseWeaponUpgradeBonus = 0.06f;
+        [SerializeField, Min(0f)] float killBonusPerKill = 0.0006f;
+        [SerializeField, Min(0f)] float stackBonusPerCard = 0.008f;
+        [SerializeField, Min(0f)] float maxStackBonus = 0.04f;
+        [SerializeField, Min(0)] int weaponUpgradeKillCap = 200;
+
         const int WeaponCardsPerSelection = 3;
 
         int upgradesTaken;
@@ -862,10 +873,9 @@ namespace FF
 
         float CalculateWeaponUpgradeMagnitude(int killCount, int cardsTaken)
         {
-            float baseBonus = 0.08f;
-            float killBonus = Mathf.Clamp(killCount, 0, 250) * 0.0008f;
-            float stackBonus = Mathf.Min(0.05f, cardsTaken * 0.01f);
-            return baseBonus + killBonus + stackBonus;
+            float killBonus = Mathf.Clamp(killCount, 0, weaponUpgradeKillCap) * killBonusPerKill;
+            float stackBonus = Mathf.Min(maxStackBonus, cardsTaken * stackBonusPerCard);
+            return baseWeaponUpgradeBonus + killBonus + stackBonus;
         }
 
         WeaponUpgradeOption CreateWeaponUpgradeOption(
@@ -987,7 +997,8 @@ namespace FF
 
         public float GetWeaponFireRateMultiplier(Weapon weapon)
         {
-            return TryGetWeaponState(weapon, out var state) ? state.GetFireRateMultiplier() : 1f;
+            float value = TryGetWeaponState(weapon, out var state) ? state.GetFireRateMultiplier() : 1f;
+            return ClampFireRateMultiplier(value);
         }
 
         public float GetWeaponProjectileSpeedMultiplier(Weapon weapon)
@@ -997,7 +1008,8 @@ namespace FF
 
         public float GetWeaponFireCooldownMultiplier(Weapon weapon)
         {
-            return TryGetWeaponState(weapon, out var state) ? state.GetFireCooldownMultiplier() : 1f;
+            float value = TryGetWeaponState(weapon, out var state) ? state.GetFireCooldownMultiplier() : 1f;
+            return ClampCooldownMultiplier(value);
         }
 
         public int GetWeaponPierceCount(Weapon weapon)
@@ -1008,6 +1020,16 @@ namespace FF
         public int GetWeaponExtraProjectiles(Weapon weapon)
         {
             return TryGetWeaponState(weapon, out var state) ? state.GetExtraProjectiles() : 0;
+        }
+
+        public float ClampFireRateMultiplier(float value)
+        {
+            return Mathf.Min(Mathf.Max(0.01f, value), Mathf.Max(1f, maxFireRateMultiplier));
+        }
+
+        public float ClampCooldownMultiplier(float value)
+        {
+            return Mathf.Max(minFireCooldownMultiplier, Mathf.Max(0.01f, value));
         }
     }
 }

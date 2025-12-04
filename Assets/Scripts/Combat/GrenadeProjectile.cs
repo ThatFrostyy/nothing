@@ -21,6 +21,7 @@ namespace FF
         [SerializeField, Min(0.1f)] private float explosionForce = 18f;
         [SerializeField] private AnimationCurve forceFalloff = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
         [SerializeField] private GameObject explosionFX;
+        [SerializeField] private GameObject explosionSecondaryFX;
         [SerializeField] private AudioClip explosionSFX;
 
         [Header("Audio")]
@@ -132,7 +133,13 @@ namespace FF
                 return;
             }
 
-            _fuseTimer -= Time.deltaTime;
+            if (Time.timeScale <= Mathf.Epsilon && PauseMenuController.IsMenuOpen)
+            {
+                return;
+            }
+
+            float deltaTime = Time.timeScale < 0.999f ? Time.unscaledDeltaTime : Time.deltaTime;
+            _fuseTimer -= deltaTime;
             if (_fuseTimer <= 0f)
             {
                 Explode();
@@ -146,10 +153,18 @@ namespace FF
                 return;
             }
 
+            if (Time.timeScale <= Mathf.Epsilon && PauseMenuController.IsMenuOpen)
+            {
+                _body.linearVelocity = Vector2.zero;
+                return;
+            }
+
+            float deltaTime = Time.timeScale < 0.999f ? Time.fixedUnscaledDeltaTime : Time.fixedDeltaTime;
             if (_currentSpeed > 0f)
             {
-                _currentSpeed = Mathf.Max(0f, _currentSpeed - _activeSlowdown * Time.fixedDeltaTime);
-                _body.linearVelocity = _movementDirection * _currentSpeed;
+                _currentSpeed = Mathf.Max(0f, _currentSpeed - _activeSlowdown * deltaTime);
+                float compensation = Time.timeScale < 0.999f ? 1f / Mathf.Max(0.01f, Time.timeScale) : 1f;
+                _body.linearVelocity = _movementDirection * _currentSpeed * compensation;
                 if (_currentSpeed <= Mathf.Epsilon)
                 {
                     _body.linearVelocity = Vector2.zero;
@@ -257,6 +272,16 @@ namespace FF
                 if (fx && !fx.TryGetComponent<PooledParticleSystem>(out var pooled))
                 {
                     pooled = fx.AddComponent<PooledParticleSystem>();
+                    pooled.OnTakenFromPool();
+                }
+            }
+
+            if (explosionSecondaryFX)
+            {
+                GameObject secondary = PoolManager.Get(explosionSecondaryFX, position, Quaternion.identity);
+                if (secondary && !secondary.TryGetComponent<PooledParticleSystem>(out var pooled))
+                {
+                    pooled = secondary.AddComponent<PooledParticleSystem>();
                     pooled.OnTakenFromPool();
                 }
             }
