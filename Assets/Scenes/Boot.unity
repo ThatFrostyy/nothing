@@ -250,7 +250,7 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: cfc7816a09db17f4282b45890078a237, type: 3}
     - target: {fileID: 1298498964072547206, guid: 878b5bd8372cbe34e9cd45152bd83b9d, type: 3}
       propertyPath: intensityRiseDuration
-      value: 60
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 8096325575840098703, guid: 878b5bd8372cbe34e9cd45152bd83b9d, type: 3}
       propertyPath: m_LocalPosition.x

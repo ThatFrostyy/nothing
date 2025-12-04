@@ -51,6 +51,7 @@ namespace FF
         private GameManager _gm;
 
         private float _lastAppliedVolume = DefaultVolume;
+        private bool _isResumingFromPause;
 
         public static void SetVolume(float value)
         {
@@ -88,9 +89,15 @@ namespace FF
 
         private void Update()
         {
+            if (_isPaused) return;  // <-- STOP overwriting pause volume!
+
+            if (_active != null)
+                Debug.Log($"[MusicDebug] Update running. Current Vol: {_active.volume} | Timer: {_intensityFadeTimer}");
+
             if (_gameStarted && _actionMusicStarted && !_fullVolumeReached)
                 FadeGameIntensityUp();
         }
+
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
@@ -107,6 +114,7 @@ namespace FF
             }
             else
             {
+                _isPaused = false;
                 _gameStarted = true;
                 _actionMusicStarted = false;
                 _fullVolumeReached = false;
@@ -118,6 +126,9 @@ namespace FF
 
         public void SetPaused(bool paused)
         {
+            Debug.Log($"[MusicDebug] SetPaused CALLED with: {paused}");
+
+
             if (_isPaused == paused)
                 return;
 
@@ -126,13 +137,26 @@ namespace FF
             if (_pauseFadeRoutine != null)
                 StopCoroutine(_pauseFadeRoutine);
 
+            if (!paused)
+            {
+                // ⭐ THIS IS THE FIX ⭐
+                _fullVolumeReached = false;
+
+                // Also reset intensity timer based on current volume
+                float current = _active != null ? _active.volume : 0f;
+                _intensityFadeTimer = (current / MusicVolume) * intensityRiseDuration;
+            }
+
             _pauseFadeRoutine = StartCoroutine(PauseFadeRoutine(paused));
         }
+
+
+
+
 
         private IEnumerator PauseFadeRoutine(bool paused)
         {
             float t = 0f;
-
             float startA = _active != null ? _active.volume : 0f;
             float startB = _standby != null ? _standby.volume : 0f;
 
@@ -140,13 +164,19 @@ namespace FF
 
             if (paused)
             {
-                // Only fade down to 20% if the music was above that level.
-                target = MusicVolume > 0.2f ? 0.2f : MusicVolume;
+                // Pausing → lower volume
+                target = MusicVolume * pauseVolumeScale;
+                Debug.Log($"[MusicDebug] Pausing. Target Volume: {target}");
             }
             else
             {
-                target = MusicVolume;
+                // UNPAUSING → return to intensity-controlled volume
+                float intensityProgress = Mathf.Clamp01(_intensityFadeTimer / intensityRiseDuration);
+                target = Mathf.Lerp(0f, MusicVolume, intensityProgress);
+
+                Debug.Log($"[MusicDebug] UNPAUSING. Target Volume should rise to: {target}");
             }
+
 
             while (t < pauseFadeDuration)
             {
@@ -162,8 +192,26 @@ namespace FF
                 yield return null;
             }
 
+            // Ensure final values are set exactly
             if (_active != null) _active.volume = target;
             if (_standby != null) _standby.volume = target;
+
+            // We are done fading. Let Update() take over again.
+            _isResumingFromPause = false;
+        }
+
+        // Add this helper method inside the MusicManager class
+        private float GetCurrentIntensityVolume()
+        {
+            // If the game hasn't started or action music hasn't started, intensity is 0.
+            if (!_gameStarted || !_actionMusicStarted)
+                return 0f;
+
+            // Calculate the 't' value the intensity fade is currently using.
+            float t = Mathf.Clamp01(_intensityFadeTimer / intensityRiseDuration);
+
+            // Calculate the volume that FadeGameIntensityUp() is currently setting.
+            return Mathf.Lerp(0f, MusicVolume, t);
         }
 
         private void TryBindGameManager()
@@ -272,15 +320,21 @@ namespace FF
             if (_active == null)
                 return;
 
+            // Use Time.deltaTime if this runs every frame and you want it tied to frame rate, 
+            // but stick with Time.unscaledDeltaTime for reliability with your coroutines.
             _intensityFadeTimer += Time.unscaledDeltaTime;
+
+            // CAP THE TIMER TO THE DURATION
+            if (_intensityFadeTimer >= intensityRiseDuration)
+            {
+                _intensityFadeTimer = intensityRiseDuration; // Stop the timer here!
+                _fullVolumeReached = true;
+            }
 
             float t = Mathf.Clamp01(_intensityFadeTimer / intensityRiseDuration);
             float v = Mathf.Lerp(0f, MusicVolume, t);
 
             _active.volume = v;
-
-            if (t >= 1f)
-                _fullVolumeReached = true;
         }
 
         // ------------------------------
@@ -371,6 +425,9 @@ namespace FF
 
             while (t < crossfadeDuration)
             {
+                if (_isPaused)
+                    yield break;
+
                 t += Time.unscaledDeltaTime;
                 float p = t / crossfadeDuration;
 

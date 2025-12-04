@@ -139,6 +139,7 @@ namespace FF
 
             _isVisible = false;
             _isDeathMenu = false;
+            MusicManager.Instance.SetPaused(false);
             HideSettings();
             _fadeRoutine = StartCoroutine(FadeCanvas(0f, RestoreTimeScale));
         }
