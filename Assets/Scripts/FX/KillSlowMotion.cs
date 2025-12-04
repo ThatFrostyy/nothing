@@ -29,6 +29,10 @@ namespace FF
         [SerializeField] private float bannerFadeTime = 0.3f;
         [SerializeField] private Color bannerColor = new(1f, 0.83f, 0.54f, 1f);
 
+        [Header("FX")]
+        [SerializeField] private GameObject slowmoStartFX;
+        [SerializeField] private Transform slowmoFXAnchor;
+
         private readonly List<float> _recentKillTimes = new();
         private Coroutine _slowmoRoutine;
         private Coroutine _bannerRoutine;
@@ -37,6 +41,7 @@ namespace FF
 
         private CanvasGroup _bannerGroup;
         private TextMeshProUGUI _bannerText;
+        private Transform _cachedPlayer;
 
         private void Awake()
         {
@@ -56,12 +61,26 @@ namespace FF
         private void OnEnable()
         {
             Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
+            PlayerController.OnPlayerReady += HandlePlayerReady;
         }
 
         private void OnDisable()
         {
             Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
+            PlayerController.OnPlayerReady -= HandlePlayerReady;
             RestoreTimeScale();
+        }
+
+        private void HandlePlayerReady(PlayerController controller)
+        {
+            if (controller != null)
+            {
+                _cachedPlayer = controller.transform;
+                if (!slowmoFXAnchor)
+                {
+                    slowmoFXAnchor = _cachedPlayer;
+                }
+            }
         }
 
         private void HandleEnemyKilled(Enemy enemy)
@@ -96,6 +115,7 @@ namespace FF
             if (_slowmoRoutine != null)
                 StopCoroutine(_slowmoRoutine);
 
+            PlaySlowmoStartFx();
             _slowmoRoutine = StartCoroutine(SlowmoRoutine(scale, duration));
             PlayBanner(message);
         }
@@ -207,6 +227,22 @@ namespace FF
             }
             _bannerGroup.alpha = 0f;
             _bannerRoutine = null;
+        }
+
+        private void PlaySlowmoStartFx()
+        {
+            if (!slowmoStartFX)
+            {
+                return;
+            }
+
+            Vector3 position = slowmoFXAnchor ? slowmoFXAnchor.position : (_cachedPlayer ? _cachedPlayer.position : Vector3.zero);
+            GameObject fx = PoolManager.Get(slowmoStartFX, position, Quaternion.identity);
+            if (fx && !fx.TryGetComponent<PooledParticleSystem>(out var pooled))
+            {
+                pooled = fx.AddComponent<PooledParticleSystem>();
+                pooled.OnTakenFromPool();
+            }
         }
     }
 }

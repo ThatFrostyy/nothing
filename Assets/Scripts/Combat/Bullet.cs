@@ -52,8 +52,15 @@ namespace FF
 
         void Update()
         {
-            transform.Translate(speed * Time.deltaTime * Vector3.right, Space.Self);
-            t += Time.deltaTime;
+            if (Time.timeScale <= Mathf.Epsilon && PauseMenuController.IsMenuOpen)
+            {
+                return;
+            }
+
+            float deltaTime = Time.timeScale < 0.999f ? Time.unscaledDeltaTime : Time.deltaTime;
+
+            transform.Translate(speed * deltaTime * Vector3.right, Space.Self);
+            t += deltaTime;
             if (t > lifetime && poolToken != null)
             {
                 poolToken.Release();
