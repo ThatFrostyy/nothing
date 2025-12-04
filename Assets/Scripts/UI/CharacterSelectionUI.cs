@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +24,8 @@ namespace FF
         [Header("Loadout Preview")]
         [SerializeField] private TMP_Text weaponNameText;
         [SerializeField] private Image weaponIconImage;
+        [SerializeField] private TMP_Text specialItemsText;
+        [SerializeField] private List<Image> specialItemIcons = new();
         [SerializeField] private PlayerPreview preview;
 
         private int _index;
@@ -54,8 +58,11 @@ namespace FF
             CharacterDefinition character = availableCharacters[_index];
             HatDefinition hat = ResolveHatSelection(character);
             Weapon weapon = character != null ? character.StartingWeapon : null;
+            IReadOnlyList<SpecialItemDefinition> specialItems = character != null
+                ? character.GetStartingSpecialItems()
+                : Array.Empty<SpecialItemDefinition>();
 
-            CharacterSelectionState.SetSelection(character, hat, weapon);
+            CharacterSelectionState.SetSelection(character, hat, weapon, specialItems);
             Refresh();
         }
 
@@ -104,6 +111,7 @@ namespace FF
                 if (descriptionText) descriptionText.text = "Add CharacterDefinition assets to Available Characters.";
                 if (abilityText) abilityText.text = string.Empty;
                 if (portraitImage) portraitImage.sprite = null;
+                if (specialItemsText) specialItemsText.text = string.Empty;
                 return;
             }
 
@@ -141,6 +149,9 @@ namespace FF
                 weaponIconImage.enabled = weaponIcon != null;
                 weaponIconImage.sprite = weaponIcon;
             }
+
+            IReadOnlyList<SpecialItemDefinition> specialItems = character?.GetStartingSpecialItems();
+            UpdateSpecialItemDisplay(specialItems);
 
             if (preview)
             {
@@ -203,6 +214,52 @@ namespace FF
 
             _hatIndex = Mathf.Clamp(_hatIndex, 0, hats.Count - 1);
             return hats[_hatIndex];
+        }
+
+        private void UpdateSpecialItemDisplay(IReadOnlyList<SpecialItemDefinition> specialItems)
+        {
+            int itemCount = specialItems != null ? specialItems.Count : 0;
+            if (specialItemsText)
+            {
+                if (itemCount == 0)
+                {
+                    specialItemsText.text = "No Special Items";
+                }
+                else
+                {
+                    StringBuilder builder = new();
+                    for (int i = 0; i < itemCount; i++)
+                    {
+                        SpecialItemDefinition item = specialItems[i];
+                        string name = item != null && !string.IsNullOrEmpty(item.DisplayName)
+                            ? item.DisplayName
+                            : item != null ? item.name : "Special Item";
+
+                        builder.Append(name);
+
+                        if (i < itemCount - 1)
+                        {
+                            builder.Append(", ");
+                        }
+                    }
+
+                    specialItemsText.text = builder.ToString();
+                }
+            }
+
+            if (specialItemIcons != null)
+            {
+                for (int i = 0; i < specialItemIcons.Count; i++)
+                {
+                    Image icon = specialItemIcons[i];
+                    SpecialItemDefinition item = specialItems != null && i < itemCount ? specialItems[i] : null;
+                    if (!icon) continue;
+
+                    bool hasIcon = item != null && item.Icon != null;
+                    icon.enabled = hasIcon;
+                    icon.sprite = hasIcon ? item.Icon : null;
+                }
+            }
         }
     }
 }

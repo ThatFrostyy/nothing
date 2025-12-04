@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Playables;
@@ -19,6 +20,7 @@ namespace FF
         [SerializeField] private UpgradeManager _upgradeManager;
         [SerializeField] private WeaponManager _weaponManager;
         [SerializeField] private Weapon _startingWeapon;
+        [SerializeField] private Transform _specialItemAnchor;
 
         [Header("Aiming Line")]
         [SerializeField] private bool _showAimingLine = true;
@@ -49,6 +51,7 @@ namespace FF
         private float _tiltVelocity;
         private LineRenderer _aimLine;
         private Vector2 _lastAimDirection = Vector2.right;
+        private readonly List<GameObject> _spawnedSpecialItems = new();
 
         private void Awake()
         {
@@ -333,6 +336,46 @@ namespace FF
             _startingWeapon = weapon;
         }
 
+        private void ApplySpecialItems(IReadOnlyList<SpecialItemDefinition> specialItems)
+        {
+            ClearSpecialItems();
+
+            if (specialItems == null || specialItems.Count == 0)
+            {
+                return;
+            }
+
+            Transform parent = _specialItemAnchor ? _specialItemAnchor : transform;
+            for (int i = 0; i < specialItems.Count; i++)
+            {
+                SpecialItemDefinition item = specialItems[i];
+                if (item == null || item.ItemPrefab == null)
+                {
+                    continue;
+                }
+
+                GameObject instance = Instantiate(item.ItemPrefab, parent);
+                instance.transform.localPosition = item.ItemPrefab.transform.localPosition;
+                instance.transform.localRotation = item.ItemPrefab.transform.localRotation;
+                instance.transform.localScale = item.ItemPrefab.transform.localScale;
+
+                _spawnedSpecialItems.Add(instance);
+            }
+        }
+
+        private void ClearSpecialItems()
+        {
+            for (int i = 0; i < _spawnedSpecialItems.Count; i++)
+            {
+                if (_spawnedSpecialItems[i])
+                {
+                    Destroy(_spawnedSpecialItems[i]);
+                }
+            }
+
+            _spawnedSpecialItems.Clear();
+        }
+
         #region Input System Callbacks
         public void OnMove(InputValue value)
         {
@@ -459,6 +502,8 @@ namespace FF
             {
                 OverrideStartingWeapon(weapon);
             }
+
+            ApplySpecialItems(CharacterSelectionState.SelectedSpecialItems ?? character?.GetStartingSpecialItems());
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace FF
 {
@@ -11,15 +12,21 @@ namespace FF
         public static CharacterDefinition SelectedCharacter => Selection.Character;
         public static HatDefinition SelectedHat => Selection.Hat;
         public static Weapon SelectedWeapon => Selection.Weapon;
+        public static IReadOnlyList<SpecialItemDefinition> SelectedSpecialItems => Selection.SpecialItems;
 
         public static bool HasSelection => Selection.Character != null;
 
-        public static void SetSelection(CharacterDefinition character, HatDefinition hat = null, Weapon weapon = null)
+        public static void SetSelection(
+            CharacterDefinition character,
+            HatDefinition hat = null,
+            Weapon weapon = null,
+            IReadOnlyList<SpecialItemDefinition> specialItems = null)
         {
             HatDefinition resolvedHat = hat ?? character?.GetDefaultHat();
             Weapon resolvedWeapon = weapon ?? character?.StartingWeapon;
+            IReadOnlyList<SpecialItemDefinition> resolvedItems = specialItems ?? character?.GetStartingSpecialItems();
 
-            CharacterLoadout newSelection = new(character, resolvedHat, resolvedWeapon);
+            CharacterLoadout newSelection = new(character, resolvedHat, resolvedWeapon, resolvedItems);
 
             if (newSelection.Equals(Selection))
             {
@@ -33,22 +40,31 @@ namespace FF
 
     public readonly struct CharacterLoadout : IEquatable<CharacterLoadout>
     {
-        public static readonly CharacterLoadout Empty = new(null, null, null);
+        public static readonly CharacterLoadout Empty = new(null, null, null, Array.Empty<SpecialItemDefinition>());
 
         public readonly CharacterDefinition Character;
         public readonly HatDefinition Hat;
         public readonly Weapon Weapon;
+        public readonly IReadOnlyList<SpecialItemDefinition> SpecialItems;
 
-        public CharacterLoadout(CharacterDefinition character, HatDefinition hat, Weapon weapon)
+        public CharacterLoadout(
+            CharacterDefinition character,
+            HatDefinition hat,
+            Weapon weapon,
+            IReadOnlyList<SpecialItemDefinition> specialItems)
         {
             Character = character;
             Hat = hat;
             Weapon = weapon;
+            SpecialItems = specialItems ?? Array.Empty<SpecialItemDefinition>();
         }
 
         public bool Equals(CharacterLoadout other)
         {
-            return Character == other.Character && Hat == other.Hat && Weapon == other.Weapon;
+            return Character == other.Character
+                && Hat == other.Hat
+                && Weapon == other.Weapon
+                && AreSpecialItemsEqual(SpecialItems, other.SpecialItems);
         }
 
         public override bool Equals(object obj)
@@ -63,8 +79,33 @@ namespace FF
                 int hash = Character ? Character.GetHashCode() : 0;
                 hash = (hash * 397) ^ (Hat ? Hat.GetHashCode() : 0);
                 hash = (hash * 397) ^ (Weapon ? Weapon.GetHashCode() : 0);
+
+                if (SpecialItems != null)
+                {
+                    for (int i = 0; i < SpecialItems.Count; i++)
+                    {
+                        hash = (hash * 397) ^ (SpecialItems[i] ? SpecialItems[i].GetHashCode() : 0);
+                    }
+                }
+
                 return hash;
             }
+        }
+
+        static bool AreSpecialItemsEqual(
+            IReadOnlyList<SpecialItemDefinition> a,
+            IReadOnlyList<SpecialItemDefinition> b)
+        {
+            if (ReferenceEquals(a, b)) return true;
+            if (a == null || b == null) return false;
+            if (a.Count != b.Count) return false;
+
+            for (int i = 0; i < a.Count; i++)
+            {
+                if (a[i] != b[i]) return false;
+            }
+
+            return true;
         }
     }
 }

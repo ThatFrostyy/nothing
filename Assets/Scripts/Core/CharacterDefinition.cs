@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -21,6 +22,7 @@ namespace FF
         public Weapon StartingWeapon;
         [Tooltip("Overrides the icon displayed in the menu. If left empty, the weapon's own icon is used.")]
         public Sprite WeaponIconOverride;
+        public List<SpecialItemDefinition> StartingSpecialItems = new();
 
         public Sprite GetWeaponIcon()
         {
@@ -45,6 +47,11 @@ namespace FF
             }
 
             return null;
+        }
+
+        public IReadOnlyList<SpecialItemDefinition> GetStartingSpecialItems()
+        {
+            return StartingSpecialItems ?? Array.Empty<SpecialItemDefinition>();
         }
     }
 }
