@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Playables;
@@ -20,7 +19,6 @@ namespace FF
         [SerializeField] private UpgradeManager _upgradeManager;
         [SerializeField] private WeaponManager _weaponManager;
         [SerializeField] private Weapon _startingWeapon;
-        [SerializeField] private Transform _specialItemAnchor;
 
         [Header("Aiming Line")]
         [SerializeField] private bool _showAimingLine = true;
@@ -51,7 +49,6 @@ namespace FF
         private float _tiltVelocity;
         private LineRenderer _aimLine;
         private Vector2 _lastAimDirection = Vector2.right;
-        private readonly List<GameObject> _spawnedSpecialItems = new();
 
         private void Awake()
         {
@@ -338,19 +335,15 @@ namespace FF
 
         private void ApplySpecialWeapon(Weapon specialWeapon)
         {
-        }
-
-        private void ClearSpecialItems()
-        {
-            for (int i = 0; i < _spawnedSpecialItems.Count; i++)
+            if (!specialWeapon)
             {
-                if (_spawnedSpecialItems[i])
-                {
-                    Destroy(_spawnedSpecialItems[i]);
-                }
+                return;
             }
 
-            _spawnedSpecialItems.Clear();
+            if (_weaponManager)
+            {
+                _weaponManager.TryEquip(specialWeapon, out _, selectSlot: false);
+            }
         }
 
         #region Input System Callbacks

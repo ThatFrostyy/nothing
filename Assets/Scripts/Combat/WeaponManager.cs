@@ -44,12 +44,14 @@ namespace FF
 
         public void Equip(Weapon newWeapon)
         {
-            TryEquip(newWeapon, out _);
+            TryEquip(newWeapon, out _, selectSlot: true);
         }
 
-        public bool TryEquip(Weapon newWeapon) => TryEquip(newWeapon, out _);
+        public bool TryEquip(Weapon newWeapon) => TryEquip(newWeapon, out _, selectSlot: true);
 
-        public bool TryEquip(Weapon newWeapon, out Weapon replacedWeapon)
+        public bool TryEquip(Weapon newWeapon, bool selectSlot) => TryEquip(newWeapon, out _, selectSlot);
+
+        public bool TryEquip(Weapon newWeapon, out Weapon replacedWeapon, bool selectSlot = true)
         {
             replacedWeapon = null;
 
@@ -67,7 +69,11 @@ namespace FF
             Weapon previous = loadout[targetSlot];
 
             AssignWeaponToSlot(targetSlot, newWeapon);
-            SelectSlot(targetSlot);
+
+            if (selectSlot)
+            {
+                SelectSlot(targetSlot);
+            }
 
             if (previous && previous != newWeapon)
             {
