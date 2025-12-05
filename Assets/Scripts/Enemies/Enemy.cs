@@ -933,7 +933,7 @@ namespace FF
             _burnTimer = Mathf.Max(_burnTimer, duration);
             _burnDamagePerSecond = Mathf.Max(1, damagePerSecond);
             _burnTickInterval = Mathf.Max(0.05f, tickInterval);
-            _burnTickTimer = Mathf.Min(_burnTickTimer, _burnTickInterval);
+            _burnTickTimer = _burnTickInterval;
             if (sourceWeapon)
             {
                 _burnSourceWeapon = sourceWeapon;

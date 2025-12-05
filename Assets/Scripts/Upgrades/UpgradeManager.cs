@@ -16,8 +16,8 @@ namespace FF
         [SerializeField, Min(0)] int maxUpgradeSelections = 0;
 
         [Header("Global Upgrade Limits")]
-        [SerializeField, Min(1f)] float maxFireRateMultiplier = 3f;
-        [SerializeField, Min(0.05f)] float minFireCooldownMultiplier = 0.2f;
+        [SerializeField, Min(1f)] float maxFireRateRpm = 500f;
+        [SerializeField, Min(0.01f)] float minFireCooldownSeconds = 0.1f;
 
         [Header("Weapon Upgrade Scaling")]
         [SerializeField, Min(0f)] float baseWeaponUpgradeBonus = 0.06f;
@@ -1024,12 +1024,24 @@ namespace FF
 
         public float ClampFireRateMultiplier(float value)
         {
-            return Mathf.Min(Mathf.Max(0.01f, value), Mathf.Max(1f, maxFireRateMultiplier));
+            return Mathf.Max(0.01f, value);
         }
 
         public float ClampCooldownMultiplier(float value)
         {
-            return Mathf.Max(minFireCooldownMultiplier, Mathf.Max(0.01f, value));
+            return Mathf.Max(0.01f, value);
+        }
+
+        public float ClampFireRateRpm(float rpm)
+        {
+            float maxRpm = Mathf.Max(1f, maxFireRateRpm);
+            return Mathf.Clamp(rpm, 0.01f, maxRpm);
+        }
+
+        public float ClampCooldownSeconds(float cooldownSeconds)
+        {
+            float minimum = Mathf.Max(0.01f, minFireCooldownSeconds);
+            return Mathf.Max(minimum, cooldownSeconds);
         }
     }
 }
