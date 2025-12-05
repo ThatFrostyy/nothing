@@ -137,6 +137,11 @@ namespace FF
                 return;
             }
 
+            if (sourceWeapon.burnDamagePerSecond <= 0 || sourceWeapon.burnDuration <= 0f)
+            {
+                return;
+            }
+
             if (!other.TryGetComponent<Enemy>(out var enemy))
             {
                 return;

@@ -178,7 +178,14 @@ namespace FF
                 rpmMultiplier *= UpgradeManager.I.GetWeaponFireRateMultiplier(_weapon);
                 rpmMultiplier = UpgradeManager.I.ClampFireRateMultiplier(rpmMultiplier);
             }
+
             float rpm = Mathf.Max(_weapon.rpm * rpmMultiplier, 0.01f);
+            if (UpgradeManager.I != null)
+            {
+                rpm = UpgradeManager.I.ClampFireRateRpm(rpm);
+            }
+
+            float effectiveRpmMultiplier = rpm / Mathf.Max(0.01f, _weapon.rpm);
             float interval = 60f / rpm;
 
             float cooldownMultiplier = _stats != null ? _stats.GetFireCooldownMultiplier() : 1f;
@@ -187,14 +194,19 @@ namespace FF
                 cooldownMultiplier *= UpgradeManager.I.GetWeaponFireCooldownMultiplier(_weapon);
                 cooldownMultiplier = UpgradeManager.I.ClampCooldownMultiplier(cooldownMultiplier);
             }
-            cooldownMultiplier = Mathf.Max(0.1f, cooldownMultiplier);
             interval *= cooldownMultiplier;
 
             if (!_weapon.isAuto && _weapon.fireCooldown > 0f)
             {
-                interval = _weapon.fireCooldown / rpmMultiplier;
+                interval = _weapon.fireCooldown / effectiveRpmMultiplier;
                 interval *= cooldownMultiplier;
             }
+
+            if (UpgradeManager.I != null)
+            {
+                interval = UpgradeManager.I.ClampCooldownSeconds(interval);
+            }
+            interval = Mathf.Max(0.01f, interval);
 
             if (_isGrenadeWeapon && _useGrenadeCharging)
             {
@@ -240,7 +252,8 @@ namespace FF
             SpawnEjectParticles();
 
             int extraProjectiles = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponExtraProjectiles(_weapon) : 0;
-            int pelletCount = _weapon.weaponClass == Weapon.WeaponClass.Shotgun
+            bool firesLikeShotgun = _weapon.isShotgun || _weapon.weaponClass == Weapon.WeaponClass.Shotgun;
+            int pelletCount = firesLikeShotgun
                 ? Mathf.Max(1, _weapon.pelletsPerShot)
                 : 1;
             int totalProjectiles = Mathf.Max(1, pelletCount + extraProjectiles);
