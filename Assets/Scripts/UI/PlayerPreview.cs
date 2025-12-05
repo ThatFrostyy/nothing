@@ -12,7 +12,7 @@ namespace FF
         private GameObject _weaponInstance;
         private readonly List<GameObject> _specialItemInstances = new();
 
-        public void Show(CharacterDefinition character, HatDefinition hat, Weapon weapon, SpecialItemDefinition specialWeapon)
+        public void Show(CharacterDefinition character, HatDefinition hat, Weapon weapon, Weapon specialWeapon)
         {
             if (cosmetics)
             {
@@ -20,7 +20,7 @@ namespace FF
             }
 
             UpdateWeapon(weapon ?? character?.StartingWeapon);
-            UpdateSpecialWeapon(specialWeapon ?? character?.GetStartingSpecialWeapon());
+            UpdateSpecialWeapon(specialWeapon ?? character?.SpecialWeapon);
         }
 
         private void UpdateWeapon(Weapon weapon)
@@ -40,26 +40,8 @@ namespace FF
             _weaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
-        private void UpdateSpecialWeapon(SpecialItemDefinition specialWeapon)
+        private void UpdateSpecialWeapon(Weapon specialWeapon)
         {
-            ClearSpecialItems();
-
-            if (specialWeapon == null)
-            {
-                return;
-            }
-
-            if (specialWeapon.ItemPrefab == null)
-            {
-                return;
-            }
-
-            Transform parent = specialItemAnchor ? specialItemAnchor : transform;
-            GameObject instance = Instantiate(specialWeapon.ItemPrefab, parent);
-            instance.transform.localPosition = specialWeapon.ItemPrefab.transform.localPosition;
-            instance.transform.localRotation = specialWeapon.ItemPrefab.transform.localRotation;
-            instance.transform.localScale = specialWeapon.ItemPrefab.transform.localScale;
-            _specialItemInstances.Add(instance);
         }
 
         private void ClearSpecialItems()

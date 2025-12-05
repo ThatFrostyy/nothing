@@ -11,7 +11,7 @@ namespace FF
         public static CharacterDefinition SelectedCharacter => Selection.Character;
         public static HatDefinition SelectedHat => Selection.Hat;
         public static Weapon SelectedWeapon => Selection.Weapon;
-        public static SpecialItemDefinition SelectedSpecialWeapon => Selection.SpecialWeapon;
+        public static Weapon SelectedSpecialWeapon => Selection.SpecialWeapon;
 
         public static bool HasSelection => Selection.Character != null;
 
@@ -19,13 +19,13 @@ namespace FF
             CharacterDefinition character,
             HatDefinition hat = null,
             Weapon weapon = null,
-            SpecialItemDefinition specialWeapon = null)
+            Weapon specialWeapon = null)
         {
             HatDefinition resolvedHat = hat ?? character?.GetDefaultHat();
             Weapon resolvedWeapon = weapon ?? character?.StartingWeapon;
-            SpecialItemDefinition resolvedSpecialWeapon = specialWeapon ?? character?.GetStartingSpecialWeapon();
+            Weapon resolvedSpecialWeapon = specialWeapon ?? character?.SpecialWeapon;
 
-            CharacterLoadout newSelection = new(character, resolvedHat, resolvedWeapon, resolvedSpecialWeapon);
+            CharacterLoadout newSelection = new(character, resolvedHat, resolvedWeapon, specialWeapon);
 
             if (newSelection.Equals(Selection))
             {
@@ -44,13 +44,13 @@ namespace FF
         public readonly CharacterDefinition Character;
         public readonly HatDefinition Hat;
         public readonly Weapon Weapon;
-        public readonly SpecialItemDefinition SpecialWeapon;
+        public readonly Weapon SpecialWeapon;
 
         public CharacterLoadout(
             CharacterDefinition character,
             HatDefinition hat,
             Weapon weapon,
-            SpecialItemDefinition specialWeapon)
+            Weapon specialWeapon) // updated parameter type
         {
             Character = character;
             Hat = hat;

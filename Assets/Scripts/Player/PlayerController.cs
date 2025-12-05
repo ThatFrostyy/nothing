@@ -336,27 +336,8 @@ namespace FF
             _startingWeapon = weapon;
         }
 
-        private void ApplySpecialWeapon(SpecialItemDefinition specialWeapon)
+        private void ApplySpecialWeapon(Weapon specialWeapon)
         {
-            ClearSpecialItems();
-
-            if (specialWeapon == null)
-            {
-                return;
-            }
-
-            if (specialWeapon.ItemPrefab == null)
-            {
-                return;
-            }
-
-            Transform parent = _specialItemAnchor ? _specialItemAnchor : transform;
-            GameObject instance = Instantiate(specialWeapon.ItemPrefab, parent);
-            instance.transform.localPosition = specialWeapon.ItemPrefab.transform.localPosition;
-            instance.transform.localRotation = specialWeapon.ItemPrefab.transform.localRotation;
-            instance.transform.localScale = specialWeapon.ItemPrefab.transform.localScale;
-
-            _spawnedSpecialItems.Add(instance);
         }
 
         private void ClearSpecialItems()
@@ -484,8 +465,8 @@ namespace FF
             CharacterDefinition character = CharacterSelectionState.SelectedCharacter;
             HatDefinition hat = CharacterSelectionState.SelectedHat ?? character?.GetDefaultHat();
             Weapon weapon = CharacterSelectionState.SelectedWeapon ?? character?.StartingWeapon;
-            SpecialItemDefinition specialWeapon = CharacterSelectionState.SelectedSpecialWeapon
-                ?? character?.GetStartingSpecialWeapon();
+            Weapon specialWeapon = CharacterSelectionState.SelectedSpecialWeapon
+                ?? character?.SpecialWeapon;
 
             if (_cosmetics && character != null)
             {

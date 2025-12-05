@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace FF
-{
+{//
     [CreateAssetMenu(menuName = "FF/Character", fileName = "Character_")]
     public class CharacterDefinition : ScriptableObject
     {
@@ -22,8 +22,7 @@ namespace FF
         [Tooltip("Overrides the icon displayed in the menu. If left empty, the weapon's own icon is used.")]
         public Sprite WeaponIconOverride;
         [Header("Special Weapon")]
-        public SpecialItemDefinition StartingSpecialWeapon;
-        public SpecialItemDefinition DefaultSpecialWeapon;
+        public Weapon SpecialWeapon;
 
         public Sprite GetWeaponIcon()
         {
@@ -49,26 +48,5 @@ namespace FF
 
             return null;
         }
-
-        public SpecialItemDefinition GetStartingSpecialWeapon()
-        {
-            if (StartingSpecialWeapon)
-            {
-                return StartingSpecialWeapon;
-            }
-
-            return GetDefaultSpecialWeapon();
-        }
-
-        public SpecialItemDefinition GetDefaultSpecialWeapon()
-        {
-            if (DefaultSpecialWeapon)
-            {
-                return DefaultSpecialWeapon;
-            }
-
-            return null;
-        }
-
     }
 }

@@ -57,9 +57,7 @@ namespace FF
             CharacterDefinition character = availableCharacters[_index];
             HatDefinition hat = ResolveHatSelection(character);
             Weapon weapon = character != null ? character.StartingWeapon : null;
-            SpecialItemDefinition specialWeapon = character != null
-                ? character.GetStartingSpecialWeapon()
-                : null;
+            Weapon specialWeapon = character != null ? character.SpecialWeapon : null;
 
             CharacterSelectionState.SetSelection(character, hat, weapon, specialWeapon);
             Refresh();
@@ -155,7 +153,7 @@ namespace FF
             }
 
             Weapon weapon = character != null ? character.StartingWeapon : null;
-            SpecialItemDefinition specialWeapon = character != null ? character.GetStartingSpecialWeapon() : null;
+            Weapon specialWeapon = character != null ? character.SpecialWeapon : null;
             bool showSpecialWeapon = _loadoutViewIndex == 1;
 
             if (weaponNameText)
@@ -254,24 +252,19 @@ namespace FF
             return weapon != null ? weapon.name : "No Weapon";
         }
 
-        private string GetSpecialWeaponLabel(SpecialItemDefinition specialWeapon)
+        private string GetSpecialWeaponLabel(Weapon specialWeapon)
         {
-            if (specialWeapon != null && !string.IsNullOrEmpty(specialWeapon.DisplayName))
-            {
-                return specialWeapon.DisplayName;
-            }
-
             if (specialWeapon != null)
             {
-                return specialWeapon.name;
+                return specialWeapon.weaponName;
             }
 
             return "No Special Weapon";
         }
 
-        private Sprite GetSpecialWeaponIcon(SpecialItemDefinition specialWeapon)
+        private Sprite GetSpecialWeaponIcon(Weapon specialWeapon)
         {
-            return specialWeapon != null ? specialWeapon.Icon : null;
+            return specialWeapon != null ? specialWeapon.weaponIcon : null;
         }
 
         private void DisableSpecialItemIcons()

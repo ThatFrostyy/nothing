@@ -15,6 +15,7 @@ namespace FF
         [SerializeField] private CharacterDefinition defaultCharacter;
         [SerializeField] private HatDefinition defaultHat;
         [SerializeField] private Weapon defaultWeapon;
+        [SerializeField] private Weapon defaultSpecialWeapon;
         [SerializeField] private bool applyDefaultSelection = true;
 
         void Awake()
@@ -79,11 +80,7 @@ namespace FF
                 return;
             }
 
-            SpecialItemDefinition specialWeapon = defaultCharacter != null
-                ? defaultCharacter.GetStartingSpecialWeapon()
-                : null;
-
-            CharacterSelectionState.SetSelection(defaultCharacter, defaultHat, defaultWeapon, specialWeapon);
+            CharacterSelectionState.SetSelection(defaultCharacter, defaultHat, defaultWeapon, defaultSpecialWeapon);
         }
 
         static void SetCursorVisibility(bool visible)
