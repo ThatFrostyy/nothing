@@ -12,7 +12,7 @@ namespace FF
         private GameObject _weaponInstance;
         private readonly List<GameObject> _specialItemInstances = new();
 
-        public void Show(CharacterDefinition character, HatDefinition hat, Weapon weapon)
+        public void Show(CharacterDefinition character, HatDefinition hat, Weapon weapon, SpecialItemDefinition specialWeapon)
         {
             if (cosmetics)
             {
@@ -20,7 +20,7 @@ namespace FF
             }
 
             UpdateWeapon(weapon ?? character?.StartingWeapon);
-            UpdateSpecialItems(character != null ? character.GetStartingSpecialItems() : null);
+            UpdateSpecialWeapon(specialWeapon ?? character?.GetStartingSpecialWeapon());
         }
 
         private void UpdateWeapon(Weapon weapon)
@@ -40,30 +40,26 @@ namespace FF
             _weaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
-        private void UpdateSpecialItems(IReadOnlyList<SpecialItemDefinition> items)
+        private void UpdateSpecialWeapon(SpecialItemDefinition specialWeapon)
         {
             ClearSpecialItems();
 
-            if (items == null || items.Count == 0)
+            if (specialWeapon == null)
+            {
+                return;
+            }
+
+            if (specialWeapon.ItemPrefab == null)
             {
                 return;
             }
 
             Transform parent = specialItemAnchor ? specialItemAnchor : transform;
-            for (int i = 0; i < items.Count; i++)
-            {
-                SpecialItemDefinition item = items[i];
-                if (item == null || item.ItemPrefab == null)
-                {
-                    continue;
-                }
-
-                GameObject instance = Instantiate(item.ItemPrefab, parent);
-                instance.transform.localPosition = item.ItemPrefab.transform.localPosition;
-                instance.transform.localRotation = item.ItemPrefab.transform.localRotation;
-                instance.transform.localScale = item.ItemPrefab.transform.localScale;
-                _specialItemInstances.Add(instance);
-            }
+            GameObject instance = Instantiate(specialWeapon.ItemPrefab, parent);
+            instance.transform.localPosition = specialWeapon.ItemPrefab.transform.localPosition;
+            instance.transform.localRotation = specialWeapon.ItemPrefab.transform.localRotation;
+            instance.transform.localScale = specialWeapon.ItemPrefab.transform.localScale;
+            _specialItemInstances.Add(instance);
         }
 
         private void ClearSpecialItems()
