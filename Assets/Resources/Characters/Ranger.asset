@@ -25,5 +25,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b0c38d26c188c6747b10d403bd016f61, type: 2}
   StartingWeapon: {fileID: 11400000, guid: 5fdcf8ba9e391ba4f9db389ee623ce59, type: 2}
   WeaponIconOverride: {fileID: 0}
-  StartingSpecialWeapon: {fileID: 11400000, guid: 99acf26230842d14a8dac1947ca6eeec, type: 2}
-  DefaultSpecialWeapon: {fileID: 11400000, guid: 99acf26230842d14a8dac1947ca6eeec, type: 2}
+  SpecialWeapon: {fileID: 11400000, guid: 35d6b0498af5bc343a8912126c34eee6, type: 2}

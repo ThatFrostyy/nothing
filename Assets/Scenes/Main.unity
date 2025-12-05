@@ -1877,6 +1877,9 @@ MonoBehaviour:
   - Name: Rain
     WeatherVfxPrefab: {fileID: 6077168872989578693, guid: f514474ff8e94554d8477de1f2f601b0, type: 3}
     LoopingSfx: {fileID: 8300000, guid: 415db4cd7857ee04fbb33e3d92a61ac0, type: 3}
+  - Name: Wind
+    WeatherVfxPrefab: {fileID: 3696007233179127096, guid: c248f95ffea8b8543bc7ad0fffe0216d, type: 3}
+    LoopingSfx: {fileID: 8300000, guid: 81bcf484da907304a9113e9983f01029, type: 3}
   weatherParent: {fileID: 1147590090}
   playOnEnable: 1
 --- !u!4 &396178897
@@ -6295,7 +6298,6 @@ MonoBehaviour:
   _upgradeManager: {fileID: 0}
   _weaponManager: {fileID: 1207903161}
   _startingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
-  _specialItemAnchor: {fileID: 0}
   _showAimingLine: 1
   _aimLineLength: 2.5
   _aimLineDashLength: 0.2

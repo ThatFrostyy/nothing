@@ -10,30 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
-  m_Name: M2
+  m_Name: MP28
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: M2 Carbine
-  fireSFX: {fileID: 8300000, guid: 97da3efc9115a42408f5ade324e0409d, type: 3}
+  weaponName: MP-28
+  fireSFX: {fileID: 8300000, guid: 1fab956a4427b944d97942f2b7f28a56, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
   ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
-  recoilAmount: 5
-  recoilRecoverySpeed: 8
+  recoilAmount: 8
+  recoilRecoverySpeed: 10
   attackLoopSFX: {fileID: 0}
   fireLoopSFX: {fileID: 0}
   loopingFireVfx: {fileID: 0}
   loopingVfxOffset: {x: 0, y: 0, z: 0}
-  weaponClass: 4
-  weaponIcon: {fileID: 21300000, guid: 4cd38b4fa594e4f46b4faba7a98111e3, type: 3}
-  isSpecial: 1
+  weaponClass: 3
+  weaponIcon: {fileID: 21300000, guid: 0e049f2c91543d24797653c35702412b, type: 3}
+  isSpecial: 0
   useGrenadeCharging: 0
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
-  weaponPrefab: {fileID: 2326734106078555472, guid: 5fb562aa350e0404da515a897170d733, type: 3}
-  rpm: 400
-  damage: 11
+  weaponPrefab: {fileID: 8414906675558019628, guid: 6da672798d1bcb64e8593f6b85222ab9, type: 3}
+  rpm: 420
+  damage: 6
   recoilKick: 3
   isAuto: 1
-  fireCooldown: 0.4
-  knockbackStrength: 1.5
+  fireCooldown: 0.2
+  knockbackStrength: 0.3
   knockbackDuration: 0.2
   appliesBurn: 0
   burnDuration: 3
@@ -41,7 +41,7 @@ MonoBehaviour:
   burnTickInterval: 0.35
   burnTargetVfx: {fileID: 0}
   burnImpactVfx: {fileID: 0}
-  baseSpread: 1.5
-  maxSpread: 4
+  baseSpread: 1.3
+  maxSpread: 5
   spreadIncreasePerShot: 0.5
   spreadRecoverySpeed: 2
