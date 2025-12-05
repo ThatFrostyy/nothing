@@ -33,14 +33,22 @@ namespace FF
             _audioSource.loop = true;
             _audioSource.playOnAwake = false;
             _audioSource.spatialBlend = 0f;
+            ApplyAmbienceVolume();
         }
 
         private void OnEnable()
         {
+            GameAudioSettings.OnAmbienceVolumeChanged += HandleAmbienceVolumeChanged;
+
             if (playOnEnable)
             {
                 ActivateRandomWeather();
             }
+        }
+
+        private void OnDisable()
+        {
+            GameAudioSettings.OnAmbienceVolumeChanged -= HandleAmbienceVolumeChanged;
         }
 
         public void ActivateRandomWeather()
@@ -82,6 +90,7 @@ namespace FF
                 _audioSource.clip = option.LoopingSfx;
                 if (option.LoopingSfx != null)
                 {
+                    ApplyAmbienceVolume();
                     _audioSource.Play();
                 }
                 else
@@ -104,6 +113,19 @@ namespace FF
                 _audioSource.Stop();
                 _audioSource.clip = null;
             }
+        }
+
+        private void ApplyAmbienceVolume()
+        {
+            if (_audioSource != null)
+            {
+                _audioSource.volume = GameAudioSettings.AmbienceVolume;
+            }
+        }
+
+        private void HandleAmbienceVolumeChanged(float value)
+        {
+            ApplyAmbienceVolume();
         }
     }
 }

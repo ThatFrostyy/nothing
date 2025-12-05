@@ -8,11 +8,17 @@ namespace FF
     {
         [SerializeField] private Slider musicVolumeSlider;
         [SerializeField] private TMP_Text musicValueLabel;
+        [SerializeField] private Slider ambienceVolumeSlider;
+        [SerializeField] private TMP_Text ambienceValueLabel;
+        [SerializeField] private Slider sfxVolumeSlider;
+        [SerializeField] private TMP_Text sfxValueLabel;
         [SerializeField, Min(0f)] private float sliderScale = 100f;
 
         private void Awake()
         {
-            BindSlider();
+            BindSlider(musicVolumeSlider, HandleMusicSliderChanged);
+            BindSlider(ambienceVolumeSlider, HandleAmbienceSliderChanged);
+            BindSlider(sfxVolumeSlider, HandleSfxSliderChanged);
             RefreshDisplay();
         }
 
@@ -25,7 +31,17 @@ namespace FF
         {
             if (musicVolumeSlider != null)
             {
-                musicVolumeSlider.onValueChanged.RemoveListener(HandleSliderChanged);
+                musicVolumeSlider.onValueChanged.RemoveListener(HandleMusicSliderChanged);
+            }
+
+            if (ambienceVolumeSlider != null)
+            {
+                ambienceVolumeSlider.onValueChanged.RemoveListener(HandleAmbienceSliderChanged);
+            }
+
+            if (sfxVolumeSlider != null)
+            {
+                sfxVolumeSlider.onValueChanged.RemoveListener(HandleSfxSliderChanged);
             }
         }
 
@@ -37,37 +53,63 @@ namespace FF
                 musicVolumeSlider.SetValueWithoutNotify(volume);
             }
 
-            UpdateLabel(volume);
+            UpdateLabel(musicValueLabel, volume);
+
+            float ambience = GameAudioSettings.AmbienceVolume;
+            if (ambienceVolumeSlider != null)
+            {
+                ambienceVolumeSlider.SetValueWithoutNotify(ambience);
+            }
+            UpdateLabel(ambienceValueLabel, ambience);
+
+            float sfx = GameAudioSettings.SfxVolume;
+            if (sfxVolumeSlider != null)
+            {
+                sfxVolumeSlider.SetValueWithoutNotify(sfx);
+            }
+            UpdateLabel(sfxValueLabel, sfx);
         }
 
-        private void BindSlider()
+        private void BindSlider(Slider slider, UnityEngine.Events.UnityAction<float> callback)
         {
-            if (musicVolumeSlider == null)
+            if (slider == null)
             {
                 return;
             }
 
-            musicVolumeSlider.minValue = 0f;
-            musicVolumeSlider.maxValue = 1f;
-            musicVolumeSlider.wholeNumbers = false;
-            musicVolumeSlider.onValueChanged.AddListener(HandleSliderChanged);
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            slider.wholeNumbers = false;
+            slider.onValueChanged.AddListener(callback);
         }
 
-        private void HandleSliderChanged(float value)
+        private void HandleMusicSliderChanged(float value)
         {
             MusicManager.SetVolume(value);
-            UpdateLabel(value);
+            UpdateLabel(musicValueLabel, value);
         }
 
-        private void UpdateLabel(float rawValue)
+        private void HandleAmbienceSliderChanged(float value)
         {
-            if (musicValueLabel == null)
+            GameAudioSettings.SetAmbienceVolume(value);
+            UpdateLabel(ambienceValueLabel, value);
+        }
+
+        private void HandleSfxSliderChanged(float value)
+        {
+            GameAudioSettings.SetSfxVolume(value);
+            UpdateLabel(sfxValueLabel, value);
+        }
+
+        private void UpdateLabel(TMP_Text label, float rawValue)
+        {
+            if (label == null)
             {
                 return;
             }
 
             float scaled = Mathf.Round(rawValue * sliderScale);
-            musicValueLabel.text = $"{scaled:0}%";
+            label.text = $"{scaled:0}%";
         }
     }
 }

@@ -32,7 +32,8 @@ namespace FF
             source.transform.position = position;
             source.outputAudioMixerGroup = mixer;
             source.spatialBlend = Mathf.Clamp01(spatialBlend);
-            source.volume = Mathf.Clamp01(volume);
+            float scaledVolume = Mathf.Clamp01(volume * GameAudioSettings.SfxVolume);
+            source.volume = scaledVolume;
             source.pitch = Mathf.Max(0.01f, pitch);
             source.PlayOneShot(clip);
         }

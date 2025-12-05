@@ -77,7 +77,7 @@ namespace FF
                 CameraShake.Shake(hitShakeDuration, hitShakeIntensity);
             }
 
-            audioSource.PlayOneShot(hitSound);
+            audioSource.PlayOneShot(hitSound, GameAudioSettings.SfxVolume);
         }
 
         void HandleLevelUp(int level)
@@ -94,7 +94,7 @@ namespace FF
                 }
             }
 
-            audioSource.PlayOneShot(levelUpSound);
+            audioSource.PlayOneShot(levelUpSound, GameAudioSettings.SfxVolume);
         }
 
         void HandleDeath()

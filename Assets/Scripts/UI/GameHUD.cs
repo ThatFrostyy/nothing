@@ -1111,7 +1111,7 @@ namespace FF
         {
             if (uiAudioSource && waveStartClip)
             {
-                uiAudioSource.PlayOneShot(waveStartClip);
+                uiAudioSource.PlayOneShot(waveStartClip, GameAudioSettings.SfxVolume);
             }
 
             if (!uiAudioSource || !waveMilestoneClip)
@@ -1129,7 +1129,7 @@ namespace FF
 
             if ((wave - startWave) % interval == 0)
             {
-                uiAudioSource.PlayOneShot(waveMilestoneClip);
+                uiAudioSource.PlayOneShot(waveMilestoneClip, GameAudioSettings.SfxVolume);
             }
 
         }

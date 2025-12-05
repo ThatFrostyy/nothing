@@ -221,11 +221,11 @@ namespace FF
 
             if (pickupAudioSource)
             {
-                pickupAudioSource.PlayOneShot(pickupSound);
+                pickupAudioSource.PlayOneShot(pickupSound, GameAudioSettings.SfxVolume);
                 return pickupSound.length / Mathf.Max(0.01f, pickupAudioSource.pitch);
             }
 
-            AudioSource.PlayClipAtPoint(pickupSound, transform.position);
+            AudioSource.PlayClipAtPoint(pickupSound, transform.position, GameAudioSettings.SfxVolume);
             return pickupSound.length;
         }
 
