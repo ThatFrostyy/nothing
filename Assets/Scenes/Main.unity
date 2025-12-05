@@ -6226,6 +6226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.AutoShooter
   extraProjectileDelay: 0.05
+  _slowmoProjectileSpeedMultiplier: 1.5
   grenadeMinThrowSpeed: 8
   grenadeMaxThrowSpeed: 22
   grenadeChargeTime: 1.1
@@ -6313,7 +6314,7 @@ MonoBehaviour:
   _idleSwayFrequency: 6
   _idleSwayAmplitude: 1.2
   _enableTilt: 0
-  _slowmoMoveSpeedMultiplier: 1.2
+  _slowmoMoveSpeedMultiplier: 2
   _boundsPadding: 0.05
 --- !u!70 &1207903157
 CapsuleCollider2D:
@@ -7336,7 +7337,7 @@ MonoBehaviour:
   bannerHoldTime: 0.5
   bannerFadeTime: 0.3
   bannerColor: {r: 1, g: 0.83, b: 0.54, a: 1}
-  slowmoStartFX: {fileID: 6091849738672977877, guid: af7931239aa7b5e479e4e5c2e6b460c3, type: 3}
+  slowmoStartFX: {fileID: 6091849738672977877, guid: 82a6f2baac9558c4aa02bdaced19c074, type: 3}
   slowmoFXAnchor: {fileID: 1207903152}
 --- !u!4 &1337338255
 Transform:
