@@ -72,7 +72,7 @@ namespace FF
                 UpgradeManager.I.ResetState();
             }
         }
-
+        //
         void ApplyDefaultCharacterSelection()
         {
             if (!applyDefaultSelection || CharacterSelectionState.HasSelection)

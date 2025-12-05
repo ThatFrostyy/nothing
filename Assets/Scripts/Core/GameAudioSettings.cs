@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 namespace FF
-{
+{//
     public static class GameAudioSettings
     {
         private const string SfxVolumePrefKey = "SfxVolume";
