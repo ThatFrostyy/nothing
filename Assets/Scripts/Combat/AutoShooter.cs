@@ -25,6 +25,9 @@ namespace FF
         [Header("Extra Projectiles")]
         [SerializeField, Min(0f)] private float extraProjectileDelay = 0.05f;
 
+        [Header("Slowmo Tweaks")]
+        [SerializeField, Min(0f)] private float _slowmoProjectileSpeedMultiplier = 1f;
+
         [Header("Grenade Charging")]
         [SerializeField, Min(0.1f)] private float grenadeMinThrowSpeed = 8f;
         [SerializeField, Min(0.1f)] private float grenadeMaxThrowSpeed = 22f;
@@ -286,14 +289,10 @@ namespace FF
             if (bulletInstance.TryGetComponent<Bullet>(out var bullet))
             {
                 float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
-                float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
-                if (UpgradeManager.I != null)
-                {
-                    projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
-                }
                 bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier), isCrit);
                 string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
                 bullet.SetOwner(ownerTag);
+                float projectileSpeedMultiplier = GetProjectileSpeedMultiplier();
                 bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
                 bullet.SetSourceWeapon(_weapon);
                 bullet.SetKnockback(_weapon.knockbackStrength, _weapon.knockbackDuration);
@@ -355,11 +354,7 @@ namespace FF
             float volume = _audioSource ? _audioSource.volume : 1f;
             float pitch = _audioSource ? _audioSource.pitch : 1f;
 
-            float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
-            if (UpgradeManager.I != null)
-            {
-                projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
-            }
+            float projectileSpeedMultiplier = GetProjectileSpeedMultiplier();
             float baseLaunchSpeed = grenade.BaseLaunchSpeed;
             float finalLaunchSpeed = speedOverride.HasValue
                 ? Mathf.Max(0.1f, speedOverride.Value * projectileSpeedMultiplier)
@@ -444,6 +439,27 @@ namespace FF
             }
 
             return damageMultiplier * Mathf.Max(1f, critDamageMultiplier);
+        }
+
+        private float GetProjectileSpeedMultiplier()
+        {
+            float projectileSpeedMultiplier = _stats != null ? _stats.GetProjectileSpeedMultiplier() : 1f;
+            if (UpgradeManager.I != null)
+            {
+                projectileSpeedMultiplier *= UpgradeManager.I.GetWeaponProjectileSpeedMultiplier(_weapon);
+            }
+
+            if (IsInSlowmo())
+            {
+                projectileSpeedMultiplier *= _slowmoProjectileSpeedMultiplier;
+            }
+
+            return projectileSpeedMultiplier;
+        }
+
+        private static bool IsInSlowmo()
+        {
+            return Time.timeScale > Mathf.Epsilon && Time.timeScale < 0.999f;
         }
         #endregion Recoil & Shooting
 

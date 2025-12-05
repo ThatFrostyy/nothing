@@ -36,7 +36,7 @@ namespace FF
         [SerializeField] private float _idleSwayFrequency = 6f;
         [SerializeField] private float _idleSwayAmplitude = 1.2f;
         [SerializeField] private bool _enableTilt = true;
-        [SerializeField, Min(1f)] private float _slowmoMoveSpeedMultiplier = 1.2f;
+        [SerializeField, Min(0f)] private float _slowmoMoveSpeedMultiplier = 1.2f;
 
         [Header("Bounds Settings")]
         [SerializeField] private float _boundsPadding = 0.05f;
