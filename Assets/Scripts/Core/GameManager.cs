@@ -14,6 +14,8 @@ namespace FF
         [SerializeField, Min(0f)] private float initialTimeBetweenWaves = 30f;
         [SerializeField, Min(0f)] private float waveIntervalIncrease = 5f;
         [SerializeField, Min(0f)] private float maximumTimeBetweenWaves = 60f;
+        [Header("FX")]
+        [SerializeField] private GameObject enemyDeathFx;
 
         float timer;
         float currentWaveInterval;
@@ -117,6 +119,23 @@ namespace FF
         {
             KillCount++;
             OnKillCountChanged?.Invoke(KillCount);
+
+            SpawnEnemyDeathFx(enemy);
+        }
+
+        private void SpawnEnemyDeathFx(Enemy enemy)
+        {
+            if (!enemyDeathFx || !enemy)
+            {
+                return;
+            }
+
+            GameObject spawned = PoolManager.Get(enemyDeathFx, enemy.transform.position, Quaternion.identity);
+            if (spawned && !spawned.TryGetComponent<PooledParticleSystem>(out var pooled))
+            {
+                pooled = spawned.AddComponent<PooledParticleSystem>();
+                pooled.OnTakenFromPool();
+            }
         }
 
         void AdvanceWaveInterval()

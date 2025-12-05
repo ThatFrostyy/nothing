@@ -237,7 +237,10 @@ namespace FF
             SpawnEjectParticles();
 
             int extraProjectiles = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponExtraProjectiles(_weapon) : 0;
-            int totalProjectiles = Mathf.Max(1, 1 + extraProjectiles);
+            int pelletCount = _weapon.weaponClass == Weapon.WeaponClass.Shotgun
+                ? Mathf.Max(1, _weapon.pelletsPerShot)
+                : 1;
+            int totalProjectiles = Mathf.Max(1, pelletCount + extraProjectiles);
             int pierceCount = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponPierceCount(_weapon) : 0;
 
             StartCoroutine(FireProjectilesRoutine(totalProjectiles, spreadRotation, pierceCount, grenadeSpeedOverride));
