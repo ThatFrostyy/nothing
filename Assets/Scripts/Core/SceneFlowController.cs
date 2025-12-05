@@ -79,7 +79,11 @@ namespace FF
                 return;
             }
 
-            CharacterSelectionState.SetSelection(defaultCharacter, defaultHat, defaultWeapon);
+            SpecialItemDefinition specialWeapon = defaultCharacter != null
+                ? defaultCharacter.GetStartingSpecialWeapon()
+                : null;
+
+            CharacterSelectionState.SetSelection(defaultCharacter, defaultHat, defaultWeapon, specialWeapon);
         }
 
         static void SetCursorVisibility(bool visible)

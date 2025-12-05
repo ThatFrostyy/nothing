@@ -336,31 +336,27 @@ namespace FF
             _startingWeapon = weapon;
         }
 
-        private void ApplySpecialItems(IReadOnlyList<SpecialItemDefinition> specialItems)
+        private void ApplySpecialWeapon(SpecialItemDefinition specialWeapon)
         {
             ClearSpecialItems();
 
-            if (specialItems == null || specialItems.Count == 0)
+            if (specialWeapon == null)
+            {
+                return;
+            }
+
+            if (specialWeapon.ItemPrefab == null)
             {
                 return;
             }
 
             Transform parent = _specialItemAnchor ? _specialItemAnchor : transform;
-            for (int i = 0; i < specialItems.Count; i++)
-            {
-                SpecialItemDefinition item = specialItems[i];
-                if (item == null || item.ItemPrefab == null)
-                {
-                    continue;
-                }
+            GameObject instance = Instantiate(specialWeapon.ItemPrefab, parent);
+            instance.transform.localPosition = specialWeapon.ItemPrefab.transform.localPosition;
+            instance.transform.localRotation = specialWeapon.ItemPrefab.transform.localRotation;
+            instance.transform.localScale = specialWeapon.ItemPrefab.transform.localScale;
 
-                GameObject instance = Instantiate(item.ItemPrefab, parent);
-                instance.transform.localPosition = item.ItemPrefab.transform.localPosition;
-                instance.transform.localRotation = item.ItemPrefab.transform.localRotation;
-                instance.transform.localScale = item.ItemPrefab.transform.localScale;
-
-                _spawnedSpecialItems.Add(instance);
-            }
+            _spawnedSpecialItems.Add(instance);
         }
 
         private void ClearSpecialItems()
@@ -488,6 +484,8 @@ namespace FF
             CharacterDefinition character = CharacterSelectionState.SelectedCharacter;
             HatDefinition hat = CharacterSelectionState.SelectedHat ?? character?.GetDefaultHat();
             Weapon weapon = CharacterSelectionState.SelectedWeapon ?? character?.StartingWeapon;
+            SpecialItemDefinition specialWeapon = CharacterSelectionState.SelectedSpecialWeapon
+                ?? character?.GetStartingSpecialWeapon();
 
             if (_cosmetics && character != null)
             {
@@ -503,7 +501,7 @@ namespace FF
                 OverrideStartingWeapon(weapon);
             }
 
-            ApplySpecialItems(CharacterSelectionState.SelectedSpecialItems ?? character?.GetStartingSpecialItems());
+            ApplySpecialWeapon(specialWeapon);
         }
     }
 }

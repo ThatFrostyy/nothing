@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,6 +28,7 @@ namespace FF
 
         private int _index;
         private int _hatIndex;
+        private int _loadoutViewIndex;
 
         void OnEnable()
         {
@@ -58,11 +57,11 @@ namespace FF
             CharacterDefinition character = availableCharacters[_index];
             HatDefinition hat = ResolveHatSelection(character);
             Weapon weapon = character != null ? character.StartingWeapon : null;
-            IReadOnlyList<SpecialItemDefinition> specialItems = character != null
-                ? character.GetStartingSpecialItems()
-                : Array.Empty<SpecialItemDefinition>();
+            SpecialItemDefinition specialWeapon = character != null
+                ? character.GetStartingSpecialWeapon()
+                : null;
 
-            CharacterSelectionState.SetSelection(character, hat, weapon, specialItems);
+            CharacterSelectionState.SetSelection(character, hat, weapon, specialWeapon);
             Refresh();
         }
 
@@ -85,6 +84,24 @@ namespace FF
 
             _index = Mathf.FloorToInt(Mathf.Repeat(_index + delta, availableCharacters.Count));
             SyncHatWithSelection();
+            _loadoutViewIndex = 0;
+            Refresh();
+        }
+
+        public void NextLoadoutDisplay()
+        {
+            StepLoadoutDisplay(1);
+        }
+
+        public void PreviousLoadoutDisplay()
+        {
+            StepLoadoutDisplay(-1);
+        }
+
+        private void StepLoadoutDisplay(int delta)
+        {
+            const int viewCount = 2;
+            _loadoutViewIndex = Mathf.FloorToInt(Mathf.Repeat(_loadoutViewIndex + delta, viewCount));
             Refresh();
         }
 
@@ -138,24 +155,35 @@ namespace FF
             }
 
             Weapon weapon = character != null ? character.StartingWeapon : null;
+            SpecialItemDefinition specialWeapon = character != null ? character.GetStartingSpecialWeapon() : null;
+            bool showSpecialWeapon = _loadoutViewIndex == 1;
+
             if (weaponNameText)
             {
-                weaponNameText.text = weapon != null ? weapon.weaponName : "No Weapon";
+                weaponNameText.text = showSpecialWeapon
+                    ? GetSpecialWeaponLabel(specialWeapon)
+                    : GetWeaponLabel(weapon);
             }
 
-            Sprite weaponIcon = character != null ? character.GetWeaponIcon() : null;
+            Sprite weaponIcon = showSpecialWeapon
+                ? GetSpecialWeaponIcon(specialWeapon)
+                : character != null ? character.GetWeaponIcon() : null;
             if (weaponIconImage)
             {
                 weaponIconImage.enabled = weaponIcon != null;
                 weaponIconImage.sprite = weaponIcon;
             }
 
-            IReadOnlyList<SpecialItemDefinition> specialItems = character?.GetStartingSpecialItems();
-            UpdateSpecialItemDisplay(specialItems);
+            if (specialItemsText)
+            {
+                specialItemsText.text = showSpecialWeapon ? "Special Weapon" : "Weapon";
+            }
+
+            DisableSpecialItemIcons();
 
             if (preview)
             {
-                preview.Show(character, hat, weapon);
+                preview.Show(character, hat, weapon, specialWeapon);
             }
         }
 
@@ -216,48 +244,49 @@ namespace FF
             return hats[_hatIndex];
         }
 
-        private void UpdateSpecialItemDisplay(IReadOnlyList<SpecialItemDefinition> specialItems)
+        private string GetWeaponLabel(Weapon weapon)
         {
-            int itemCount = specialItems != null ? specialItems.Count : 0;
-            if (specialItemsText)
+            if (weapon != null && !string.IsNullOrEmpty(weapon.weaponName))
             {
-                if (itemCount == 0)
-                {
-                    specialItemsText.text = "No Special Items";
-                }
-                else
-                {
-                    StringBuilder builder = new();
-                    for (int i = 0; i < itemCount; i++)
-                    {
-                        SpecialItemDefinition item = specialItems[i];
-                        string name = item != null && !string.IsNullOrEmpty(item.DisplayName)
-                            ? item.DisplayName
-                            : item != null ? item.name : "Special Item";
-
-                        builder.Append(name);
-
-                        if (i < itemCount - 1)
-                        {
-                            builder.Append(", ");
-                        }
-                    }
-
-                    specialItemsText.text = builder.ToString();
-                }
+                return weapon.weaponName;
             }
 
-            if (specialItemIcons != null)
-            {
-                for (int i = 0; i < specialItemIcons.Count; i++)
-                {
-                    Image icon = specialItemIcons[i];
-                    SpecialItemDefinition item = specialItems != null && i < itemCount ? specialItems[i] : null;
-                    if (!icon) continue;
+            return weapon != null ? weapon.name : "No Weapon";
+        }
 
-                    bool hasIcon = item != null && item.Icon != null;
-                    icon.enabled = hasIcon;
-                    icon.sprite = hasIcon ? item.Icon : null;
+        private string GetSpecialWeaponLabel(SpecialItemDefinition specialWeapon)
+        {
+            if (specialWeapon != null && !string.IsNullOrEmpty(specialWeapon.DisplayName))
+            {
+                return specialWeapon.DisplayName;
+            }
+
+            if (specialWeapon != null)
+            {
+                return specialWeapon.name;
+            }
+
+            return "No Special Weapon";
+        }
+
+        private Sprite GetSpecialWeaponIcon(SpecialItemDefinition specialWeapon)
+        {
+            return specialWeapon != null ? specialWeapon.Icon : null;
+        }
+
+        private void DisableSpecialItemIcons()
+        {
+            if (specialItemIcons == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < specialItemIcons.Count; i++)
+            {
+                if (specialItemIcons[i])
+                {
+                    specialItemIcons[i].enabled = false;
+                    specialItemIcons[i].sprite = null;
                 }
             }
         }
