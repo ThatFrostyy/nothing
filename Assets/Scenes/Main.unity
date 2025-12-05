@@ -1844,6 +1844,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 389589376}
   m_CullTransparentMesh: 1
+--- !u!1 &396178895
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 396178897}
+  - component: {fileID: 396178896}
+  m_Layer: 0
+  m_Name: Weather
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &396178896
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396178895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f967a8a77ab246e899ebc7602528dcd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.WeatherRandomizer
+  weatherOptions:
+  - Name: Rain
+    WeatherVfxPrefab: {fileID: 6077168872989578693, guid: f514474ff8e94554d8477de1f2f601b0, type: 3}
+    LoopingSfx: {fileID: 8300000, guid: 415db4cd7857ee04fbb33e3d92a61ac0, type: 3}
+  weatherParent: {fileID: 1147590090}
+  playOnEnable: 1
+--- !u!4 &396178897
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396178895}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &409490496
 GameObject:
   m_ObjectHideFlags: 0
@@ -6245,6 +6295,7 @@ MonoBehaviour:
   _upgradeManager: {fileID: 0}
   _weaponManager: {fileID: 1207903161}
   _startingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
+  _specialItemAnchor: {fileID: 0}
   _showAimingLine: 1
   _aimLineLength: 2.5
   _aimLineDashLength: 0.2
@@ -6258,6 +6309,7 @@ MonoBehaviour:
   _idleSwayFrequency: 6
   _idleSwayAmplitude: 1.2
   _enableTilt: 0
+  _slowmoMoveSpeedMultiplier: 1.2
   _boundsPadding: 0.05
 --- !u!70 &1207903157
 CapsuleCollider2D:
@@ -7269,10 +7321,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.KillSlowMotion
   multiKillTimeScale: 0.45
-  multiKillDuration: 1.25
+  multiKillDuration: 1
   bossKillTimeScale: 0.35
   bossKillDuration: 1.75
-  killWindow: 2.2
+  killWindow: 3
   killsNeededForSlowmo: 5
   slowmoCooldown: 5
   multiKillMessage: BULLET TIME
@@ -7280,6 +7332,8 @@ MonoBehaviour:
   bannerHoldTime: 0.5
   bannerFadeTime: 0.3
   bannerColor: {r: 1, g: 0.83, b: 0.54, a: 1}
+  slowmoStartFX: {fileID: 6091849738672977877, guid: af7931239aa7b5e479e4e5c2e6b460c3, type: 3}
+  slowmoFXAnchor: {fileID: 1207903152}
 --- !u!4 &1337338255
 Transform:
   m_ObjectHideFlags: 0
@@ -11353,6 +11407,7 @@ SceneRoots:
   - {fileID: 322110424}
   - {fileID: 592156656}
   - {fileID: 1337338255}
+  - {fileID: 396178897}
   - {fileID: 1843290322}
   - {fileID: 2091572886}
   - {fileID: 1207903152}

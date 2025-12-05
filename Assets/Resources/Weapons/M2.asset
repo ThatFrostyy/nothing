@@ -10,29 +10,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
-  m_Name: G43
+  m_Name: M2
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: Gewher 43
+  weaponName: M2 Carbine
   fireSFX: {fileID: 8300000, guid: 97da3efc9115a42408f5ade324e0409d, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
   ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
-  recoilAmount: 6
-  recoilRecoverySpeed: 10
+  recoilAmount: 5
+  recoilRecoverySpeed: 8
   attackLoopSFX: {fileID: 0}
   fireLoopSFX: {fileID: 0}
   loopingFireVfx: {fileID: 0}
   loopingVfxOffset: {x: 0, y: 0, z: 0}
-  weaponClass: 1
-  weaponIcon: {fileID: 21300000, guid: 38049806782c7cc4b9ad0aa4b603d979, type: 3}
-  isSpecial: 0
+  weaponClass: 4
+  weaponIcon: {fileID: 21300000, guid: 4cd38b4fa594e4f46b4faba7a98111e3, type: 3}
+  isSpecial: 1
   useGrenadeCharging: 0
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
-  weaponPrefab: {fileID: 6013124137081973134, guid: 5d09727c2caaa7643ae6209bf755fa7d, type: 3}
-  rpm: 300
-  damage: 11
+  weaponPrefab: {fileID: 2326734106078555472, guid: 5fb562aa350e0404da515a897170d733, type: 3}
+  rpm: 400
+  damage: 13
   recoilKick: 3
-  isAuto: 0
-  fireCooldown: 0.3
+  isAuto: 1
+  fireCooldown: 0.4
   knockbackStrength: 1.5
   knockbackDuration: 0.2
   appliesBurn: 0
@@ -42,6 +42,6 @@ MonoBehaviour:
   burnTargetVfx: {fileID: 0}
   burnImpactVfx: {fileID: 0}
   baseSpread: 1.5
-  maxSpread: 5
+  maxSpread: 4
   spreadIncreasePerShot: 0.5
   spreadRecoverySpeed: 2

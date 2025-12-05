@@ -51,7 +51,8 @@ namespace FF
 
         public IReadOnlyList<SpecialItemDefinition> GetStartingSpecialItems()
         {
-            return StartingSpecialItems ?? Array.Empty<SpecialItemDefinition>();
+            return StartingSpecialItems ?? (IReadOnlyList<SpecialItemDefinition>)Array.Empty<SpecialItemDefinition>();
         }
+
     }
 }

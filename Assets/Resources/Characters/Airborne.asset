@@ -25,3 +25,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
   StartingWeapon: {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
   WeaponIconOverride: {fileID: 0}
+  StartingSpecialItems:
+  - {fileID: 11400000, guid: 18d116b7f8ec92b43b0fb68b4945305f, type: 2}

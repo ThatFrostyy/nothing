@@ -10,30 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
-  m_Name: G43
+  m_Name: M1A1Bazooka
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: Gewher 43
-  fireSFX: {fileID: 8300000, guid: 97da3efc9115a42408f5ade324e0409d, type: 3}
+  weaponName: M1A1 Bazooka
+  fireSFX: {fileID: 8300000, guid: 893b152b6b370ba498d47fa1eeaf3a1a, type: 3}
   muzzleFlash: {fileID: 2583876746747355934, guid: 389919f56a2d0434c959a39a502431a1, type: 3}
-  ejectParticles: {fileID: 5701590377506449747, guid: fbfcb6bd286c5b0439783380b8031d97, type: 3}
-  recoilAmount: 6
-  recoilRecoverySpeed: 10
+  ejectParticles: {fileID: 0}
+  recoilAmount: 10
+  recoilRecoverySpeed: 8
   attackLoopSFX: {fileID: 0}
   fireLoopSFX: {fileID: 0}
   loopingFireVfx: {fileID: 0}
   loopingVfxOffset: {x: 0, y: 0, z: 0}
-  weaponClass: 1
-  weaponIcon: {fileID: 21300000, guid: 38049806782c7cc4b9ad0aa4b603d979, type: 3}
-  isSpecial: 0
+  weaponClass: 4
+  weaponIcon: {fileID: 21300000, guid: ffa289d7727032c42b9e4cbf4d327cc1, type: 3}
+  isSpecial: 1
   useGrenadeCharging: 0
-  bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
-  weaponPrefab: {fileID: 6013124137081973134, guid: 5d09727c2caaa7643ae6209bf755fa7d, type: 3}
-  rpm: 300
-  damage: 11
-  recoilKick: 3
+  bulletPrefab: {fileID: 8458610750905009341, guid: 7dcbcd53d5e608a45a44f77a64b6dba8, type: 3}
+  weaponPrefab: {fileID: 8478173719753817492, guid: f2bbfddf8cc56d641aee8bb626719b92, type: 3}
+  rpm: 75
+  damage: 35
+  recoilKick: 6
   isAuto: 0
-  fireCooldown: 0.3
-  knockbackStrength: 1.5
+  fireCooldown: 1.5
+  knockbackStrength: 0
   knockbackDuration: 0.2
   appliesBurn: 0
   burnDuration: 3
@@ -41,7 +41,7 @@ MonoBehaviour:
   burnTickInterval: 0.35
   burnTargetVfx: {fileID: 0}
   burnImpactVfx: {fileID: 0}
-  baseSpread: 1.5
-  maxSpread: 5
+  baseSpread: 1.2
+  maxSpread: 3
   spreadIncreasePerShot: 0.5
   spreadRecoverySpeed: 2
