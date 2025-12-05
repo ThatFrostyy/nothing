@@ -25,7 +25,7 @@ namespace FF
             Weapon resolvedWeapon = weapon ?? character?.StartingWeapon;
             Weapon resolvedSpecialWeapon = specialWeapon ?? character?.SpecialWeapon;
 
-            CharacterLoadout newSelection = new(character, resolvedHat, resolvedWeapon, specialWeapon);
+            CharacterLoadout newSelection = new(character, resolvedHat, resolvedWeapon, resolvedSpecialWeapon);
 
             if (newSelection.Equals(Selection))
             {

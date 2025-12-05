@@ -7,7 +7,6 @@ namespace FF
     {
         [SerializeField] private PlayerCosmetics cosmetics;
         [SerializeField] private Transform weaponAnchor;
-        [SerializeField] private Transform specialItemAnchor;
 
         private GameObject _weaponInstance;
         private readonly List<GameObject> _specialItemInstances = new();
@@ -42,6 +41,7 @@ namespace FF
 
         private void UpdateSpecialWeapon(Weapon specialWeapon)
         {
+            ClearSpecialItems();
         }
 
         private void ClearSpecialItems()
