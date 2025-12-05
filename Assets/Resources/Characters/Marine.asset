@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Marine
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
   DisplayName: US Marine
-  Description: Armed with a Thompson. Fast and agile able to perform a short combat
-    dash to reposition or escape danger.
+  Description: Armed with a Thompson and a M12 Shotgun. Fast and agile able to perform
+    a short combat dash to reposition or escape danger.
   AbilityId: Default
   Portrait: {fileID: 21300000, guid: f51a1b388c3ea624cb8c9dbb1ff67954, type: 3}
   PlayerSprite: {fileID: 21300000, guid: f51a1b388c3ea624cb8c9dbb1ff67954, type: 3}
@@ -25,3 +25,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b0c38d26c188c6747b10d403bd016f61, type: 2}
   StartingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
   WeaponIconOverride: {fileID: 0}
+  SpecialWeapon: {fileID: 11400000, guid: 73ebe158e9c8f9b4ba6d8076e0c0dbbc, type: 2}

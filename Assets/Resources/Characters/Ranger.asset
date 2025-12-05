@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Ranger
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
   DisplayName: US Ranger
-  Description: Armed with an BAR. Steady and reliable, can supress many enemies in
-    an area.
+  Description: Armed with an BAR and a poweful M1A1 Bazooka. Steady and reliable,
+    can supress many enemies in an area.
   AbilityId: Default
   Portrait: {fileID: 21300000, guid: 74670c89a1f639c45982179bc0df8d1f, type: 3}
   PlayerSprite: {fileID: 21300000, guid: 74670c89a1f639c45982179bc0df8d1f, type: 3}
