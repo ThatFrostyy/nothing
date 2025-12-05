@@ -524,7 +524,7 @@ namespace FF
                 return;
             }
 
-            audioSource.PlayOneShot(finalClip);
+            audioSource.PlayOneShot(finalClip, GameAudioSettings.SfxVolume);
         }
         #endregion Audio
 

@@ -57,7 +57,7 @@ namespace FF
 
             if (attackClip && _audioSource)
             {
-                _audioSource.PlayOneShot(attackClip);
+                _audioSource.PlayOneShot(attackClip, GameAudioSettings.SfxVolume);
             }
 
             _cooldownTimer = cooldown;

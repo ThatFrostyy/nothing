@@ -156,7 +156,7 @@ public class ButtonUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         float previousPitch = playbackSource.pitch;
         playbackSource.pitch = targetPitch;
 
-        float volumeScale = Mathf.Clamp01(clickVolume);
+        float volumeScale = Mathf.Clamp01(clickVolume * GameAudioSettings.SfxVolume);
         playbackSource.PlayOneShot(clickSound, volumeScale);
         playbackSource.pitch = previousPitch;
     }

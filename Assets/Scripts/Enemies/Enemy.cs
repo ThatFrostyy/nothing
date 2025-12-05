@@ -1250,7 +1250,7 @@ namespace FF
             AudioClip clip = GetRandomClip(hitSound);
             if (clip)
             {
-                _audioSource.PlayOneShot(clip);
+                _audioSource.PlayOneShot(clip, GameAudioSettings.SfxVolume);
             }
         }
 
@@ -1276,11 +1276,11 @@ namespace FF
 
             if (_audioSource)
             {
-                _audioSource.PlayOneShot(dogAttackSound);
+                _audioSource.PlayOneShot(dogAttackSound, GameAudioSettings.SfxVolume);
                 return;
             }
 
-            AudioSource.PlayClipAtPoint(dogAttackSound, transform.position);
+            AudioSource.PlayClipAtPoint(dogAttackSound, transform.position, GameAudioSettings.SfxVolume);
         }
         #endregion Audio
 
