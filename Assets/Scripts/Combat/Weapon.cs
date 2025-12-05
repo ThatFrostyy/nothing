@@ -34,6 +34,7 @@ namespace FF
 
         [Header("Classification")]
         public WeaponClass weaponClass = WeaponClass.General;
+        public bool isShotgun = false;
 
         [Header("UI")]
         public Sprite weaponIcon;
