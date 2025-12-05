@@ -12,7 +12,8 @@ namespace FF
             SemiRifle,
             MG,
             SMG,
-            Special
+            Special,
+            Shotgun
         }
 
         [Header("Name")]
@@ -69,5 +70,8 @@ namespace FF
         public float maxSpread = 6f;              // degrees (auto increases up to this)
         public float spreadIncreasePerShot = 0.5f;
         public float spreadRecoverySpeed = 2f;    // how fast spread shrinks when not firing
+
+        [Header("Shotgun")]
+        [Min(1)] public int pelletsPerShot = 6;
     }
 }

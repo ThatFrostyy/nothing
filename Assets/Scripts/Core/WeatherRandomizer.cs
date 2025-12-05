@@ -17,6 +17,7 @@ namespace FF
         [SerializeField] private List<WeatherOption> weatherOptions = new();
         [SerializeField] private Transform weatherParent;
         [SerializeField] private bool playOnEnable = true;
+        [SerializeField, Range(0f, 1f)] private float chanceForNoWeather = 0.1f;
 
         private AudioSource _audioSource;
         private GameObject _activeWeather;
@@ -46,6 +47,13 @@ namespace FF
         {
             if (weatherOptions == null || weatherOptions.Count == 0)
             {
+                ClearActiveWeather();
+                return;
+            }
+
+            if (chanceForNoWeather > 0f && UnityEngine.Random.value < Mathf.Clamp01(chanceForNoWeather))
+            {
+                ClearActiveWeather();
                 return;
             }
 
@@ -61,11 +69,7 @@ namespace FF
                 return;
             }
 
-            if (_activeWeather)
-            {
-                Destroy(_activeWeather);
-                _activeWeather = null;
-            }
+            ClearActiveWeather();
 
             if (option.WeatherVfxPrefab != null)
             {
@@ -84,6 +88,21 @@ namespace FF
                 {
                     _audioSource.Stop();
                 }
+            }
+        }
+
+        private void ClearActiveWeather()
+        {
+            if (_activeWeather)
+            {
+                Destroy(_activeWeather);
+                _activeWeather = null;
+            }
+
+            if (_audioSource != null)
+            {
+                _audioSource.Stop();
+                _audioSource.clip = null;
             }
         }
     }
