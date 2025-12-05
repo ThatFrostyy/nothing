@@ -320,7 +320,8 @@ namespace FF
                 yield break;
             }
 
-            bool staggerShots = _isGrenadeWeapon || (_weapon != null && (_weapon.isSpecial || _weapon.weaponClass == Weapon.WeaponClass.Special));
+            bool firesLikeShotgun = _weapon != null && (_weapon.isShotgun || _weapon.weaponClass == Weapon.WeaponClass.Shotgun);
+            bool staggerShots = _isGrenadeWeapon || (_weapon != null && (_weapon.isSpecial || _weapon.weaponClass == Weapon.WeaponClass.Special) && !firesLikeShotgun);
 
             for (int i = 0; i < totalProjectiles; i++)
             {
