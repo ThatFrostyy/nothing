@@ -100,11 +100,19 @@ namespace FF
 
         private static IEnumerator LoadSceneAsyncRoutine(string sceneName)
         {
+            LoadingScreen.Show($"Loading {sceneName}...");
+
             var op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
             op.allowSceneActivation = true;
 
             while (!op.isDone)
+            {
+                float progress = Mathf.Clamp01(op.progress / 0.9f);
+                LoadingScreen.UpdateMessage($"Loading {sceneName}... {(progress * 100f):0}%");
                 yield return null;
+            }
+
+            LoadingScreen.Hide();
         }
 
         IEnumerator Start()
