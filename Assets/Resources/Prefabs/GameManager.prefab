@@ -48,9 +48,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.GameManager
   spawner: {fileID: 0}
-  initialTimeBetweenWaves: 8
+  initialTimeBetweenWaves: 5
   waveIntervalIncrease: 2
-  maximumTimeBetweenWaves: 60
+  maximumTimeBetweenWaves: 30
+  enemyDeathFx: {fileID: 4611953073509470929, guid: 5ecfc0d60f76dc7459be8d2b0fea045a, type: 3}
 --- !u!114 &5457090804296160985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,7 +85,14 @@ MonoBehaviour:
   wallet: {fileID: 0}
   ui: {fileID: 0}
   weaponManager: {fileID: 0}
-  maxUpgradeSelections: 30
+  maxUpgradeSelections: 20
+  maxFireRateRpm: 500
+  minFireCooldownSeconds: 0.1
+  baseWeaponUpgradeBonus: 0.06
+  killBonusPerKill: 0.0006
+  stackBonusPerCard: 0.008
+  maxStackBonus: 0.04
+  weaponUpgradeKillCap: 200
 --- !u!114 &7492380447983614614
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100,9 +108,10 @@ MonoBehaviour:
   mainMenuSceneName: MainMenu
   gameplaySceneName: Main
   persistAcrossScenes: 1
-  defaultCharacter: {fileID: 0}
-  defaultHat: {fileID: 0}
-  defaultWeapon: {fileID: 0}
+  defaultCharacter: {fileID: 11400000, guid: 968fc4a4a96a8ca429344ced2ac63fb0, type: 2}
+  defaultHat: {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
+  defaultWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
+  defaultSpecialWeapon: {fileID: 11400000, guid: 73ebe158e9c8f9b4ba6d8076e0c0dbbc, type: 2}
   applyDefaultSelection: 1
 --- !u!114 &6172420153196284239
 MonoBehaviour:
