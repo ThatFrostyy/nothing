@@ -25,6 +25,7 @@ namespace FF
         private CallResult<LeaderboardScoreUploaded_t> _killScoreUploadedResult;
         private SteamLeaderboard_t _killLeaderboard;
         private int _lastKillCount;
+        private int _killStatBase;
         private int _highestWave;
         private bool _gameManagerHooked;
         private bool _statsReady;
@@ -132,6 +133,11 @@ namespace FF
 
         private void HandleKillCountChanged(int kills)
         {
+            if (kills < _lastKillCount)
+            {
+                _killStatBase += _lastKillCount;
+            }
+
             _lastKillCount = kills;
             PushCoreStats();
             PushKillLeaderboardScore();
@@ -175,7 +181,20 @@ namespace FF
             {
                 Debug.Log("Steam stats ready");
                 _statsReady = true;
+
+                if (SteamUserStats.GetStat(KillStatName, out int storedKills))
+                {
+                    _killStatBase = Mathf.Max(0, storedKills);
+                }
+
+                if (SteamUserStats.GetStat(TopWaveStatName, out int storedTopWave))
+                {
+                    _highestWave = Mathf.Max(_highestWave, storedTopWave);
+                }
+
                 EnsureKillLeaderboard();
+                PushCoreStats();
+                PushKillLeaderboardScore();
             }
             else
             {
@@ -229,7 +248,7 @@ namespace FF
             if (!_statsReady)
                 return;
 
-            SteamUserStats.SetStat(KillStatName, _lastKillCount);
+            SteamUserStats.SetStat(KillStatName, _killStatBase + _lastKillCount);
             SteamUserStats.SetStat(TopWaveStatName, _highestWave);
             SteamUserStats.StoreStats();
         }
