@@ -14,15 +14,21 @@ namespace FF
 #if !DISABLESTEAMWORKS
         private const string KillStatName = "total_kills";
         private const string TopWaveStatName = "top_wave_survived";
+        private const string KillLeaderboardName = "total_kills";
+        private const string WaveTenAchievementName = "ACH_WAVE_10";
 
         private readonly Dictionary<Weapon, int> _weaponKills = new();
         private readonly HashSet<Health> _trackedPlayerHealth = new();
         private Callback<UserStatsReceived_t> _userStatsReceived;
         private Callback<UserStatsStored_t> _userStatsStored;
+        private CallResult<LeaderboardFindResult_t> _killLeaderboardFindResult;
+        private CallResult<LeaderboardScoreUploaded_t> _killScoreUploadedResult;
+        private SteamLeaderboard_t _killLeaderboard;
         private int _lastKillCount;
         private int _highestWave;
         private bool _gameManagerHooked;
         private bool _statsReady;
+        private bool _waveTenUnlocked;
 
         private void Start()
         {
@@ -44,6 +50,8 @@ namespace FF
 
             _userStatsReceived = Callback<UserStatsReceived_t>.Create(HandleStatsReceived);
             _userStatsStored = Callback<UserStatsStored_t>.Create(HandleStatsStored);
+            _killLeaderboardFindResult = CallResult<LeaderboardFindResult_t>.Create(HandleKillLeaderboardFound);
+            _killScoreUploadedResult = CallResult<LeaderboardScoreUploaded_t>.Create(HandleKillScoreUploaded);
 
             HookGameManager();
             Enemy.OnAnyEnemyKilledByWeapon += HandleEnemyKilledByWeapon;
@@ -70,8 +78,11 @@ namespace FF
             _trackedPlayerHealth.Clear();
             _userStatsReceived = null;
             _userStatsStored = null;
+            _killLeaderboardFindResult = null;
+            _killScoreUploadedResult = null;
             _gameManagerHooked = false;
             _statsReady = false;
+            _waveTenUnlocked = false;
         }
 
         private void Update()
@@ -97,6 +108,20 @@ namespace FF
             _gameManagerHooked = true;
         }
 
+        private void EnsureKillLeaderboard()
+        {
+            if (!_statsReady || _killLeaderboard.m_SteamLeaderboard != 0)
+            {
+                return;
+            }
+
+            SteamAPICall_t handle = SteamUserStats.FindOrCreateLeaderboard(
+                KillLeaderboardName,
+                ELeaderboardSortMethod.k_ELeaderboardSortMethodDescending,
+                ELeaderboardDisplayType.k_ELeaderboardDisplayTypeNumeric);
+            _killLeaderboardFindResult.Set(handle, HandleKillLeaderboardFound);
+        }
+
         private void HandleStatsStored(UserStatsStored_t callback)
         {
             if (callback.m_eResult != EResult.k_EResultOK)
@@ -109,6 +134,7 @@ namespace FF
         {
             _lastKillCount = kills;
             PushCoreStats();
+            PushKillLeaderboardScore();
         }
 
         private void HandleWaveStarted(int wave)
@@ -116,6 +142,31 @@ namespace FF
             _highestWave = Mathf.Max(_highestWave, wave);
 
             PushCoreStats();
+            PushKillLeaderboardScore();
+            TryUnlockWaveTenAchievement();
+        }
+
+        private void HandleKillLeaderboardFound(LeaderboardFindResult_t result, bool failure)
+        {
+            if (failure || result.m_bLeaderboardFound == 0 || result.m_hSteamLeaderboard.m_SteamLeaderboard == 0)
+            {
+                Debug.LogWarning("[Steam] Failed to locate kill leaderboard");
+                return;
+            }
+
+            _killLeaderboard = result.m_hSteamLeaderboard;
+            PushKillLeaderboardScore();
+        }
+
+        private void HandleKillScoreUploaded(LeaderboardScoreUploaded_t result, bool failure)
+        {
+            if (failure || result.m_bSuccess == 0)
+            {
+                Debug.LogWarning("[Steam] Failed to upload kill leaderboard score");
+                return;
+            }
+
+            Debug.Log($"[Steam] Uploaded kill leaderboard score: {result.m_nScore}");
         }
 
         private void HandleStatsReceived(UserStatsReceived_t callback)
@@ -124,6 +175,7 @@ namespace FF
             {
                 Debug.Log("Steam stats ready");
                 _statsReady = true;
+                EnsureKillLeaderboard();
             }
             else
             {
@@ -180,6 +232,39 @@ namespace FF
             SteamUserStats.SetStat(KillStatName, _lastKillCount);
             SteamUserStats.SetStat(TopWaveStatName, _highestWave);
             SteamUserStats.StoreStats();
+        }
+
+        private void PushKillLeaderboardScore()
+        {
+            if (!_statsReady)
+                return;
+
+            EnsureKillLeaderboard();
+            if (_killLeaderboard.m_SteamLeaderboard == 0)
+                return;
+
+            SteamAPICall_t handle = SteamUserStats.UploadLeaderboardScore(
+                _killLeaderboard,
+                ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest,
+                _lastKillCount,
+                null,
+                0);
+            _killScoreUploadedResult.Set(handle, HandleKillScoreUploaded);
+        }
+
+        private void TryUnlockWaveTenAchievement()
+        {
+            if (_waveTenUnlocked || !_statsReady)
+            {
+                return;
+            }
+
+            if (_highestWave >= 10 && SteamUserStats.SetAchievement(WaveTenAchievementName))
+            {
+                _waveTenUnlocked = true;
+                SteamUserStats.StoreStats();
+                Debug.Log("[Steam] Unlocked wave 10 achievement");
+            }
         }
 
         private void PushFavoriteWeapons()
