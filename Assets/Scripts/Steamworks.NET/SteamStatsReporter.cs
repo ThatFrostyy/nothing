@@ -139,8 +139,6 @@ namespace FF
             }
 
             _lastKillCount = kills;
-            PushCoreStats();
-            PushKillLeaderboardScore();
         }
 
         private void HandleWaveStarted(int wave)
@@ -172,14 +170,20 @@ namespace FF
                 return;
             }
 
-            Debug.Log($"[Steam] Uploaded kill leaderboard score: {result.m_nScore}");
+            if (result.m_bScoreChanged == 1)
+            {
+                Debug.Log($"[Steam] Leaderboard updated!");
+            }
+            else
+            {
+                Debug.Log("[Steam] Score sent, but existing high score was better.");
+            }
         }
 
         private void HandleStatsReceived(UserStatsReceived_t callback)
         {
             if (callback.m_eResult == EResult.k_EResultOK)
             {
-                Debug.Log("Steam stats ready");
                 _statsReady = true;
 
                 if (SteamUserStats.GetStat(KillStatName, out int storedKills))
@@ -238,9 +242,8 @@ namespace FF
 
         private void HandlePlayerDeath()
         {
-            Debug.Log("Player died, pushing stats to Steam");
             PushCoreStats();
-            PushFavoriteWeapons();
+            PushKillLeaderboardScore();
         }
 
         private void PushCoreStats()
@@ -265,9 +268,10 @@ namespace FF
             SteamAPICall_t handle = SteamUserStats.UploadLeaderboardScore(
                 _killLeaderboard,
                 ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest,
-                _lastKillCount,
+                _killStatBase + _lastKillCount,
                 null,
                 0);
+
             _killScoreUploadedResult.Set(handle, HandleKillScoreUploaded);
         }
 
