@@ -85,7 +85,7 @@ namespace FF
 
                 TryApplyBurn(other);
 
-                if (other.gameObject.layer.ToString() == "Crate" && crateFX)
+                if (other.gameObject.layer == LayerMask.NameToLayer("Crate") && crateFX)
                 {
                     SpawnImpactVfx(crateFX);
                 }
