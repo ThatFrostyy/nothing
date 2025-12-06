@@ -7,18 +7,21 @@ namespace FF
 {
     public class GameManager : MonoBehaviour, ISceneReferenceHandler
     {
-        public float CurrentWaveInterval => currentWaveInterval;
-
         [SerializeField] private EnemySpawner spawner;
         [FormerlySerializedAs("timeBetweenWaves")]
-        [SerializeField, Min(0f)] private float initialTimeBetweenWaves = 30f;
-        [SerializeField, Min(0f)] private float waveIntervalIncrease = 5f;
-        [SerializeField, Min(0f)] private float maximumTimeBetweenWaves = 60f;
+        [SerializeField, Min(0f)] private float initialWaveDuration = 30f;
+        [SerializeField, Min(0f)] private float waveDurationIncrease = 5f;
+        [SerializeField, Min(0f)] private float maximumWaveDuration = 60f;
+        [SerializeField, Min(0f)] private float initialTimeBetweenWaves = 10f;
+        [SerializeField, Min(0f)] private float timeBetweenWavesIncrease = 0f;
+        [SerializeField, Min(0f)] private float maximumTimeBetweenWaves = 20f;
         [Header("FX")]
         [SerializeField] private GameObject enemyDeathFx;
 
-        float timer;
-        float currentWaveInterval;
+        private float timer;
+        private float currentWaveDuration;
+        private float currentTimeBetweenWaves;
+        private WavePhase currentPhase = WavePhase.Idle;
 
         public int Wave { get; private set; } = 0;
         public int KillCount { get; private set; } = 0;
@@ -82,9 +85,15 @@ namespace FF
             KillCount = 0;
             Wave = 0;
             timer = 0f;
+            currentPhase = WavePhase.Idle;
 
-            float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
-            currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
+            currentWaveDuration = ClampWaveDuration(initialWaveDuration);
+            currentTimeBetweenWaves = ClampTimeBetweenWaves(initialTimeBetweenWaves);
+
+            if (spawner)
+            {
+                spawner.EndWave();
+            }
 
             ClearSceneReferences();
 
@@ -96,22 +105,17 @@ namespace FF
             if (spawner == null)
                 return;
 
-            timer += Time.deltaTime;
-            float interval = Mathf.Max(0.01f, currentWaveInterval);
-
-            if (timer >= interval)
+            switch (currentPhase)
             {
-                timer = 0f;
-                Wave++;
-
-                OnWaveStarted?.Invoke(Wave);
-
-                if (spawner)
-                {
-                    spawner.SpawnWave(Wave);
-                }
-
-                AdvanceWaveInterval();
+                case WavePhase.Idle:
+                    StartNextWave();
+                    break;
+                case WavePhase.Wave:
+                    RunWaveTimer();
+                    break;
+                case WavePhase.Pause:
+                    RunPauseTimer();
+                    break;
             }
         }
 
@@ -138,24 +142,79 @@ namespace FF
             }
         }
 
-        void AdvanceWaveInterval()
+        private void StartNextWave()
         {
-            if (waveIntervalIncrease <= 0f)
+            timer = 0f;
+            Wave++;
+            currentPhase = WavePhase.Wave;
+
+            OnWaveStarted?.Invoke(Wave);
+
+            if (spawner)
+            {
+                spawner.SpawnWave(Wave, currentWaveDuration);
+            }
+        }
+
+        private void RunWaveTimer()
+        {
+            timer += Time.deltaTime;
+            if (timer < Mathf.Max(0.01f, currentWaveDuration))
             {
                 return;
             }
 
+            timer = 0f;
+            currentPhase = WavePhase.Pause;
+            currentWaveDuration = ClampWaveDuration(currentWaveDuration + waveDurationIncrease);
+            currentTimeBetweenWaves = ClampTimeBetweenWaves(currentTimeBetweenWaves + timeBetweenWavesIncrease);
+
+            if (spawner)
+            {
+                spawner.EndWave();
+            }
+        }
+
+        private void RunPauseTimer()
+        {
+            timer += Time.deltaTime;
+            if (timer < Mathf.Max(0f, currentTimeBetweenWaves))
+            {
+                return;
+            }
+
+            StartNextWave();
+        }
+
+        private float ClampWaveDuration(float value)
+        {
+            float cap = maximumWaveDuration <= 0f ? float.MaxValue : maximumWaveDuration;
+            return Mathf.Clamp(value, 0f, cap);
+        }
+
+        private float ClampTimeBetweenWaves(float value)
+        {
             float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
-            currentWaveInterval = Mathf.Min(cap, currentWaveInterval + waveIntervalIncrease);
+            return Mathf.Clamp(value, 0f, cap);
         }
 
         void OnValidate()
         {
+            initialWaveDuration = Mathf.Max(0f, initialWaveDuration);
+            waveDurationIncrease = Mathf.Max(0f, waveDurationIncrease);
+            maximumWaveDuration = Mathf.Max(0f, maximumWaveDuration);
             initialTimeBetweenWaves = Mathf.Max(0f, initialTimeBetweenWaves);
-            waveIntervalIncrease = Mathf.Max(0f, waveIntervalIncrease);
+            timeBetweenWavesIncrease = Mathf.Max(0f, timeBetweenWavesIncrease);
             maximumTimeBetweenWaves = Mathf.Max(0f, maximumTimeBetweenWaves);
-            float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
-            currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
+            currentWaveDuration = ClampWaveDuration(initialWaveDuration);
+            currentTimeBetweenWaves = ClampTimeBetweenWaves(initialTimeBetweenWaves);
+        }
+
+        private enum WavePhase
+        {
+            Idle,
+            Wave,
+            Pause
         }
     }
 }

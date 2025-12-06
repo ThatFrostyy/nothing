@@ -45,12 +45,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0b949374cced92845ad478938eea683d, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::FF.GameManager
   spawner: {fileID: 0}
+  initialWaveDuration: 30
+  waveDurationIncrease: 5
+  maximumWaveDuration: 60
   initialTimeBetweenWaves: 8
-  waveIntervalIncrease: 2
+  timeBetweenWavesIncrease: 2
   maximumTimeBetweenWaves: 60
+  enemyDeathFx: {fileID: 0}
 --- !u!114 &5457090804296160985
 MonoBehaviour:
   m_ObjectHideFlags: 0

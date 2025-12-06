@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -18,6 +19,7 @@ namespace FF
         [SerializeField] private bool spawnNonBossDefinitionsDuringBossWave = true;
         [SerializeField] private WaveAttributeScaling defaultScaling = new();
         [SerializeField] private List<EnemySpawnDefinition> spawnDefinitions = new();
+        [SerializeField] private List<WaveSpike> waveSpikes = new();
 
         [Header("Spawn Timing")]
         [SerializeField, Min(0.01f)] private float initialSpawnInterval = 0.6f;
@@ -85,7 +87,7 @@ namespace FF
             }
         }
 
-        public void SpawnWave(int wave)
+        public void SpawnWave(int wave, float waveDuration)
         {
 
             if (!player)
@@ -99,20 +101,28 @@ namespace FF
                 StopCoroutine(_spawnRoutine);
             }
 
-            _spawnRoutine = StartCoroutine(SpawnWaveRoutine(wave));
+            _spawnRoutine = StartCoroutine(SpawnWaveRoutine(wave, waveDuration));
         }
 
-        private System.Collections.IEnumerator SpawnWaveRoutine(int wave)
+        public void EndWave()
+        {
+            if (_spawnRoutine != null)
+            {
+                StopCoroutine(_spawnRoutine);
+                _spawnRoutine = null;
+            }
+        }
+
+        private System.Collections.IEnumerator SpawnWaveRoutine(int wave, float waveDuration)
         {
             bool isBossWave = bossWaveInterval > 0 && wave > 0 && wave % bossWaveInterval == 0;
             float radius = GetSpawnRadius();
 
-            List<SpawnRequest> requests = BuildSpawnRequests(wave, isBossWave);
-            if (requests.Count == 0)
-            {
-                _spawnRoutine = null;
-                yield break;
-            }
+            List<SpawnRequest> baseRequests = BuildSpawnRequests(wave, isBossWave);
+            WaveSpike spike = FindSpikeForWave(wave);
+            List<SpawnRequest> spikeRequests = spike != null
+                ? BuildSpawnRequests(wave, isBossWave, spike.SpawnDefinitions)
+                : null;
 
             List<Vector2> primarySides = Random.value > 0.5f
                 ? new List<Vector2> { Vector2.left, Vector2.right }
@@ -123,10 +133,45 @@ namespace FF
             int requestIndex = 0;
             int idleIterations = 0;
 
-            while (HasPendingRequests(requests))
+            while (elapsed < waveDuration)
             {
+                bool spikeActive = spikeRequests != null && elapsed < spike.SpikeDuration;
+                List<SpawnRequest> requests = spikeActive
+                    ? MergeRequests(baseRequests, spikeRequests)
+                    : baseRequests;
+
+                if (!HasPendingRequests(requests))
+                {
+                    baseRequests = BuildSpawnRequests(wave, isBossWave);
+                    if (spikeRequests != null && spikeActive)
+                    {
+                        spikeRequests = BuildSpawnRequests(wave, isBossWave, spike.SpawnDefinitions);
+                    }
+
+                    requestIndex = 0;
+                    idleIterations = 0;
+                    requests = spikeActive ? MergeRequests(baseRequests, spikeRequests) : baseRequests;
+
+                    if (!HasPendingRequests(requests))
+                    {
+                        float idleWait = Mathf.Min(0.25f, waveDuration - elapsed);
+                        if (idleWait > 0f)
+                        {
+                            elapsed += idleWait;
+                            yield return new WaitForSeconds(idleWait);
+                        }
+                        continue;
+                    }
+                }
+
+                if (requests.Count == 0)
+                {
+                    break;
+                }
+
                 float interval = GetCurrentSpawnInterval(elapsed);
                 Vector2 direction = SelectDirection(elapsed < sideSwapDelay ? primarySides : allSides);
+                requestIndex = requestIndex % requests.Count;
                 SpawnRequest current = requests[requestIndex];
 
                 bool spawned = TrySpawnFromRequest(current, direction, radius);
@@ -150,14 +195,19 @@ namespace FF
                 }
 
                 requestIndex = (requestIndex + 1) % requests.Count;
+                float waitTime = Mathf.Min(interval, waveDuration - elapsed);
+                if (waitTime > 0f)
+                {
+                    yield return new WaitForSeconds(waitTime);
+                }
+
                 elapsed += interval;
-                yield return new WaitForSeconds(interval);
             }
 
             _spawnRoutine = null;
         }
 
-        private List<SpawnRequest> BuildSpawnRequests(int wave, bool isBossWave)
+        private List<SpawnRequest> BuildSpawnRequests(int wave, bool isBossWave, IList<EnemySpawnDefinition> definitionsOverride = null)
         {
             var requests = new List<SpawnRequest>();
 
@@ -178,9 +228,10 @@ namespace FF
                 return Mathf.Min(totalRemaining, typeRemaining);
             }
 
-            for (int i = 0; i < spawnDefinitions.Count; i++)
+            IList<EnemySpawnDefinition> definitions = definitionsOverride ?? spawnDefinitions;
+            for (int i = 0; i < definitions.Count; i++)
             {
-                EnemySpawnDefinition definition = spawnDefinitions[i];
+                EnemySpawnDefinition definition = definitions[i];
                 if (definition == null || definition.Prefabs == null || definition.Prefabs.Length == 0)
                     continue;
 
@@ -210,6 +261,23 @@ namespace FF
             }
 
             return requests;
+        }
+
+        private static List<SpawnRequest> MergeRequests(List<SpawnRequest> primary, List<SpawnRequest> secondary)
+        {
+            if (secondary == null || secondary.Count == 0)
+            {
+                return primary ?? new List<SpawnRequest>();
+            }
+
+            var merged = new List<SpawnRequest>();
+            if (primary != null)
+            {
+                merged.AddRange(primary);
+            }
+
+            merged.AddRange(secondary);
+            return merged;
         }
 
         private bool HasPendingRequests(List<SpawnRequest> requests)
@@ -333,6 +401,24 @@ namespace FF
             }
         }
 
+        [Serializable]
+        private class WaveSpike
+        {
+            [SerializeField, Min(1)] private int wave = 1;
+            [SerializeField, Min(0f)] private float spikeDuration = 5f;
+            [SerializeField] private List<EnemySpawnDefinition> spawnDefinitions = new();
+
+            public int Wave => Mathf.Max(1, wave);
+            public float SpikeDuration => Mathf.Max(0f, spikeDuration);
+            public List<EnemySpawnDefinition> SpawnDefinitions => spawnDefinitions;
+
+            public void OnValidate()
+            {
+                wave = Mathf.Max(1, wave);
+                spikeDuration = Mathf.Max(0f, spikeDuration);
+            }
+        }
+
         private bool DefinitionIsActive(EnemySpawnDefinition definition, int wave, bool isBossWave)
         {
             int startWave = definition.StartWave;
@@ -372,6 +458,25 @@ namespace FF
             }
 
             return true;
+        }
+
+        private WaveSpike FindSpikeForWave(int wave)
+        {
+            if (waveSpikes == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < waveSpikes.Count; i++)
+            {
+                WaveSpike spike = waveSpikes[i];
+                if (spike != null && spike.Wave == wave)
+                {
+                    return spike;
+                }
+            }
+
+            return null;
         }
 
         private GameObject ChooseRandomPrefab(EnemySpawnDefinition def)
@@ -492,6 +597,13 @@ namespace FF
             spawnRampDuration = Mathf.Max(0f, spawnRampDuration);
             sideSwapDelay = Mathf.Max(0f, sideSwapDelay);
             packSpawnBurst = Mathf.Max(1, packSpawnBurst);
+            if (waveSpikes != null)
+            {
+                for (int i = 0; i < waveSpikes.Count; i++)
+                {
+                    waveSpikes[i]?.OnValidate();
+                }
+            }
             EnsureAudioSource();
             EnsurePoolParent();
         }
