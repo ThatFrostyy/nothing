@@ -21,7 +21,6 @@ namespace FF
             }
 
             CacheParticleSystems();
-            ConfigureStopActions();
         }
 
         private void Update()
@@ -53,6 +52,8 @@ namespace FF
             {
                 CacheParticleSystems();
             }
+
+            ConfigureStopActions();
 
             for (int i = 0; i < _particleSystems.Length; i++)
             {
@@ -101,6 +102,8 @@ namespace FF
                 var system = GetComponent<ParticleSystem>();
                 _particleSystems = system ? new[] { system } : System.Array.Empty<ParticleSystem>();
             }
+
+            ConfigureStopActions();
         }
 
         private void ConfigureStopActions()
