@@ -192,7 +192,7 @@ MonoBehaviour:
   speed: 26
   lifetime: 2
   bloodFX: {fileID: 1676495797548180, guid: 456ac15176c216148b7ae74f2910e9b1, type: 3}
-  crateFX: {fileID: 8640953338639136997, guid: e0f57ac6d70ab6a43a228b330e8ef8e1, type: 3}
+  crateFX: {fileID: 2744938657592794676, guid: 4b6020a159b8cf54c8e5d8e50f6f8ed7, type: 3}
   hitMask:
     serializedVersion: 2
     m_Bits: 1216

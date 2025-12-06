@@ -20,6 +20,9 @@ namespace FF
             }
             _instance = this;
             DontDestroyOnLoad(gameObject);
+
+            transform.localScale = Vector3.one;
+            gameObject.SetActive(false);
         }
 
         public static void Show(string message)
