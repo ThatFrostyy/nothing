@@ -3044,7 +3044,7 @@ MonoBehaviour:
     - {fileID: 6114283723824905712, guid: b8432984aa5b1d94ab26f175c01ba71e, type: 3}
     - {fileID: 7785297196771200664, guid: 6600a5c3edfd2e24f9869ff09e610790, type: 3}
     - {fileID: 7695581959867539719, guid: 668c7b2d70cfefb40894e93143f680fa, type: 3}
-    initialSpawnDelay: 45
+    initialSpawnDelay: 30
     spawnOnStart: 0
     useRespawnDelay: 1
     respawnDelay: 45
@@ -3053,9 +3053,9 @@ MonoBehaviour:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 100
-        inSlope: -0.18333334
-        outSlope: -0.18333334
+        value: 90
+        inSlope: -0.15
+        outSlope: -0.15
         tangentMode: 34
         weightedMode: 0
         inWeight: 0
@@ -3063,8 +3063,8 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 300
         value: 45
-        inSlope: -0.108333334
-        outSlope: -0.108333334
+        inSlope: -0.09166667
+        outSlope: -0.09166667
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334
@@ -3087,17 +3087,17 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 0
         value: 1
-        inSlope: 0
-        outSlope: 0
+        inSlope: 0.0016666667
+        outSlope: 0.0016666667
         tangentMode: 34
         weightedMode: 0
         inWeight: 0
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 600
-        value: 1
-        inSlope: 0
-        outSlope: 0
+        value: 2
+        inSlope: 0.0016666667
+        outSlope: 0.0016666667
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334
@@ -3120,17 +3120,17 @@ MonoBehaviour:
       - serializedVersion: 3
         time: 300
         value: 1
-        inSlope: 0
-        outSlope: 0
+        inSlope: 0.0016666667
+        outSlope: 0.0016666667
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
         time: 600
-        value: 1
-        inSlope: 0
-        outSlope: 0
+        value: 2
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
         tangentMode: 34
         weightedMode: 0
         inWeight: 0.33333334

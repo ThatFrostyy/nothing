@@ -100,7 +100,7 @@ namespace FF
 
         private static IEnumerator LoadSceneAsyncRoutine(string sceneName)
         {
-            LoadingScreen.Show($"Loading {sceneName}...");
+            LoadingScreen.Show($"Loading");
 
             var op = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
             op.allowSceneActivation = true;
@@ -108,7 +108,7 @@ namespace FF
             while (!op.isDone)
             {
                 float progress = Mathf.Clamp01(op.progress / 0.9f);
-                LoadingScreen.UpdateMessage($"Loading {sceneName}... {(progress * 100f):0}%");
+                LoadingScreen.UpdateMessage($"Loading {(progress * 100f):0}%");
                 yield return null;
             }
 
