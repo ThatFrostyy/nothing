@@ -1030,7 +1030,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -7475,6 +7475,10 @@ MonoBehaviour:
   waveMilestoneClip: {fileID: 8300000, guid: fc98f6edf072bd744a5165f88673b39f, type: 3}
   waveMilestoneInterval: 5
   waveMilestoneStartingWave: 5
+  getReadyText: {fileID: 0}
+  getReadyGroup: {fileID: 0}
+  getReadyFadeDuration: 0.35
+  getReadyHoldDuration: 0.25
   waveStartClip: {fileID: 8300000, guid: d41ba945dc1622148af17ec7979d7e5d, type: 3}
   heartbeatClip: {fileID: 8300000, guid: 4c3eb99ef3d1d5748808d1120238248a, type: 3}
   xpFillLoopClip: {fileID: 0}
