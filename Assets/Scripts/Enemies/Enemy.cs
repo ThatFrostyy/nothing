@@ -340,20 +340,6 @@ namespace FF
 
         private void Update()
         {
-            if (!gameObject.activeInHierarchy)
-            {
-                Debug.Log($"{name} LOST: active=false", this);
-            }
-
-            float dist = Vector3.Distance(transform.position, _lastPos);
-
-            if (dist > 2f) // threshold
-            {
-                Debug.Log($"{name} TELEPORT jump: {dist}, newPos={transform.position}", this);
-            }
-
-            _lastPos = transform.position;
-
             if (Time.timeScale <= Mathf.Epsilon)
             {
                 if (autoShooter)
@@ -414,7 +400,6 @@ namespace FF
 
         private void OnEnable()
         {
-            Debug.Log("Enabled");
             if (_health != null)
             {
                 _health.OnDeath += HandleDeath;
@@ -438,7 +423,6 @@ namespace FF
 
         private void OnDisable()
         {
-            Debug.Log("Disabled");
             if (_health != null)
             {
                 _health.OnDeath -= HandleDeath;
@@ -460,7 +444,6 @@ namespace FF
 
         void OnDestroy()
         {
-            Debug.Log("Destroyed");
             activeBosses.Remove(this);
         }
 

@@ -14,12 +14,6 @@ namespace FF
 #if !DISABLESTEAMWORKS
         private const string KillStatName = "total_kills";
         private const string TopWaveStatName = "top_wave_survived";
-        private const string FavoriteWeapon1StatName = "favorite_weapon_1";
-        private const string FavoriteWeapon2StatName = "favorite_weapon_2";
-        private const string FavoriteWeapon3StatName = "favorite_weapon_3";
-        private const string FavoriteWeapon1KillsStatName = "favorite_weapon_1_kills";
-        private const string FavoriteWeapon2KillsStatName = "favorite_weapon_2_kills";
-        private const string FavoriteWeapon3KillsStatName = "favorite_weapon_3_kills";
 
         private readonly Dictionary<Weapon, int> _weaponKills = new();
         private readonly HashSet<Health> _trackedPlayerHealth = new();
@@ -29,6 +23,11 @@ namespace FF
         private int _highestWave;
         private bool _gameManagerHooked;
         private bool _statsReady;
+
+        private void Start()
+        {
+            SteamUserStats.RequestUserStats(SteamUser.GetSteamID());
+        }
 
         private void Awake()
         {
@@ -45,8 +44,6 @@ namespace FF
 
             _userStatsReceived = Callback<UserStatsReceived_t>.Create(HandleStatsReceived);
             _userStatsStored = Callback<UserStatsStored_t>.Create(HandleStatsStored);
-
-            SteamUserStats.RequestCurrentStats();
 
             HookGameManager();
             Enemy.OnAnyEnemyKilledByWeapon += HandleEnemyKilledByWeapon;
@@ -100,16 +97,6 @@ namespace FF
             _gameManagerHooked = true;
         }
 
-        private void HandleStatsReceived(UserStatsReceived_t callback)
-        {
-            if (callback.m_nGameID == SteamUtils.GetAppID().ToUInt64() && callback.m_eResult == EResult.k_EResultOK)
-            {
-                _statsReady = true;
-                PushCoreStats();
-                PushFavoriteWeapons();
-            }
-        }
-
         private void HandleStatsStored(UserStatsStored_t callback)
         {
             if (callback.m_eResult != EResult.k_EResultOK)
@@ -130,6 +117,20 @@ namespace FF
 
             PushCoreStats();
         }
+
+        private void HandleStatsReceived(UserStatsReceived_t callback)
+        {
+            if (callback.m_eResult == EResult.k_EResultOK)
+            {
+                Debug.Log("Steam stats ready");
+                _statsReady = true;
+            }
+            else
+            {
+                Debug.LogWarning($"[Steam] Failed to receive stats: {callback.m_eResult}");
+            }
+        }
+       
 
         private void HandleEnemyKilledByWeapon(Enemy enemy, Weapon weapon)
         {
@@ -166,16 +167,15 @@ namespace FF
 
         private void HandlePlayerDeath()
         {
+            Debug.Log("Player died, pushing stats to Steam");
             PushCoreStats();
             PushFavoriteWeapons();
         }
 
         private void PushCoreStats()
         {
-            if (!EnsureStatsReady())
-            {
+            if (!_statsReady)
                 return;
-            }
 
             SteamUserStats.SetStat(KillStatName, _lastKillCount);
             SteamUserStats.SetStat(TopWaveStatName, _highestWave);
@@ -184,11 +184,6 @@ namespace FF
 
         private void PushFavoriteWeapons()
         {
-            if (!EnsureStatsReady())
-            {
-                return;
-            }
-
             var ranked = _weaponKills
                 .Where(pair => pair.Key != null)
                 .OrderByDescending(pair => pair.Value)
@@ -207,25 +202,7 @@ namespace FF
                 kills[i] = ranked[i].Value;
             }
 
-            SteamUserStats.SetStat(FavoriteWeapon1StatName, ids[0]);
-            SteamUserStats.SetStat(FavoriteWeapon2StatName, ids[1]);
-            SteamUserStats.SetStat(FavoriteWeapon3StatName, ids[2]);
-
-            SteamUserStats.SetStat(FavoriteWeapon1KillsStatName, kills[0]);
-            SteamUserStats.SetStat(FavoriteWeapon2KillsStatName, kills[1]);
-            SteamUserStats.SetStat(FavoriteWeapon3KillsStatName, kills[2]);
-
             SteamUserStats.StoreStats();
-        }
-
-        private bool EnsureStatsReady()
-        {
-            if (!_statsReady)
-            {
-                SteamUserStats.RequestCurrentStats();
-            }
-
-            return _statsReady;
         }
 #endif
     }
