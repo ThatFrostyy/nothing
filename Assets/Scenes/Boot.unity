@@ -171,42 +171,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameManager
       objectReference: {fileID: 0}
-    - target: {fileID: 5457090804296160985, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: maxUpgradeSelections
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 7492380447983614614, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: defaultHat
-      value: 
-      objectReference: {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
-    - target: {fileID: 7492380447983614614, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: defaultWeapon
-      value: 
-      objectReference: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
-    - target: {fileID: 7492380447983614614, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: defaultCharacter
-      value: 
-      objectReference: {fileID: 11400000, guid: 968fc4a4a96a8ca429344ced2ac63fb0, type: 2}
-    - target: {fileID: 7492380447983614614, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: defaultSpecialWeapon
-      value: 
-      objectReference: {fileID: 11400000, guid: 73ebe158e9c8f9b4ba6d8076e0c0dbbc, type: 2}
-    - target: {fileID: 7721843222088791118, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: enemyDeathFx
-      value: 
-      objectReference: {fileID: 4611953073509470929, guid: 5ecfc0d60f76dc7459be8d2b0fea045a, type: 3}
-    - target: {fileID: 7721843222088791118, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: waveIntervalIncrease
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7721843222088791118, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: initialTimeBetweenWaves
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7721843222088791118, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
-      propertyPath: maximumTimeBetweenWaves
-      value: 15
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

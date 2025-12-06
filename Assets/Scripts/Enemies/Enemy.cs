@@ -130,6 +130,9 @@ namespace FF
 
         public static System.Collections.Generic.IReadOnlyCollection<Enemy> ActiveBosses => activeBosses;
 
+        private Vector3 _lastPos;
+
+
         public void Initialize(Transform player)
         {
             _player = player;
@@ -336,6 +339,20 @@ namespace FF
 
         private void Update()
         {
+            if (!gameObject.activeInHierarchy)
+            {
+                Debug.Log($"{name} LOST: active=false", this);
+            }
+
+            float dist = Vector3.Distance(transform.position, _lastPos);
+
+            if (dist > 2f) // threshold
+            {
+                Debug.Log($"{name} TELEPORT jump: {dist}, newPos={transform.position}", this);
+            }
+
+            _lastPos = transform.position;
+
             if (Time.timeScale <= Mathf.Epsilon)
             {
                 if (autoShooter)
