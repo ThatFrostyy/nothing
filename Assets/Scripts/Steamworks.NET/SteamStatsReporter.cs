@@ -14,8 +14,8 @@ namespace FF
 #if !DISABLESTEAMWORKS
         private const string KillStatName = "total_kills";
         private const string TopWaveStatName = "top_wave_survived";
-        private const string KillLeaderboardName = "total_kills";
-        private const string WaveTenAchievementName = "ACH_WAVE_10";
+        private const string KillLeaderboardName = "Kills";
+        private const string WaveTenAchievementName = "WAVE_10";
 
         private readonly Dictionary<Weapon, int> _weaponKills = new();
         private readonly HashSet<Health> _trackedPlayerHealth = new();
