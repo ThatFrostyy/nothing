@@ -54,7 +54,20 @@ namespace FF
             while (_available.Count > 0)
             {
                 var candidate = _available.Pop();
-                if (candidate != null) 
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                // Skip entries that are somehow still active or no longer owned by this pool
+                // to avoid yanking live objects back to the spawn position.
+                var token = candidate.GetComponent<PoolToken>();
+                if (candidate.activeInHierarchy || (token != null && token.Owner != this))
+                {
+                    continue;
+                }
+
+                if (candidate != null)
                 {
                     instance = candidate;
                     break;
