@@ -32,9 +32,15 @@ namespace FF
 
         void OnEnable()
         {
+            CharacterSelectionState.OnSelectedChanged += HandleSelectionChanged;
             SyncIndexWithSelection();
             SyncHatWithSelection();
             Refresh();
+        }
+
+        void OnDisable()
+        {
+            CharacterSelectionState.OnSelectedChanged -= HandleSelectionChanged;
         }
 
         public void Next()
@@ -100,6 +106,13 @@ namespace FF
         {
             const int viewCount = 2;
             _loadoutViewIndex = Mathf.FloorToInt(Mathf.Repeat(_loadoutViewIndex + delta, viewCount));
+            Refresh();
+        }
+
+        void HandleSelectionChanged(CharacterLoadout _)
+        {
+            SyncIndexWithSelection();
+            SyncHatWithSelection();
             Refresh();
         }
 
