@@ -171,7 +171,6 @@ namespace FF
             if (found != null)
             {
                 RegisterWallet(found);
-                Debug.Log("[UM] Auto-bound XPWallet");
             }
         }
 
@@ -187,7 +186,6 @@ namespace FF
             this.wallet = wallet;
             OnWalletRgistered?.Invoke(wallet);
 
-            Debug.Log($"[UM] RegisterWallet ? bound wallet on {wallet.gameObject.name}");
             wallet.OnLevelUp += OnLevel;
         }
 
@@ -258,7 +256,6 @@ namespace FF
 
         void OnLevel(int lvl)
         {
-            Debug.Log($"[UM] OnLevel({lvl}) called. CanReceiveUpgrades() = {CanReceiveUpgrades()} (ui != null: {ui != null}, all len: {(all != null ? all.Length : -1)}, maxUpgradeSelections: {maxUpgradeSelections}, upgradesTaken: {upgradesTaken})");
 
             if (!CanReceiveUpgrades())
             {
@@ -266,7 +263,6 @@ namespace FF
             }
 
             pendingUpgrades = Mathf.Min(pendingUpgrades + 1, GetRemainingSelections());
-            Debug.Log($"[UM] pendingUpgrades now = {pendingUpgrades}, GetRemainingSelections() = {GetRemainingSelections()}");
             NotifyPendingChanged();
         }
 
@@ -395,7 +391,6 @@ namespace FF
         {
             var listeners = OnPendingUpgradesChanged?.GetInvocationList();
             int count = listeners?.Length ?? 0;
-            Debug.Log($"[UM] NotifyPendingChanged ? pendingUpgrades={pendingUpgrades}, listeners={count}");
             OnPendingUpgradesChanged?.Invoke(pendingUpgrades);
         }
 

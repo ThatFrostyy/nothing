@@ -173,7 +173,6 @@ namespace FF
                 return;
             }
 
-            Debug.Log("DiscordRichPresence: Subscribing to gameplay events.");
             subscribedGameManager = gameManager;
             subscribedGameManager.OnWaveStarted += HandleWaveStarted;
             subscribedGameManager.OnKillCountChanged += HandleKillCountChanged;

@@ -91,7 +91,6 @@ namespace FF
             if (_isPaused) return;  // <-- STOP overwriting pause volume!
 
             if (_active != null)
-                Debug.Log($"[MusicDebug] Update running. Current Vol: {_active.volume} | Timer: {_intensityFadeTimer}");
 
             if (_gameStarted && _actionMusicStarted && !_fullVolumeReached)
                 FadeGameIntensityUp();
@@ -125,8 +124,6 @@ namespace FF
 
         public void SetPaused(bool paused)
         {
-            Debug.Log($"[MusicDebug] SetPaused CALLED with: {paused}");
-
 
             if (_isPaused == paused)
                 return;
@@ -165,7 +162,6 @@ namespace FF
             {
                 // Pausing → lower volume
                 target = MusicVolume * pauseVolumeScale;
-                Debug.Log($"[MusicDebug] Pausing. Target Volume: {target}");
             }
             else
             {
@@ -173,7 +169,6 @@ namespace FF
                 float intensityProgress = Mathf.Clamp01(_intensityFadeTimer / intensityRiseDuration);
                 target = Mathf.Lerp(0f, MusicVolume, intensityProgress);
 
-                Debug.Log($"[MusicDebug] UNPAUSING. Target Volume should rise to: {target}");
             }
 
 

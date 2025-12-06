@@ -42,8 +42,8 @@ MonoBehaviour:
   burnTickInterval: 0.35
   burnTargetVfx: {fileID: 0}
   burnImpactVfx: {fileID: 0}
-  baseSpread: 5
-  maxSpread: 5
+  baseSpread: 7
+  maxSpread: 7
   spreadIncreasePerShot: 0.5
   spreadRecoverySpeed: 2
   pelletsPerShot: 6

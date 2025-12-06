@@ -324,7 +324,6 @@ namespace FF
 
         void BindSceneManagers()
         {
-            Debug.Log("Binding managers");
             RefreshGameManagerReference();
             RefreshUpgradeManagerReference();
         }
@@ -350,14 +349,12 @@ namespace FF
 
         void RefreshUpgradeManagerReference()
         {
-            Debug.Log($"[HUD] Attempting Subscription. Manager found: {upgradeManager != null}, isActive: {isActiveAndEnabled}");
 
             // FIX: Robustly switch to Singleton if the current reference is stale or wron
    
             if (upgradeManager != null)
             {
                 upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
-                Debug.Log("[HUD] Unsubscribed from UpgradeManager.OnPendingUpgradesChanged");
             }
 
             if (upgradeManager != null && isActiveAndEnabled)
@@ -365,7 +362,6 @@ namespace FF
                 upgradeManager.OnPendingUpgradesChanged += HandlePendingUpgradesChanged;
                 // Force immediate sync
                 HandlePendingUpgradesChanged(upgradeManager.GetPendingUpgradeCount());
-                Debug.Log("[HUD] Subscribed to UpgradeManager.OnPendingUpgradesChanged");
             }
         }
 
@@ -456,7 +452,6 @@ namespace FF
         void HandlePendingUpgradesChanged(int pending)
         {
             pendingUpgrades = Mathf.Max(0, pending);
-            Debug.Log($"[GameHUD] Pending upgrades changed: {pendingUpgrades}. Upgrade Menu is visible: {upgradeMenuVisible}");
 
             if (pendingUpgrades > 0)
             {

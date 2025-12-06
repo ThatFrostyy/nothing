@@ -396,6 +396,7 @@ namespace FF
 
         private void OnEnable()
         {
+            Debug.Log("Enabled");
             if (_health != null)
             {
                 _health.OnDeath += HandleDeath;
@@ -419,6 +420,7 @@ namespace FF
 
         private void OnDisable()
         {
+            Debug.Log("Disabled");
             if (_health != null)
             {
                 _health.OnDeath -= HandleDeath;
@@ -440,6 +442,7 @@ namespace FF
 
         void OnDestroy()
         {
+            Debug.Log("Destroyed");
             activeBosses.Remove(this);
         }
 
