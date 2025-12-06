@@ -61,6 +61,12 @@ namespace FF
         [SerializeField, Min(1)] private int waveMilestoneInterval = 5;
         [SerializeField, Min(1)] private int waveMilestoneStartingWave = 5;
 
+        [Header("Get Ready")]
+        [SerializeField] private TMP_Text getReadyText;
+        [SerializeField] private CanvasGroup getReadyGroup;
+        [SerializeField, Min(0f)] private float getReadyFadeDuration = 0.75f;
+        [SerializeField, Min(0f)] private float getReadyHoldDuration = 0.35f;
+
         [Header("Audio")]
         [SerializeField] private AudioClip waveStartClip;
         [SerializeField] private AudioClip heartbeatClip;
@@ -113,6 +119,8 @@ namespace FF
         private Coroutine weaponNameRoutine;
         private Vector3[] slotBaseScales = Array.Empty<Vector3>();
         private Coroutine[] slotScaleRoutines = Array.Empty<Coroutine>();
+        private bool getReadyDismissed;
+        private Coroutine getReadyRoutine;
 
         void Awake()
         {
@@ -152,6 +160,15 @@ namespace FF
                 }
             }
 
+            if (!getReadyGroup && getReadyText)
+            {
+                getReadyGroup = getReadyText.GetComponent<CanvasGroup>();
+                if (!getReadyGroup)
+                {
+                    getReadyGroup = getReadyText.gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
             healthPulseTarget = ResolveHealthPulseTarget();
 
             if (!xpPulseTarget && xpFillImage)
@@ -175,6 +192,7 @@ namespace FF
 
             InitializeAudio();
             SetWaveBannerVisible(0f);
+            InitializeGetReady();
             InitializeWaveFlash();
             RefreshUpgradePrompt();
         }
@@ -503,6 +521,11 @@ namespace FF
             SetWaveBannerVisible(1f);
             TriggerWaveFlash();
             PlayWaveStartSound(wave);
+
+            if (wave == 1)
+            {
+                FadeOutGetReady();
+            }
         }
 
         void HandleUpgradeVisibilityChanged(bool isVisible)
@@ -1020,6 +1043,84 @@ namespace FF
             waveFlashImage.color = color;
         }
 
+        void InitializeGetReady()
+        {
+            if (!getReadyGroup && !getReadyText)
+            {
+                return;
+            }
+
+            if (getReadyGroup)
+            {
+                getReadyGroup.alpha = 1f;
+                getReadyGroup.gameObject.SetActive(true);
+                getReadyGroup.blocksRaycasts = false;
+                getReadyGroup.interactable = false;
+            }
+
+            getReadyDismissed = false;
+        }
+
+        void FadeOutGetReady()
+        {
+            if (getReadyDismissed)
+            {
+                return;
+            }
+
+            getReadyDismissed = true;
+
+            if (!getReadyGroup)
+            {
+                return;
+            }
+
+            if (getReadyRoutine != null)
+            {
+                StopCoroutine(getReadyRoutine);
+            }
+
+            getReadyRoutine = StartCoroutine(GetReadyFadeRoutine());
+        }
+
+        IEnumerator GetReadyFadeRoutine()
+        {
+            if (getReadyGroup)
+            {
+                getReadyGroup.gameObject.SetActive(true);
+                getReadyGroup.alpha = 1f;
+            }
+
+            if (getReadyHoldDuration > 0f)
+            {
+                yield return new WaitForSecondsRealtime(getReadyHoldDuration);
+            }
+
+            float duration = Mathf.Max(0.01f, getReadyFadeDuration);
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float t = Mathf.Clamp01(elapsed / duration);
+
+                if (getReadyGroup)
+                {
+                    getReadyGroup.alpha = Mathf.Lerp(1f, 0f, t);
+                }
+
+                yield return null;
+            }
+
+            if (getReadyGroup)
+            {
+                getReadyGroup.alpha = 0f;
+                getReadyGroup.gameObject.SetActive(false);
+            }
+
+            getReadyRoutine = null;
+        }
+
         void InitializeAudio()
         {
             if (!uiAudioSource)
@@ -1203,6 +1304,9 @@ namespace FF
             {
                 xpPulseTarget = xpFillImage.rectTransform;
             }
+
+            getReadyFadeDuration = Mathf.Max(0f, getReadyFadeDuration);
+            getReadyHoldDuration = Mathf.Max(0f, getReadyHoldDuration);
         }
 
         RectTransform ResolveHealthPulseTarget()

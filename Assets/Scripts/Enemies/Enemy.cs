@@ -61,6 +61,7 @@ namespace FF
         [SerializeField, Min(0)] private int dogAttackDamage = 8;
         [SerializeField, Min(0f)] private float dogLeapHeight = 0.4f;
         [SerializeField, Min(0f)] private float dogLeapDuration = 0.3f;
+        [SerializeField, Min(0f)] private float dogMinimumDistanceFromPlayer = 0.6f;
         [SerializeField] private AudioClip dogAttackSound;
 
         [Header("Rewards")]
@@ -493,7 +494,16 @@ namespace FF
                 if (distance > 0.001f)
                 {
                     Vector2 direction = toPlayer / distance;
-                    targetVelocity = direction * moveSpeed;
+                    float minimumDistance = Mathf.Max(0f, dogMinimumDistanceFromPlayer);
+                    if (distance < minimumDistance)
+                    {
+                        targetVelocity = -direction * moveSpeed;
+                    }
+                    else
+                    {
+                        float approachFactor = Mathf.InverseLerp(minimumDistance, Mathf.Max(minimumDistance, dogAttackRange), distance);
+                        targetVelocity = direction * (moveSpeed * approachFactor);
+                    }
                     _isFacingLeft = direction.x < 0f;
                 }
             }
