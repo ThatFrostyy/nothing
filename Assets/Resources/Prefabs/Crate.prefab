@@ -490,7 +490,7 @@ MonoBehaviour:
   - {fileID: 3785600660565315841, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
   pickupLifetimeSeconds: 30
   lifetimeSeconds: 45
-  breakFx: {fileID: 4374216279115908777, guid: f76c37ad9af25104bbc4acde32b01fa2, type: 3}
+  breakFx: {fileID: 363920278307669088, guid: e24dccc0a30b0574c956811d1833180c, type: 3}
   breakSfx: {fileID: 8300000, guid: 4edcebeef040c57458dda659d0ea90c5, type: 3}
 --- !u!61 &7582976024857831151
 BoxCollider2D:
