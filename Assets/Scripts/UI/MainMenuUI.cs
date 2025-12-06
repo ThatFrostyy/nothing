@@ -19,7 +19,7 @@ namespace FF
 #if !DISABLESTEAMWORKS
         private const string KillStatName = "total_kills";
         private const string TopWaveStatName = "top_wave_survived";
-        private const string KillLeaderboardName = "Kills";
+        private const string KillLeaderboardName = "kills";
 
         private Callback<UserStatsReceived_t> _userStatsReceived;
         private CallResult<LeaderboardFindResult_t> _leaderboardFindResult;
@@ -97,6 +97,7 @@ namespace FF
 
             if (SteamUserStats.GetStat(KillStatName, out int kills))
             {
+                Debug.Log($"[Steam] Received total kills: {kills}");
                 UpdateKillsText(kills);
             }
             else
@@ -106,6 +107,7 @@ namespace FF
 
             if (SteamUserStats.GetStat(TopWaveStatName, out int topWave))
             {
+                Debug.Log($"[Steam] Received top wave survived: {topWave}");
                 UpdateTopWaveText(topWave);
             }
             else
