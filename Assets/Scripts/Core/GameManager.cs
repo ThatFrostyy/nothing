@@ -19,6 +19,7 @@ namespace FF
 
         float timer;
         float currentWaveInterval;
+        bool spawningEnabled = true;
 
         public int Wave { get; private set; } = 0;
         public int KillCount { get; private set; } = 0;
@@ -83,6 +84,8 @@ namespace FF
             Wave = 0;
             timer = 0f;
 
+            spawningEnabled = true;
+
             float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
             currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
 
@@ -93,7 +96,7 @@ namespace FF
 
         void Update()
         {
-            if (spawner == null)
+            if (spawner == null || !spawningEnabled)
                 return;
 
             timer += Time.deltaTime;
@@ -156,6 +159,17 @@ namespace FF
             maximumTimeBetweenWaves = Mathf.Max(0f, maximumTimeBetweenWaves);
             float cap = maximumTimeBetweenWaves <= 0f ? float.MaxValue : maximumTimeBetweenWaves;
             currentWaveInterval = Mathf.Clamp(initialTimeBetweenWaves, 0f, cap);
+        }
+
+        public void SetSpawningEnabled(bool enabled, bool stopActiveSpawns = false)
+        {
+            spawningEnabled = enabled;
+
+            if (stopActiveSpawns)
+            {
+                timer = 0f;
+                spawner?.StopSpawning();
+            }
         }
     }
 }

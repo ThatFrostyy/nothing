@@ -102,6 +102,15 @@ namespace FF
             _spawnRoutine = StartCoroutine(SpawnWaveRoutine(wave));
         }
 
+        public void StopSpawning()
+        {
+            if (_spawnRoutine != null)
+            {
+                StopCoroutine(_spawnRoutine);
+                _spawnRoutine = null;
+            }
+        }
+
         private System.Collections.IEnumerator SpawnWaveRoutine(int wave)
         {
             bool isBossWave = bossWaveInterval > 0 && wave > 0 && wave % bossWaveInterval == 0;

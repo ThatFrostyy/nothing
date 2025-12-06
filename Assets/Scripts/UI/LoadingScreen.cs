@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,6 +25,11 @@ namespace FF
         public static void Show(string message)
         {
             EnsureInstance();
+            if (_instance == null)
+            {
+                return;
+            }
+
             _instance.ShowInternal(message);
         }
 
@@ -39,21 +43,23 @@ namespace FF
             _instance.UpdateMessageInternal(message);
         }
 
-        public void Hide()
-        {
-            if (_instance == null)
-            {
-                return;
-            }
-
-            this.gameObject.SetActive(false);
-        }
-
         private static void EnsureInstance()
         {
             if (_instance != null)
             {
                 return;
+            }
+
+            _instance = FindAnyObjectByType<LoadingScreen>();
+            if (_instance != null)
+            {
+                return;
+            }
+
+            var prefab = Resources.Load<LoadingScreen>("Prefabs/Loading");
+            if (prefab)
+            {
+                _instance = Instantiate(prefab);
             }
         }
 
@@ -67,8 +73,18 @@ namespace FF
         {
             if (messageText)
             {
-                messageText.text = "Loading...";
+                messageText.text = message;
             }
+        }
+
+        public static void Hide()
+        {
+            if (_instance == null)
+            {
+                return;
+            }
+
+            _instance.gameObject.SetActive(false);
         }
     }
 }

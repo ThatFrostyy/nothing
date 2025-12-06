@@ -107,6 +107,10 @@ namespace FF
         public static void ShowDeathMenu(Vector3 deathPosition)
         {
             if (Instance == null) CreateRuntimeInstance();
+            if (GameManager.I != null)
+            {
+                GameManager.I.SetSpawningEnabled(false, true);
+            }
             Instance.PlayDeathFeedback(deathPosition);
             Instance.ShowMenu(true);
         }
@@ -118,7 +122,11 @@ namespace FF
             _isVisible = true;
             _isDeathMenu = isDeath;
             _previousTimeScale = Time.timeScale;
-            Time.timeScale = 0f;
+
+            if (!isDeath)
+            {
+                Time.timeScale = 0f;
+            }
 
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
