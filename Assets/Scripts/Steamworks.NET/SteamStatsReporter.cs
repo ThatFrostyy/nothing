@@ -12,10 +12,22 @@ namespace FF
     public class SteamStatsReporter : MonoBehaviour
     {
 #if !DISABLESTEAMWORKS
-        private const string KillStatName = "total_kills";
-        private const string TopWaveStatName = "top_wave_survived";
-        private const string KillLeaderboardName = "kills";
-        private const string WaveTenAchievementName = "WAVE_10";
+        [Header ("Stats")]
+        [SerializeField] private const string KillStatName = "total_kills";
+        [SerializeField] private const string TopWaveStatName = "top_wave_survived";
+
+        [Header("Leaderboards")]
+        [SerializeField] private const string KillLeaderboardName = "kills";
+
+        [Header("Achievements")]
+        [SerializeField] private List<WaveAchievement> waveAchievements = new List<WaveAchievement>()
+        {
+            new WaveAchievement { waveRequired = 10, achievementId = "WAVE_10" },
+            new WaveAchievement { waveRequired = 20, achievementId = "WAVE_20" },
+            new WaveAchievement { waveRequired = 30, achievementId = "WAVE_30" },
+            new WaveAchievement { waveRequired = 40, achievementId = "WAVE_40" },
+            new WaveAchievement { waveRequired = 50, achievementId = "WAVE_50" }
+        };
 
         private readonly Dictionary<Weapon, int> _weaponKills = new();
         private readonly HashSet<Health> _trackedPlayerHealth = new();
@@ -147,7 +159,7 @@ namespace FF
 
             PushCoreStats();
             PushKillLeaderboardScore();
-            TryUnlockWaveTenAchievement();
+            TryUnlockWaveAchievements();
         }
 
         private void HandleKillLeaderboardFound(LeaderboardFindResult_t result, bool failure)
@@ -275,18 +287,22 @@ namespace FF
             _killScoreUploadedResult.Set(handle, HandleKillScoreUploaded);
         }
 
-        private void TryUnlockWaveTenAchievement()
+        private void TryUnlockWaveAchievements()
         {
-            if (_waveTenUnlocked || !_statsReady)
-            {
+            if (!_statsReady)
                 return;
-            }
 
-            if (_highestWave >= 10 && SteamUserStats.SetAchievement(WaveTenAchievementName))
+            foreach (var a in waveAchievements)
             {
-                _waveTenUnlocked = true;
-                SteamUserStats.StoreStats();
-                Debug.Log("[Steam] Unlocked wave 10 achievement");
+                if (!a.unlocked && _highestWave >= a.waveRequired)
+                {
+                    if (SteamUserStats.SetAchievement(a.achievementId))
+                    {
+                        a.unlocked = true;
+                        SteamUserStats.StoreStats();
+                        Debug.Log($"[Steam] Unlocked: {a.achievementId}");
+                    }
+                }
             }
         }
 
@@ -315,3 +331,12 @@ namespace FF
 #endif
     }
 }
+
+[System.Serializable]
+public class WaveAchievement
+{
+    public int waveRequired;
+    public string achievementId;
+    public bool unlocked;
+}
+

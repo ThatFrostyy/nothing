@@ -3045,7 +3045,7 @@ MonoBehaviour:
     - {fileID: 7785297196771200664, guid: 6600a5c3edfd2e24f9869ff09e610790, type: 3}
     - {fileID: 7695581959867539719, guid: 668c7b2d70cfefb40894e93143f680fa, type: 3}
     initialSpawnDelay: 30
-    spawnOnStart: 0
+    spawnOnStart: 1
     useRespawnDelay: 1
     respawnDelay: 45
     spawnIntervalCurve:

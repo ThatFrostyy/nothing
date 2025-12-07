@@ -481,13 +481,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponCrate
   dropPoint: {fileID: 8732419302471801801}
   pickupPool:
-  - {fileID: 5464304506579632199, guid: 453b3ff7d25e6a64687efcc1cc0aadaf, type: 3}
   - {fileID: 8041796474199530670, guid: a50d0c54f4e8d084fb95c194f4ef9c9c, type: 3}
-  - {fileID: 2918078933888443673, guid: 4a95b463607cd1f4c9165152abe50192, type: 3}
   - {fileID: 6611012969518936712, guid: 3652e60c26aae624c8306b56bde1dbb3, type: 3}
   - {fileID: 6114283723824905712, guid: b8432984aa5b1d94ab26f175c01ba71e, type: 3}
   - {fileID: 7785297196771200664, guid: 6600a5c3edfd2e24f9869ff09e610790, type: 3}
-  - {fileID: 3785600660565315841, guid: 3f321b7a48d34704baf434cdebfbfdc4, type: 3}
+  - {fileID: 7695581959867539719, guid: 668c7b2d70cfefb40894e93143f680fa, type: 3}
   pickupLifetimeSeconds: 30
   lifetimeSeconds: 45
   breakFx: {fileID: 363920278307669088, guid: e24dccc0a30b0574c956811d1833180c, type: 3}
