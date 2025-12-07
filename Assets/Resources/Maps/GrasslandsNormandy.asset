@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c092377263393f0458303f25010fd431, type: 3}
+  m_Name: GrasslandsNormandy
+  m_EditorClassIdentifier: Assembly-CSharp::FF.MapDefinition
+  MapName: Grasslands - Normandy
+  Description: "Open green fields and hedgerows, scattered farmhouses, and rolling
+    countryside once peaceful\u2014now a frontline battlefield."
+  GroundSprite: {fileID: 21300000, guid: 2aa5f935c2f9053429a1a27b79f14b12, type: 3}
+  LightingColor: {r: 1, g: 1, b: 1, a: 1}
+  availableWeather:
+  - Name: Rain
+    WeatherVfxPrefab: {fileID: 6077168872989578693, guid: f514474ff8e94554d8477de1f2f601b0, type: 3}
+    LoopingSfx: {fileID: 8300000, guid: 415db4cd7857ee04fbb33e3d92a61ac0, type: 3}
+  - Name: Wind
+    WeatherVfxPrefab: {fileID: 3696007233179127096, guid: c248f95ffea8b8543bc7ad0fffe0216d, type: 3}
+    LoopingSfx: {fileID: 8300000, guid: 81bcf484da907304a9113e9983f01029, type: 3}
+  chanceForNoWeather: 0.5

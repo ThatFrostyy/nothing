@@ -120,8 +120,6 @@ namespace FF
         private int _highestWave;
         private bool _gameManagerHooked;//
         private bool _statsReady;
-        private bool _waveTenUnlocked;
-
         private void Start()
         {
             SteamUserStats.RequestUserStats(SteamUser.GetSteamID());
@@ -174,7 +172,6 @@ namespace FF
             _killScoreUploadedResult = null;
             _gameManagerHooked = false;
             _statsReady = false;
-            _waveTenUnlocked = false;
             _weaponKillTotals.Clear();
             _pendingWeaponKillIncrements.Clear();
             _unlockedWeaponAchievements.Clear();

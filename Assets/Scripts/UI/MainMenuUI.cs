@@ -142,6 +142,7 @@ namespace FF
             _killLeaderboard = default;
 #endif
         }
+#if !DISABLESTEAMWORKS
         private void HandleStatsReceived(UserStatsReceived_t result)
         {
             if (result.m_eResult != EResult.k_EResultOK)
@@ -260,7 +261,6 @@ namespace FF
                 leaderboardText.text = string.IsNullOrWhiteSpace(text) ? unavailableText : text.TrimEnd();
             }
         }
-#endif
 
         private void HandleMapChanged(MapDefinition _)
         {

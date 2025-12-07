@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c092377263393f0458303f25010fd431, type: 3}
+  m_Name: SnowfieldArdens
+  m_EditorClassIdentifier: Assembly-CSharp::FF.MapDefinition
+  MapName: "Snowfield \u2013 Ardennes"
+  Description: Dense snowy forests and frozen roads, where ambushes hide behind pine
+    trees in the bitter winter cold.
+  GroundSprite: {fileID: 21300000, guid: 4b4872b9613462e48a9c9bc51d590748, type: 3}
+  LightingColor: {r: 0.8726415, g: 0.9777974, b: 1, a: 1}
+  availableWeather:
+  - Name: Snow
+    WeatherVfxPrefab: {fileID: 5386875010281837627, guid: 29a5d6bd61f32a9429ede395747c5195, type: 3}
+    LoopingSfx: {fileID: 8300000, guid: e9435176e580cd840bb6aab982df96a9, type: 3}
+  chanceForNoWeather: 0.5

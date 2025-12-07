@@ -1854,6 +1854,7 @@ GameObject:
   m_Component:
   - component: {fileID: 396178897}
   - component: {fileID: 396178896}
+  - component: {fileID: 396178898}
   m_Layer: 0
   m_Name: Weather
   m_TagString: Untagged
@@ -1898,6 +1899,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &396178898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396178895}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2de18db33876e604096144cd842382c7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.MapAppearanceController
+  groundRenderer: {fileID: 562780112}
+  weatherRandomizer: {fileID: 396178896}
+  lighting: {fileID: 619394801}
+  defaultMap: {fileID: 11400000, guid: 58e6b82642dc0a943aa9de2185ebeddd, type: 2}
 --- !u!1 &409490496
 GameObject:
   m_ObjectHideFlags: 0
@@ -4235,6 +4252,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 768413638}
   m_CullTransparentMesh: 1
+--- !u!1001 &790841223
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.2571878
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -12.938257
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2515806366845624577, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6307860222732104358, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
+      propertyPath: m_Name
+      value: M12Pickup
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
 --- !u!1 &791341250
 GameObject:
   m_ObjectHideFlags: 0
@@ -7428,6 +7502,7 @@ MonoBehaviour:
   upgradePromptText: {fileID: 1612907682}
   upgradePromptGroup: {fileID: 1612907681}
   upgradeKeyLabel: Tab
+  interactKeyLabel: F
   timeFormat: mm\:ss
   healthPulseTarget: {fileID: 2001000101}
   xpPulseTarget: {fileID: 1358656901}
@@ -11424,3 +11499,4 @@ SceneRoots:
   - {fileID: 1756355925}
   - {fileID: 497791597}
   - {fileID: 483938635}
+  - {fileID: 790841223}
