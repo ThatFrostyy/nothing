@@ -21,6 +21,9 @@ namespace FF
         [SerializeField] private TMP_Text hatRarityText;
         [SerializeField] private Image hatIconImage;
 
+        [Header("Steam Inventory")]
+        [SerializeField] private List<HatDefinition> steamOnlyHats = new();
+
         [Header("Loadout Preview")]
         [SerializeField] private TMP_Text weaponNameText;
         [SerializeField] private Image weaponIconImage;
@@ -34,7 +37,8 @@ namespace FF
         private Color _defaultHatRarityColor = Color.white;
         private readonly List<HatDefinition> _ownedSteamHats = new();
         private readonly Dictionary<int, HatDefinition> _hatsByItemDefinitionId = new();
-        private CallResult<SteamInventoryResultReady_t> _inventoryRequest;
+        private Callback<SteamInventoryResultReady_t> _inventoryCallback;
+        private SteamInventoryResult_t _currentHandle;
 
         void OnEnable()
         {
@@ -50,8 +54,12 @@ namespace FF
         void OnDisable()
         {
             CharacterSelectionState.OnSelectedChanged -= HandleSelectionChanged;
-            _inventoryRequest?.Dispose();
-            _inventoryRequest = null;
+
+            if (_inventoryCallback != null)
+            {
+                _inventoryCallback.Dispose();
+                _inventoryCallback = null;
+            }
         }
 
         public void Next()
@@ -239,16 +247,19 @@ namespace FF
         {
             List<HatDefinition> hats = new();
 
-            if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
+            // 1. Character-specific hats (always available if configured for the character)
+            if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
             {
                 hats.AddRange(character.AvailableHats);
             }
             else
             {
-                hats.AddRange(availableHats);
+                // 2. Global default hats (always available to all characters)
+                hats.AddRange(availableHats);
             }
 
-            AppendSteamHats(hats);
+            // 3. Steam-owned hats (added only if the Steam Inventory reported them as owned)
+            AppendSteamHats(hats);
 
             return hats;
         }
@@ -336,7 +347,8 @@ namespace FF
         {
             _hatsByItemDefinitionId.Clear();
 
-            foreach (HatDefinition hat in EnumerateAllHats())
+            // We cache ALL hats (global, character-specific, and steam-only) for the Steam lookup
+            foreach (HatDefinition hat in EnumerateAllHats())
             {
                 if (!hat || hat.SteamItemDefinitionId == 0)
                 {
@@ -354,7 +366,8 @@ namespace FF
         {
             HashSet<HatDefinition> seen = new();
 
-            for (int i = 0; i < availableHats.Count; i++)
+            // Add Global Hats (AvailableHats)
+            for (int i = 0; i < availableHats.Count; i++)
             {
                 HatDefinition hat = availableHats[i];
                 if (hat && seen.Add(hat))
@@ -363,23 +376,18 @@ namespace FF
                 }
             }
 
-            for (int i = 0; i < availableCharacters.Count; i++)
+            // Add Hats from Character Definitions (DefaultHat and AvailableHats)
+            for (int i = 0; i < availableCharacters.Count; i++)
             {
                 CharacterDefinition character = availableCharacters[i];
-                if (!character)
-                {
-                    continue;
-                }
+                if (!character) continue;
 
                 if (character.DefaultHat && seen.Add(character.DefaultHat))
                 {
                     yield return character.DefaultHat;
                 }
 
-                if (character.AvailableHats == null)
-                {
-                    continue;
-                }
+                if (character.AvailableHats == null) continue;
 
                 for (int h = 0; h < character.AvailableHats.Count; h++)
                 {
@@ -388,6 +396,16 @@ namespace FF
                     {
                         yield return hat;
                     }
+                }
+            }
+
+            // NEW: Add Steam-Only Hats to the cache lookup
+            for (int i = 0; i < steamOnlyHats.Count; i++)
+            {
+                HatDefinition hat = steamOnlyHats[i];
+                if (hat && seen.Add(hat))
+                {
+                    yield return hat;
                 }
             }
         }
@@ -413,42 +431,54 @@ namespace FF
         {
             if (!SteamManager.Initialized)
             {
+                Debug.Log("Steam Manager is not initialized.");
                 return;
             }
 
-            SteamInventoryResult_t handle;
-            if (!SteamInventory.GetAllItems(out handle))
+            // Create the callback if it doesn't exist
+            if (_inventoryCallback == null)
+            {
+                _inventoryCallback = Callback<SteamInventoryResultReady_t>.Create(OnSteamInventoryReady);
+                Debug.Log("[Steam] Created inventory callback.");   
+            }
+
+            // SteamInventory returns a result handle, NOT an API Call handle.
+            // We store this handle to verify the callback later.
+            if (!SteamInventory.GetAllItems(out _currentHandle))
             {
                 Debug.LogWarning("[Steam] Failed to request inventory.");
-                return;
             }
-
-            _inventoryRequest?.Dispose();
-            _inventoryRequest = CallResult<SteamInventoryResultReady_t>.Create(OnSteamInventoryReady);
-            _inventoryRequest.Set(handle);
+            Debug.Log("[Steam] Requested inventory.");
         }
 
-        private void OnSteamInventoryReady(SteamInventoryResultReady_t result, bool ioFailure)
+        // Note: Callback handlers have a different signature than CallResult handlers
+        // (They do not have the 'bool ioFailure' parameter)
+        private void OnSteamInventoryReady(SteamInventoryResultReady_t result)
         {
-            SteamInventoryResult_t handle = result.m_handle;
-
-            if (ioFailure || result.m_result != EResult.k_EResultOK)
+            // Check if this result matches the request we made
+            if (result.m_handle != _currentHandle)
             {
-                Debug.LogWarning($"[Steam] Inventory request failed ({result.m_result}). IO failure: {ioFailure}");
-                SteamInventory.DestroyResult(handle);
-                _inventoryRequest?.Dispose();
-                _inventoryRequest = null;
+                Debug.LogWarning("[Steam] Received inventory result for unknown handle.");
                 return;
             }
 
-            UpdateOwnedHatsFromInventory(handle);
-            SteamInventory.DestroyResult(handle);
+            if (result.m_result != EResult.k_EResultOK)
+            {
+                Debug.LogWarning($"[Steam] Inventory request failed ({result.m_result}).");
+                // Even on failure, we must destroy the result to free memory
+                SteamInventory.DestroyResult(result.m_handle);
+                return;
+            }
+
+            Debug.Log("[Steam] Inventory request succeeded.");
+            UpdateOwnedHatsFromInventory(result.m_handle);
+
+            // Clean up memory
+            SteamInventory.DestroyResult(result.m_handle);
+            _currentHandle = SteamInventoryResult_t.Invalid;
 
             SyncHatWithSelection();
             Refresh();
-
-            _inventoryRequest?.Dispose();
-            _inventoryRequest = null;
         }
 
         private void UpdateOwnedHatsFromInventory(SteamInventoryResult_t handle)
@@ -460,12 +490,14 @@ namespace FF
             uint itemCount = 0;
             if (!SteamInventory.GetResultItems(handle, null, ref itemCount) || itemCount == 0)
             {
+                Debug.LogWarning("[Steam] No items found in inventory.");
                 return;
             }
 
             SteamItemDetails_t[] items = new SteamItemDetails_t[itemCount];
             if (!SteamInventory.GetResultItems(handle, items, ref itemCount))
             {
+                Debug.LogWarning("[Steam] No items found in inventory.");
                 return;
             }
 
@@ -476,6 +508,7 @@ namespace FF
 
                 if (_hatsByItemDefinitionId.TryGetValue(definitionId, out HatDefinition hat) && hat && addedHats.Add(hat))
                 {
+                    Debug.Log($"[Steam] Owned hat found: {hat.DisplayName} (DefID: {definitionId})");
                     _ownedSteamHats.Add(hat);
                 }
             }

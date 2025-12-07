@@ -14,4 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.HatDefinition
   DisplayName: Ranger M1 Helmet
   Icon: {fileID: 21300000, guid: 84269ee36aecdd7438484316be887b7c, type: 3}
+  RarityText: Common
+  RarityColor: {r: 0.9490196, g: 0.9490196, b: 0.9490196, a: 1}
   HatPrefab: {fileID: 1034890427689786710, guid: 2d9467be2454cb14d83227ed21abe6d7, type: 3}
+  SteamItemDefinitionId: 0

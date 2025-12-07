@@ -21,8 +21,6 @@ MonoBehaviour:
   DefaultHat: {fileID: 11400000, guid: 1d5f8028d62e0544388964a158543185, type: 2}
   AvailableHats:
   - {fileID: 11400000, guid: 1d5f8028d62e0544388964a158543185, type: 2}
-  - {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
-  - {fileID: 11400000, guid: b0c38d26c188c6747b10d403bd016f61, type: 2}
   StartingWeapon: {fileID: 11400000, guid: 5fdcf8ba9e391ba4f9db389ee623ce59, type: 2}
   WeaponIconOverride: {fileID: 0}
   SpecialWeapon: {fileID: 11400000, guid: 35d6b0498af5bc343a8912126c34eee6, type: 2}

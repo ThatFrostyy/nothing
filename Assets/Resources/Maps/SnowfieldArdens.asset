@@ -22,3 +22,4 @@ MonoBehaviour:
     WeatherVfxPrefab: {fileID: 5386875010281837627, guid: 29a5d6bd61f32a9429ede395747c5195, type: 3}
     LoopingSfx: {fileID: 8300000, guid: e9435176e580cd840bb6aab982df96a9, type: 3}
   chanceForNoWeather: 0.5
+  MovementEffectOverride: {fileID: 1676495797548180, guid: 6d87b16e155bca74d847e70cbdb99f3f, type: 3}
