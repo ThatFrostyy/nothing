@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace FF
@@ -21,6 +22,7 @@ namespace FF
         Transform eject;
         int currentSlotIndex;
         int lastPrimarySlotIndex;
+        bool hasNearbyPickups;
 
         public Transform GunPivot => gunPivot;
         public AutoShooter Shooter => shooter;
@@ -28,9 +30,11 @@ namespace FF
         public int CurrentSlotIndex => currentSlotIndex;
         public int SlotCount => loadout.Length;
         public Transform CurrentMuzzle => muzzle;
+        public bool HasNearbyPickups => hasNearbyPickups;
 
         public event Action<Weapon> OnWeaponEquipped;
         public event Action OnInventoryChanged;
+        public event Action<bool> OnPickupAvailabilityChanged;
 
         public Weapon GetWeaponInSlot(int slotIndex)
         {
@@ -146,6 +150,7 @@ namespace FF
             }
 
             CleanupNearbyPickups();
+            UpdatePickupAvailability();
         }
 
         public void UnregisterNearbyPickup(WeaponPickup pickup)
@@ -153,10 +158,12 @@ namespace FF
             if (pickup == null)
             {
                 nearbyPickups.RemoveAll(p => p == null);
+                UpdatePickupAvailability();
                 return;
             }
 
             nearbyPickups.Remove(pickup);
+            UpdatePickupAvailability();
         }
 
         public bool TryCollectNearbyPickup()
@@ -204,6 +211,7 @@ namespace FF
         void CleanupNearbyPickups()
         {
             nearbyPickups.RemoveAll(p => p == null);
+            UpdatePickupAvailability();
         }
 
         WeaponPickup GetClosestPickup()
@@ -233,6 +241,18 @@ namespace FF
             }
 
             return closest;
+        }
+
+        void UpdatePickupAvailability()
+        {
+            bool hasPickups = nearbyPickups.Any(p => p != null);
+            if (hasPickups == hasNearbyPickups)
+            {
+                return;
+            }
+
+            hasNearbyPickups = hasPickups;
+            OnPickupAvailabilityChanged?.Invoke(hasNearbyPickups);
         }
 
         void AssignWeaponToSlot(int slotIndex, Weapon weapon)

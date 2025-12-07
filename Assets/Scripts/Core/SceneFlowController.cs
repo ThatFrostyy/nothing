@@ -16,6 +16,7 @@ namespace FF
         [SerializeField] private HatDefinition defaultHat;
         [SerializeField] private Weapon defaultWeapon;
         [SerializeField] private Weapon defaultSpecialWeapon;
+        [SerializeField] private MapDefinition defaultMap;
         [SerializeField] private bool applyDefaultSelection = true;
 
         void Awake()
@@ -47,7 +48,7 @@ namespace FF
 
         public void LoadGameplayScene()
         {
-            ApplyDefaultCharacterSelection();
+            ApplyDefaultSelections();
             LoadScene(gameplaySceneName);
         }
 
@@ -73,14 +74,26 @@ namespace FF
             }
         }
         //
-        void ApplyDefaultCharacterSelection()
+        void ApplyDefaultSelections()
         {
             if (!applyDefaultSelection || CharacterSelectionState.HasSelection)
             {
+                ApplyDefaultMap();
                 return;
             }
 
             CharacterSelectionState.SetSelection(defaultCharacter, defaultHat, defaultWeapon, defaultSpecialWeapon);
+            ApplyDefaultMap();
+        }
+
+        void ApplyDefaultMap()
+        {
+            if (MapSelectionState.HasSelection)
+            {
+                return;
+            }
+
+            MapSelectionState.SetSelection(defaultMap);
         }
 
         static void SetCursorVisibility(bool visible)

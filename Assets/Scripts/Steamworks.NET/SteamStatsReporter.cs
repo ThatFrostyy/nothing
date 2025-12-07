@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -17,7 +18,85 @@ namespace FF
         private const string KillLeaderboardName = "kills";
         private const string WaveTenAchievementName = "WAVE_10";
 
+        private readonly struct WeaponAchievementConfig
+        {
+            public WeaponAchievementConfig(
+                string weaponKey,
+                string statName,
+                (int Threshold, string AchievementName)[] achievementThresholds)
+            {
+                WeaponKey = weaponKey;
+                StatName = statName;
+                AchievementThresholds = achievementThresholds;
+            }
+
+            public string WeaponKey { get; }
+            public string StatName { get; }
+            public (int Threshold, string AchievementName)[] AchievementThresholds { get; }
+        }
+
+        private readonly Dictionary<string, WeaponAchievementConfig> _weaponAchievementConfigs = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Thompson"] = new WeaponAchievementConfig(
+                "Thompson",
+                "kills_thompson",
+                new (int, string)[]
+                {
+                    (100, "THOMPSON_100"),
+                    (500, "THOMPSON_500"),
+                    (1000, "THOMPSON_1000")
+                }),
+            ["BAR M-1918"] = new WeaponAchievementConfig(
+                "BAR M-1918",
+                "kills_bar",
+                new (int, string)[]
+                {
+                    (100, "BAR_100"),
+                    (500, "BAR_500"),
+                    (1000, "BAR_1000")
+                }),
+            ["M12 Shotgun"] = new WeaponAchievementConfig(
+                "M12 Shotgun",
+                "kills_m12",
+                new (int, string)[]
+                {
+                    (100, "M12_100"),
+                    (500, "M12_500"),
+                    (1000, "M12_1000")
+                }),
+            ["M1 Garand"] = new WeaponAchievementConfig(
+                "M1 Garand",
+                "kills_m1",
+                new (int, string)[]
+                {
+                    (100, "M1_100"),
+                    (500, "M1_500"),
+                    (1000, "M1_1000")
+                }),
+            ["M2 Carbine"] = new WeaponAchievementConfig(
+                "M2 Carbine",
+                "kills_m2",
+                new (int, string)[]
+                {
+                    (100, "M2_100"),
+                    (500, "M2_500"),
+                    (1000, "M2_1000")
+                }),
+            ["M1A1 Bazooka"] = new WeaponAchievementConfig(
+                "M1A1 Bazooka",
+                "kills_bazooka",
+                new (int, string)[]
+                {
+                    (100, "BAZOOKA_100"),
+                    (500, "BAZOOKA_500"),
+                    (1000, "BAZOOKA_1000")
+                })
+        };
+
         private readonly Dictionary<Weapon, int> _weaponKills = new();
+        private readonly Dictionary<string, int> _weaponKillTotals = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, int> _pendingWeaponKillIncrements = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _unlockedWeaponAchievements = new();
         private readonly HashSet<Health> _trackedPlayerHealth = new();
         private Callback<UserStatsReceived_t> _userStatsReceived;
         private Callback<UserStatsStored_t> _userStatsStored;
@@ -84,6 +163,9 @@ namespace FF
             _gameManagerHooked = false;
             _statsReady = false;
             _waveTenUnlocked = false;
+            _weaponKillTotals.Clear();
+            _pendingWeaponKillIncrements.Clear();
+            _unlockedWeaponAchievements.Clear();
         }
 
         private void Update()
@@ -196,6 +278,8 @@ namespace FF
                     _highestWave = Mathf.Max(_highestWave, storedTopWave);
                 }
 
+                SyncWeaponKillStats();
+
                 EnsureKillLeaderboard();
                 PushCoreStats();
                 PushKillLeaderboardScore();
@@ -224,6 +308,7 @@ namespace FF
             }
 
             PushFavoriteWeapons();
+            RegisterWeaponKill(weapon);
         }
 
         private void HandlePlayerReady(PlayerController controller)
@@ -254,6 +339,115 @@ namespace FF
             SteamUserStats.SetStat(KillStatName, _killStatBase + _lastKillCount);
             SteamUserStats.SetStat(TopWaveStatName, _highestWave);
             SteamUserStats.StoreStats();
+        }
+
+        private void SyncWeaponKillStats()
+        {
+            bool updated = false;
+
+            foreach (WeaponAchievementConfig config in _weaponAchievementConfigs.Values)
+            {
+                int stored = 0;
+                if (SteamUserStats.GetStat(config.StatName, out int statValue))
+                {
+                    stored = Mathf.Max(0, statValue);
+                }
+
+                if (_pendingWeaponKillIncrements.TryGetValue(config.StatName, out int pending) && pending > 0)
+                {
+                    stored += pending;
+                    updated = true;
+                }
+
+                _weaponKillTotals[config.StatName] = stored;
+                EvaluateWeaponAchievements(config, stored, ref updated);
+            }
+
+            _pendingWeaponKillIncrements.Clear();
+
+            if (updated)
+            {
+                SteamUserStats.StoreStats();
+            }
+        }
+
+        private void RegisterWeaponKill(Weapon weapon)
+        {
+            if (!_weaponAchievementConfigs.TryGetValue(ResolveWeaponKey(weapon), out WeaponAchievementConfig config))
+            {
+                return;
+            }
+
+            if (!_statsReady)
+            {
+                IncrementPendingWeaponKill(config.StatName);
+                return;
+            }
+
+            int newTotal = (_weaponKillTotals.TryGetValue(config.StatName, out int current) ? current : 0) + 1;
+            _weaponKillTotals[config.StatName] = newTotal;
+
+            SteamUserStats.SetStat(config.StatName, newTotal);
+
+            bool statsUpdated = false;
+            EvaluateWeaponAchievements(config, newTotal, ref statsUpdated);
+
+            SteamUserStats.StoreStats();
+        }
+
+        private void EvaluateWeaponAchievements(WeaponAchievementConfig config, int total, ref bool statsUpdated)
+        {
+            foreach ((int threshold, string achievementName) in config.AchievementThresholds)
+            {
+                if (total < threshold || IsAchievementUnlocked(achievementName))
+                {
+                    continue;
+                }
+
+                if (SteamUserStats.SetAchievement(achievementName))
+                {
+                    _unlockedWeaponAchievements.Add(achievementName);
+                    statsUpdated = true;
+                    Debug.Log($"[Steam] Unlocked {config.WeaponKey} {threshold} kills achievement");
+                }
+            }
+        }
+
+        private void IncrementPendingWeaponKill(string statName)
+        {
+            if (_pendingWeaponKillIncrements.ContainsKey(statName))
+            {
+                _pendingWeaponKillIncrements[statName]++;
+            }
+            else
+            {
+                _pendingWeaponKillIncrements.Add(statName, 1);
+            }
+        }
+
+        private bool IsAchievementUnlocked(string achievementName)
+        {
+            if (_unlockedWeaponAchievements.Contains(achievementName))
+            {
+                return true;
+            }
+
+            if (SteamUserStats.GetAchievement(achievementName, out bool achieved) && achieved)
+            {
+                _unlockedWeaponAchievements.Add(achievementName);
+                return true;
+            }
+
+            return false;
+        }
+
+        private string ResolveWeaponKey(Weapon weapon)
+        {
+            string weaponName = !string.IsNullOrWhiteSpace(weapon.weaponName)
+                ? weapon.weaponName
+                : weapon.name;
+
+            return weaponName ?? string.Empty;
         }
 
         private void PushKillLeaderboardScore()

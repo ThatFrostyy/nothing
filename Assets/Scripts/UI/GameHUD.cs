@@ -29,6 +29,7 @@ namespace FF
         [SerializeField] private TMP_Text upgradePromptText;
         [SerializeField] private CanvasGroup upgradePromptGroup;
         [SerializeField] private string upgradeKeyLabel = "Tab";
+        [SerializeField] private string interactKeyLabel = "E";
 
         [SerializeField] private string timeFormat = "mm\\:ss";
 
@@ -121,6 +122,8 @@ namespace FF
         private Coroutine[] slotScaleRoutines = Array.Empty<Coroutine>();
         private bool getReadyDismissed;
         private Coroutine getReadyRoutine;
+        private bool hasNearbyPickups;
+        private WeaponManager boundWeaponManager;
 
         void Awake()
         {
@@ -238,6 +241,7 @@ namespace FF
 
             // FIX: Ensure we are bound to the correct manager on enable
             RefreshUpgradeManagerReference();
+            BindWeaponManager(weaponManager);
 
             RefreshAll();
             SyncFillImmediately();
@@ -257,6 +261,8 @@ namespace FF
             if (wallet != null) wallet.OnXPChanged -= HandleXPChanged;
 
             if (upgradeManager != null) upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
+
+            UnbindWeaponManager();
         }
 
         private void HandlePlayerReady(PlayerController player)
@@ -273,14 +279,10 @@ namespace FF
             if (wallet != null)
             {
                 wallet.OnXPChanged += HandleXPChanged;
-                UpgradeManager.I?.RegisterWallet(wallet);   
+                UpgradeManager.I?.RegisterWallet(wallet);
             }
 
-            if (weaponManager != null)
-            {
-                weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
-                weaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
-            }
+            BindWeaponManager(weaponManager);
 
             RefreshAll();
             SyncFillImmediately();
@@ -313,6 +315,46 @@ namespace FF
             if (upgradeManager == null) Debug.LogWarning("[HUD] Could not find UpgradeManager.");
 
             RefreshUpgradeManagerReference();
+            BindWeaponManager(weaponManager);
+        }
+
+        private void BindWeaponManager(WeaponManager manager)
+        {
+            if (manager == null)
+            {
+                UnbindWeaponManager();
+                return;
+            }
+
+            if (manager == boundWeaponManager)
+            {
+                HandlePickupAvailabilityChanged(manager.HasNearbyPickups);
+                return;
+            }
+
+            UnbindWeaponManager();
+
+            boundWeaponManager = manager;
+            boundWeaponManager.OnWeaponEquipped += HandleWeaponEquipped;
+            boundWeaponManager.OnInventoryChanged += HandleWeaponInventoryChanged;
+            boundWeaponManager.OnPickupAvailabilityChanged += HandlePickupAvailabilityChanged;
+
+            HandlePickupAvailabilityChanged(boundWeaponManager.HasNearbyPickups);
+        }
+
+        private void UnbindWeaponManager()
+        {
+            if (boundWeaponManager == null)
+            {
+                return;
+            }
+
+            boundWeaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+            boundWeaponManager.OnInventoryChanged -= HandleWeaponInventoryChanged;
+            boundWeaponManager.OnPickupAvailabilityChanged -= HandlePickupAvailabilityChanged;
+            boundWeaponManager = null;
+
+            HandlePickupAvailabilityChanged(false);
         }
 
         void Update()
@@ -483,7 +525,7 @@ namespace FF
             else
             {
                 upgradePromptTimer = 0f;
-                StartUpgradePromptFade(0f);
+                StartUpgradePromptFade(hasNearbyPickups ? 1f : 0f);
             }
 
             RefreshUpgradePrompt();
@@ -528,6 +570,18 @@ namespace FF
             }
         }
 
+        void HandlePickupAvailabilityChanged(bool hasPickups)
+        {
+            hasNearbyPickups = hasPickups;
+
+            if (!upgradeMenuVisible && pendingUpgrades <= 0)
+            {
+                StartUpgradePromptFade(hasPickups ? 1f : 0f);
+            }
+
+            RefreshUpgradePrompt();
+        }
+
         void HandleUpgradeVisibilityChanged(bool isVisible)
         {
             upgradeMenuVisible = isVisible;
@@ -542,6 +596,10 @@ namespace FF
                 upgradePromptTimer = upgradePromptVisibleTime;
                 StartUpgradePromptFade(1f);
             }
+            else if (hasNearbyPickups)
+            {
+                StartUpgradePromptFade(1f);
+            }
 
             RefreshUpgradePrompt();
         }
@@ -553,6 +611,10 @@ namespace FF
             if (pendingUpgrades > 0)
             {
                 upgradePromptText.text = $"Press {upgradeKeyLabel} to upgrade! ({pendingUpgrades} left)";
+            }
+            else if (hasNearbyPickups)
+            {
+                upgradePromptText.text = $"Press {interactKeyLabel} to pickup";
             }
             else
             {
