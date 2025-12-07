@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Steamworks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +18,7 @@ namespace FF
         [Header("Hat Selection")]
         [SerializeField] private List<HatDefinition> availableHats = new();
         [SerializeField] private TMP_Text hatNameText;
+        [SerializeField] private TMP_Text hatRarityText;
         [SerializeField] private Image hatIconImage;
 
         [Header("Loadout Preview")]
@@ -29,9 +31,16 @@ namespace FF
         private int _index;
         private int _hatIndex;
         private int _loadoutViewIndex;
+        private Color _defaultHatRarityColor = Color.white;
+        private readonly List<HatDefinition> _ownedSteamHats = new();
+        private readonly Dictionary<int, HatDefinition> _hatsByItemDefinitionId = new();
+        private CallResult<SteamInventoryResultReady_t> _inventoryRequest;
 
         void OnEnable()
         {
+            CacheHatLookup();
+            RequestSteamInventory();
+            CacheDefaults();
             CharacterSelectionState.OnSelectedChanged += HandleSelectionChanged;
             SyncIndexWithSelection();
             SyncHatWithSelection();
@@ -41,6 +50,8 @@ namespace FF
         void OnDisable()
         {
             CharacterSelectionState.OnSelectedChanged -= HandleSelectionChanged;
+            _inventoryRequest?.Dispose();
+            _inventoryRequest = null;
         }
 
         public void Next()
@@ -154,16 +165,7 @@ namespace FF
             }
 
             HatDefinition hat = ResolveHatSelection(character);
-            if (hatNameText)
-            {
-                hatNameText.text = hat != null ? hat.DisplayName : "No Hat";
-            }
-
-            if (hatIconImage)
-            {
-                hatIconImage.enabled = hat != null && hat.Icon != null;
-                hatIconImage.sprite = hat != null ? hat.Icon : null;
-            }
+            UpdateHatDisplay(hat);
 
             Weapon weapon = character != null ? character.StartingWeapon : null;
             Weapon specialWeapon = character != null ? character.SpecialWeapon : null;
@@ -235,12 +237,20 @@ namespace FF
 
         private List<HatDefinition> GetHatsForCharacter(CharacterDefinition character)
         {
+            List<HatDefinition> hats = new();
+
             if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
             {
-                return character.AvailableHats;
+                hats.AddRange(character.AvailableHats);
+            }
+            else
+            {
+                hats.AddRange(availableHats);
             }
 
-            return availableHats;
+            AppendSteamHats(hats);
+
+            return hats;
         }
 
         private HatDefinition ResolveHatSelection(CharacterDefinition character)
@@ -293,6 +303,180 @@ namespace FF
                 {
                     specialItemIcons[i].enabled = false;
                     specialItemIcons[i].sprite = null;
+                }
+            }
+        }
+
+        private void UpdateHatDisplay(HatDefinition hat)
+        {
+            if (hatNameText)
+            {
+                hatNameText.text = hat != null ? hat.DisplayName : "No Hat";
+            }
+
+            if (hatRarityText)
+            {
+                hatRarityText.text = hat != null ? hat.RarityText : string.Empty;
+                hatRarityText.color = hat != null ? hat.RarityColor : _defaultHatRarityColor;
+            }
+
+            if (hatIconImage)
+            {
+                hatIconImage.enabled = hat != null && hat.Icon != null;
+                hatIconImage.sprite = hat != null ? hat.Icon : null;
+            }
+        }
+
+        private void CacheDefaults()
+        {
+            _defaultHatRarityColor = hatRarityText ? hatRarityText.color : _defaultHatRarityColor;
+        }
+
+        private void CacheHatLookup()
+        {
+            _hatsByItemDefinitionId.Clear();
+
+            foreach (HatDefinition hat in EnumerateAllHats())
+            {
+                if (!hat || hat.SteamItemDefinitionId == 0)
+                {
+                    continue;
+                }
+
+                if (!_hatsByItemDefinitionId.ContainsKey(hat.SteamItemDefinitionId))
+                {
+                    _hatsByItemDefinitionId.Add(hat.SteamItemDefinitionId, hat);
+                }
+            }
+        }
+
+        private IEnumerable<HatDefinition> EnumerateAllHats()
+        {
+            HashSet<HatDefinition> seen = new();
+
+            for (int i = 0; i < availableHats.Count; i++)
+            {
+                HatDefinition hat = availableHats[i];
+                if (hat && seen.Add(hat))
+                {
+                    yield return hat;
+                }
+            }
+
+            for (int i = 0; i < availableCharacters.Count; i++)
+            {
+                CharacterDefinition character = availableCharacters[i];
+                if (!character)
+                {
+                    continue;
+                }
+
+                if (character.DefaultHat && seen.Add(character.DefaultHat))
+                {
+                    yield return character.DefaultHat;
+                }
+
+                if (character.AvailableHats == null)
+                {
+                    continue;
+                }
+
+                for (int h = 0; h < character.AvailableHats.Count; h++)
+                {
+                    HatDefinition hat = character.AvailableHats[h];
+                    if (hat && seen.Add(hat))
+                    {
+                        yield return hat;
+                    }
+                }
+            }
+        }
+
+        private void AppendSteamHats(List<HatDefinition> hats)
+        {
+            if (_ownedSteamHats.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _ownedSteamHats.Count; i++)
+            {
+                HatDefinition ownedHat = _ownedSteamHats[i];
+                if (ownedHat && !hats.Contains(ownedHat))
+                {
+                    hats.Add(ownedHat);
+                }
+            }
+        }
+
+        private void RequestSteamInventory()
+        {
+            if (!SteamManager.Initialized)
+            {
+                return;
+            }
+
+            SteamInventoryResult_t handle;
+            if (!SteamInventory.GetAllItems(out handle))
+            {
+                Debug.LogWarning("[Steam] Failed to request inventory.");
+                return;
+            }
+
+            _inventoryRequest?.Dispose();
+            _inventoryRequest = CallResult<SteamInventoryResultReady_t>.Create(OnSteamInventoryReady);
+            _inventoryRequest.Set(handle);
+        }
+
+        private void OnSteamInventoryReady(SteamInventoryResultReady_t result, bool ioFailure)
+        {
+            SteamInventoryResult_t handle = result.m_handle;
+
+            if (ioFailure || result.m_result != EResult.k_EResultOK)
+            {
+                Debug.LogWarning($"[Steam] Inventory request failed ({result.m_result}). IO failure: {ioFailure}");
+                SteamInventory.DestroyResult(handle);
+                _inventoryRequest?.Dispose();
+                _inventoryRequest = null;
+                return;
+            }
+
+            UpdateOwnedHatsFromInventory(handle);
+            SteamInventory.DestroyResult(handle);
+
+            SyncHatWithSelection();
+            Refresh();
+
+            _inventoryRequest?.Dispose();
+            _inventoryRequest = null;
+        }
+
+        private void UpdateOwnedHatsFromInventory(SteamInventoryResult_t handle)
+        {
+            _ownedSteamHats.Clear();
+
+            HashSet<HatDefinition> addedHats = new();
+
+            uint itemCount = 0;
+            if (!SteamInventory.GetResultItems(handle, null, ref itemCount) || itemCount == 0)
+            {
+                return;
+            }
+
+            SteamItemDetails_t[] items = new SteamItemDetails_t[itemCount];
+            if (!SteamInventory.GetResultItems(handle, items, ref itemCount))
+            {
+                return;
+            }
+
+            for (int i = 0; i < itemCount; i++)
+            {
+                SteamItemDetails_t item = items[i];
+                int definitionId = item.m_iDefinition.m_SteamItemDef;
+
+                if (_hatsByItemDefinitionId.TryGetValue(definitionId, out HatDefinition hat) && hat && addedHats.Add(hat))
+                {
+                    _ownedSteamHats.Add(hat);
                 }
             }
         }
