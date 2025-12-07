@@ -70,6 +70,16 @@ namespace FF
             ActivateWeather(option);
         }
 
+        public void SetWeatherOptions(IEnumerable<WeatherOption> options)
+        {
+            weatherOptions = options != null ? new List<WeatherOption>(options) : new List<WeatherOption>();
+        }
+
+        public void SetChanceForNoWeather(float chance)
+        {
+            chanceForNoWeather = Mathf.Clamp01(chance);
+        }
+
         private void ActivateWeather(WeatherOption option)
         {
             if (option == null)
