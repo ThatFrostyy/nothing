@@ -39,7 +39,7 @@ namespace FF
         private int _lastKillCount;
         private int _killStatBase;
         private int _highestWave;
-        private bool _gameManagerHooked;
+        private bool _gameManagerHooked;//
         private bool _statsReady;
         private bool _waveTenUnlocked;
 
