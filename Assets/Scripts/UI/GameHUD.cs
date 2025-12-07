@@ -34,6 +34,8 @@ namespace FF
         [SerializeField] private InputActionReference upgradeAction;
         [SerializeField] private string upgradeBindingId = "d4d249ae-55f1-4a58-aef2-3913d718d7d7";
         [SerializeField] private InputActionReference interactAction;
+        [SerializeField] private string upgradeActionName = "Upgrade";
+        [SerializeField] private string interactActionName = "Interact";
         [SerializeField] private string interactBindingId = "1c04ea5f-b012-41d1-a6f7-02e963b52893";
 
         [SerializeField] private string timeFormat = "mm\\:ss";
@@ -236,6 +238,7 @@ namespace FF
             SceneManager.sceneLoaded += OnSceneLoaded;
             PlayerController.OnPlayerReady += HandlePlayerReady;
 
+            EnsureActionReferences();
             InputBindingManager.Initialize(ResolveInputAsset());
             InputBindingManager.OnBindingsChanged += HandleBindingsChanged;
             RefreshKeybindLabels();
@@ -474,6 +477,62 @@ namespace FF
         InputActionAsset ResolveInputAsset()
         {
             return upgradeAction?.action?.actionMap?.asset ?? interactAction?.action?.actionMap?.asset;
+        }
+
+        void EnsureActionReferences()
+        {
+            var asset = ResolveInputAsset();
+            if (asset == null)
+            {
+                var playerInput = FindObjectOfType<PlayerInput>();
+                asset = playerInput ? playerInput.actions : null;
+            }
+
+            upgradeAction = EnsureActionReference(upgradeAction, asset, upgradeBindingId, upgradeActionName);
+            interactAction = EnsureActionReference(interactAction, asset, interactBindingId, interactActionName);
+        }
+
+        static InputActionReference EnsureActionReference(InputActionReference reference, InputActionAsset asset, string bindingId, string actionName)
+        {
+            if (reference != null && reference.action != null)
+            {
+                return reference;
+            }
+
+            var action = FindActionForBinding(asset, bindingId, actionName);
+            if (action != null)
+            {
+                return InputActionReference.Create(action);
+            }
+
+            return reference;
+        }
+
+        static InputAction FindActionForBinding(InputActionAsset asset, string bindingId, string actionName)
+        {
+            if (asset != null && !string.IsNullOrEmpty(bindingId))
+            {
+                foreach (var map in asset.actionMaps)
+                {
+                    foreach (var action in map.actions)
+                    {
+                        for (int i = 0; i < action.bindings.Count; i++)
+                        {
+                            if (action.bindings[i].id.ToString() == bindingId)
+                            {
+                                return action;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (asset != null && !string.IsNullOrEmpty(actionName))
+            {
+                return asset.FindAction(actionName, false);
+            }
+
+            return null;
         }
 
         void HandleHealthChanged(int current, int max)
