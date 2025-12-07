@@ -248,7 +248,7 @@ namespace FF
             if (playerHealth != null) playerHealth.OnHealthChanged += HandleHealthChanged;
             if (wallet != null) wallet.OnXPChanged += HandleXPChanged;
 
-            // FIX: Ensure we are bound to the correct manager on enable
+            // FIX: Ensure we are bound to the correct manager on enable//
             RefreshUpgradeManagerReference();
             BindWeaponManager(weaponManager);
 

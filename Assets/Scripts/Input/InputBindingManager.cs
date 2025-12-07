@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -111,7 +112,7 @@ namespace FF
             OnBindingsChanged?.Invoke();
         }
 
-        private static void SaveOverrides()
+        public static void SaveOverrides()
         {
             if (_asset == null)
             {
@@ -143,7 +144,7 @@ namespace FF
 
             if (!string.IsNullOrEmpty(bindingId))
             {
-                int foundIndex = action.bindings.FindIndex(b => b.id.ToString() == bindingId || b.name == bindingId);
+                int foundIndex = action.bindings.ToList().FindIndex(b => b.id.ToString() == bindingId || b.name == bindingId);
                 if (foundIndex >= 0)
                 {
                     return foundIndex;

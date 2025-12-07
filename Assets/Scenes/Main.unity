@@ -2348,6 +2348,7 @@ MonoBehaviour:
   settingsGroup: {fileID: 0}
   settingsRoot: {fileID: 0}
   musicSettingsUI: {fileID: 0}
+  keybindSettingsUI: {fileID: 0}
   sceneFlow: {fileID: 0}
   deathClip: {fileID: 8300000, guid: 01a717beb0477de48aab9c0ed9bc0552, type: 3}
   deathEffectPrefab: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
@@ -6715,6 +6716,7 @@ MonoBehaviour:
   playerBody: {fileID: 1207903158}
   spawnPoint: {fileID: 1202479935}
   moveEffectPrefab: {fileID: 1676495797548180, guid: 0d15d5bd206ea2944890db26e55e5776, type: 3}
+  useMapSpecificEffect: 1
   minSpeedForEffect: 0.5
   spawnInterval: 0.18
   alignToVelocity: 1
@@ -7501,8 +7503,12 @@ MonoBehaviour:
   xpFillImage: {fileID: 658359175}
   upgradePromptText: {fileID: 1612907682}
   upgradePromptGroup: {fileID: 1612907681}
-  upgradeKeyLabel: Tab
-  interactKeyLabel: F
+  upgradeKeyLabel: test
+  interactKeyLabel: test
+  upgradeAction: {fileID: 0}
+  upgradeBindingId: d4d249ae-55f1-4a58-aef2-3913d718d7d7
+  interactAction: {fileID: 0}
+  interactBindingId: 1c04ea5f-b012-41d1-a6f7-02e963b52893
   timeFormat: mm\:ss
   healthPulseTarget: {fileID: 2001000101}
   xpPulseTarget: {fileID: 1358656901}
