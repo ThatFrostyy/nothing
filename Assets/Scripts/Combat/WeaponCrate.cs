@@ -19,11 +19,14 @@ namespace FF
         [Header("Effects")]
         [SerializeField] private GameObject breakFx;
         [SerializeField] private AudioClip breakSfx;
+        [SerializeField] private AudioClip hitSfx;
+        [SerializeField, Min(0f)] private float hitSfxCooldown = 0.05f;
 
         private Health _health;
         private float _lifetimeTimer;
         private bool _isBroken;
         private bool _isExpired;
+        private float _hitSfxTimer;
 
         private static readonly HashSet<WeaponCrate> activeCrates = new();
 
@@ -62,10 +65,12 @@ namespace FF
             _lifetimeTimer = 0f;
             _isBroken = false;
             _isExpired = false;
+            _hitSfxTimer = 0f;
 
             if (_health)
             {
                 _health.OnDeath += HandleBroken;
+                _health.OnDamaged += HandleDamaged;
             }
 
             activeCrates.Add(this);
@@ -73,6 +78,11 @@ namespace FF
 
         void Update()
         {
+            if (_hitSfxTimer > 0f)
+            {
+                _hitSfxTimer -= Time.deltaTime;
+            }
+
             if (_isBroken || _isExpired)
             {
                 return;
@@ -93,6 +103,7 @@ namespace FF
             if (_health)
             {
                 _health.OnDeath -= HandleBroken;
+                _health.OnDamaged -= HandleDamaged;
             }
 
             activeCrates.Remove(this);
@@ -112,6 +123,22 @@ namespace FF
             PlayBreakSfx();
 
             OnBroken?.Invoke(this);
+        }
+
+        void HandleDamaged(int amount)
+        {
+            if (_isBroken || _isExpired)
+            {
+                return;
+            }
+
+            if (_hitSfxTimer > 0f)
+            {
+                return;
+            }
+
+            PlayHitSfx();
+            _hitSfxTimer = hitSfxCooldown;
         }
 
         void TriggerExpired()
@@ -170,6 +197,16 @@ namespace FF
             }
 
             AudioPlaybackPool.PlayOneShot(breakSfx, transform.position);
+        }
+
+        void PlayHitSfx()
+        {
+            if (!hitSfx)
+            {
+                return;
+            }
+
+            AudioPlaybackPool.PlayOneShot(hitSfx, transform.position);
         }
     }
 }

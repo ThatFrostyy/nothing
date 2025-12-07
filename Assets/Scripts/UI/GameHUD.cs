@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Playables;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -30,6 +31,10 @@ namespace FF
         [SerializeField] private CanvasGroup upgradePromptGroup;
         [SerializeField] private string upgradeKeyLabel = "Tab";
         [SerializeField] private string interactKeyLabel = "E";
+        [SerializeField] private InputActionReference upgradeAction;
+        [SerializeField] private string upgradeBindingId = "d4d249ae-55f1-4a58-aef2-3913d718d7d7";
+        [SerializeField] private InputActionReference interactAction;
+        [SerializeField] private string interactBindingId = "1c04ea5f-b012-41d1-a6f7-02e963b52893";
 
         [SerializeField] private string timeFormat = "mm\\:ss";
 
@@ -231,6 +236,10 @@ namespace FF
             SceneManager.sceneLoaded += OnSceneLoaded;
             PlayerController.OnPlayerReady += HandlePlayerReady;
 
+            InputBindingManager.Initialize(ResolveInputAsset());
+            InputBindingManager.OnBindingsChanged += HandleBindingsChanged;
+            RefreshKeybindLabels();
+
             if (gameManager != null)
             {
                 gameManager.OnKillCountChanged += HandleKillCountChanged;
@@ -251,6 +260,8 @@ namespace FF
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
             PlayerController.OnPlayerReady -= HandlePlayerReady;
+
+            InputBindingManager.OnBindingsChanged -= HandleBindingsChanged;
 
             if (gameManager != null)
             {
@@ -439,6 +450,30 @@ namespace FF
                 HandlePendingUpgradesChanged(upgradeManager.GetPendingUpgradeCount());
             else
                 RefreshUpgradePrompt();
+        }
+
+        void HandleBindingsChanged()
+        {
+            RefreshKeybindLabels();
+            RefreshUpgradePrompt();
+        }
+
+        void RefreshKeybindLabels()
+        {
+            if (upgradeAction)
+            {
+                upgradeKeyLabel = InputBindingManager.GetBindingDisplay(upgradeAction, upgradeBindingId, 0, upgradeKeyLabel);
+            }
+
+            if (interactAction)
+            {
+                interactKeyLabel = InputBindingManager.GetBindingDisplay(interactAction, interactBindingId, 0, interactKeyLabel);
+            }
+        }
+
+        InputActionAsset ResolveInputAsset()
+        {
+            return upgradeAction?.action?.actionMap?.asset ?? interactAction?.action?.actionMap?.asset;
         }
 
         void HandleHealthChanged(int current, int max)
