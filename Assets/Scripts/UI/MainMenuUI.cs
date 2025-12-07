@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -15,6 +16,10 @@ namespace FF
         [SerializeField] private TMP_Text topWaveStatText;
         [SerializeField] private TMP_Text leaderboardText;
         [SerializeField] private string unavailableText = "Unavailable";
+        [Header("Map Selection")]
+        [SerializeField] private TMP_Text mapNameText;
+        [SerializeField] private TMP_Text mapDescriptionText;
+        [SerializeField] private List<MapDefinition> availableMaps = new();
 
 #if !DISABLESTEAMWORKS
         private const string KillStatName = "total_kills";
@@ -28,6 +33,8 @@ namespace FF
         private SteamLeaderboard_t _killLeaderboard;
 #endif
 
+        private int _mapIndex;
+
         void Awake()
         {
             if (!sceneFlow)
@@ -36,12 +43,71 @@ namespace FF
             }
         }
 
+        void OnEnable()
+        {
+            MapSelectionState.OnMapChanged += HandleMapChanged;
+            SyncMapIndexWithSelection();
+            RefreshMapText();
+
+#if !DISABLESTEAMWORKS
+            if (!SteamManager.Initialized)
+            {
+                return;
+            }
+
+            _userStatsReceived = Callback<UserStatsReceived_t>.Create(HandleStatsReceived);
+            _leaderboardFindResult = CallResult<LeaderboardFindResult_t>.Create(HandleKillLeaderboardFound);
+            _leaderboardScoresDownloaded = CallResult<LeaderboardScoresDownloaded_t>.Create(HandleLeaderboardScoresDownloaded);
+#endif
+        }
+
         public void StartGame()
         {
+            MapDefinition selectedMap = ResolveSelectedMap();
+            if (selectedMap != null)
+            {
+                MapSelectionState.SetSelection(selectedMap);
+            }
+
             if (sceneFlow)
             {
                 sceneFlow.LoadGameplayScene();
             }
+        }
+
+        public void NextMap()
+        {
+            StepMap(1);
+        }
+
+        public void PreviousMap()
+        {
+            StepMap(-1);
+        }
+
+        private void StepMap(int delta)
+        {
+            if (availableMaps.Count == 0)
+            {
+                return;
+            }
+
+            _mapIndex = Mathf.FloorToInt(Mathf.Repeat(_mapIndex + delta, availableMaps.Count));
+            MapDefinition map = ResolveSelectedMap();
+            MapSelectionState.SetSelection(map);
+            RefreshMapText();
+        }
+
+        private void SyncMapIndexWithSelection()
+        {
+            if (availableMaps.Count == 0)
+            {
+                _mapIndex = 0;
+                return;
+            }
+
+            int foundIndex = availableMaps.IndexOf(MapSelectionState.SelectedMap);
+            _mapIndex = foundIndex >= 0 ? foundIndex : Mathf.Clamp(_mapIndex, 0, availableMaps.Count - 1);
         }
 
         public void QuitGame()
@@ -65,27 +131,17 @@ namespace FF
 #endif
         }
 
-#if !DISABLESTEAMWORKS
-        void OnEnable()
-        {
-            if (!SteamManager.Initialized)
-            {
-                return;
-            }
-
-            _userStatsReceived = Callback<UserStatsReceived_t>.Create(HandleStatsReceived);
-            _leaderboardFindResult = CallResult<LeaderboardFindResult_t>.Create(HandleKillLeaderboardFound);
-            _leaderboardScoresDownloaded = CallResult<LeaderboardScoresDownloaded_t>.Create(HandleLeaderboardScoresDownloaded);
-        }
-
         void OnDisable()
         {
+            MapSelectionState.OnMapChanged -= HandleMapChanged;
+
+#if !DISABLESTEAMWORKS
             _userStatsReceived = null;
             _leaderboardFindResult = null;
             _leaderboardScoresDownloaded = null;
             _killLeaderboard = default;
+#endif
         }
-
         private void HandleStatsReceived(UserStatsReceived_t result)
         {
             if (result.m_eResult != EResult.k_EResultOK)
@@ -115,6 +171,7 @@ namespace FF
                 UpdateTopWaveText(null);
             }
         }
+#endif
 
         private void RequestKillLeaderboard()
         {
@@ -204,6 +261,39 @@ namespace FF
             }
         }
 #endif
+
+        private void HandleMapChanged(MapDefinition _)
+        {
+            SyncMapIndexWithSelection();
+            RefreshMapText();
+        }
+
+        private MapDefinition ResolveSelectedMap()
+        {
+            if (availableMaps.Count == 0)
+            {
+                return null;
+            }
+
+            _mapIndex = Mathf.Clamp(_mapIndex, 0, availableMaps.Count - 1);
+            return availableMaps[_mapIndex];
+        }
+
+        private void RefreshMapText()
+        {
+            MapDefinition map = ResolveSelectedMap();
+            if (mapNameText)
+            {
+                mapNameText.text = map ? map.MapName : unavailableText;
+            }
+
+            if (mapDescriptionText)
+            {
+                mapDescriptionText.text = map && !string.IsNullOrWhiteSpace(map.Description)
+                    ? map.Description
+                    : string.Empty;
+            }
+        }
 
         private void ShowUnavailableText()
         {
