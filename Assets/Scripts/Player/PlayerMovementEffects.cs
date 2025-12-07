@@ -8,6 +8,7 @@ namespace FF
         [SerializeField] private Rigidbody2D playerBody;
         [SerializeField] private Transform spawnPoint;
         [SerializeField] private GameObject moveEffectPrefab;
+        [SerializeField] private bool useMapSpecificEffect = true;
 
         [Header("Behaviour")]
         [SerializeField, Min(0f)] private float minSpeedForEffect = 0.5f;
@@ -18,6 +19,7 @@ namespace FF
 
         private float spawnTimer;
         private GameObjectPool moveEffectPool;
+        private GameObject defaultMoveEffectPrefab;
 
         private void Awake()
         {
@@ -31,10 +33,22 @@ namespace FF
                 spawnPoint = transform;
             }
 
+            defaultMoveEffectPrefab = moveEffectPrefab;
             if (moveEffectPrefab)
             {
                 moveEffectPool = PoolManager.GetPool(moveEffectPrefab, poolPrewarmCount, transform);
             }
+        }
+
+        private void OnEnable()
+        {
+            MapSelectionState.OnMapChanged += HandleMapChanged;
+            ApplyMapEffect(MapSelectionState.SelectedMap);
+        }
+
+        private void OnDisable()
+        {
+            MapSelectionState.OnMapChanged -= HandleMapChanged;
         }
 
         private void Update()
@@ -60,6 +74,34 @@ namespace FF
             }
 
             SpawnEffect(velocity);
+        }
+
+        private void HandleMapChanged(MapDefinition map)
+        {
+            ApplyMapEffect(map);
+        }
+
+        private void ApplyMapEffect(MapDefinition map)
+        {
+            if (!useMapSpecificEffect)
+            {
+                return;
+            }
+
+            GameObject chosenPrefab = map && map.MovementEffectOverride
+                ? map.MovementEffectOverride
+                : defaultMoveEffectPrefab;
+
+            if (chosenPrefab == moveEffectPrefab)
+            {
+                return;
+            }
+
+            moveEffectPrefab = chosenPrefab;
+            if (moveEffectPrefab)
+            {
+                moveEffectPool = PoolManager.GetPool(moveEffectPrefab, poolPrewarmCount, transform);
+            }
         }
 
         private void SpawnEffect(Vector2 velocity)

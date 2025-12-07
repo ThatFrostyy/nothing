@@ -29,6 +29,7 @@ namespace FF
         [SerializeField] private CanvasGroup settingsGroup;
         [SerializeField] private GameObject settingsRoot;
         [SerializeField] private MusicSettingsUI musicSettingsUI;
+        [SerializeField] private KeybindSettingsUI keybindSettingsUI;
 
         [Header("Flow")]
         [SerializeField] private SceneFlowController sceneFlow;
@@ -270,6 +271,11 @@ namespace FF
             if (musicSettingsUI)
             {
                 musicSettingsUI.RefreshDisplay();
+            }
+
+            if (keybindSettingsUI)
+            {
+                keybindSettingsUI.RefreshDisplay();
             }
         }
 

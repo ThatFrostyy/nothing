@@ -19,6 +19,9 @@ namespace FF
         [SerializeField] private List<WeatherRandomizer.WeatherOption> availableWeather = new();
         [SerializeField, Range(0f, 1f)] private float chanceForNoWeather = 0.1f;
 
+        [Header("Gameplay Overrides")]
+        public GameObject MovementEffectOverride;
+
         public IReadOnlyList<WeatherRandomizer.WeatherOption> AvailableWeather => availableWeather;
         public float ChanceForNoWeather => chanceForNoWeather;
     }
