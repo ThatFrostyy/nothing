@@ -19,6 +19,7 @@ namespace FF
         [SerializeField] private UpgradeManager _upgradeManager;
         [SerializeField] private WeaponManager _weaponManager;
         [SerializeField] private Weapon _startingWeapon;
+        [SerializeField] private CharacterAbilityController _abilityController;
 
         [Header("Aiming Line")]
         [SerializeField] private bool _showAimingLine = true;
@@ -63,6 +64,12 @@ namespace FF
             }
             _weaponManager = _weaponManager ? _weaponManager : GetComponentInChildren<WeaponManager>();
             _cosmetics = _cosmetics ? _cosmetics : GetComponent<PlayerCosmetics>();
+            _abilityController = _abilityController ? _abilityController : GetComponent<CharacterAbilityController>();
+
+            if (!_abilityController)
+            {
+                _abilityController = gameObject.AddComponent<CharacterAbilityController>();
+            }
 
             if (!_cosmetics && _playerVisual)
             {
@@ -350,6 +357,7 @@ namespace FF
         public void OnMove(InputValue value)
         {
             _moveInput = value.Get<Vector2>();
+            _abilityController?.UpdateMoveInput(_moveInput);
         }
 
         public void OnAttack(InputValue value)

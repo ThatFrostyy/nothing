@@ -12,6 +12,8 @@ namespace FF
         [SerializeField] private Color normalColor = new(1f, 0.92f, 0.84f);
         [SerializeField] private Color highlightColor = new(1f, 0.55f, 0.2f);
         [SerializeField] private float emphasizedScale = 1.2f;
+        [SerializeField] private Color statusColor = new(0.75f, 0.85f, 1f);
+        [SerializeField, Min(0.1f)] private float statusScale = 1f;
 
         private DamageNumber _runtimePrefab;
 
@@ -53,6 +55,21 @@ namespace FF
             _instance?.SpawnDamageNumber(position, amount, emphasized);
         }
 
+        public static void ShowText(Vector3 position, string text, Color? colorOverride = null, float sizeMultiplier = 0f)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            if (!_instance)
+            {
+                CreateInstance();
+            }
+
+            _instance?.SpawnText(position, text, colorOverride ?? _instance.statusColor, sizeMultiplier);
+        }
+
         private void SpawnDamageNumber(Vector3 position, int amount, bool emphasized)
         {
             DamageNumber prefab = ResolvePrefab();
@@ -68,6 +85,22 @@ namespace FF
             if (instance)
             {
                 instance.Play(position, amount, color, scale);
+            }
+        }
+
+        private void SpawnText(Vector3 position, string text, Color color, float sizeMultiplier)
+        {
+            DamageNumber prefab = ResolvePrefab();
+            if (!prefab)
+            {
+                return;
+            }
+
+            float scale = sizeMultiplier > 0f ? sizeMultiplier : statusScale;
+            DamageNumber instance = PoolManager.GetComponent(prefab, position, Quaternion.identity);
+            if (instance)
+            {
+                instance.PlayText(position, text, color, scale);
             }
         }
 

@@ -17,6 +17,7 @@ namespace FF
         [SerializeField] private XPWallet wallet;
         [SerializeField] private WeaponManager weaponManager;
         [SerializeField] private UpgradeManager upgradeManager;
+        [SerializeField] private CanvasGroup rootCanvasGroup;
 
         [Header("UI References")]
         [SerializeField] private TMP_Text healthValueText;
@@ -170,6 +171,15 @@ namespace FF
                 }
             }
 
+            if (!rootCanvasGroup)
+            {
+                rootCanvasGroup = GetComponent<CanvasGroup>();
+                if (!rootCanvasGroup)
+                {
+                    rootCanvasGroup = gameObject.AddComponent<CanvasGroup>();
+                }
+            }
+
             if (!getReadyGroup && getReadyText)
             {
                 getReadyGroup = getReadyText.GetComponent<CanvasGroup>();
@@ -205,6 +215,8 @@ namespace FF
             InitializeGetReady();
             InitializeWaveFlash();
             RefreshUpgradePrompt();
+
+            ApplySceneVisibility(SceneManager.GetActiveScene());
         }
 
         void OnDestroy()
@@ -306,9 +318,51 @@ namespace FF
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            ApplySceneVisibility(scene);
+
+            if (!IsGameplayScene(scene))
+            {
+                return;
+            }
+
             TryBindAll();
             RefreshAll();
             SyncFillImmediately();
+        }
+
+        private void ApplySceneVisibility(Scene scene)
+        {
+            bool isGameplay = IsGameplayScene(scene);
+
+            if (rootCanvasGroup)
+            {
+                rootCanvasGroup.alpha = isGameplay ? 1f : 0f;
+                rootCanvasGroup.interactable = isGameplay;
+                rootCanvasGroup.blocksRaycasts = isGameplay;
+            }
+
+            if (!isGameplay)
+            {
+                upgradePromptTimer = 0f;
+            }
+        }
+
+        private bool IsGameplayScene(Scene scene)
+        {
+            string gameplayName = SceneFlowController.Instance ? SceneFlowController.Instance.GameplaySceneName : string.Empty;
+            string menuName = SceneFlowController.Instance ? SceneFlowController.Instance.MainMenuSceneName : string.Empty;
+
+            if (!string.IsNullOrEmpty(gameplayName) && scene.name.Equals(gameplayName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrEmpty(menuName) && scene.name.Equals(menuName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return scene.name.Equals("Main", StringComparison.OrdinalIgnoreCase);
         }
 
         private void TryBindAll()
