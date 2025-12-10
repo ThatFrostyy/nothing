@@ -270,19 +270,19 @@ namespace FF
         {
             List<HatDefinition> hats = new();
 
-� � � � � � // 1. Character-specific hats (always available if configured for the character)
-� � � � � � if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
+            // 1. Character-specific hats (always available if configured for the character)
+           if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
             {
                 hats.AddRange(character.AvailableHats);
             }
             else
             {
-� � � � � � � � // 2. Global default hats (always available to all characters)
-� � � � � � � � hats.AddRange(availableHats);
+             // 2. Global default hats (always available to all characters)
+            hats.AddRange(availableHats);
             }
 
-� � � � � � // 3. Steam-owned hats (added only if the Steam Inventory reported them as owned)
-� � � � � � AppendSteamHats(hats);
+            // 3. Steam-owned hats (added only if the Steam Inventory reported them as owned)
+            AppendSteamHats(hats);
 
             return hats;
         }
@@ -370,8 +370,8 @@ namespace FF
         {
             _hatsByItemDefinitionId.Clear();
 
-� � � � � � // We cache ALL hats (global, character-specific, and steam-only) for the Steam lookup
-� � � � � � foreach (HatDefinition hat in EnumerateAllHats())
+      // We cache ALL hats (global, character-specific, and steam-only) for the Steam lookup
+      foreach (HatDefinition hat in EnumerateAllHats())
             {
                 if (!hat || hat.SteamItemDefinitionId == 0)
                 {
@@ -389,8 +389,8 @@ namespace FF
         {
             HashSet<HatDefinition> seen = new();
 
-� � � � � � // Add Global Hats (AvailableHats)
-� � � � � � for (int i = 0; i < availableHats.Count; i++)
+      // Add Global Hats (AvailableHats)
+      for (int i = 0; i < availableHats.Count; i++)
             {
                 HatDefinition hat = availableHats[i];
                 if (hat && seen.Add(hat))
@@ -399,8 +399,8 @@ namespace FF
                 }
             }
 
-� � � � � � // Add Hats from Character Definitions (DefaultHat and AvailableHats)
-� � � � � � for (int i = 0; i < availableCharacters.Count; i++)
+      // Add Hats from Character Definitions (DefaultHat and AvailableHats)
+      for (int i = 0; i < availableCharacters.Count; i++)
             {
                 CharacterDefinition character = availableCharacters[i];
                 if (!character) continue;
@@ -422,8 +422,7 @@ namespace FF
                 }
             }
 
-� � � � � � // NEW: Add Steam-Only Hats to the cache lookup
-� � � � � � for (int i = 0; i < steamOnlyHats.Count; i++)
+             for (int i = 0; i < steamOnlyHats.Count; i++)
             {
                 HatDefinition hat = steamOnlyHats[i];
                 if (hat && seen.Add(hat))

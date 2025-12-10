@@ -15,7 +15,7 @@ MonoBehaviour:
   DisplayName: US Airman
   Description: Equipped with a M1 Garand and a automatic M2 Carbine. Bold and aggressive,
     can deal incredible bonus damage with rifles.
-  AbilityId: Default
+  AbilityId: sharpshooter
   Portrait: {fileID: 21300000, guid: 957aedc587fd19a49a0689cbfaa3aeb9, type: 3}
   PlayerSprite: {fileID: 21300000, guid: 957aedc587fd19a49a0689cbfaa3aeb9, type: 3}
   DefaultHat: {fileID: 11400000, guid: b0c38d26c188c6747b10d403bd016f61, type: 2}

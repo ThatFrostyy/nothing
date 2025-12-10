@@ -15,7 +15,7 @@ MonoBehaviour:
   DisplayName: US Ranger
   Description: Armed with an BAR and a poweful M1A1 Bazooka. Steady and reliable,
     can supress many enemies in an area.
-  AbilityId: Default
+  AbilityId: suppress
   Portrait: {fileID: 21300000, guid: 74670c89a1f639c45982179bc0df8d1f, type: 3}
   PlayerSprite: {fileID: 21300000, guid: 74670c89a1f639c45982179bc0df8d1f, type: 3}
   DefaultHat: {fileID: 11400000, guid: 1d5f8028d62e0544388964a158543185, type: 2}

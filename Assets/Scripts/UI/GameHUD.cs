@@ -538,7 +538,7 @@ namespace FF
             var asset = ResolveInputAsset();
             if (asset == null)
             {
-                var playerInput = FindObjectOfType<PlayerInput>();
+                var playerInput = FindFirstObjectByType<PlayerInput>();
                 asset = playerInput ? playerInput.actions : null;
             }
 

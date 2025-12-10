@@ -951,6 +951,8 @@ MonoBehaviour:
   normalColor: {r: 1, g: 0.366525, b: 0.06132078, a: 1}
   highlightColor: {r: 1, g: 0, b: 0, a: 1}
   emphasizedScale: 1
+  statusColor: {r: 0.75, g: 0.85, b: 1, a: 1}
+  statusScale: 1
 --- !u!4 &301909244
 Transform:
   m_ObjectHideFlags: 0
@@ -6191,6 +6193,7 @@ GameObject:
   - component: {fileID: 1207903162}
   - component: {fileID: 1207903165}
   - component: {fileID: 1207903166}
+  - component: {fileID: 1207903167}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -6319,6 +6322,7 @@ MonoBehaviour:
   _upgradeManager: {fileID: 0}
   _weaponManager: {fileID: 1207903161}
   _startingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
+  _abilityController: {fileID: 0}
   _showAimingLine: 1
   _aimLineLength: 2.5
   _aimLineDashLength: 0.2
@@ -6679,6 +6683,31 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.PlayerCosmetics
   bodyRenderer: {fileID: 507405424}
   hatAnchor: {fileID: 1819971725}
+--- !u!114 &1207903167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1207903151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a700bea38fad2674e9889d17aef40988, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterAbilityController
+  abilityIdOverride: 
+  dashSpeedMultiplier: 2.25
+  dashDuration: 0.35
+  dashCooldown: 2.5
+  suppressionRadius: 6
+  suppressionSpeedMultiplier: 0.65
+  suppressionDuration: 3.5
+  suppressionPulseInterval: 0.75
+  suppressionFireRateMultiplier: 0.8
+  suppressionTextColor: {r: 1, g: 0.24495545, b: 0, a: 1}
+  suppressionTextScale: 0.5
+  sharpshooterCritBonus: 0.35
+  sharpshooterCritDamageMult: 1.5
 --- !u!1 &1262527578
 GameObject:
   m_ObjectHideFlags: 0
@@ -7436,6 +7465,7 @@ MonoBehaviour:
   wallet: {fileID: 1207903163}
   weaponManager: {fileID: 1207903161}
   upgradeManager: {fileID: 0}
+  rootCanvasGroup: {fileID: 0}
   healthValueText: {fileID: 2001000303}
   healthFillImage: {fileID: 2001000203}
   killCountText: {fileID: 994975255}
