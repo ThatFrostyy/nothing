@@ -9,7 +9,10 @@ namespace FF
         ProjectileSpeed,
         Pierce,
         ExtraProjectiles,
-        FireCooldownReduction
+        FireCooldownReduction,
+        CritChance,
+        CritDamage,
+        Accuracy
     }
 
     [System.Serializable]
@@ -59,6 +62,9 @@ namespace FF
         int pierceCount;
         int extraProjectiles;
         float fireCooldownReduction;
+        float critChanceBonus;
+        float critDamageBonus;
+        float accuracyBonus;
 
         public WeaponUpgradeState(Weapon weapon)
         {
@@ -70,6 +76,9 @@ namespace FF
             pierceCount = 0;
             extraProjectiles = 0;
             fireCooldownReduction = 0f;
+            critChanceBonus = 0f;
+            critDamageBonus = 0f;
+            accuracyBonus = 0f;
         }
 
         public void Apply(WeaponUpgradeOption option)
@@ -97,6 +106,15 @@ namespace FF
                 case WeaponUpgradeType.FireCooldownReduction:
                     fireCooldownReduction += amount;
                     break;
+                case WeaponUpgradeType.CritChance:
+                    critChanceBonus += amount;
+                    break;
+                case WeaponUpgradeType.CritDamage:
+                    critDamageBonus += amount;
+                    break;
+                case WeaponUpgradeType.Accuracy:
+                    accuracyBonus += amount;
+                    break;
             }
         }
 
@@ -106,5 +124,8 @@ namespace FF
         public int GetPierceCount() => pierceCount;
         public int GetExtraProjectiles() => extraProjectiles;
         public float GetFireCooldownMultiplier() => Mathf.Max(0.1f, 1f - fireCooldownReduction);
+        public float GetCritChanceBonus() => Mathf.Clamp01(critChanceBonus);
+        public float GetCritDamageMultiplier() => 1f + critDamageBonus;
+        public float GetAccuracyMultiplier() => Mathf.Max(0.1f, 1f - accuracyBonus);
     }
 }
