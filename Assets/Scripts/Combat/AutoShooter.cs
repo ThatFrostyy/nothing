@@ -225,7 +225,9 @@ namespace FF
             {
                 movementPenalty = _stats.GetMovementAccuracyPenalty();
             }
-            float targetSpread = _weapon.baseSpread * (isMoving ? movementPenalty : 1f);
+            float accuracyMultiplier = GetAccuracyMultiplier();
+            float adjustedBaseSpread = _weapon.baseSpread * accuracyMultiplier;
+            float targetSpread = adjustedBaseSpread * (isMoving ? movementPenalty : 1f);
             _currentSpread = Mathf.Lerp(_currentSpread, targetSpread, deltaTime * _weapon.spreadRecoverySpeed);
 
             UpdateRecoil(deltaTime);
@@ -235,7 +237,9 @@ namespace FF
         #region Recoil & Shooting
         private void Shoot(float? grenadeSpeedOverride = null)
         {
-            _currentSpread += _weapon.spreadIncreasePerShot;
+            float accuracyMultiplier = GetAccuracyMultiplier();
+            float spreadIncrease = _weapon.spreadIncreasePerShot * accuracyMultiplier;
+            _currentSpread += spreadIncrease;
 
             bool isMoving = _playerBody && _playerBody.linearVelocity.magnitude > 0.1f;
             float movementPenalty = 1f;
@@ -243,8 +247,10 @@ namespace FF
             {
                 movementPenalty = _stats.GetMovementAccuracyPenalty();
             }
-            float maxSpread = _weapon.maxSpread * (isMoving ? movementPenalty : 1f);
-            _currentSpread = Mathf.Clamp(_currentSpread, _weapon.baseSpread, maxSpread);
+            float adjustedBaseSpread = _weapon.baseSpread * accuracyMultiplier;
+            float adjustedMaxSpread = _weapon.maxSpread * accuracyMultiplier;
+            float maxSpread = adjustedMaxSpread * (isMoving ? movementPenalty : 1f);
+            _currentSpread = Mathf.Clamp(_currentSpread, adjustedBaseSpread, maxSpread);
 
             float angleOffset = UnityEngine.Random.Range(-_currentSpread, _currentSpread);
             Quaternion spreadRotation = _muzzle.rotation * Quaternion.AngleAxis(angleOffset, Vector3.forward);
@@ -443,6 +449,13 @@ namespace FF
             }
             float critChance = _stats != null ? _stats.GetCritChance() : 0f;
             float critDamageMultiplier = _stats != null ? _stats.GetCritDamageMultiplier() : 1f;
+            if (UpgradeManager.I != null)
+            {
+                critChance += UpgradeManager.I.GetWeaponCritChance(_weapon);
+                critDamageMultiplier *= UpgradeManager.I.GetWeaponCritDamageMultiplier(_weapon);
+            }
+
+            critChance = Mathf.Clamp01(critChance);
 
             bool didCrit = critChance > 0f && UnityEngine.Random.value < critChance;
             isCrit = didCrit;
@@ -469,6 +482,11 @@ namespace FF
             }
 
             return projectileSpeedMultiplier;
+        }
+
+        private float GetAccuracyMultiplier()
+        {
+            return UpgradeManager.I != null ? UpgradeManager.I.GetWeaponAccuracyMultiplier(_weapon) : 1f;
         }
 
         private static bool IsInSlowmo()

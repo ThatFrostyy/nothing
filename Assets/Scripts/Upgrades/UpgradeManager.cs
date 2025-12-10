@@ -462,7 +462,10 @@ namespace FF
                 WeaponUpgradeType.Damage,
                 WeaponUpgradeType.FireRate,
                 WeaponUpgradeType.ProjectileSpeed,
-                WeaponUpgradeType.FireCooldownReduction
+                WeaponUpgradeType.FireCooldownReduction,
+                WeaponUpgradeType.CritChance,
+                WeaponUpgradeType.CritDamage,
+                WeaponUpgradeType.Accuracy
             };
 
             foreach (var request in requests)
@@ -895,6 +898,9 @@ namespace FF
                 WeaponUpgradeType.Pierce => "Piercing Rounds",
                 WeaponUpgradeType.ExtraProjectiles => "Multi-Shot",
                 WeaponUpgradeType.FireCooldownReduction => "Cooldown Reduction",
+                WeaponUpgradeType.CritChance => "Critical Chance",
+                WeaponUpgradeType.CritDamage => "Critical Damage",
+                WeaponUpgradeType.Accuracy => "Accuracy Boost",
                 _ => "Upgrade"
             };
 
@@ -912,6 +918,9 @@ namespace FF
                 WeaponUpgradeType.Pierce => $"Pierce {flatAmount} additional enemies.",
                 WeaponUpgradeType.ExtraProjectiles => $"Fire {flatAmount} extra projectile{(flatAmount == 1 ? string.Empty : "s")}.",
                 WeaponUpgradeType.FireCooldownReduction => "Reduce weapon cooldown by ",
+                WeaponUpgradeType.CritChance => "Increase critical chance by ",
+                WeaponUpgradeType.CritDamage => "Increase critical damage by ",
+                WeaponUpgradeType.Accuracy => "Improve accuracy by ",
                 _ => "Boost weapon performance by "
             };
 
@@ -924,6 +933,9 @@ namespace FF
                 WeaponUpgradeType.Pierce => "#7EC8E3",
                 WeaponUpgradeType.ExtraProjectiles => "#A36FF0",
                 WeaponUpgradeType.FireCooldownReduction => "#7FD1C9",
+                WeaponUpgradeType.CritChance => "#FF9F1C",
+                WeaponUpgradeType.CritDamage => "#F94144",
+                WeaponUpgradeType.Accuracy => "#4ECDC4",
                 _ => "#FFD966"
             };
 
@@ -1015,6 +1027,21 @@ namespace FF
         public int GetWeaponExtraProjectiles(Weapon weapon)
         {
             return TryGetWeaponState(weapon, out var state) ? state.GetExtraProjectiles() : 0;
+        }
+
+        public float GetWeaponCritChance(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetCritChanceBonus() : 0f;
+        }
+
+        public float GetWeaponCritDamageMultiplier(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetCritDamageMultiplier() : 1f;
+        }
+
+        public float GetWeaponAccuracyMultiplier(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetAccuracyMultiplier() : 1f;
         }
 
         public float ClampFireRateMultiplier(float value)

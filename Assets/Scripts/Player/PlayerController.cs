@@ -376,6 +376,21 @@ namespace FF
             _autoShooter.OnFire(value);
         }
 
+        public void OnDash(InputValue value)
+        {
+            if (!value.isPressed || _abilityController == null)
+            {
+                return;
+            }
+
+            if (_upgradeMenuOpen || PauseMenuController.IsMenuOpen)
+            {
+                return;
+            }
+
+            _abilityController.RequestDash();
+        }
+
         public void OnUpgrade(InputValue value)
         {
             if (!value.isPressed)

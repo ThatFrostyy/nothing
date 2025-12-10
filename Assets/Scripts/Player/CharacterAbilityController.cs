@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace FF
 {
@@ -43,6 +42,7 @@ namespace FF
         private float _dashCooldownTimer;
         private float _dashTimer;
         private Vector2 _lastMoveInput;
+        private bool _dashRequested;
         private float _suppressionTimer;
         private readonly Dictionary<EnemyStats, float> _suppressedEnemies = new();
         private readonly List<EnemyStats> _toRemove = new();
@@ -98,6 +98,7 @@ namespace FF
             {
                 _dashCooldownTimer = 0f;
                 _dashTimer = 0f;
+                _dashRequested = false;
                 _suppressionTimer = 0f;
                 _suppressedEnemies.Clear();
 
@@ -150,18 +151,14 @@ namespace FF
 
             if (!CanDash())
             {
+                _dashRequested = false;
                 return;
             }
 
-            if (Keyboard.current != null && Keyboard.current.leftShiftKey.wasPressedThisFrame)
+            if (_dashRequested)
             {
                 TriggerDash();
-                return;
-            }
-
-            if (Gamepad.current != null && (Gamepad.current.leftStickButton.wasPressedThisFrame || Gamepad.current.bButton.wasPressedThisFrame))
-            {
-                TriggerDash();
+                _dashRequested = false;
             }
         }
 
@@ -173,6 +170,16 @@ namespace FF
             }
 
             return _lastMoveInput.sqrMagnitude > 0.01f;
+        }
+
+        public void RequestDash()
+        {
+            if (_activeAbility != AbilityType.Dash)
+            {
+                return;
+            }
+
+            _dashRequested = true;
         }
 
         private void TriggerDash()
