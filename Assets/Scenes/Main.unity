@@ -7451,6 +7451,8 @@ MonoBehaviour:
   upgradeAction: {fileID: 0}
   upgradeBindingId: d4d249ae-55f1-4a58-aef2-3913d718d7d7
   interactAction: {fileID: 0}
+  upgradeActionName: Upgrade
+  interactActionName: Interact
   interactBindingId: 1c04ea5f-b012-41d1-a6f7-02e963b52893
   timeFormat: mm\:ss
   healthPulseTarget: {fileID: 2001000101}

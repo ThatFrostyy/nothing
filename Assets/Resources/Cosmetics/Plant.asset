@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6e5954baa4a82024ea1ea1c9339c98ef, type: 3}
-  m_Name: MarineHelmet
+  m_Name: Plant
   m_EditorClassIdentifier: Assembly-CSharp::FF.HatDefinition
-  DisplayName: Marine M1 Helmet
-  Icon: {fileID: 21300000, guid: a7efbbc04efa74641b2bc7bd72723fdc, type: 3}
-  RarityText: 
-  RarityColor: {r: 0.9490196, g: 0.9490196, b: 0.9490196, a: 1}
-  HatPrefab: {fileID: 8177723574371877624, guid: f94259d5edbc60144b447c7b3c6f157c, type: 3}
-  SteamItemDefinitionId: 0
+  DisplayName: Plant
+  Icon: {fileID: 21300000, guid: 2306b76c09d01384bb4998a0d7b8677e, type: 3}
+  RarityText: Rare
+  RarityColor: {r: 0.254902, g: 0.4117647, b: 0.882353, a: 1}
+  HatPrefab: {fileID: 8160479860272100147, guid: 37aeb79332299df459b4f2373bb046e5, type: 3}
+  SteamItemDefinitionId: 104

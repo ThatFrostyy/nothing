@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
   Title: Extra Projectile Upgrade<br>
   DescriptionPrefix: 'Increase weapon projectile count by '
-  rarity: 4
+  rarity: 3
   rarityWeightOverride: 0
   Type: 4
   percentColor: '#D17A22'
-  allowedClasses: 18
+  allowedClasses: 22
   onlyForSemiAuto: 0

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.HatDefinition
   DisplayName: Airborne M1 Helmet
   Icon: {fileID: 21300000, guid: f7cb3afbdeb5c4e46983a2eb27df6f4d, type: 3}
-  RarityText: Common
+  RarityText: 
   RarityColor: {r: 0.9490196, g: 0.9490196, b: 0.9490196, a: 1}
   HatPrefab: {fileID: 8144561046199555452, guid: 6b48de065210dba4ea3df1aa60edcf39, type: 3}
   SteamItemDefinitionId: 0

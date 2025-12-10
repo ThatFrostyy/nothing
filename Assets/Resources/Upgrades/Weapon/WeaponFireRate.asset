@@ -18,5 +18,5 @@ MonoBehaviour:
   rarityWeightOverride: 0
   Type: 1
   percentColor: '#D17A22'
-  allowedClasses: 15
+  allowedClasses: -1
   onlyForSemiAuto: 0
