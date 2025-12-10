@@ -165,7 +165,7 @@ namespace FF
             CharacterDefinition character = availableCharacters[_index];
             if (nameText) nameText.text = character != null ? character.DisplayName : "Unknown";
             if (descriptionText) descriptionText.text = character != null ? character.Description : string.Empty;
-            if (abilityText) abilityText.text = character != null ? $"Ability: {character.AbilityId}" : string.Empty;
+            if (abilityText) abilityText.text = character != null ? GetAbilityLabel(character.AbilityId) : string.Empty;
             if (portraitImage)
             {
                 portraitImage.enabled = character != null && character.Portrait != null;
@@ -208,6 +208,29 @@ namespace FF
             }
         }
 
+        private string GetAbilityLabel(string abilityId)
+        {
+            if (string.IsNullOrWhiteSpace(abilityId))
+            {
+                return "Ability: Unknown";
+            }
+
+            string lower = abilityId.ToLowerInvariant();
+            switch (lower)
+            {
+                case "dash":
+                    return "Ability: Dash (Left Shift / Gamepad B)";
+                case "suppression":
+                case "suppress":
+                case "suppresion":
+                    return "Ability: Suppression (slows nearby enemies)";
+                case "sharpshooter":
+                    return "Ability: Sharpshooter (bonus crits)";
+                default:
+                    return $"Ability: {abilityId}";
+            }
+        }
+
         private void StepHat(int delta)
         {
             CharacterDefinition character = availableCharacters.Count > 0 ? availableCharacters[_index] : null;
@@ -247,19 +270,19 @@ namespace FF
         {
             List<HatDefinition> hats = new();
 
-            // 1. Character-specific hats (always available if configured for the character)
-            if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ // 1. Character-specific hats (always available if configured for the character)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ if (character != null && character.AvailableHats != null && character.AvailableHats.Count > 0)
             {
                 hats.AddRange(character.AvailableHats);
             }
             else
             {
-                // 2. Global default hats (always available to all characters)
-                hats.AddRange(availableHats);
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ // 2. Global default hats (always available to all characters)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ hats.AddRange(availableHats);
             }
 
-            // 3. Steam-owned hats (added only if the Steam Inventory reported them as owned)
-            AppendSteamHats(hats);
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ // 3. Steam-owned hats (added only if the Steam Inventory reported them as owned)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ AppendSteamHats(hats);
 
             return hats;
         }
@@ -347,8 +370,8 @@ namespace FF
         {
             _hatsByItemDefinitionId.Clear();
 
-            // We cache ALL hats (global, character-specific, and steam-only) for the Steam lookup
-            foreach (HatDefinition hat in EnumerateAllHats())
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ // We cache ALL hats (global, character-specific, and steam-only) for the Steam lookup
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ foreach (HatDefinition hat in EnumerateAllHats())
             {
                 if (!hat || hat.SteamItemDefinitionId == 0)
                 {
@@ -366,8 +389,8 @@ namespace FF
         {
             HashSet<HatDefinition> seen = new();
 
-            // Add Global Hats (AvailableHats)
-            for (int i = 0; i < availableHats.Count; i++)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ // Add Global Hats (AvailableHats)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ for (int i = 0; i < availableHats.Count; i++)
             {
                 HatDefinition hat = availableHats[i];
                 if (hat && seen.Add(hat))
@@ -376,8 +399,8 @@ namespace FF
                 }
             }
 
-            // Add Hats from Character Definitions (DefaultHat and AvailableHats)
-            for (int i = 0; i < availableCharacters.Count; i++)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ // Add Hats from Character Definitions (DefaultHat and AvailableHats)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ for (int i = 0; i < availableCharacters.Count; i++)
             {
                 CharacterDefinition character = availableCharacters[i];
                 if (!character) continue;
@@ -399,8 +422,8 @@ namespace FF
                 }
             }
 
-            // NEW: Add Steam-Only Hats to the cache lookup
-            for (int i = 0; i < steamOnlyHats.Count; i++)
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ // NEW: Add Steam-Only Hats to the cache lookup
+ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ for (int i = 0; i < steamOnlyHats.Count; i++)
             {
                 HatDefinition hat = steamOnlyHats[i];
                 if (hat && seen.Add(hat))

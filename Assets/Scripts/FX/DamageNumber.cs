@@ -47,12 +47,27 @@ namespace FF
 
         public void Play(Vector3 worldPosition, int amount, Color color, float sizeMultiplier = 0)
         {
+            PlayInternal(worldPosition, amount.ToString(), color, sizeMultiplier);
+        }
+
+        public void PlayText(Vector3 worldPosition, string text, Color color, float sizeMultiplier = 0)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            PlayInternal(worldPosition, text, color, sizeMultiplier);
+        }
+
+        private void PlayInternal(Vector3 worldPosition, string text, Color color, float sizeMultiplier)
+        {
             transform.position = worldPosition + new Vector3(
                 Random.Range(-spawnJitter.x, spawnJitter.x),
                 Random.Range(0f, spawnJitter.y),
                 0f);
 
-            _text.text = amount.ToString();
+            _text.text = text;
             _text.fontSize = baseFontSize * Mathf.Max(0.05f, sizeMultiplier);
             _color = color;
             _scaleMultiplier = Mathf.Max(0.05f, sizeMultiplier);

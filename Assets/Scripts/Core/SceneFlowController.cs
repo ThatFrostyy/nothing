@@ -8,6 +8,9 @@ namespace FF
     {
         public static SceneFlowController Instance { get; private set; }
 
+        public string MainMenuSceneName => mainMenuSceneName;
+        public string GameplaySceneName => gameplaySceneName;
+
         [SerializeField] private string mainMenuSceneName = "MainMenu";
         [SerializeField] private string gameplaySceneName = "Main";
         [SerializeField] private bool persistAcrossScenes = true;
