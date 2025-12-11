@@ -51,6 +51,8 @@ namespace FF
         private bool _isChargingGrenade;
         private bool _useGrenadeCharging;
 
+        public static event Action<int> OnRoundsFired;
+
         public event Action<float> OnCooldownChanged;
         public event Action<float> OnGrenadeChargeChanged;
 
@@ -341,11 +343,26 @@ namespace FF
                     SpawnStandardBullet(shotRotation, pierceCount);
                 }
 
+                if (launchedGrenade || (_weapon != null && _weapon.bulletPrefab))
+                {
+                    NotifyRoundsFired(1);
+                }
+
                 if (staggerShots && i < totalProjectiles - 1 && extraProjectileDelay > 0f)
                 {
                     yield return new WaitForSeconds(extraProjectileDelay);
                 }
             }
+        }
+
+        private void NotifyRoundsFired(int count)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+
+            OnRoundsFired?.Invoke(count);
         }
 
         private bool TryLaunchGrenade(Quaternion spreadRotation, float? speedOverride = null)

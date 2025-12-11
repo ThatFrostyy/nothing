@@ -22,6 +22,8 @@ namespace FF
         [SerializeField, Min(1f)] private float dashSpeedMultiplier = 2.25f;
         [SerializeField, Min(0.05f)] private float dashDuration = 0.35f;
         [SerializeField, Min(0.05f)] private float dashCooldown = 2.5f;
+        [SerializeField] private AudioClip dashSfx;
+        [SerializeField] private GameObject dashEffect;
 
         [Header("Suppression Aura")]
         [SerializeField, Min(0.5f)] private float suppressionRadius = 5.5f;
@@ -38,6 +40,7 @@ namespace FF
 
         private PlayerStats _stats;
         private Rigidbody2D _rigidbody;
+        private WeaponManager _weaponManager;
         private AbilityType _activeAbility = AbilityType.None;
         private float _dashCooldownTimer;
         private float _dashTimer;
@@ -52,17 +55,26 @@ namespace FF
         {
             _stats = GetComponent<PlayerStats>();
             _rigidbody = GetComponent<Rigidbody2D>();
+            _weaponManager = GetComponentInChildren<WeaponManager>();
         }
 
         private void OnEnable()
         {
             CharacterSelectionState.OnSelectedChanged += HandleSelectionChanged;
+            if (_weaponManager)
+            {
+                _weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
+            }
             InitializeAbility(CharacterSelectionState.SelectedCharacter);
         }
 
         private void OnDisable()
         {
             CharacterSelectionState.OnSelectedChanged -= HandleSelectionChanged;
+            if (_weaponManager)
+            {
+                _weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+            }
         }
 
         private void Update()
@@ -92,6 +104,12 @@ namespace FF
         {
             AbilityType resolved = ResolveAbility(character);
             bool abilityChanged = resolved != _activeAbility;
+
+            if (abilityChanged && _activeAbility == AbilityType.Sharpshooter)
+            {
+                RemoveSharpshooterBonuses();
+            }
+
             _activeAbility = resolved;
 
             if (abilityChanged)
@@ -112,6 +130,22 @@ namespace FF
             {
                 ApplySharpshooterBonuses();
             }
+        }
+
+        private void HandleWeaponEquipped(Weapon weapon)
+        {
+            if (_activeAbility != AbilityType.Sharpshooter)
+            {
+                return;
+            }
+
+            if (!IsSharpshooterWeapon(weapon))
+            {
+                RemoveSharpshooterBonuses();
+                return;
+            }
+
+            ApplySharpshooterBonuses();
         }
 
         private AbilityType ResolveAbility(CharacterDefinition character)
@@ -202,8 +236,23 @@ namespace FF
                     _rigidbody.linearVelocity += direction * (_stats.GetMoveSpeed() * (dashSpeedMultiplier - 1f));
                 }
             }
+
+            PlayDashFeedback();
         }
         #endregion Dash
+
+        private void PlayDashFeedback()
+        {
+            if (dashEffect)
+            {
+                PoolManager.Get(dashEffect, transform.position, Quaternion.identity);
+            }
+
+            if (dashSfx)
+            {
+                AudioPlaybackPool.PlayOneShot(dashSfx, transform.position);
+            }
+        }
 
         #region Suppression
         private void UpdateSuppression()
@@ -287,7 +336,18 @@ namespace FF
         #region Sharpshooter
         private void ApplySharpshooterBonuses()
         {
-            if (_sharpshooterApplied || _stats == null)
+            if (_stats == null)
+            {
+                return;
+            }
+
+            if (!IsSharpshooterWeapon(_weaponManager ? _weaponManager.CurrentWeapon : null))
+            {
+                RemoveSharpshooterBonuses();
+                return;
+            }
+
+            if (_sharpshooterApplied)
             {
                 return;
             }
@@ -295,6 +355,28 @@ namespace FF
             _stats.CritChance = Mathf.Clamp01(_stats.CritChance + sharpshooterCritBonus);
             _stats.CritDamageMult = Mathf.Max(1f, _stats.CritDamageMult * sharpshooterCritDamageMult);
             _sharpshooterApplied = true;
+        }
+
+        private void RemoveSharpshooterBonuses()
+        {
+            if (!_sharpshooterApplied || _stats == null)
+            {
+                return;
+            }
+
+            _stats.CritChance = Mathf.Clamp01(_stats.CritChance - sharpshooterCritBonus);
+            _stats.CritDamageMult = Mathf.Max(1f, _stats.CritDamageMult / Mathf.Max(0.0001f, sharpshooterCritDamageMult));
+            _sharpshooterApplied = false;
+        }
+
+        private bool IsSharpshooterWeapon(Weapon weapon)
+        {
+            if (weapon == null)
+            {
+                return false;
+            }
+
+            return weapon.weaponClass == Weapon.WeaponClass.SemiRifle;
         }
         #endregion Sharpshooter
     }

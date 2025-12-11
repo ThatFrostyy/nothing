@@ -33,6 +33,8 @@ namespace FF
         public event System.Action<WeaponCrate> OnBroken;
         public event System.Action<WeaponCrate> OnExpired;
 
+        public static event System.Action<WeaponCrate> OnAnyBroken;
+
         public static IReadOnlyCollection<WeaponCrate> ActiveCrates => activeCrates;
 
         public void ConfigurePickups(WeaponPickup[] pool)
@@ -123,6 +125,7 @@ namespace FF
             PlayBreakSfx();
 
             OnBroken?.Invoke(this);
+            OnAnyBroken?.Invoke(this);
         }
 
         void HandleDamaged(int amount)

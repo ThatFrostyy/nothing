@@ -15,6 +15,7 @@ namespace FF
         public System.Action<int> OnDamaged;
         public System.Action OnDeath;
         public System.Action<int, int> OnHealthChanged;
+        public static System.Action<Health, int> OnAnyHealed;
 
         public int MaxHP => maxHP;
         public int CurrentHP => hp;
@@ -68,7 +69,9 @@ namespace FF
 
             if (hp != previousHp)
             {
+                int healedAmount = hp - previousHp;
                 OnHealthChanged?.Invoke(hp, maxHP);
+                OnAnyHealed?.Invoke(this, healedAmount);
             }
         }
 
