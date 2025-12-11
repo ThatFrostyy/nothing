@@ -127,6 +127,7 @@ namespace FF
         private readonly Dictionary<string, int> _progressStats = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, int> _pendingProgressStatIncrements = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<HatDefinition> _equippedHats = new();
+        private readonly HashSet<AutoShooter> _playerShooters = new();
         private Callback<UserStatsReceived_t> _userStatsReceived;
         private Callback<UserStatsStored_t> _userStatsStored;
         private CallResult<LeaderboardFindResult_t> _killLeaderboardFindResult;
@@ -205,6 +206,7 @@ namespace FF
             _progressStats.Clear();
             _pendingProgressStatIncrements.Clear();
             _equippedHats.Clear();
+            _playerShooters.Clear();
         }
 
         private void Update()
@@ -362,6 +364,12 @@ namespace FF
             if (_trackedPlayerHealth.Add(health))
             {
                 health.OnDeath += HandlePlayerDeath;
+            }
+
+            AutoShooter shooter = controller ? controller.GetComponentInChildren<AutoShooter>() : null;
+            if (shooter != null)
+            {
+                _playerShooters.Add(shooter);
             }
         }
 
@@ -568,8 +576,13 @@ namespace FF
             _pendingProgressStatIncrements.Clear();
         }
 
-        private void HandleRoundsFired(int count)
+        private void HandleRoundsFired(AutoShooter shooter, int count)
         {
+            if (shooter == null || !_playerShooters.Contains(shooter))
+            {
+                return;
+            }
+
             IncrementProgressStat(RoundsFiredStatName, count, out int total);
             if (total >= 5000)
             {
