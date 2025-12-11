@@ -16,5 +16,5 @@ MonoBehaviour:
   HealAmount: 0
   Multiplier: 1.2
   Duration: 12
-  Tint: {r: 1, g: 1, b: 1, a: 1}
-  PickupSound: {fileID: 0}
+  PickupSound: {fileID: 8300000, guid: dfa7a98293abfed4e9f5df4584dccef5, type: 3}
+  Icon: {fileID: 21300000, guid: 3576b05c465e20243b64852975690174, type: 3}

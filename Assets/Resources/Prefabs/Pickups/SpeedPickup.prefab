@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3386970526413415766}
   - component: {fileID: 2380167602723371700}
   m_Layer: 0
-  m_Name: DamagePickup
+  m_Name: SpeedPickup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayerID: 1329244529
   m_SortingLayer: 2
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -157,7 +157,7 @@ MonoBehaviour:
   shakeDuration: 0.1
   shakeMagnitude: 0.15
   pickupFx: {fileID: 1429954232896169633, guid: 83036083a4ebcd34f98131bd3cf6f4d2, type: 3}
-  effect: {fileID: 11400000, guid: 423310aff87543f6ad848cb5f0757e45, type: 2}
+  effect: {fileID: 11400000, guid: 78489819743345b1ab5ce347143289f4, type: 2}
 --- !u!114 &2380167602723371700
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -320,7 +320,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7831740662026284754, guid: e2c1ac940434a5242b54d72b66654687, type: 3}
       propertyPath: m_Intensity
-      value: 2.8160026
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8797081065329041583, guid: e2c1ac940434a5242b54d72b66654687, type: 3}
       propertyPath: m_Materials.Array.size

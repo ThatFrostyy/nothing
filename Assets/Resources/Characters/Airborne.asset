@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
   DisplayName: US Airman
   Description: Equipped with a M1 Garand and a automatic M2 Carbine. Bold and aggressive,
-    can deal incredible bonus damage with rifles.
+    can deal incredible bonus damage.
   AbilityId: sharpshooter
   Portrait: {fileID: 21300000, guid: 957aedc587fd19a49a0689cbfaa3aeb9, type: 3}
   PlayerSprite: {fileID: 21300000, guid: 957aedc587fd19a49a0689cbfaa3aeb9, type: 3}

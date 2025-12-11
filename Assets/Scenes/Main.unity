@@ -3026,6 +3026,196 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
+  - pickupPrefab: {fileID: 3386970526413415766, guid: b9d08acae5324df499bdeae490ab9a6e, type: 3}
+    initialSpawnDelay: 10
+    spawnOnStart: 0
+    useRespawnDelay: 0
+    respawnDelay: 60
+    spawnIntervalCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 45
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 35
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 25
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    pickupsPerSpawnCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    maxActiveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 2
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 4
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  - pickupPrefab: {fileID: 3386970526413415766, guid: ddad70f88922dab47ad1248f45aee347, type: 3}
+    initialSpawnDelay: 10
+    spawnOnStart: 0
+    useRespawnDelay: 0
+    respawnDelay: 60
+    spawnIntervalCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 45
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 35
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 25
+        inSlope: -0.033333335
+        outSlope: -0.033333335
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    pickupsPerSpawnCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    maxActiveCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 2
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 300
+        value: 3
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 600
+        value: 4
+        inSlope: 0.0033333334
+        outSlope: 0.0033333334
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
   player: {fileID: 1207903152}
   offscreenPadding: 2
   minSpawnRadius: 8
@@ -3064,6 +3254,7 @@ MonoBehaviour:
     - {fileID: 6114283723824905712, guid: b8432984aa5b1d94ab26f175c01ba71e, type: 3}
     - {fileID: 7785297196771200664, guid: 6600a5c3edfd2e24f9869ff09e610790, type: 3}
     - {fileID: 7695581959867539719, guid: 668c7b2d70cfefb40894e93143f680fa, type: 3}
+    - {fileID: 6221002777495832667, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
     initialSpawnDelay: 30
     spawnOnStart: 0
     useRespawnDelay: 1
