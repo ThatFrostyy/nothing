@@ -40,6 +40,7 @@ namespace FF
         public event Action<UpgradePickup> OnCollected;
         public event Action<UpgradePickup> OnExpired;
         public static event Action<UpgradePickupEffect> OnEffectApplied;
+        public static event Action<UpgradePickup> OnAnyCollected;
 
         public static System.Collections.Generic.IReadOnlyCollection<UpgradePickup> ActivePickups => activePickups;
 
@@ -229,6 +230,7 @@ namespace FF
             CameraShake.Shake(shakeDuration, shakeMagnitude);
             TriggerDespawn();
             OnCollected?.Invoke(this);
+            OnAnyCollected?.Invoke(this);
         }
 
         private void TriggerDespawn()

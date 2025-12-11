@@ -16,6 +16,12 @@ namespace FF
         [Header ("Stats")]
         [SerializeField] private const string KillStatName = "total_kills";
         [SerializeField] private const string TopWaveStatName = "top_wave_survived";
+        [SerializeField] private const string RoundsFiredStatName = "total_rounds_fired";
+        [SerializeField] private const string HatsEquippedStatName = "total_hats_equipped";
+        [SerializeField] private const string UniqueHatsStatName = "unique_hats_equipped";
+        [SerializeField] private const string SupplyCratesOpenedStatName = "supply_crates_opened";
+        [SerializeField] private const string UpgradePickupsCollectedStatName = "upgrade_pickups_collected";
+        [SerializeField] private const string TotalHealingStatName = "total_healing_received";
 
         [Header("Leaderboards")]
         [SerializeField] private const string KillLeaderboardName = "kills";
@@ -29,6 +35,14 @@ namespace FF
             new WaveAchievement { waveRequired = 40, achievementId = "WAVE_40" },
             new WaveAchievement { waveRequired = 50, achievementId = "WAVE_50" }
         };
+
+        private const string AchievementRoundsFired = "ROUNDS_5000";
+        private const string AchievementFirstHat = "HAT_FIRST";
+        private const string AchievementLegendaryHat = "HAT_LEGENDARY";
+        private const string AchievementCollectHats = "HAT_COLLECT_10";
+        private const string AchievementSupplyCrates = "CRATES_25";
+        private const string AchievementUpgradePickups = "PICKUPS_10";
+        private const string AchievementTotalHealing = "HEAL_500";
 
         private readonly struct WeaponAchievementConfig
         {
@@ -108,8 +122,11 @@ namespace FF
         private readonly Dictionary<Weapon, int> _weaponKills = new();
         private readonly Dictionary<string, int> _weaponKillTotals = new(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, int> _pendingWeaponKillIncrements = new(StringComparer.OrdinalIgnoreCase);
-        private readonly HashSet<string> _unlockedWeaponAchievements = new();
+        private readonly HashSet<string> _unlockedAchievements = new();
         private readonly HashSet<Health> _trackedPlayerHealth = new();
+        private readonly Dictionary<string, int> _progressStats = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, int> _pendingProgressStatIncrements = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<HatDefinition> _equippedHats = new();
         private Callback<UserStatsReceived_t> _userStatsReceived;
         private Callback<UserStatsStored_t> _userStatsStored;
         private CallResult<LeaderboardFindResult_t> _killLeaderboardFindResult;
@@ -146,6 +163,11 @@ namespace FF
             HookGameManager();
             Enemy.OnAnyEnemyKilledByWeapon += HandleEnemyKilledByWeapon;
             PlayerController.OnPlayerReady += HandlePlayerReady;
+            AutoShooter.OnRoundsFired += HandleRoundsFired;
+            PlayerCosmetics.OnHatEquipped += HandleHatEquipped;
+            UpgradePickup.OnAnyCollected += HandleUpgradePickupCollected;
+            WeaponCrate.OnAnyBroken += HandleSupplyCrateBroken;
+            Health.OnAnyHealed += HandleAnyHealed;
         }
 
         private void OnDisable()
@@ -158,6 +180,11 @@ namespace FF
 
             Enemy.OnAnyEnemyKilledByWeapon -= HandleEnemyKilledByWeapon;
             PlayerController.OnPlayerReady -= HandlePlayerReady;
+            AutoShooter.OnRoundsFired -= HandleRoundsFired;
+            PlayerCosmetics.OnHatEquipped -= HandleHatEquipped;
+            UpgradePickup.OnAnyCollected -= HandleUpgradePickupCollected;
+            WeaponCrate.OnAnyBroken -= HandleSupplyCrateBroken;
+            Health.OnAnyHealed -= HandleAnyHealed;
             foreach (Health health in _trackedPlayerHealth)
             {
                 if (health != null)
@@ -174,7 +201,10 @@ namespace FF
             _statsReady = false;
             _weaponKillTotals.Clear();
             _pendingWeaponKillIncrements.Clear();
-            _unlockedWeaponAchievements.Clear();
+            _unlockedAchievements.Clear();
+            _progressStats.Clear();
+            _pendingProgressStatIncrements.Clear();
+            _equippedHats.Clear();
         }
 
         private void Update()
@@ -288,6 +318,7 @@ namespace FF
                 }
 
                 SyncWeaponKillStats();
+                SyncProgressStats();
 
                 EnsureKillLeaderboard();
                 PushCoreStats();
@@ -415,7 +446,7 @@ namespace FF
 
                 if (SteamUserStats.SetAchievement(achievementName))
                 {
-                    _unlockedWeaponAchievements.Add(achievementName);
+                    _unlockedAchievements.Add(achievementName);
                     statsUpdated = true;
                     Debug.Log($"[Steam] Unlocked {config.WeaponKey} {threshold} kills achievement");
                 }
@@ -436,14 +467,14 @@ namespace FF
 
         private bool IsAchievementUnlocked(string achievementName)
         {
-            if (_unlockedWeaponAchievements.Contains(achievementName))
+            if (_unlockedAchievements.Contains(achievementName))
             {
                 return true;
             }
 
             if (SteamUserStats.GetAchievement(achievementName, out bool achieved) && achieved)
             {
-                _unlockedWeaponAchievements.Add(achievementName);
+                _unlockedAchievements.Add(achievementName);
                 return true;
             }
 
@@ -494,6 +525,191 @@ namespace FF
                         Debug.Log($"[Steam] Unlocked: {a.achievementId}");
                     }
                 }
+            }
+        }
+
+        private void SyncProgressStats()
+        {
+            LoadProgressStat(RoundsFiredStatName);
+            LoadProgressStat(HatsEquippedStatName);
+            LoadProgressStat(UniqueHatsStatName);
+            LoadProgressStat(SupplyCratesOpenedStatName);
+            LoadProgressStat(UpgradePickupsCollectedStatName);
+            LoadProgressStat(TotalHealingStatName);
+
+            FlushPendingProgressStatIncrements();
+            EvaluateProgressAchievements();
+        }
+
+        private void LoadProgressStat(string statName)
+        {
+            if (SteamUserStats.GetStat(statName, out int stored))
+            {
+                _progressStats[statName] = Mathf.Max(0, stored);
+            }
+            else
+            {
+                _progressStats[statName] = 0;
+            }
+        }
+
+        private void FlushPendingProgressStatIncrements()
+        {
+            if (!_statsReady || _pendingProgressStatIncrements.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var kvp in _pendingProgressStatIncrements)
+            {
+                IncrementProgressStat(kvp.Key, kvp.Value, out _);
+            }
+
+            _pendingProgressStatIncrements.Clear();
+        }
+
+        private void HandleRoundsFired(int count)
+        {
+            IncrementProgressStat(RoundsFiredStatName, count, out int total);
+            if (total >= 5000)
+            {
+                TryUnlockAchievement(AchievementRoundsFired);
+            }
+        }
+
+        private void HandleHatEquipped(HatDefinition hat)
+        {
+            if (hat == null)
+            {
+                return;
+            }
+
+            IncrementProgressStat(HatsEquippedStatName, 1, out int totalHats);
+            if (totalHats >= 1)
+            {
+                TryUnlockAchievement(AchievementFirstHat);
+            }
+
+            if (_equippedHats.Add(hat))
+            {
+                IncrementProgressStat(UniqueHatsStatName, 1, out int uniqueHats);
+                if (uniqueHats >= 10)
+                {
+                    TryUnlockAchievement(AchievementCollectHats);
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(hat.RarityText) && string.Equals(hat.RarityText, "Legendary", StringComparison.OrdinalIgnoreCase))
+            {
+                TryUnlockAchievement(AchievementLegendaryHat);
+            }
+        }
+
+        private void HandleSupplyCrateBroken(WeaponCrate crate)
+        {
+            IncrementProgressStat(SupplyCratesOpenedStatName, 1, out int totalCrates);
+            if (totalCrates >= 25)
+            {
+                TryUnlockAchievement(AchievementSupplyCrates);
+            }
+        }
+
+        private void HandleUpgradePickupCollected(UpgradePickup pickup)
+        {
+            IncrementProgressStat(UpgradePickupsCollectedStatName, 1, out int totalPickups);
+            if (totalPickups >= 10)
+            {
+                TryUnlockAchievement(AchievementUpgradePickups);
+            }
+        }
+
+        private void HandleAnyHealed(Health health, int amount)
+        {
+            IncrementProgressStat(TotalHealingStatName, amount, out int totalHealing);
+            if (totalHealing >= 500)
+            {
+                TryUnlockAchievement(AchievementTotalHealing);
+            }
+        }
+
+        private void EvaluateProgressAchievements()
+        {
+            if (GetProgressStat(RoundsFiredStatName) >= 5000)
+            {
+                TryUnlockAchievement(AchievementRoundsFired);
+            }
+
+            if (GetProgressStat(HatsEquippedStatName) >= 1)
+            {
+                TryUnlockAchievement(AchievementFirstHat);
+            }
+
+            if (GetProgressStat(UniqueHatsStatName) >= 10)
+            {
+                TryUnlockAchievement(AchievementCollectHats);
+            }
+
+            if (GetProgressStat(SupplyCratesOpenedStatName) >= 25)
+            {
+                TryUnlockAchievement(AchievementSupplyCrates);
+            }
+
+            if (GetProgressStat(UpgradePickupsCollectedStatName) >= 10)
+            {
+                TryUnlockAchievement(AchievementUpgradePickups);
+            }
+
+            if (GetProgressStat(TotalHealingStatName) >= 500)
+            {
+                TryUnlockAchievement(AchievementTotalHealing);
+            }
+        }
+
+        private int GetProgressStat(string statName)
+        {
+            return _progressStats.TryGetValue(statName, out int value) ? value : 0;
+        }
+
+        private void IncrementProgressStat(string statName, int amount, out int newTotal)
+        {
+            newTotal = GetProgressStat(statName);
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            if (!_statsReady)
+            {
+                if (_pendingProgressStatIncrements.ContainsKey(statName))
+                {
+                    _pendingProgressStatIncrements[statName] += amount;
+                }
+                else
+                {
+                    _pendingProgressStatIncrements.Add(statName, amount);
+                }
+
+                return;
+            }
+
+            newTotal += amount;
+            _progressStats[statName] = newTotal;
+            SteamUserStats.SetStat(statName, newTotal);
+            SteamUserStats.StoreStats();
+        }
+
+        private void TryUnlockAchievement(string achievementId)
+        {
+            if (string.IsNullOrWhiteSpace(achievementId) || IsAchievementUnlocked(achievementId) || !_statsReady)
+            {
+                return;
+            }
+
+            if (SteamUserStats.SetAchievement(achievementId))
+            {
+                _unlockedAchievements.Add(achievementId);
+                SteamUserStats.StoreStats();
+                Debug.Log($"[Steam] Unlocked achievement: {achievementId}");
             }
         }
 

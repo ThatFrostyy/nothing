@@ -8,11 +8,20 @@ namespace FF
         [SerializeField] private Transform hatAnchor;
 
         private GameObject _hatInstance;
+        private HatDefinition _currentHat;
+
+        public static event System.Action<HatDefinition> OnHatEquipped;
 
         public void Apply(HatDefinition hat, Sprite bodySprite)
         {
             UpdateBody(bodySprite);
             UpdateHat(hat);
+
+            if (hat != null && hat != _currentHat)
+            {
+                _currentHat = hat;
+                OnHatEquipped?.Invoke(hat);
+            }
         }
 
         public void SetRenderTargets(SpriteRenderer body, Transform anchor)
