@@ -109,7 +109,7 @@ namespace FF
             UpdateActiveModifiers();
         }
 
-        public void ApplyTemporaryMultiplier(StatType stat, float multiplier, float duration)
+        public void ApplyTemporaryMultiplier(StatType stat, float multiplier, float duration, bool refreshIfExists = false)
         {
             if (multiplier <= 0f)
             {
@@ -117,6 +117,19 @@ namespace FF
             }
 
             float expiry = duration > 0f ? Time.time + duration : float.PositiveInfinity;
+            if (refreshIfExists)
+            {
+                for (int i = 0; i < _activeModifiers.Count; i++)
+                {
+                    TimedModifier modifier = _activeModifiers[i];
+                    if (modifier.Stat == stat && Mathf.Approximately(modifier.Multiplier, multiplier))
+                    {
+                        _activeModifiers[i] = new TimedModifier(stat, multiplier, expiry);
+                        return;
+                    }
+                }
+            }
+
             _activeModifiers.Add(new TimedModifier(stat, multiplier, expiry));
         }
 

@@ -243,8 +243,8 @@ namespace FF
                     continue;
                 }
 
-                stats.ApplyTemporaryMultiplier(EnemyStats.StatType.MoveSpeed, suppressionSpeedMultiplier, suppressionDuration);
-                stats.ApplyTemporaryMultiplier(EnemyStats.StatType.FireRate, suppressionFireRateMultiplier, suppressionDuration);
+                stats.ApplyTemporaryMultiplier(EnemyStats.StatType.MoveSpeed, suppressionSpeedMultiplier, suppressionDuration, true);
+                stats.ApplyTemporaryMultiplier(EnemyStats.StatType.FireRate, suppressionFireRateMultiplier, suppressionDuration, true);
 
                 bool isNewOrRefreshed = !_suppressedEnemies.TryGetValue(stats, out float expiry) || expiry <= now;
                 _suppressedEnemies[stats] = now + suppressionDuration;
