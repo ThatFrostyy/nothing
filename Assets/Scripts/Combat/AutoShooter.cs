@@ -51,7 +51,7 @@ namespace FF
         private bool _isChargingGrenade;
         private bool _useGrenadeCharging;
 
-        public static event Action<int> OnRoundsFired;
+        public static event Action<AutoShooter, int> OnRoundsFired;
 
         public event Action<float> OnCooldownChanged;
         public event Action<float> OnGrenadeChargeChanged;
@@ -362,7 +362,7 @@ namespace FF
                 return;
             }
 
-            OnRoundsFired?.Invoke(count);
+            OnRoundsFired?.Invoke(this, count);
         }
 
         private bool TryLaunchGrenade(Quaternion spreadRotation, float? speedOverride = null)
