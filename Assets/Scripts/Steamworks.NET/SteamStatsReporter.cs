@@ -43,6 +43,11 @@ namespace FF
         private const string AchievementSupplyCrates = "CRATES_25";
         private const string AchievementUpgradePickups = "PICKUPS_10";
         private const string AchievementTotalHealing = "HEAL_500";
+        private const string AchievementWaveNoMiss = "WAVE_NO_MISS";
+        private const string AchievementKillsInMinute = "KILLS_100_MIN";
+        private const string AchievementTwentyWavesNoDamage = "WAVES_20_NO_DAMAGE";
+        private const string AchievementTenBosses = "BOSSES_10";
+        private const string AchievementNoMovementWave = "WAVE_NO_MOVE";
 
         private readonly struct WeaponAchievementConfig
         {
@@ -128,6 +133,7 @@ namespace FF
         private readonly Dictionary<string, int> _pendingProgressStatIncrements = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<HatDefinition> _equippedHats = new();
         private readonly HashSet<AutoShooter> _playerShooters = new();
+        private readonly Queue<float> _recentKillTimestamps = new();
         private Callback<UserStatsReceived_t> _userStatsReceived;
         private Callback<UserStatsStored_t> _userStatsStored;
         private CallResult<LeaderboardFindResult_t> _killLeaderboardFindResult;
@@ -136,8 +142,15 @@ namespace FF
         private int _lastKillCount;
         private int _killStatBase;
         private int _highestWave;
+        private int _shotsThisWave;
+        private int _hitsThisWave;
+        private int _consecutiveNoDamageWaves;
+        private int _bossKills;
+        private bool _damageTakenThisWave;
+        private bool _movementThisWave;
         private bool _gameManagerHooked;//
         private bool _statsReady;
+        private Rigidbody2D _playerBody;
         private void Start()
         {
             SteamUserStats.RequestUserStats(SteamUser.GetSteamID());
@@ -165,10 +178,12 @@ namespace FF
             Enemy.OnAnyEnemyKilledByWeapon += HandleEnemyKilledByWeapon;
             PlayerController.OnPlayerReady += HandlePlayerReady;
             AutoShooter.OnRoundsFired += HandleRoundsFired;
+            Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
             PlayerCosmetics.OnHatEquipped += HandleHatEquipped;
             UpgradePickup.OnAnyCollected += HandleUpgradePickupCollected;
             WeaponCrate.OnAnyBroken += HandleSupplyCrateBroken;
             Health.OnAnyHealed += HandleAnyHealed;
+            Health.OnAnyDamaged += HandleAnyDamaged;
         }
 
         private void OnDisable()
@@ -182,15 +197,18 @@ namespace FF
             Enemy.OnAnyEnemyKilledByWeapon -= HandleEnemyKilledByWeapon;
             PlayerController.OnPlayerReady -= HandlePlayerReady;
             AutoShooter.OnRoundsFired -= HandleRoundsFired;
+            Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
             PlayerCosmetics.OnHatEquipped -= HandleHatEquipped;
             UpgradePickup.OnAnyCollected -= HandleUpgradePickupCollected;
             WeaponCrate.OnAnyBroken -= HandleSupplyCrateBroken;
             Health.OnAnyHealed -= HandleAnyHealed;
+            Health.OnAnyDamaged -= HandleAnyDamaged;
             foreach (Health health in _trackedPlayerHealth)
             {
                 if (health != null)
                 {
                     health.OnDeath -= HandlePlayerDeath;
+                    health.OnDamaged -= HandlePlayerDamaged;
                 }
             }
             _trackedPlayerHealth.Clear();
@@ -207,6 +225,11 @@ namespace FF
             _pendingProgressStatIncrements.Clear();
             _equippedHats.Clear();
             _playerShooters.Clear();
+            _recentKillTimestamps.Clear();
+            _bossKills = 0;
+            _consecutiveNoDamageWaves = 0;
+            ResetWaveTrackers();
+            _playerBody = null;
         }
 
         private void Update()
@@ -215,6 +238,8 @@ namespace FF
             {
                 HookGameManager();
             }
+
+            TrackPlayerMovement();
         }
 
         private void HookGameManager()
@@ -266,11 +291,14 @@ namespace FF
 
         private void HandleWaveStarted(int wave)
         {
+            EvaluateWaveBasedAchievements(wave);
             _highestWave = Mathf.Max(_highestWave, wave);
 
             PushCoreStats();
             PushKillLeaderboardScore();
             TryUnlockWaveAchievements();
+
+            ResetWaveTrackers();
         }
 
         private void HandleKillLeaderboardFound(LeaderboardFindResult_t result, bool failure)
@@ -353,6 +381,35 @@ namespace FF
             RegisterWeaponKill(weapon);
         }
 
+        private void HandleEnemyKilled(Enemy enemy)
+        {
+            if (!_statsReady || enemy == null)
+            {
+                return;
+            }
+
+            _recentKillTimestamps.Enqueue(Time.time);
+            float cutoff = Time.time - 60f;
+            while (_recentKillTimestamps.Count > 0 && _recentKillTimestamps.Peek() < cutoff)
+            {
+                _recentKillTimestamps.Dequeue();
+            }
+
+            if (_recentKillTimestamps.Count >= 100)
+            {
+                TryUnlockAchievement(AchievementKillsInMinute);
+            }
+
+            if (enemy.IsBoss)
+            {
+                _bossKills++;
+                if (_bossKills >= 10)
+                {
+                    TryUnlockAchievement(AchievementTenBosses);
+                }
+            }
+        }
+
         private void HandlePlayerReady(PlayerController controller)
         {
             Health health = controller ? controller.GetComponentInChildren<Health>() : null;
@@ -364,6 +421,7 @@ namespace FF
             if (_trackedPlayerHealth.Add(health))
             {
                 health.OnDeath += HandlePlayerDeath;
+                health.OnDamaged += HandlePlayerDamaged;
             }
 
             AutoShooter shooter = controller ? controller.GetComponentInChildren<AutoShooter>() : null;
@@ -371,12 +429,23 @@ namespace FF
             {
                 _playerShooters.Add(shooter);
             }
+
+            if (!_playerBody && controller)
+            {
+                _playerBody = controller.GetComponent<Rigidbody2D>();
+            }
         }
 
         private void HandlePlayerDeath()
         {
             PushCoreStats();
             PushKillLeaderboardScore();
+        }
+
+        private void HandlePlayerDamaged(int _)
+        {
+            _damageTakenThisWave = true;
+            _consecutiveNoDamageWaves = 0;
         }
 
         private void PushCoreStats()
@@ -583,10 +652,25 @@ namespace FF
                 return;
             }
 
+            _shotsThisWave += Mathf.Max(0, count);
+
             IncrementProgressStat(RoundsFiredStatName, count, out int total);
             if (total >= 5000)
             {
                 TryUnlockAchievement(AchievementRoundsFired);
+            }
+        }
+
+        private void HandleAnyDamaged(Health health, int amount, Weapon sourceWeapon)
+        {
+            if (health == null || sourceWeapon == null || amount <= 0)
+            {
+                return;
+            }
+
+            if (health.TryGetComponent<Enemy>(out _))
+            {
+                _hitsThisWave++;
             }
         }
 
@@ -642,6 +726,61 @@ namespace FF
             if (totalHealing >= 500)
             {
                 TryUnlockAchievement(AchievementTotalHealing);
+            }
+        }
+
+        private void EvaluateWaveBasedAchievements(int wave)
+        {
+            if (!_statsReady)
+            {
+                return;
+            }
+
+            if (wave > 1 && _shotsThisWave > 0 && _hitsThisWave >= _shotsThisWave)
+            {
+                TryUnlockAchievement(AchievementWaveNoMiss);
+            }
+
+            if (!_damageTakenThisWave)
+            {
+                if (wave > 1)
+                {
+                    _consecutiveNoDamageWaves++;
+                    if (_consecutiveNoDamageWaves >= 20)
+                    {
+                        TryUnlockAchievement(AchievementTwentyWavesNoDamage);
+                    }
+                }
+            }
+            else
+            {
+                _consecutiveNoDamageWaves = 0;
+            }
+
+            if (wave > 1 && !_movementThisWave)
+            {
+                TryUnlockAchievement(AchievementNoMovementWave);
+            }
+        }
+
+        private void ResetWaveTrackers()
+        {
+            _shotsThisWave = 0;
+            _hitsThisWave = 0;
+            _damageTakenThisWave = false;
+            _movementThisWave = false;
+        }
+
+        private void TrackPlayerMovement()
+        {
+            if (_playerBody == null)
+            {
+                return;
+            }
+
+            if (_playerBody.linearVelocity.sqrMagnitude > 0.01f)
+            {
+                _movementThisWave = true;
             }
         }
 
