@@ -52,3 +52,4 @@ MonoBehaviour:
     m_Bits: 128
   stopFadeDuration: 0.2
   vfxOffset: {x: 0, y: 0, z: 0}
+  rotationOffsetEuler: {x: 0, y: 0, z: 0}

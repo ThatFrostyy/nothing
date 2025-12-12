@@ -4771,7 +4771,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2559290978850416604, guid: 38fa03b9f83f85942a9ca809a73abe9b, type: 3}
       propertyPath: m_Intensity
-      value: 3.9434607
+      value: 4.6486793
       objectReference: {fileID: 0}
     - target: {fileID: 3100607877274599450, guid: 38fa03b9f83f85942a9ca809a73abe9b, type: 3}
       propertyPath: InitialModule.maxNumParticles
