@@ -24,6 +24,10 @@ namespace FF
         [SerializeField] private string deathTitle = "Defeated";
         [SerializeField, Min(0f)] private float fadeDuration = 0.25f;
         [SerializeField, Range(0f, 1f)] private float backdropAlpha = 0.7f;
+        [SerializeField] private TextMeshProUGUI roundKillsText;
+        [SerializeField] private TextMeshProUGUI lastWaveText;
+        [SerializeField] private TextMeshProUGUI mostUsedWeaponText;
+        [SerializeField] private string unavailableStatText = "--";
 
         [Header("Settings")]
         [SerializeField] private CanvasGroup settingsGroup;
@@ -134,6 +138,11 @@ namespace FF
 
             HideSettings();
             RefreshSettingsUI();
+
+            if (isDeath)
+            {
+                RefreshDeathStats();
+            }
 
             if (titleText) titleText.text = isDeath ? deathTitle : pauseTitle;
             if (resumeButton) resumeButton.gameObject.SetActive(!isDeath);
@@ -304,6 +313,38 @@ namespace FF
             _fadeRoutine = StartCoroutine(FadeCanvas(1f));
             yield return new WaitForSecondsRealtime(fadeDuration);
             loadAction?.Invoke();
+        }
+
+        private void RefreshDeathStats()
+        {
+            int kills = GameManager.I != null ? GameManager.I.KillCount : 0;
+            if (roundKillsText)
+            {
+                roundKillsText.text = kills.ToString();
+            }
+
+            int wave = GameManager.I != null ? GameManager.I.Wave : 0;
+            if (lastWaveText)
+            {
+                lastWaveText.text = Mathf.Max(0, wave).ToString();
+            }
+
+            string weaponLabel = unavailableStatText;
+            if (UpgradeManager.I != null)
+            {
+                Weapon topWeapon = UpgradeManager.I.GetMostUsedWeapon(out int weaponKills);
+                if (topWeapon != null)
+                {
+                    weaponLabel = weaponKills > 0
+                        ? $"{topWeapon.weaponName} ({weaponKills} kills)"
+                        : topWeapon.weaponName;
+                }
+            }
+
+            if (mostUsedWeaponText)
+            {
+                mostUsedWeaponText.text = weaponLabel;
+            }
         }
 
         private void PlayDeathFeedback(Vector3 position)

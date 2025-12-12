@@ -17,6 +17,8 @@ namespace FF
         private AudioSource _attackLoopSource;
         private AudioSource _fireLoopSource;
         private GameObject _activeLoopingVfx;
+        private GameObject _flamethrowerInstance;
+        private FlamethrowerEmitter _flamethrowerEmitter;
 
         private float _fireTimer;
         private bool _isFireHeld;
@@ -91,6 +93,8 @@ namespace FF
 
             SetCooldownProgress(1f);
 
+            SetupFlamethrowerEmitter();
+
             if (_gunPivot)
             {
                 _baseLocalPosition = _gunPivot.localPosition;
@@ -113,6 +117,7 @@ namespace FF
             _isChargingGrenade = false;
             SetCooldownProgress(1f);
             SetGrenadeChargeProgress(0f);
+            CleanupFlamethrowerEmitter();
         }
 
         public void SetFireHeld(bool isHeld)
@@ -133,6 +138,53 @@ namespace FF
         public void SetCameraShakeEnabled(bool enabled)
         {
             _cameraShakeEnabled = enabled;
+        }
+
+        private void SetupFlamethrowerEmitter()
+        {
+            CleanupFlamethrowerEmitter();
+
+            if (_weapon == null || !_weapon.isFlamethrower || _muzzle == null)
+            {
+                return;
+            }
+
+            if (_weapon.flamethrowerEmitterPrefab)
+            {
+                _flamethrowerInstance = Instantiate(_weapon.flamethrowerEmitterPrefab);
+            }
+            else
+            {
+                _flamethrowerInstance = new GameObject("FlamethrowerEmitter");
+            }
+
+            _flamethrowerInstance.transform.SetParent(null);
+            _flamethrowerInstance.transform.SetPositionAndRotation(_muzzle.position, _muzzle.rotation);
+            _flamethrowerInstance.transform.localScale = Vector3.one;
+
+            _flamethrowerEmitter = _flamethrowerInstance.GetComponent<FlamethrowerEmitter>();
+            if (_flamethrowerEmitter == null)
+            {
+                _flamethrowerEmitter = _flamethrowerInstance.AddComponent<FlamethrowerEmitter>();
+            }
+
+            _flamethrowerEmitter.Initialize(_weapon, _muzzle, ResolveOwnerTag());
+        }
+
+        private void CleanupFlamethrowerEmitter()
+        {
+            if (_flamethrowerEmitter)
+            {
+                _flamethrowerEmitter.gameObject.SetActive(false);
+            }
+
+            if (_flamethrowerInstance)
+            {
+                Destroy(_flamethrowerInstance);
+            }
+
+            _flamethrowerEmitter = null;
+            _flamethrowerInstance = null;
         }
         #endregion Initialization
 
@@ -156,10 +208,20 @@ namespace FF
                 SetFireHeld(false);
                 sustainedFireTime = 0f;
                 StopLoopingFeedback();
+                if (_flamethrowerEmitter)
+                {
+                    _flamethrowerEmitter.Tick(false, 0, ResolveOwnerTag());
+                }
                 return;
             }
 
             float deltaTime = Time.timeScale < 0.999f ? Time.unscaledDeltaTime : Time.deltaTime;
+
+            if (_weapon.isFlamethrower)
+            {
+                HandleFlamethrower(deltaTime);
+                return;
+            }
 
             if (_isFireHeld && _weapon.isAuto)
             {
@@ -234,6 +296,33 @@ namespace FF
 
             UpdateRecoil(deltaTime);
             UpdateLoopingFeedback();
+        }
+
+        private void HandleFlamethrower(float deltaTime)
+        {
+            if (_flamethrowerEmitter == null)
+            {
+                SetupFlamethrowerEmitter();
+                if (_flamethrowerEmitter == null)
+                {
+                    return;
+                }
+            }
+
+            float damageMultiplier = GetFinalDamageMultiplier(out _);
+            int damagePerSecond = Mathf.Max(1, Mathf.RoundToInt(_weapon.flamethrowerDamagePerSecond * damageMultiplier));
+            _flamethrowerEmitter.Tick(_isFireHeld, damagePerSecond, ResolveOwnerTag());
+
+            _currentSpread = _weapon.baseSpread;
+            _fireTimer = 0f;
+            SetCooldownProgress(1f);
+            SetGrenadeChargeProgress(0f);
+            UpdateRecoil(deltaTime);
+        }
+
+        private string ResolveOwnerTag()
+        {
+            return transform.root ? transform.root.tag : gameObject.tag;
         }
 
         #region Recoil & Shooting

@@ -66,6 +66,15 @@ namespace FF
         public GameObject burnTargetVfx;
         public GameObject burnImpactVfx;
 
+        [Header("Flamethrower")]
+        public bool isFlamethrower = false;
+        [Min(0.1f)] public float flamethrowerRange = 5f;
+        [Range(1f, 180f)] public float flamethrowerConeAngle = 45f;
+        [Min(0.05f)] public float flamethrowerTickInterval = 0.1f;
+        [Min(1)] public int flamethrowerDamagePerSecond = 18;
+        public LayerMask flamethrowerHitMask;
+        public GameObject flamethrowerEmitterPrefab;
+
         [Header("Accuracy / Spread")]
         public float baseSpread = 1.5f;           // degrees
         public float maxSpread = 6f;              // degrees (auto increases up to this)
