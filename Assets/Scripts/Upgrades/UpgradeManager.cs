@@ -839,6 +839,29 @@ namespace FF
             return null;
         }
 
+        public Weapon GetMostUsedWeapon(out int killCount)
+        {
+            Weapon bestWeapon = null;
+            int bestKills = 0;
+
+            foreach (var pair in weaponKillCounts)
+            {
+                if (pair.Key == null)
+                {
+                    continue;
+                }
+
+                if (pair.Value > bestKills)
+                {
+                    bestWeapon = pair.Key;
+                    bestKills = pair.Value;
+                }
+            }
+
+            killCount = bestKills;
+            return bestWeapon;
+        }
+
         void HandleWeaponKill(Enemy enemy, Weapon weapon)
         {
             if (weapon == null)
