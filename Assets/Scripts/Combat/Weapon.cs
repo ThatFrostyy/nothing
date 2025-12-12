@@ -74,6 +74,9 @@ namespace FF
         [Min(1)] public int flamethrowerDamagePerSecond = 18;
         public LayerMask flamethrowerHitMask;
         public GameObject flamethrowerEmitterPrefab;
+        public bool useFlamethrowerBurst = false;
+        [Min(0.1f)] public float flamethrowerBurstDuration = 3f;
+        [Min(0.1f)] public float flamethrowerOverheatCooldown = 2.5f;
 
         [Header("Accuracy / Spread")]
         public float baseSpread = 1.5f;           // degrees

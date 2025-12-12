@@ -80,6 +80,13 @@ namespace FF
                 return;
             }
 
+            if (_fadeRoutine != null)
+            {
+                StopCoroutine(_fadeRoutine);
+                _fadeRoutine = null;
+                ResetLoopVolume();
+            }
+
             _isFiring = true;
             _tickTimer = 0f;
             StartLoopingVfx();
@@ -310,6 +317,36 @@ namespace FF
             {
                 _loopSource.Stop();
             }
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            float range = _sourceWeapon ? Mathf.Max(0.1f, _sourceWeapon.flamethrowerRange) : defaultRange;
+            float cone = _sourceWeapon ? Mathf.Clamp(_sourceWeapon.flamethrowerConeAngle, 1f, 180f) : defaultConeAngle;
+
+            Gizmos.color = new Color(1f, 0.5f, 0f, 0.35f);
+
+            Vector3 origin = transform.position;
+            Vector3 forward = transform.right;
+            float halfAngle = cone * 0.5f;
+            Quaternion leftRot = Quaternion.AngleAxis(-halfAngle, Vector3.forward);
+            Quaternion rightRot = Quaternion.AngleAxis(halfAngle, Vector3.forward);
+
+            Gizmos.DrawRay(origin, leftRot * forward * range);
+            Gizmos.DrawRay(origin, rightRot * forward * range);
+
+            int segments = 16;
+            Vector3 prevPoint = origin + leftRot * forward * range;
+            for (int i = 1; i <= segments; i++)
+            {
+                float t = i / (float)segments;
+                Quaternion stepRot = Quaternion.AngleAxis(Mathf.Lerp(-halfAngle, halfAngle, t), Vector3.forward);
+                Vector3 nextPoint = origin + stepRot * forward * range;
+                Gizmos.DrawLine(prevPoint, nextPoint);
+                prevPoint = nextPoint;
+            }
+
+            Gizmos.DrawWireSphere(origin, 0.05f);
         }
     }
 }
