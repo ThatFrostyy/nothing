@@ -6890,6 +6890,8 @@ MonoBehaviour:
   dashSpeedMultiplier: 2.25
   dashDuration: 0.35
   dashCooldown: 2.5
+  dashSfx: {fileID: 8300000, guid: cc32c3a4eafa3fd47b3993fd77bcbdbb, type: 3}
+  dashEffect: {fileID: 6091849738672977877, guid: af7931239aa7b5e479e4e5c2e6b460c3, type: 3}
   suppressionRadius: 6
   suppressionSpeedMultiplier: 0.65
   suppressionDuration: 3.5
@@ -7571,7 +7573,7 @@ MonoBehaviour:
   killWindow: 3
   killsNeededForSlowmo: 5
   slowmoCooldown: 5
-  multiKillMessage: BULLET TIME
+  multiKillMessage: FRENZY
   bossKillMessage: BOSS DOWN
   bannerHoldTime: 0.5
   bannerFadeTime: 0.3

@@ -2658,8 +2658,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Player
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e2a8bcd637f9f714182fb162f3102b89, type: 2}
-  m_sharedMaterial: {fileID: 5599663890423478549, guid: e2a8bcd637f9f714182fb162f3102b89, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 492ab391ad41b9946a67d20db57e4dfa, type: 2}
+  m_sharedMaterial: {fileID: 5599663890423478549, guid: 492ab391ad41b9946a67d20db57e4dfa, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -14542,8 +14542,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Marine M1 Helmet
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e2a8bcd637f9f714182fb162f3102b89, type: 2}
-  m_sharedMaterial: {fileID: 5599663890423478549, guid: e2a8bcd637f9f714182fb162f3102b89, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 492ab391ad41b9946a67d20db57e4dfa, type: 2}
+  m_sharedMaterial: {fileID: 5599663890423478549, guid: 492ab391ad41b9946a67d20db57e4dfa, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -14573,7 +14573,7 @@ MonoBehaviour:
   m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 1
+  m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
   m_textAlignment: 65535
@@ -18056,8 +18056,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: A very strong and resiliant character.
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: e2a8bcd637f9f714182fb162f3102b89, type: 2}
-  m_sharedMaterial: {fileID: 5599663890423478549, guid: e2a8bcd637f9f714182fb162f3102b89, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 492ab391ad41b9946a67d20db57e4dfa, type: 2}
+  m_sharedMaterial: {fileID: 5599663890423478549, guid: 492ab391ad41b9946a67d20db57e4dfa, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
