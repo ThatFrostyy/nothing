@@ -91,6 +91,27 @@ namespace FF
             _isPlaying = false;
         }
 
+        public void StopEmitting()
+        {
+            if (_particleSystems == null || _particleSystems.Length == 0)
+            {
+                CacheParticleSystems();
+            }
+
+            for (int i = 0; i < _particleSystems.Length; i++)
+            {
+                var system = _particleSystems[i];
+                if (!system)
+                {
+                    continue;
+                }
+
+                system.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
+
+            _isPlaying = true;
+        }
+
         private void CacheParticleSystems()
         {
             if (includeChildren)

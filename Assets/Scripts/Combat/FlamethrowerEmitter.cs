@@ -11,6 +11,7 @@ namespace FF
         [SerializeField] private LayerMask defaultHitMask = ~0;
         [SerializeField, Min(0.01f)] private float stopFadeDuration = 0.2f;
         [SerializeField] private Vector3 vfxOffset = Vector3.zero;
+        [SerializeField] private Vector3 rotationOffsetEuler = new(0f, 0f, 90f);
 
         private readonly Collider2D[] _overlapResults = new Collider2D[24];
         private readonly List<Enemy> _targets = new();
@@ -113,7 +114,7 @@ namespace FF
                 return;
             }
 
-            Vector2 forward = _followTarget ? (Vector2)_followTarget.right : (Vector2)transform.right;
+            Vector2 forward = (Vector2)transform.right;
             float halfAngle = _coneAngle * 0.5f;
             _targets.Clear();
 
@@ -185,10 +186,12 @@ namespace FF
             _activeVfx = PoolManager.Get(_sourceWeapon.loopingFireVfx, position, transform.rotation);
             if (_activeVfx)
             {
-                _activeVfx.transform.SetParent(null, true);
+                _activeVfx.transform.SetParent(transform, true);
                 _activeVfx.transform.position = position;
                 _activeVfx.transform.rotation = transform.rotation;
                 _activeVfx.transform.localScale = Vector3.one;
+                _activeVfx.transform.localPosition = vfxOffset;
+                _activeVfx.transform.localRotation = Quaternion.identity;
 
                 if (_activeVfx.TryGetComponent<PooledParticleSystem>(out var pooled))
                 {
@@ -209,13 +212,21 @@ namespace FF
                 return;
             }
 
-            if (_activeVfx.TryGetComponent<PoolToken>(out var token))
+            _activeVfx.transform.SetParent(null, true);
+
+            if (_activeVfx.TryGetComponent<PooledParticleSystem>(out var pooled))
             {
-                token.Release();
+                pooled.StopEmitting();
             }
             else
             {
-                Destroy(_activeVfx);
+                var particleSystems = _activeVfx.GetComponentsInChildren<ParticleSystem>();
+                foreach (var system in particleSystems)
+                {
+                    system.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+                }
+
+                Destroy(_activeVfx, Mathf.Max(0.01f, stopFadeDuration));
             }
 
             _activeVfx = null;
@@ -289,7 +300,7 @@ namespace FF
             }
 
             transform.position = _followTarget.position;
-            transform.rotation = _followTarget.rotation;
+            transform.rotation = _followTarget.rotation * Quaternion.Euler(rotationOffsetEuler);
         }
 
         private void OnDisable()
