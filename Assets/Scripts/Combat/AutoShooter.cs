@@ -46,6 +46,8 @@ namespace FF
         private float _currentRecoil;
         private Vector3 _baseLocalPosition;
         private Transform _gunPivot;
+        private float _flamethrowerHeat;
+        private bool _flamethrowerOverheated;
 
         private float _currentCooldownProgress = 1f;
         private float _currentChargeProgress;
@@ -89,6 +91,8 @@ namespace FF
             _isGrenadeWeapon = _weapon && _weapon.bulletPrefab && _weapon.bulletPrefab.TryGetComponent<GrenadeProjectile>(out _);
             _useGrenadeCharging = _weapon && _weapon.useGrenadeCharging;
             SetGrenadeChargeProgress(0f);
+            _flamethrowerHeat = 0f;
+            _flamethrowerOverheated = false;
             _isChargingGrenade = false;
 
             SetCooldownProgress(1f);
@@ -115,6 +119,8 @@ namespace FF
             _isGrenadeWeapon = false;
             _useGrenadeCharging = false;
             _isChargingGrenade = false;
+            _flamethrowerHeat = 0f;
+            _flamethrowerOverheated = false;
             SetCooldownProgress(1f);
             SetGrenadeChargeProgress(0f);
             CleanupFlamethrowerEmitter();
@@ -311,13 +317,59 @@ namespace FF
 
             float damageMultiplier = GetFinalDamageMultiplier(out _);
             int damagePerSecond = Mathf.Max(1, Mathf.RoundToInt(_weapon.flamethrowerDamagePerSecond * damageMultiplier));
-            _flamethrowerEmitter.Tick(_isFireHeld, damagePerSecond, ResolveOwnerTag());
+            bool canFire = _isFireHeld && !_flamethrowerOverheated;
+
+            if (_weapon.useFlamethrowerBurst)
+            {
+                UpdateFlamethrowerHeat(deltaTime);
+                canFire &= !_flamethrowerOverheated;
+            }
+            else
+            {
+                if (_flamethrowerHeat > 0.001f)
+                {
+                    _flamethrowerHeat = 0f;
+                    _flamethrowerOverheated = false;
+                    SetGrenadeChargeProgress(0f);
+                }
+            }
+
+            _flamethrowerEmitter.Tick(canFire, damagePerSecond, ResolveOwnerTag());
 
             _currentSpread = _weapon.baseSpread;
             _fireTimer = 0f;
             SetCooldownProgress(1f);
-            SetGrenadeChargeProgress(0f);
             UpdateRecoil(deltaTime);
+        }
+
+        private void UpdateFlamethrowerHeat(float deltaTime)
+        {
+            if (!_weapon || !_weapon.useFlamethrowerBurst)
+            {
+                return;
+            }
+
+            if (!_flamethrowerOverheated && _isFireHeld)
+            {
+                float duration = Mathf.Max(0.1f, _weapon.flamethrowerBurstDuration);
+                _flamethrowerHeat += deltaTime / duration;
+                if (_flamethrowerHeat >= 1f)
+                {
+                    _flamethrowerHeat = 1f;
+                    _flamethrowerOverheated = true;
+                }
+            }
+            else if (_flamethrowerHeat > 0f)
+            {
+                float cooldown = Mathf.Max(0.1f, _weapon.flamethrowerOverheatCooldown);
+                _flamethrowerHeat = Mathf.Max(0f, _flamethrowerHeat - deltaTime / cooldown);
+                if (_flamethrowerOverheated && _flamethrowerHeat <= Mathf.Epsilon)
+                {
+                    _flamethrowerOverheated = false;
+                }
+            }
+
+            SetGrenadeChargeProgress(_flamethrowerHeat);
         }
 
         private string ResolveOwnerTag()
