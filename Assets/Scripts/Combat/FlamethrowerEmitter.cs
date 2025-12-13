@@ -179,7 +179,8 @@ namespace FF
                 Mathf.Max(0, _sourceWeapon.burnDamagePerSecond),
                 Mathf.Max(0.05f, _sourceWeapon.burnTickInterval),
                 _sourceWeapon.burnTargetVfx,
-                _sourceWeapon);
+                _sourceWeapon,
+                _sourceWeapon.burnTargetVfxOffset);
         }
 
         private void StartLoopingVfx()

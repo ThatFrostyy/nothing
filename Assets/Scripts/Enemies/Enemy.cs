@@ -122,6 +122,7 @@ namespace FF
         private Weapon _burnSourceWeapon;
         private GameObject _activeBurningVfx;
         private GameObject _burningVfxPrefab;
+        private Vector3 _burningVfxOffset = Vector3.zero;
 
         private static readonly System.Collections.Generic.HashSet<Enemy> activeBosses = new();
 
@@ -936,7 +937,7 @@ namespace FF
             PlayHitSound();
         }
 
-        public void ApplyBurn(float duration, int damagePerSecond, float tickInterval, GameObject vfxPrefab, Weapon sourceWeapon)
+        public void ApplyBurn(float duration, int damagePerSecond, float tickInterval, GameObject vfxPrefab, Weapon sourceWeapon, Vector3 vfxOffset)
         {
             if (_health == null || duration <= 0f || damagePerSecond <= 0)
             {
@@ -951,6 +952,8 @@ namespace FF
             {
                 _burnSourceWeapon = sourceWeapon;
             }
+
+            _burningVfxOffset = vfxOffset;
 
             EnsureBurningVfx(vfxPrefab);
         }
@@ -986,20 +989,20 @@ namespace FF
                 return;
             }
 
+            Transform anchor = enemyVisual ? enemyVisual : transform;
+
             if (_activeBurningVfx && _burningVfxPrefab == prefab)
             {
+                ResetBurningVfxTransform(anchor, _activeBurningVfx);
                 return;
             }
 
             ClearBurningVfx();
 
-            Transform anchor = enemyVisual ? enemyVisual : transform;
             GameObject fx = PoolManager.Get(prefab, anchor.position, anchor.rotation);
             if (fx)
             {
-                fx.transform.SetParent(anchor);
-                fx.transform.localPosition = Vector3.zero;
-                fx.transform.localRotation = Quaternion.identity;
+                ResetBurningVfxTransform(anchor, fx);
 
                 if (fx.TryGetComponent<PooledParticleSystem>(out var pooled))
                 {
@@ -1032,7 +1035,12 @@ namespace FF
 
         private void ClearBurningVfx()
         {
-            if (_activeBurningVfx && _activeBurningVfx.TryGetComponent<PoolToken>(out var token))
+            if (_activeBurningVfx && _activeBurningVfx.TryGetComponent<PooledParticleSystem>(out var pooled))
+            {
+                _activeBurningVfx.transform.SetParent(null, true);
+                pooled.StopEmitting();
+            }
+            else if (_activeBurningVfx && _activeBurningVfx.TryGetComponent<PoolToken>(out var token))
             {
                 token.Release();
             }
@@ -1043,6 +1051,14 @@ namespace FF
 
             _activeBurningVfx = null;
             _burningVfxPrefab = null;
+        }
+
+        private void ResetBurningVfxTransform(Transform anchor, GameObject fx)
+        {
+            fx.transform.SetParent(anchor, false);
+            fx.transform.localPosition = _burningVfxOffset;
+            fx.transform.localRotation = Quaternion.identity;
+            fx.transform.localScale = Vector3.one;
         }
 
         private void HandleDeath()
