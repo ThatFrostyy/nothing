@@ -81,16 +81,6 @@ namespace FF
 
         void Update()
         {
-            // --- NEW FAILING FIX ---
-            // If the orb is parented (e.g., to a dying enemy or a fire effect),
-            // detach it immediately and enforce the correct base scale.
-            if (transform.parent != null)
-            {
-                transform.SetParent(null, true);
-                transform.localScale = baseScale;
-            }
-            // -----------------------
-
             if (collected)
             {
                 return;
@@ -106,22 +96,9 @@ namespace FF
             AnimatePulse(Time.deltaTime); // This is what calculates the scale. It must run AFTER the fix.
         }
 
-        private void LateUpdate()
-        {
-            // If the orb is attached to anything (like a dying enemy or fire effect),
-            // detach it immediately. XP Orbs should always be in World Space.
-            if (transform.parent != null)
-            {
-                transform.SetParent(null, true);
-
-                // Force the scale back to normal immediately so it doesn't render big for even one frame
-                transform.localScale = baseScale;
-            }
-        }
-
         private void OnTransformParentChanged()
         {
-            // If the orb is unparented (detached from enemy), Unity might have 
+            // If the orb is unparented (detached from enemy), Unity might have
             // distorted the scale to match the parent's world scale.
             // We immediately force it back to our desired baseScale.
             if (transform.parent == null)
@@ -148,10 +125,6 @@ namespace FF
 
         public void OnTakenFromPool()
         {
-            // Fix the scale and parent immediately upon activation
-            transform.SetParent(null, true);
-            transform.localScale = baseScale;
-
             ResetOrbState();
         }
 
@@ -321,6 +294,12 @@ namespace FF
 
         void ResetOrbState()
         {
+            // Detach and reset scale immediately so pooled orbs don't inherit scaling
+            // from effects (e.g., flamethrower burn VFX) that might have temporarily
+            // parented them.
+            transform.SetParent(null, true);
+            transform.localScale = baseScale;
+
             if (releaseRoutine != null)
             {
                 StopCoroutine(releaseRoutine);
