@@ -294,14 +294,14 @@ namespace FF
                 pickupAudioSource.Stop();
             }
 
+            transform.localScale = baseScale;
+            ResetPulseTimer();
             if (orbCollider)
             {
                 orbCollider.enabled = true;
             }
 
             SetRenderersEnabled(true);
-            transform.localScale = baseScale;
-            ResetPulseTimer();
             lifetimeTimer = 0f;
             currentLifetime = GetLifetimeDuration();
         }
