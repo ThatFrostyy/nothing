@@ -77,8 +77,20 @@ namespace FF
             CacheRenderers();
         }
 
+        // Inside XPOrb.cs
+
         void Update()
         {
+            // --- NEW FAILING FIX ---
+            // If the orb is parented (e.g., to a dying enemy or a fire effect),
+            // detach it immediately and enforce the correct base scale.
+            if (transform.parent != null)
+            {
+                transform.SetParent(null, true);
+                transform.localScale = baseScale;
+            }
+            // -----------------------
+
             if (collected)
             {
                 return;
@@ -91,7 +103,31 @@ namespace FF
             }
             AcquireTarget();
             MoveTowardsTarget(Time.deltaTime);
-            AnimatePulse(Time.deltaTime);
+            AnimatePulse(Time.deltaTime); // This is what calculates the scale. It must run AFTER the fix.
+        }
+
+        private void LateUpdate()
+        {
+            // If the orb is attached to anything (like a dying enemy or fire effect),
+            // detach it immediately. XP Orbs should always be in World Space.
+            if (transform.parent != null)
+            {
+                transform.SetParent(null, true);
+
+                // Force the scale back to normal immediately so it doesn't render big for even one frame
+                transform.localScale = baseScale;
+            }
+        }
+
+        private void OnTransformParentChanged()
+        {
+            // If the orb is unparented (detached from enemy), Unity might have 
+            // distorted the scale to match the parent's world scale.
+            // We immediately force it back to our desired baseScale.
+            if (transform.parent == null)
+            {
+                transform.localScale = baseScale;
+            }
         }
 
         void OnTriggerEnter2D(Collider2D other)
@@ -112,6 +148,10 @@ namespace FF
 
         public void OnTakenFromPool()
         {
+            // Fix the scale and parent immediately upon activation
+            transform.SetParent(null, true);
+            transform.localScale = baseScale;
+
             ResetOrbState();
         }
 
@@ -277,6 +317,8 @@ namespace FF
             BeginRelease(0f);
         }
 
+        // Inside XPOrb.cs
+
         void ResetOrbState()
         {
             if (releaseRoutine != null)
@@ -294,7 +336,6 @@ namespace FF
                 pickupAudioSource.Stop();
             }
 
-            transform.localScale = baseScale;
             ResetPulseTimer();
             if (orbCollider)
             {
