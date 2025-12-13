@@ -63,6 +63,7 @@ namespace FF
         [Min(0f)] public float burnDuration = 3f;
         [Min(0)] public int burnDamagePerSecond = 5;
         [Min(0.05f)] public float burnTickInterval = 0.35f;
+        public Vector3 burnTargetVfxOffset = Vector3.zero;
         public GameObject burnTargetVfx;
         public GameObject burnImpactVfx;
 
