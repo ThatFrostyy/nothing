@@ -2347,6 +2347,10 @@ MonoBehaviour:
   deathTitle: Defeated
   fadeDuration: 0.25
   backdropAlpha: 0.7
+  roundKillsText: {fileID: 0}
+  lastWaveText: {fileID: 0}
+  mostUsedWeaponText: {fileID: 0}
+  unavailableStatText: --
   settingsGroup: {fileID: 0}
   settingsRoot: {fileID: 0}
   musicSettingsUI: {fileID: 0}
@@ -11656,6 +11660,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2124256403}
   m_CullTransparentMesh: 1
+--- !u!1001 &2988008240239484162
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3566676732500430944, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_Name
+      value: FlamethrowerPickup
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4645781473523836578, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 40089548b0e5cec45ac55473b531f589, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -11673,3 +11734,4 @@ SceneRoots:
   - {fileID: 1756355925}
   - {fileID: 497791597}
   - {fileID: 483938635}
+  - {fileID: 2988008240239484162}

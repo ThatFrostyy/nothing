@@ -12,23 +12,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
   m_Name: Flamethrower
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: 
+  weaponName: test
   fireSFX: {fileID: 0}
   muzzleFlash: {fileID: 0}
   ejectParticles: {fileID: 0}
   recoilAmount: 6
   recoilRecoverySpeed: 10
-  attackLoopSFX: {fileID: 0}
-  fireLoopSFX: {fileID: 0}
-  loopingFireVfx: {fileID: 0}
+  attackLoopSFX: {fileID: 8300000, guid: be0ced10bafa6894a899f1a7b34cd2fa, type: 3}
+  fireLoopSFX: {fileID: 8300000, guid: be0ced10bafa6894a899f1a7b34cd2fa, type: 3}
+  loopingFireVfx: {fileID: 5202666124479915743, guid: 0052d85b91aae67498847a0336eb2aed, type: 3}
   loopingVfxOffset: {x: 0, y: 0, z: 0}
-  weaponClass: 0
+  weaponClass: 4
   isShotgun: 0
-  weaponIcon: {fileID: 0}
-  isSpecial: 0
-  useGrenadeCharging: 1
+  weaponIcon: {fileID: 21300004, guid: 7ab74e659e1f0a34d9cfec21c478fc12, type: 3}
+  isSpecial: 1
+  useGrenadeCharging: 0
   bulletPrefab: {fileID: 0}
-  weaponPrefab: {fileID: 0}
+  weaponPrefab: {fileID: 7922939727332240829, guid: 88b3a3721e66f0e4894347f48bdb0069, type: 3}
   rpm: 420
   damage: 10
   recoilKick: 4
@@ -36,21 +36,24 @@ MonoBehaviour:
   fireCooldown: 0.1
   knockbackStrength: 0
   knockbackDuration: 0.2
-  appliesBurn: 0
+  appliesBurn: 1
   burnDuration: 3
   burnDamagePerSecond: 5
   burnTickInterval: 0.35
-  burnTargetVfx: {fileID: 0}
+  burnTargetVfx: {fileID: 6294508013172393196, guid: 043176b6a68be2b43b073aaaa4782c7d, type: 3}
   burnImpactVfx: {fileID: 0}
-  isFlamethrower: 0
+  isFlamethrower: 1
   flamethrowerRange: 5
   flamethrowerConeAngle: 45
   flamethrowerTickInterval: 0.1
   flamethrowerDamagePerSecond: 18
   flamethrowerHitMask:
     serializedVersion: 2
-    m_Bits: 0
-  flamethrowerEmitterPrefab: {fileID: 0}
+    m_Bits: 128
+  flamethrowerEmitterPrefab: {fileID: 5845333133233451679, guid: de13837ad7cc26c4a82322fdc3ddd26c, type: 3}
+  useFlamethrowerBurst: 1
+  flamethrowerBurstDuration: 3
+  flamethrowerOverheatCooldown: 2.5
   baseSpread: 1.5
   maxSpread: 6
   spreadIncreasePerShot: 0.5
