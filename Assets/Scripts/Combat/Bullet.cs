@@ -152,7 +152,8 @@ namespace FF
                 Mathf.Max(0, sourceWeapon.burnDamagePerSecond),
                 Mathf.Max(0.05f, sourceWeapon.burnTickInterval),
                 sourceWeapon.burnTargetVfx,
-                sourceWeapon);
+                sourceWeapon,
+                sourceWeapon.burnTargetVfxOffset);
         }
 
         private void SpawnImpactVfx(GameObject prefab)
