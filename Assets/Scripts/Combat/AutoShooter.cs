@@ -146,6 +146,21 @@ namespace FF
             _cameraShakeEnabled = enabled;
         }
 
+        private void OnDisable()
+        {
+            StopLoopingFeedback();
+
+            if (_flamethrowerEmitter)
+            {
+                _flamethrowerEmitter.Tick(false, 0, ResolveOwnerTag());
+            }
+        }
+
+        private void OnDestroy()
+        {
+            CleanupFlamethrowerEmitter();
+        }
+
         private void SetupFlamethrowerEmitter()
         {
             CleanupFlamethrowerEmitter();
@@ -317,22 +332,19 @@ namespace FF
 
             float damageMultiplier = GetFinalDamageMultiplier(out _);
             int damagePerSecond = Mathf.Max(1, Mathf.RoundToInt(_weapon.flamethrowerDamagePerSecond * damageMultiplier));
-            bool canFire = _isFireHeld && !_flamethrowerOverheated;
 
             if (_weapon.useFlamethrowerBurst)
             {
                 UpdateFlamethrowerHeat(deltaTime);
-                canFire &= !_flamethrowerOverheated;
             }
-            else
+            else if (_flamethrowerHeat > 0.001f)
             {
-                if (_flamethrowerHeat > 0.001f)
-                {
-                    _flamethrowerHeat = 0f;
-                    _flamethrowerOverheated = false;
-                    SetGrenadeChargeProgress(0f);
-                }
+                _flamethrowerHeat = 0f;
+                _flamethrowerOverheated = false;
+                SetGrenadeChargeProgress(0f);
             }
+
+            bool canFire = _isFireHeld && !_flamethrowerOverheated;
 
             _flamethrowerEmitter.Tick(canFire, damagePerSecond, ResolveOwnerTag());
 
