@@ -526,15 +526,15 @@ namespace FF
         {
             if (candidates != null && candidates.Count > 0)
             {
-                int index = Random.Range(0, candidates.Count);
-                return candidates[index];
+                int candidateIndex = Random.Range(0, candidates.Count);
+                return candidates[candidateIndex];
             }
 
             if (def.Prefabs == null || def.Prefabs.Length == 0)
                 return null;
 
-            int index = Random.Range(0, def.Prefabs.Length);
-            return def.Prefabs[index];
+            int prefabIndex = Random.Range(0, def.Prefabs.Length);
+            return def.Prefabs[prefabIndex];
         }
 
         private bool SpawnEnemy(GameObject prefab, Vector2 position, EnemyWaveModifiers modifiers, bool isBoss)

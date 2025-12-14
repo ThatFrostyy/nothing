@@ -67,7 +67,7 @@ namespace FF
         public WaveAttributeScaling GetScalingOverrideForPrefab(GameObject prefab)
         {
             PrefabSpawnOverride match = FindOverride(prefab);
-            if (match != null && match.overrideScaling && match.attributeScalingOverride)
+            if (match != null && match.overrideScaling && match.attributeScalingOverride != null)
             {
                 return match.attributeScalingOverride;
             }
