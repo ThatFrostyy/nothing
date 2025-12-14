@@ -193,29 +193,165 @@ namespace FF
                 if (definition == null || definition.Prefabs == null || definition.Prefabs.Length == 0)
                     continue;
 
-                if (!DefinitionIsActive(definition, wave, isBossWave))
+                if (!definition.HasPrefabOverrides)
+                {
+                    if (!DefinitionIsActive(definition, wave, isBossWave))
+                        continue;
+
+                    bool definitionIsBoss = definition.IsBoss || definition.SpawnOnlyOnBossWaves;
+
+                    int remainingAllowed = VirtualRemaining(definitionIsBoss);
+                    if (remainingAllowed <= 0)
+                        continue;
+
+                    int desired = definition.EvaluateSpawnCount(wave);
+                    int count = Mathf.Min(desired, remainingAllowed);
+
+                    if (count <= 0)
+                        continue;
+
+                    if (definitionIsBoss)
+                        virtualActiveBosses += count;
+                    else
+                        virtualActiveNonBosses += count;
+
+                    EnemyWaveModifiers modifiers = definition.GetWaveModifiers(wave, defaultScaling);
+
+                    requests.Add(new SpawnRequest(definition, count, modifiers, definitionIsBoss, null));
                     continue;
+                }
 
-                bool definitionIsBoss = definition.IsBoss || definition.SpawnOnlyOnBossWaves;
-
-                int remainingAllowed = VirtualRemaining(definitionIsBoss);
-                if (remainingAllowed <= 0)
+                List<EnemySpawnDefinition.PrefabEntry> activePrefabs = definition.GetEligiblePrefabs(wave, isBossWave, spawnNonBossDefinitionsDuringBossWave);
+                if (activePrefabs.Count == 0)
+                {
                     continue;
+                }
 
-                int desired = definition.EvaluateSpawnCount(wave);
-                int count = Mathf.Min(desired, remainingAllowed);
+                int baseCount = definition.EvaluateSpawnCount(wave);
+                int baseBossCount = (definition.IsBoss || definition.SpawnOnlyOnBossWaves) ? baseCount : 0;
+                int baseNonBossCount = (!definition.IsBoss && !definition.SpawnOnlyOnBossWaves) ? baseCount : 0;
 
-                if (count <= 0)
-                    continue;
+                var defaultBossPrefabs = new List<GameObject>();
+                var defaultNonBossPrefabs = new List<GameObject>();
+                var customBossEntries = new List<EnemySpawnDefinition.PrefabEntry>();
+                var customNonBossEntries = new List<EnemySpawnDefinition.PrefabEntry>();
 
-                if (definitionIsBoss)
-                    virtualActiveBosses += count;
-                else
-                    virtualActiveNonBosses += count;
+                for (int p = 0; p < activePrefabs.Count; p++)
+                {
+                    EnemySpawnDefinition.PrefabEntry entry = activePrefabs[p];
 
-                EnemyWaveModifiers modifiers = definition.GetWaveModifiers(wave, defaultScaling);
+                    if (entry.HasSpawnCountOverride)
+                    {
+                        int remainingAllowed = VirtualRemaining(entry.IsBoss);
+                        if (remainingAllowed <= 0)
+                        {
+                            continue;
+                        }
 
-                requests.Add(new SpawnRequest(definition, count, modifiers, definitionIsBoss));
+                        int desired = entry.EvaluateSpawnCount(wave, 0);
+                        int count = Mathf.Min(desired, remainingAllowed);
+                        if (count <= 0)
+                        {
+                            continue;
+                        }
+
+                        if (entry.IsBoss)
+                        {
+                            baseBossCount = Mathf.Max(0, baseBossCount - count);
+                            virtualActiveBosses += count;
+                        }
+                        else
+                        {
+                            baseNonBossCount = Mathf.Max(0, baseNonBossCount - count);
+                            virtualActiveNonBosses += count;
+                        }
+
+                        EnemyWaveModifiers modifiers = entry.BuildWaveModifiers(wave, defaultScaling);
+                        requests.Add(new SpawnRequest(definition, count, modifiers, entry.IsBoss, new List<GameObject> { entry.Prefab }));
+                        continue;
+                    }
+
+                    if (entry.IsBoss)
+                    {
+                        if (entry.HasScalingOverride)
+                        {
+                            customBossEntries.Add(entry);
+                        }
+                        else
+                        {
+                            defaultBossPrefabs.Add(entry.Prefab);
+                        }
+                    }
+                    else
+                    {
+                        if (entry.HasScalingOverride)
+                        {
+                            customNonBossEntries.Add(entry);
+                        }
+                        else
+                        {
+                            defaultNonBossPrefabs.Add(entry.Prefab);
+                        }
+                    }
+                }
+
+                int bossBuckets = customBossEntries.Count + (defaultBossPrefabs.Count > 0 ? 1 : 0);
+                int bossShare = bossBuckets > 0 ? Mathf.CeilToInt((float)baseBossCount / bossBuckets) : 0;
+
+                for (int b = 0; b < customBossEntries.Count; b++)
+                {
+                    EnemySpawnDefinition.PrefabEntry entry = customBossEntries[b];
+                    int remainingAllowed = VirtualRemaining(true);
+                    int desired = Mathf.Min(bossShare, remainingAllowed, baseBossCount);
+                    if (desired > 0)
+                    {
+                        EnemyWaveModifiers modifiers = entry.BuildWaveModifiers(wave, defaultScaling);
+                        requests.Add(new SpawnRequest(definition, desired, modifiers, true, new List<GameObject> { entry.Prefab }));
+                        baseBossCount = Mathf.Max(0, baseBossCount - desired);
+                        virtualActiveBosses += desired;
+                    }
+                }
+
+                int nonBossBuckets = customNonBossEntries.Count + (defaultNonBossPrefabs.Count > 0 ? 1 : 0);
+                int nonBossShare = nonBossBuckets > 0 ? Mathf.CeilToInt((float)baseNonBossCount / nonBossBuckets) : 0;
+
+                for (int n = 0; n < customNonBossEntries.Count; n++)
+                {
+                    EnemySpawnDefinition.PrefabEntry entry = customNonBossEntries[n];
+                    int remainingAllowed = VirtualRemaining(false);
+                    int desired = Mathf.Min(nonBossShare, remainingAllowed, baseNonBossCount);
+                    if (desired > 0)
+                    {
+                        EnemyWaveModifiers modifiers = entry.BuildWaveModifiers(wave, defaultScaling);
+                        requests.Add(new SpawnRequest(definition, desired, modifiers, false, new List<GameObject> { entry.Prefab }));
+                        baseNonBossCount = Mathf.Max(0, baseNonBossCount - desired);
+                        virtualActiveNonBosses += desired;
+                    }
+                }
+
+                if (defaultBossPrefabs.Count > 0)
+                {
+                    int remainingAllowed = VirtualRemaining(true);
+                    int count = Mathf.Min(baseBossCount, remainingAllowed);
+                    if (count > 0)
+                    {
+                        EnemyWaveModifiers modifiers = definition.GetWaveModifiers(wave, defaultScaling);
+                        requests.Add(new SpawnRequest(definition, count, modifiers, true, defaultBossPrefabs));
+                        virtualActiveBosses += count;
+                    }
+                }
+
+                if (defaultNonBossPrefabs.Count > 0)
+                {
+                    int remainingAllowed = VirtualRemaining(false);
+                    int count = Mathf.Min(baseNonBossCount, remainingAllowed);
+                    if (count > 0)
+                    {
+                        EnemyWaveModifiers modifiers = definition.GetWaveModifiers(wave, defaultScaling);
+                        requests.Add(new SpawnRequest(definition, count, modifiers, false, defaultNonBossPrefabs));
+                        virtualActiveNonBosses += count;
+                    }
+                }
             }
 
             return requests;
@@ -262,14 +398,15 @@ namespace FF
                 return false;
             }
 
-            int spawned = SpawnBatch(request.Definition, batchSize, direction, radius, request.Modifiers, request.IsBoss);
+            int spawned = SpawnBatch(request, batchSize, direction, radius);
             request.Remaining = Mathf.Max(0, request.Remaining - spawned);
             return spawned > 0;
         }
 
-        private int SpawnBatch(EnemySpawnDefinition definition, int count, Vector2 direction, float radius, EnemyWaveModifiers modifiers, bool isBoss)
+        private int SpawnBatch(SpawnRequest request, int count, Vector2 direction, float radius)
         {
             int spawned = 0;
+            EnemySpawnDefinition definition = request.Definition;
             Vector2 baseDirection = direction.sqrMagnitude > Mathf.Epsilon ? direction.normalized : Random.insideUnitCircle.normalized;
             if (definition.SpawnInPacks)
             {
@@ -278,7 +415,7 @@ namespace FF
                 {
                     Vector2 offset = Random.insideUnitCircle * definition.PackRadius;
                     Vector2 spawnPosition = anchor + offset;
-                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers, isBoss))
+                    if (SpawnEnemy(ChooseRandomPrefab(definition, request.Prefabs), spawnPosition, request.Modifiers, request.IsBoss))
                     {
                         spawned++;
                     }
@@ -296,7 +433,7 @@ namespace FF
                     }
 
                     Vector2 spawnPosition = FindSpawnPosition(spawnDirection, radius);
-                    if (SpawnEnemy(ChooseRandomPrefab(definition), spawnPosition, modifiers, isBoss))
+                    if (SpawnEnemy(ChooseRandomPrefab(definition, request.Prefabs), spawnPosition, request.Modifiers, request.IsBoss))
                     {
                         spawned++;
                     }
@@ -332,13 +469,15 @@ namespace FF
             public EnemyWaveModifiers Modifiers { get; }
             public bool IsBoss { get; }
             public bool CuePlayed { get; set; }
+            public System.Collections.Generic.IReadOnlyList<GameObject> Prefabs { get; }
 
-            public SpawnRequest(EnemySpawnDefinition definition, int count, EnemyWaveModifiers modifiers, bool isBoss)
+            public SpawnRequest(EnemySpawnDefinition definition, int count, EnemyWaveModifiers modifiers, bool isBoss, System.Collections.Generic.IReadOnlyList<GameObject> prefabs)
             {
                 Definition = definition;
                 Remaining = count;
                 Modifiers = modifiers;
                 IsBoss = isBoss;
+                Prefabs = prefabs;
             }
         }
 
@@ -383,8 +522,14 @@ namespace FF
             return true;
         }
 
-        private GameObject ChooseRandomPrefab(EnemySpawnDefinition def)
+        private GameObject ChooseRandomPrefab(EnemySpawnDefinition def, System.Collections.Generic.IReadOnlyList<GameObject> candidates)
         {
+            if (candidates != null && candidates.Count > 0)
+            {
+                int index = Random.Range(0, candidates.Count);
+                return candidates[index];
+            }
+
             if (def.Prefabs == null || def.Prefabs.Length == 0)
                 return null;
 
