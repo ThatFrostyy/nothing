@@ -6,8 +6,10 @@ namespace FF
     {
         [SerializeField] private SpriteRenderer bodyRenderer;
         [SerializeField] private Transform hatAnchor;
+        [SerializeField] private Transform backAnchor;
 
         private GameObject _hatInstance;
+        private GameObject _backpackInstance;
         private HatDefinition _currentHat;
 
         public static event System.Action<HatDefinition> OnHatEquipped;
@@ -34,6 +36,14 @@ namespace FF
             if (anchor)
             {
                 hatAnchor = anchor;
+            }
+        }
+
+        public void SetBackpackAnchor(Transform anchor)
+        {
+            if (anchor)
+            {
+                backAnchor = anchor;
             }
         }
 
@@ -65,6 +75,26 @@ namespace FF
             _hatInstance.transform.localPosition = hat.HatPrefab.transform.localPosition;
             _hatInstance.transform.localRotation = hat.HatPrefab.transform.localRotation;
             _hatInstance.transform.localScale = hat.HatPrefab.transform.localScale;
+        }
+
+        public void SetBackpack(GameObject backpackPrefab)
+        {
+            if (_backpackInstance)
+            {
+                Destroy(_backpackInstance);
+                _backpackInstance = null;
+            }
+
+            if (!backpackPrefab)
+            {
+                return;
+            }
+
+            Transform parent = backAnchor ? backAnchor : transform;
+            _backpackInstance = Instantiate(backpackPrefab, parent);
+            _backpackInstance.transform.localPosition = backpackPrefab.transform.localPosition;
+            _backpackInstance.transform.localRotation = backpackPrefab.transform.localRotation;
+            _backpackInstance.transform.localScale = backpackPrefab.transform.localScale;
         }
     }
 }

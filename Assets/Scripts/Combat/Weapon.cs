@@ -78,6 +78,8 @@ namespace FF
         public bool useFlamethrowerBurst = false;
         [Min(0.1f)] public float flamethrowerBurstDuration = 3f;
         [Min(0.1f)] public float flamethrowerOverheatCooldown = 2.5f;
+        [Tooltip("Optional backpack cosmetic to show when this flamethrower is equipped.")]
+        public GameObject flamethrowerBackpackPrefab;
 
         [Header("Accuracy / Spread")]
         public float baseSpread = 1.5f;           // degrees

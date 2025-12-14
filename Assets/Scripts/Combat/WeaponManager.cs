@@ -13,6 +13,7 @@ namespace FF
         [Header("References")]
         [SerializeField] Transform gunPivot;
         [SerializeField] AutoShooter shooter;
+        [SerializeField] PlayerCosmetics cosmetics;
 
         readonly Weapon[] loadout = new Weapon[3];
         readonly List<WeaponPickup> nearbyPickups = new();
@@ -277,6 +278,11 @@ namespace FF
                     shooter.ClearWeapon();
                 }
 
+                if (cosmetics)
+                {
+                    cosmetics.SetBackpack(null);
+                }
+
                 OnWeaponEquipped?.Invoke(currentSO);
                 return;
             }
@@ -306,7 +312,21 @@ namespace FF
                 Debug.LogWarning("WeaponManager is missing a shooter reference.");
             }
 
+            if (cosmetics)
+            {
+                GameObject backpack = currentSO.isFlamethrower ? currentSO.flamethrowerBackpackPrefab : null;
+                cosmetics.SetBackpack(backpack);
+            }
+
             OnWeaponEquipped?.Invoke(currentSO);
+        }
+
+        void Awake()
+        {
+            if (!cosmetics)
+            {
+                cosmetics = GetComponentInParent<PlayerCosmetics>();
+            }
         }
     }
 }
