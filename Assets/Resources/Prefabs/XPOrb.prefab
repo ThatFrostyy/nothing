@@ -231,7 +231,7 @@ MonoBehaviour:
   acceleration: 18
   pickupSound: {fileID: 8300000, guid: 20d20156f0130a3498b17107fe30a538, type: 3}
   pickupAudioSource: {fileID: 0}
-  pulseScaleRange: {x: 0.1, y: 0.15}
+  pulseScaleRange: {x: 1, y: 1.15}
   pulseSpeed: 4
   randomizePulseOffset: 1
   lifetime: 45

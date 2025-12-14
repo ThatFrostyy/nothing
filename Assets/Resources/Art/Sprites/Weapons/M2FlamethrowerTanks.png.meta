@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: a04d1ed9a65e1394fa7b9a002195c342
+guid: 433bd623d15027044b8d7cd8e9e60819
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4677351393409931103
-    second: XPOrb_0
+      213: -938121557168875626
+    second: M2FlamethrowerTanks_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 0
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 430
+  spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: XPOrb_0
+      name: M2FlamethrowerTanks_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 100
-        height: 100
+        x: 53
+        y: 32
+        width: 203
+        height: 219
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1a86f1a70b5b61fb0800000000000000
-      internalID: -4677351393409931103
+      spriteID: 69710d40a6f1bf2f0800000000000000
+      internalID: -938121557168875626
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      XPOrb_0: -4677351393409931103
+      M2FlamethrowerTanks_0: -938121557168875626
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

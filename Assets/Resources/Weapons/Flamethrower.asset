@@ -40,6 +40,7 @@ MonoBehaviour:
   burnDuration: 3
   burnDamagePerSecond: 5
   burnTickInterval: 0.35
+  burnTargetVfxOffset: {x: 0, y: -0.5, z: 0}
   burnTargetVfx: {fileID: 6294508013172393196, guid: 043176b6a68be2b43b073aaaa4782c7d, type: 3}
   burnImpactVfx: {fileID: 0}
   isFlamethrower: 1
@@ -52,7 +53,7 @@ MonoBehaviour:
     m_Bits: 128
   flamethrowerEmitterPrefab: {fileID: 5845333133233451679, guid: de13837ad7cc26c4a82322fdc3ddd26c, type: 3}
   useFlamethrowerBurst: 1
-  flamethrowerBurstDuration: 3
+  flamethrowerBurstDuration: 2.5
   flamethrowerOverheatCooldown: 2.5
   baseSpread: 1.5
   maxSpread: 6
