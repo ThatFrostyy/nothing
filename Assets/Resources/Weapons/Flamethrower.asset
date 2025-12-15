@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
   m_Name: Flamethrower
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: test
+  weaponName: M2A1 Flamethrower
   fireSFX: {fileID: 0}
   muzzleFlash: {fileID: 0}
   ejectParticles: {fileID: 0}

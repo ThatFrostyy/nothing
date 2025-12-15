@@ -68,6 +68,12 @@ namespace FF
 
             if (isFiring)
             {
+                // Ensure the VFX reference is valid on every tick while firing.
+                // The pooled instance can be returned/reparented externally which
+                // may leave _activeVfx referencing a stale object without the
+                // actual particle systems — detect and recover from that.
+                EnsureVfxActive();
+
                 BeginFiring();
                 ApplyDamage(damagePerSecond);
             }
@@ -106,6 +112,12 @@ namespace FF
             _isFiring = true;
             _tickTimer = 0f;
             StartLoopingVfx();
+            if (_activeVfx == null || !_activeVfx.activeInHierarchy)
+            {
+                // defensive retry
+                StopLoopingVfx();
+                StartLoopingVfx();
+            }
             StartLoopingAudio();
         }
 
@@ -210,13 +222,12 @@ namespace FF
             _activeVfx = PoolManager.Get(_sourceWeapon.loopingFireVfx, position, transform.rotation);
             if (_activeVfx)
             {
-                _activeVfx.transform.SetParent(transform, true);
-                _activeVfx.transform.position = position;
-                _activeVfx.transform.rotation = transform.rotation;
+                _activeVfx.SetActive(true);
+                _activeVfx.transform.SetParent(transform, false);
+                ApplyVfxLengthScale();
+                _activeVfx.transform.SetPositionAndRotation(position, transform.rotation);
                 _activeVfx.transform.localScale = Vector3.one;
-                _activeVfx.transform.localPosition = vfxOffset;
-                _activeVfx.transform.localRotation = Quaternion.identity;
-
+                _activeVfx.transform.SetLocalPositionAndRotation(vfxOffset, Quaternion.identity);
                 if (_activeVfx.TryGetComponent<PooledParticleSystem>(out var pooled))
                 {
                     pooled.OnTakenFromPool();
@@ -229,6 +240,67 @@ namespace FF
 
                 ApplyVfxLengthScale();
             }
+            Debug.Log($"Flame VFX spawn: {_activeVfx?.name}, active={_activeVfx?.activeInHierarchy}");
+        }
+
+        // Defensive check to ensure the _activeVfx reference actually contains
+        // a visible particle effect. Some pool implementations reparent or
+        // deactivate the original root and spawn a separate runtime root which
+        // contains the particle systems; this can leave our reference pointing
+        // at an empty holder. If we detect that problem, try to recover by
+        // searching children and reacquiring a valid instance or respawning.
+        private void EnsureVfxActive()
+        {
+            if (_activeVfx == null)
+            {
+                return;
+            }
+
+            // If the referenced object is inactive in hierarchy, try to reacquire
+            if (!_activeVfx.activeInHierarchy)
+            {
+                Debug.Log("Flame VFX reference inactive in hierarchy — clearing reference so it can be respawned.");
+                _activeVfx = null;
+                return;
+            }
+
+            // Check if this gameobject (or any child) contains at least one ParticleSystem//
+            bool hasParticle = false;
+            if (_activeVfx.GetComponentInChildren<ParticleSystem>() != null)
+            {
+                hasParticle = true;
+            }
+
+            // If no ParticleSystem found, it may have been reparented under a new root.
+            if (!hasParticle)
+            {
+                // Try to find a child under the same transform with ParticleSystems
+                Transform root = _activeVfx.transform.parent;
+                if (root != null)
+                {
+                    ParticleSystem found = root.GetComponentInChildren<ParticleSystem>();
+                    if (found != null)
+                    {
+                        // Adopt the root that actually contains the particles
+                        GameObject candidate = found.gameObject;
+                        while (candidate.transform.parent != null && candidate.transform.parent != root)
+                        {
+                            candidate = candidate.transform.parent.gameObject;
+                        }
+
+                        if (candidate != null)
+                        {
+                            Debug.Log($"Flame VFX moved under parent '{root.name}' — switching active vfx to '{candidate.name}'");
+                            _activeVfx = candidate;
+                            return;
+                        }
+                    }
+                }
+
+                // Fallback: clear reference so StartLoopingVfx can respawn it.
+                Debug.Log("Flame VFX no longer contains particle systems — clearing reference to force respawn.");
+                _activeVfx = null;
+            }
         }
 
         private void StopLoopingVfx()
@@ -238,6 +310,7 @@ namespace FF
                 return;
             }
 
+            Debug.Log("Stopping flame VFX");
             _activeVfx.transform.SetParent(null, true);
 
             if (_activeVfx.TryGetComponent<PooledParticleSystem>(out var pooled))
@@ -325,8 +398,9 @@ namespace FF
                 return;
             }
 
-            float baseRange = Mathf.Max(0.1f, _baseRange);
-            float lengthScale = Mathf.Max(0.1f, _range) / baseRange;
+            float baseRange = Mathf.Max(0.0001f, _baseRange);
+            float lengthScale = Mathf.Clamp(Mathf.Max(0.1f, _range) / baseRange, 0.1f, 100f);
+            if (float.IsNaN(lengthScale) || float.IsInfinity(lengthScale)) lengthScale = 1f;
             Vector3 currentScale = _activeVfx.transform.localScale;
             _activeVfx.transform.localScale = new Vector3(currentScale.x, lengthScale, currentScale.z);
         }

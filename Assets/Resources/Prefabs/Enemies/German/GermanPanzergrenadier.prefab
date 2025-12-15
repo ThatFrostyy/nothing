@@ -264,11 +264,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ba7b9fb9b6da54d4a80a48fc95cd1365, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.StopAndShootMovement
-  advanceDuration: 1.5
-  pauseDuration: 1.25
-  repositionDuration: 1.25
-  stopDistance: 1.75
-  lateralBias: 0.65
+  moveDuration: 2
+  stopDuration: 1.5
+  respectMinDistance: 1
+  minDistance: 2.3
 --- !u!1 &4015478371635210542
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 639b2135e5fe44a489165be878c19319, type: 3}
   m_Name: WeaponFlameRange
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
-  Title: Flamethrower Range<br>
+  Title: Flamethrower Range Upgrade<br>
   DescriptionPrefix: 'Increase flamethrower range by '
   rarity: 2
   rarityWeightOverride: 0

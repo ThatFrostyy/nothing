@@ -6,129 +6,67 @@ namespace FF
     public class StopAndShootMovement : MonoBehaviour, IEnemyMovement
     {
         [Header("Timings")]
-        [SerializeField, Min(0.1f)] private float advanceDuration = 1.5f;
-        [SerializeField, Min(0.1f)] private float pauseDuration = 1f;
-        [SerializeField, Min(0.1f)] private float repositionDuration = 1.25f;
+        [Tooltip("How long the enemy walks towards the player.")]
+        [SerializeField, Min(0.1f)] private float moveDuration = 2.0f;
 
-        [Header("Positioning")]
-        [SerializeField, Min(0f)] private float stopDistance = 1.75f;
-        [SerializeField, Range(0f, 1f)] private float lateralBias = 0.65f;
+        [Tooltip("How long the enemy stands still to shoot.")]
+        [SerializeField, Min(0.1f)] private float stopDuration = 1.0f;
 
-        private State _state = State.Advancing;
-        private float _stateTimer;
-        private Vector2 _repositionDirection;
+        [Header("Settings")]
+        [Tooltip("If true, the enemy will stop moving if they get too close, even if the Move Timer is active.")]
+        [SerializeField] private bool respectMinDistance = true;
+        [SerializeField, Min(0f)] private float minDistance = 1.5f;
 
-        private enum State
+        private float _timer;
+        private bool _isMoving;
+
+        private void Start()
         {
-            Advancing,
-            Paused,
-            Repositioning
+            // Start by moving
+            _isMoving = true;
+            _timer = moveDuration;
         }
 
         public Vector2 GetDesiredVelocity(Enemy enemy, Transform player, EnemyStats stats, Rigidbody2D body, float deltaTime)
         {
-            _stateTimer -= deltaTime;
+            if (!player) return Vector2.zero;
 
-            if (_state == State.Advancing && player)
+            // 1. Handle the Timer Cycle
+            _timer -= deltaTime;
+            if (_timer <= 0f)
             {
-                float distance = Vector2.Distance(enemy.transform.position, player.position);
-                if (distance <= stopDistance)
-                {
-                    BeginPause();
-                }
+                // Toggle state
+                _isMoving = !_isMoving;
+
+                // Reset timer based on new state
+                _timer = _isMoving ? moveDuration : stopDuration;
             }
 
-            if (_stateTimer <= 0f)
-            {
-                AdvanceState(player, enemy.transform);
-            }
-
-            float baseSpeed = stats ? stats.MoveSpeed : 3f;
-            switch (_state)
-            {
-                case State.Advancing:
-                    return GetAdvanceVelocity(enemy.transform, player, baseSpeed);
-                case State.Repositioning:
-                    return baseSpeed * _repositionDirection;
-                default:
-                    return Vector2.zero;
-            }
-        }
-
-        private void AdvanceState(Transform player, Transform enemyTransform)
-        {
-            switch (_state)
-            {
-                case State.Advancing:
-                    BeginPause();
-                    break;
-                case State.Paused:
-                    BeginReposition(player, enemyTransform);
-                    break;
-                case State.Repositioning:
-                    BeginAdvance();
-                    break;
-            }
-        }
-
-        private void BeginAdvance()
-        {
-            _state = State.Advancing;
-            _stateTimer = advanceDuration;
-        }
-
-        private void BeginPause()
-        {
-            _state = State.Paused;
-            _stateTimer = pauseDuration;
-        }
-
-        private void BeginReposition(Transform player, Transform enemyTransform)
-        {
-            _state = State.Repositioning;
-            _stateTimer = repositionDuration;
-
-            Vector2 forward = enemyTransform.right;
-            Vector2 awayFromPlayer = Vector2.right;
-
-            if (player)
-            {
-                awayFromPlayer = (Vector2)(enemyTransform.position - player.position);
-                if (awayFromPlayer.sqrMagnitude > Mathf.Epsilon)
-                {
-                    awayFromPlayer = awayFromPlayer.normalized;
-                }
-            }
-
-            if (forward.sqrMagnitude < Mathf.Epsilon)
-            {
-                forward = Vector2.right;
-            }
-
-            Vector2 lateral = Vector2.Perpendicular(awayFromPlayer);
-            _repositionDirection = (awayFromPlayer * (1f - lateralBias) + lateral * lateralBias).normalized;
-        }
-
-        private Vector2 GetAdvanceVelocity(Transform enemyTransform, Transform player, float speed)
-        {
-            if (!player)
+            // 2. If we are in the "Stop/Shoot" phase, return zero velocity
+            if (!_isMoving)
             {
                 return Vector2.zero;
             }
 
-            Vector2 toPlayer = (Vector2)(player.position - enemyTransform.position);
-            if (toPlayer.sqrMagnitude < Mathf.Epsilon)
+            // 3. We are in "Move" phase - Calculate direction to player
+            Vector2 toPlayer = player.position - enemy.transform.position;
+            float distance = toPlayer.magnitude;
+
+            // Optional: If we are moving, but we are ALREADY too close, stop anyway
+            if (respectMinDistance && distance <= minDistance)
             {
                 return Vector2.zero;
             }
 
-            return toPlayer.normalized * speed;
+            // 4. Return movement velocity
+            float moveSpeed = stats ? stats.MoveSpeed : 3f;
+            return toPlayer.normalized * moveSpeed;
         }
 
         private void Reset()
         {
-            _state = State.Advancing;
-            _stateTimer = advanceDuration;
+            _isMoving = true;
+            _timer = moveDuration;
         }
     }
 }
