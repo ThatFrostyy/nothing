@@ -216,6 +216,19 @@ namespace FF
                     }
                 }
 
+                // Hide any lingering offscreen indicators (boss/pickup/weapon arrows) that
+                // may have been created during gameplay so they do not remain visible on
+                // the main menu after returning from the death screen.
+                var indicators = FindObjectsOfType<OffscreenIndicatorController>(true);
+                for (int i = 0; i < indicators.Length; i++)
+                {
+                    var indicator = indicators[i];
+                    if (indicator != null)
+                    {
+                        indicator.gameObject.SetActive(false);
+                    }
+                }
+
                 // Also ensure cursor is visible and unlocked in menu scenes
                 Cursor.visible = true;
                 Cursor.lockState = CursorLockMode.None;
