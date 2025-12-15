@@ -60,7 +60,13 @@ namespace FF
             FollowMuzzleImmediate();
         }
 
-        public void Tick(bool isFiring, int damagePerSecond, string ownerTag)
+        public void Tick(
+            bool isFiring,
+            int baseDamagePerSecond,
+            float damageMultiplier,
+            float critChance,
+            float critDamageMultiplier,
+            string ownerTag)
         {
             _ownerTag = ownerTag;
             FollowMuzzleImmediate();
@@ -75,7 +81,7 @@ namespace FF
                 EnsureVfxActive();
 
                 BeginFiring();
-                ApplyDamage(damagePerSecond);
+                ApplyDamage(baseDamagePerSecond, damageMultiplier, critChance, critDamageMultiplier);
             }
             else
             {
@@ -133,7 +139,7 @@ namespace FF
             FadeOutAudio();
         }
 
-        private void ApplyDamage(int damagePerSecond)
+        private void ApplyDamage(int baseDamagePerSecond, float damageMultiplier, float critChance, float critDamageMultiplier)
         {
             _tickTimer -= Time.deltaTime;
             if (_tickTimer > 0f)
@@ -178,12 +184,19 @@ namespace FF
                 return;
             }
 
-            int tickDamage = Mathf.Max(1, Mathf.CeilToInt(damagePerSecond * _tickInterval));
+            float scaledDamagePerSecond = Mathf.Max(1f, baseDamagePerSecond * Mathf.Max(0f, damageMultiplier));
+            int tickDamage = Mathf.Max(1, Mathf.CeilToInt(scaledDamagePerSecond * _tickInterval));
+            critChance = Mathf.Clamp01(critChance);
+            bool isCritical = critChance > 0f && UnityEngine.Random.value < critChance;
+            if (isCritical)
+            {
+                tickDamage = Mathf.Max(1, Mathf.CeilToInt(tickDamage * Mathf.Max(1f, critDamageMultiplier)));
+            }
             foreach (var enemy in _targets)
             {
                 if (enemy && enemy.TryGetComponent(out Health health))
                 {
-                    health.Damage(tickDamage, _sourceWeapon);
+                    health.Damage(tickDamage, _sourceWeapon, isCritical);
                 }
 
                 TryApplyBurn(enemy);
