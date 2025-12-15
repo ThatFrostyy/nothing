@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d0c63abe3df3004198c3d1614f994f9, type: 3}
-  m_Name: Dogs
+  m_Name: Special
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
-  - {fileID: 3282402498340923105, guid: 943a250ae05bb894eb865c90f38fa653, type: 3}
+  - {fileID: 1193462048856524953, guid: 4f1a00de167ce294fa0add037b1767bd, type: 3}
   prefabOverrides: []
-  startWave: 8
+  startWave: 10
   endWave: -1
   spawnInterval: 2
   spawnOnlyOnBossWaves: 0
@@ -24,17 +24,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 5
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
       time: 10
-      value: 4
+      value: 1
       inSlope: 8.304192
       outSlope: 8.304192
       tangentMode: 0
@@ -43,7 +34,7 @@ MonoBehaviour:
       outWeight: 0.33333334
     - serializedVersion: 3
       time: 15
-      value: 5
+      value: 3
       inSlope: 12.631327
       outSlope: 12.631327
       tangentMode: 0
@@ -60,8 +51,8 @@ MonoBehaviour:
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 25
-      value: 7
+      time: 25.070648
+      value: 10
       inSlope: 25.303886
       outSlope: 25.303886
       tangentMode: 0
@@ -89,8 +80,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  spawnChance: 0.65
-  spawnInPacks: 1
+  spawnChance: 1
+  spawnInPacks: 0
   packRadius: 3
   poolPrewarmCount: 4
   attributeScalingOverride:
@@ -223,4 +214,4 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  spawnCue: {fileID: 8300000, guid: b9f5e84a6174dfc47a27702105cac7ed, type: 3}
+  spawnCue: {fileID: 0}

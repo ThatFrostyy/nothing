@@ -93,7 +93,7 @@ namespace FF
             }
 
             Vector2 origin = enemy.transform.position;
-            int hits = Physics2D.OverlapCircle(origin, healRadius, _overlapBuffer);
+            int hits = Physics2D.OverlapCircleNonAlloc(origin, healRadius, _overlapBuffer);
             for (int i = 0; i < hits; i++)
             {
                 Collider2D col = _overlapBuffer[i];

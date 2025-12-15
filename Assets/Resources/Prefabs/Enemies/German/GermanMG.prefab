@@ -145,7 +145,7 @@ MonoBehaviour:
   acceleration: 0.7
   retreatSpeedMultiplier: 0.6
   bodyTiltDegrees: 7
-  shootingDistance: 6
+  shootingDistance: 7
   distanceBuffer: 2
   fireRateMultiplier: 1
   damageMultiplier: 1
@@ -279,10 +279,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.StopAndShootMovement
   advanceDuration: 1.5
-  pauseDuration: 1.25
+  pauseDuration: 1
   repositionDuration: 1.25
-  stopDistance: 1.75
-  lateralBias: 0.65
+  stopDistance: 1.5
+  lateralBias: 0.5
 --- !u!1 &7373173639438170191
 GameObject:
   m_ObjectHideFlags: 0

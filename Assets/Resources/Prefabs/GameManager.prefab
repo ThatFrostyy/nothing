@@ -49,8 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.GameManager
   spawner: {fileID: 0}
   initialTimeBetweenWaves: 5
-  waveIntervalIncrease: 2
-  maximumTimeBetweenWaves: 30
+  waveIntervalIncrease: 1
+  maximumTimeBetweenWaves: 15
   enemyDeathFx: {fileID: 4611953073509470929, guid: 5ecfc0d60f76dc7459be8d2b0fea045a, type: 3}
 --- !u!114 &5457090804296160985
 MonoBehaviour:

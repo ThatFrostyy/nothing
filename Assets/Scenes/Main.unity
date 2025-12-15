@@ -1152,7 +1152,7 @@ MonoBehaviour:
   spawnBuffer: 2
   maxSpawnAttempts: 8
   spawnCamera: {fileID: 1147590089}
-  bossWaveInterval: 10
+  bossWaveInterval: 5
   spawnNonBossDefinitionsDuringBossWave: 1
   defaultScaling:
     healthMultiplierByWave:
@@ -1372,6 +1372,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ffe14a2bcce7a614c93d629a558beb8e, type: 2}
   - {fileID: 11400000, guid: bd6bc3c20b4f3b446993e27e87c6571c, type: 2}
   - {fileID: 11400000, guid: 3bb37a1fd54b6a041b7441e3f4ebde6f, type: 2}
+  - {fileID: 11400000, guid: 2d8b27ce0fda0c942a5e04172fc728ac, type: 2}
   initialSpawnInterval: 0.6
   minimumSpawnInterval: 0.18
   spawnRampDuration: 1.25
@@ -2560,63 +2561,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1001 &520123371
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 686931471789777764, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_Name
-      value: M2FlamethrowerPickup
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 5.24605
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -1.0129676
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3963126657897347835, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
 --- !u!1 &552118487
 GameObject:
   m_ObjectHideFlags: 0
@@ -6589,7 +6533,7 @@ MonoBehaviour:
   _idleSwayFrequency: 6
   _idleSwayAmplitude: 1.2
   _enableTilt: 0
-  _slowmoMoveSpeedMultiplier: 2
+  _slowmoMoveSpeedMultiplier: 1.5
   _boundsPadding: 0.05
 --- !u!70 &1207903157
 CapsuleCollider2D:
@@ -7634,8 +7578,8 @@ MonoBehaviour:
   multiKillDuration: 1
   bossKillTimeScale: 0.35
   bossKillDuration: 1.75
-  killWindow: 3
-  killsNeededForSlowmo: 5
+  killWindow: 1.5
+  killsNeededForSlowmo: 6
   slowmoCooldown: 5
   multiKillMessage: FRENZY
   bossKillMessage: BOSS DOWN
@@ -11768,4 +11712,3 @@ SceneRoots:
   - {fileID: 1756355925}
   - {fileID: 497791597}
   - {fileID: 483938635}
-  - {fileID: 520123371}

@@ -153,8 +153,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -258}
-  m_SizeDelta: {x: -1328.678, y: -787.239}
+  m_AnchoredPosition: {x: 6.4849854, y: -239.66498}
+  m_SizeDelta: {x: -654.366, y: -949.331}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &36046977
 MonoBehaviour:
@@ -203,10 +203,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 55.05
-  m_fontSizeBase: 24
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
@@ -219,7 +219,7 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
+  m_TextWrappingMode: 0
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
@@ -7569,8 +7569,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 70, y: 89.999985}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 118, y: 89.999985}
+  m_SizeDelta: {x: 217.101, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!82 &930573172
 AudioSource:
@@ -9086,11 +9086,11 @@ MonoBehaviour:
     label: {fileID: 797985014}
     rebindButton: {fileID: 980263890}
     isComposite: 0
-  - bindingId: Next
+  - bindingId: Dash
     bindingIndex: 1
     action: {fileID: -4849071480152716119, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-    label: {fileID: 797985014}
-    rebindButton: {fileID: 980263890}
+    label: {fileID: 1442796708}
+    rebindButton: {fileID: 930573175}
     isComposite: 0
 --- !u!1 &1031472497
 GameObject:
@@ -12850,7 +12850,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1360879112
 RectTransform:
   m_ObjectHideFlags: 0
@@ -14221,7 +14221,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: C
+  m_text: Shift
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: e2a8bcd637f9f714182fb162f3102b89, type: 2}
   m_sharedMaterial: {fileID: 5599663890423478549, guid: e2a8bcd637f9f714182fb162f3102b89, type: 2}

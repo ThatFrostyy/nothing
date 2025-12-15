@@ -14,10 +14,85 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
   - {fileID: 3393795199479919163, guid: fb537fc43468d1640bc384d67945e4b6, type: 3}
-  prefabOverrides: []
+  - {fileID: 2122780448097001684, guid: a9fbebf0368fe3048a3b1682f158c21f, type: 3}
+  prefabOverrides:
+  - prefab: {fileID: 2122780448097001684, guid: a9fbebf0368fe3048a3b1682f158c21f, type: 3}
+    overrideWaveTiming: 1
+    startWave: 25
+    endWave: -1
+    spawnInterval: 1
+    spawnOnlyOnBossWaves: 1
+    overrideSpawnChance: 0
+    spawnChance: 0
+    overrideSpawnCurve: 1
+    spawnCountByWave:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 25
+        value: 3
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 30
+        value: 6
+        inSlope: 0.47368422
+        outSlope: 0.47368422
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 50
+        value: 50
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    overrideScaling: 0
+    attributeScalingOverride:
+      healthMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      moveSpeedMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      fireRateMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      damageMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      xpMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
   startWave: 10
   endWave: -1
-  spawnInterval: 10
+  spawnInterval: 1
   spawnOnlyOnBossWaves: 1
   isBoss: 1
   spawnCountByWave:

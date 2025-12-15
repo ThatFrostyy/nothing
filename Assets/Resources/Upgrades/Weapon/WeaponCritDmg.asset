@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 639b2135e5fe44a489165be878c19319, type: 3}
   m_Name: WeaponCritDmg
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
-  Title: Critical DamageUpgrade<br>
+  Title: Critical Damage Upgrade<br>
   DescriptionPrefix: 'Increase weapon critical hit damage by '
   rarity: 1
   rarityWeightOverride: 0

@@ -164,6 +164,7 @@ MonoBehaviour:
   bossWeaponDropPrefabs:
   - {fileID: 2392108840699155933, guid: 35df915de39386444912f19c26a57108, type: 3}
   - {fileID: 954479531348738314, guid: 10611e9bd10067340b08a734943f0066, type: 3}
+  - {fileID: 928517962390292367, guid: 074ab9af08f3b2044b8dce1c28f8c263, type: 3}
   avoidanceLayers:
     serializedVersion: 2
     m_Bits: 128

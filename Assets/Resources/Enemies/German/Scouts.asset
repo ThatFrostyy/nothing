@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
   - {fileID: 1684379601896230019, guid: 80fa15ea0cad0cb4aa20e43302f6b828, type: 3}
+  - {fileID: 7012008558008479575, guid: 62b7b49f56a830d4bb4d0ea428f92ec2, type: 3}
   prefabOverrides:
   - prefab: {fileID: 7012008558008479575, guid: 62b7b49f56a830d4bb4d0ea428f92ec2, type: 3}
     overrideWaveTiming: 1

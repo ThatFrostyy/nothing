@@ -177,6 +177,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 4675a14c0671bb240bbeb34ee7869d26, type: 3}
   - {fileID: 8300000, guid: ab9a9327dff658549ace2a131d4347e3, type: 3}
   deathFX: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}
+  defaultBurningVfx: {fileID: 0}
   isDog: 0
   isBoss: 1
   dogAttackRange: 1.25
@@ -184,14 +185,17 @@ MonoBehaviour:
   dogAttackDamage: 8
   dogLeapHeight: 0.4
   dogLeapDuration: 0.3
+  dogMinimumDistanceFromPlayer: 0.6
   dogAttackSound: {fileID: 0}
   xpOrbPrefab: {fileID: 5860978669140793186, guid: 6a3eb14e9abcb124ca084a235e022790, type: 3}
   xpOrbValue: 3
   xpOrbCount: 4
   xpOrbSpreadRadius: 1
+  slowmoKillXpMultiplier: 1.25
   bossWeaponDropPrefabs:
   - {fileID: 2392108840699155933, guid: 35df915de39386444912f19c26a57108, type: 3}
   - {fileID: 954479531348738314, guid: 10611e9bd10067340b08a734943f0066, type: 3}
+  - {fileID: 928517962390292367, guid: 074ab9af08f3b2044b8dce1c28f8c263, type: 3}
   avoidanceLayers:
     serializedVersion: 2
     m_Bits: 128
@@ -386,6 +390,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d221d6788c88f149a3c30cdd493439e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.AutoShooter
+  extraProjectileDelay: 0.05
+  _slowmoProjectileSpeedMultiplier: 1
   grenadeMinThrowSpeed: 8
   grenadeMaxThrowSpeed: 22
   grenadeChargeTime: 1.1
@@ -429,6 +435,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponManager
   gunPivot: {fileID: 6634418000954358247}
   shooter: {fileID: 9105323423674479412}
+  cosmetics: {fileID: 0}
 --- !u!82 &9083093267626433877
 AudioSource:
   m_ObjectHideFlags: 0

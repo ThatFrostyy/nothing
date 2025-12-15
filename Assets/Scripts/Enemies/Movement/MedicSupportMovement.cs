@@ -76,7 +76,8 @@ namespace FF
         private Enemy FindPreferredAlly(Enemy self)
         {
             Vector2 origin = self.transform.position;
-            int hits = Physics2D.OverlapCircle(origin, allySearchRadius, _searchBuffer);
+            // Fix: Use OverlapCircleNonAlloc instead of OverlapCircle
+            int hits = Physics2D.OverlapCircleNonAlloc(origin, allySearchRadius, _searchBuffer);
 
             Enemy best = null;
             float bestScore = float.MinValue;

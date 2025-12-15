@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
   - {fileID: 7117406024691269827, guid: 5a26e7b3483023347880cd84250d2708, type: 3}
+  - {fileID: 5705400390586311514, guid: ec3a0fc29cfdff846bb7edce54766abb, type: 3}
+  - {fileID: 3797237885229447885, guid: 6443843a047ad624f9b3b782599c35d3, type: 3}
   prefabOverrides:
   - prefab: {fileID: 5705400390586311514, guid: ec3a0fc29cfdff846bb7edce54766abb, type: 3}
     overrideWaveTiming: 1
@@ -30,6 +32,98 @@ MonoBehaviour:
       m_PreInfinity: 0
       m_PostInfinity: 0
       m_RotationOrder: 0
+    overrideScaling: 0
+    attributeScalingOverride:
+      healthMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      moveSpeedMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      fireRateMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      damageMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      xpMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+  - prefab: {fileID: 3797237885229447885, guid: 6443843a047ad624f9b3b782599c35d3, type: 3}
+    overrideWaveTiming: 1
+    startWave: 16
+    endWave: -1
+    spawnInterval: 1
+    spawnOnlyOnBossWaves: 0
+    overrideSpawnChance: 0
+    spawnChance: 0
+    overrideSpawnCurve: 1
+    spawnCountByWave:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 16
+        value: 3
+        inSlope: 7.833651
+        outSlope: 7.833651
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 20
+        value: 6
+        inSlope: 12.801331
+        outSlope: 12.801331
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 25
+        value: 15
+        inSlope: 15.404282
+        outSlope: 15.404282
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 30
+        value: 20
+        inSlope: 0.47368422
+        outSlope: 0.47368422
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 50
+        value: 50
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     overrideScaling: 0
     attributeScalingOverride:
       healthMultiplierByWave:

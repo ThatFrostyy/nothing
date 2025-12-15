@@ -18,14 +18,46 @@ MonoBehaviour:
   ejectParticles: {fileID: 0}
   recoilAmount: 6
   recoilRecoverySpeed: 10
+  attackLoopSFX: {fileID: 0}
+  fireLoopSFX: {fileID: 0}
+  loopingFireVfx: {fileID: 0}
+  loopingVfxOffset: {x: 0, y: 0, z: 0}
+  weaponClass: 0
+  isShotgun: 0
+  weaponIcon: {fileID: 0}
+  isSpecial: 0
+  useGrenadeCharging: 1
   bulletPrefab: {fileID: 1314581820453278891, guid: e418b23278424284794c2a49a1b9c815, type: 3}
   weaponPrefab: {fileID: 7905454119641298057, guid: b7d7b6be70b22fd47a092c70ec775fbe, type: 3}
   rpm: 420
   damage: 15
   recoilKick: 4
   isAuto: 0
-  fireCooldown: 2
+  fireCooldown: 5
+  knockbackStrength: 0
+  knockbackDuration: 0.2
+  appliesBurn: 0
+  burnDuration: 3
+  burnDamagePerSecond: 5
+  burnTickInterval: 0.35
+  burnTargetVfxOffset: {x: 0, y: 0, z: 0}
+  burnTargetVfx: {fileID: 0}
+  burnImpactVfx: {fileID: 0}
+  isFlamethrower: 0
+  flamethrowerRange: 5
+  flamethrowerConeAngle: 45
+  flamethrowerTickInterval: 0.1
+  flamethrowerDamagePerSecond: 18
+  flamethrowerHitMask:
+    serializedVersion: 2
+    m_Bits: 0
+  flamethrowerEmitterPrefab: {fileID: 0}
+  useFlamethrowerBurst: 0
+  flamethrowerBurstDuration: 3
+  flamethrowerOverheatCooldown: 2.5
+  flamethrowerBackpackPrefab: {fileID: 0}
   baseSpread: 1.5
   maxSpread: 6
   spreadIncreasePerShot: 0.5
   spreadRecoverySpeed: 2
+  pelletsPerShot: 6

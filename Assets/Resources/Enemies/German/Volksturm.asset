@@ -14,22 +14,59 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
   - {fileID: 425959831364912862, guid: 9c9620954138ff249a8dc80673e9caf4, type: 3}
+  - {fileID: 425959831364912862, guid: 36be06b3f2257b746a55f4eb618c5a45, type: 3}
   prefabOverrides:
   - prefab: {fileID: 425959831364912862, guid: 36be06b3f2257b746a55f4eb618c5a45, type: 3}
     overrideWaveTiming: 1
-    startWave: 20
+    startWave: 21
     endWave: -1
     spawnInterval: 2
     spawnOnlyOnBossWaves: 0
     overrideSpawnChance: 0
     spawnChance: 0
-    overrideSpawnCurve: 0
+    overrideSpawnCurve: 1
     spawnCountByWave:
       serializedVersion: 2
-      m_Curve: []
-      m_PreInfinity: 0
-      m_PostInfinity: 0
-      m_RotationOrder: 0
+      m_Curve:
+      - serializedVersion: 3
+        time: 20
+        value: 3
+        inSlope: 7.833651
+        outSlope: 7.833651
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 25
+        value: 10
+        inSlope: 11.410701
+        outSlope: 11.410701
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.11993752
+      - serializedVersion: 3
+        time: 30
+        value: 15
+        inSlope: 0.47368422
+        outSlope: 0.47368422
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 50
+        value: 50
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
     overrideScaling: 0
     attributeScalingOverride:
       healthMultiplierByWave:
@@ -62,7 +99,7 @@ MonoBehaviour:
         m_PreInfinity: 0
         m_PostInfinity: 0
         m_RotationOrder: 0
-  startWave: 17
+  startWave: 18
   endWave: -1
   spawnInterval: 1
   spawnOnlyOnBossWaves: 0
@@ -71,7 +108,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 15
+      time: 17
       value: 3
       inSlope: 7.833651
       outSlope: 7.833651
