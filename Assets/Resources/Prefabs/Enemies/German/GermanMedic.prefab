@@ -220,7 +220,7 @@ MonoBehaviour:
   healPerSecond: 4
   targetSearchInterval: 0.35
   areaVfxPrefab: {fileID: 0}
-  healingVfxPrefab: {fileID: 0}
+  healingVfxPrefab: {fileID: 5691030147902170563, guid: 051fd934eff3b06408c99c7b05a9e820, type: 3}
   vfxAnchor: {fileID: 0}
 --- !u!114 &317238117283929593
 MonoBehaviour:

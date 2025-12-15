@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -184,7 +185,41 @@ namespace FF
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (!sceneFlow) sceneFlow = FindAnyObjectByType<SceneFlowController>();
+
+            // Hide the pause menu immediately on scene load
             HideInstant();
+
+            // If we just switched to a non-gameplay (menu) scene, aggressively ensure
+            // gameplay-only HUD indicators are not left visible. Some HUD elements
+            // can leak into the menu if they are not properly destroyed or disabled
+            // during the transition (for example when the player died and the
+            // pause/death menu was active). Disable any lingering GameHUD instances.
+            bool isMenuScene = false;
+            if (sceneFlow != null && !string.IsNullOrEmpty(sceneFlow.MainMenuSceneName))
+            {
+                isMenuScene = scene.name.Equals(sceneFlow.MainMenuSceneName, System.StringComparison.OrdinalIgnoreCase);
+            }
+            else
+            {
+                isMenuScene = scene.name.Equals("Main", System.StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (isMenuScene)
+            {
+                var huds = FindObjectsOfType<GameHUD>();
+                for (int i = 0; i < huds.Length; i++)
+                {
+                    var hud = huds[i];
+                    if (hud != null)
+                    {
+                        hud.gameObject.SetActive(false);
+                    }
+                }
+
+                // Also ensure cursor is visible and unlocked in menu scenes
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
         }
 
         private IEnumerator FadeCanvas(float targetAlpha, System.Action onComplete = null)
