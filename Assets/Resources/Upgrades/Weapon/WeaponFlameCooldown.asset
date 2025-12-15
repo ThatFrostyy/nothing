@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 639b2135e5fe44a489165be878c19319, type: 3}
-  m_Name: FlamethrowerRange
+  m_Name: WeaponFlameCooldown
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
-  Title: Extended Reach<br>
+  Title: Flamethrower Range<br>
   DescriptionPrefix: 'Increase flamethrower range by '
-  rarity: 1
+  rarity: 2
   rarityWeightOverride: 0
   Type: 10
-  percentColor: '#FFA69E'
+  percentColor: '#D17A22'
   allowedClasses: 32
   onlyForSemiAuto: 0

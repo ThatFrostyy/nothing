@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
   Title: Bullet Speed Upgrade<br>
   DescriptionPrefix: 'Increase weapon projectile speed by '
+  rarity: 0
+  rarityWeightOverride: 0
   Type: 2
   percentColor: '#DBBE50'
-  allowedClasses: -1
+  allowedClasses: 31
   onlyForSemiAuto: 0
