@@ -330,8 +330,8 @@ namespace FF
                 }
             }
 
-            float damageMultiplier = GetFinalDamageMultiplier(out _);
-            int damagePerSecond = Mathf.Max(1, Mathf.RoundToInt(_weapon.flamethrowerDamagePerSecond * damageMultiplier));
+            GetDamageAndCritStats(out float damageMultiplier, out float critChance, out float critDamageMultiplier);
+            int baseDamagePerSecond = Mathf.Max(1, _weapon.flamethrowerDamagePerSecond);
 
             if (_weapon.useFlamethrowerBurst)
             {
@@ -349,7 +349,13 @@ namespace FF
 
             bool canFire = _isFireHeld && !_flamethrowerOverheated;
 
-            _flamethrowerEmitter.Tick(canFire, damagePerSecond, ResolveOwnerTag());
+            _flamethrowerEmitter.Tick(
+                canFire,
+                baseDamagePerSecond,
+                damageMultiplier,
+                critChance,
+                critDamageMultiplier,
+                ResolveOwnerTag());
 
             _currentSpread = _weapon.baseSpread;
             _fireTimer = 0f;
@@ -617,22 +623,25 @@ namespace FF
             _currentRecoil = Mathf.Lerp(_currentRecoil, 0f, deltaTime * _weapon.recoilRecoverySpeed);
         }
 
-        private float GetFinalDamageMultiplier(out bool isCrit)
+        private void GetDamageAndCritStats(out float damageMultiplier, out float critChance, out float critDamageMultiplier)
         {
-            float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
+            damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
+            critChance = _stats != null ? _stats.GetCritChance() : 0f;
+            critDamageMultiplier = _stats != null ? _stats.GetCritDamageMultiplier() : 1f;
+
             if (UpgradeManager.I != null)
             {
                 damageMultiplier *= UpgradeManager.I.GetWeaponDamageMultiplier(_weapon);
-            }
-            float critChance = _stats != null ? _stats.GetCritChance() : 0f;
-            float critDamageMultiplier = _stats != null ? _stats.GetCritDamageMultiplier() : 1f;
-            if (UpgradeManager.I != null)
-            {
                 critChance += UpgradeManager.I.GetWeaponCritChance(_weapon);
                 critDamageMultiplier *= UpgradeManager.I.GetWeaponCritDamageMultiplier(_weapon);
             }
 
             critChance = Mathf.Clamp01(critChance);
+        }
+
+        private float GetFinalDamageMultiplier(out bool isCrit)
+        {
+            GetDamageAndCritStats(out float damageMultiplier, out float critChance, out float critDamageMultiplier);
 
             bool didCrit = critChance > 0f && UnityEngine.Random.value < critChance;
             isCrit = didCrit;
