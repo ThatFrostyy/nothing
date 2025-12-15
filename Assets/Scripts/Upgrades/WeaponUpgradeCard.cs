@@ -14,6 +14,7 @@ namespace FF
             MG = 1 << 2,
             SMG = 1 << 3,
             Special = 1 << 4,
+            Flamethrower = 1 << 5,
             All = ~0
         }
 
@@ -44,7 +45,7 @@ namespace FF
                 ? baseTitle
                 : $"{baseTitle} ({weaponName})";
 
-            bool isCooldown = Type == WeaponUpgradeType.FireCooldownReduction;
+            bool isCooldown = Type == WeaponUpgradeType.FireCooldownReduction || Type == WeaponUpgradeType.FlamethrowerCooldown;
             string percentText = isCooldown ? $"{percentage}%" : $"+{percentage}%";
             string coloredPercent = $"<color={percentColor}>{percentText}</color>.";
             string baseDescription = Type switch
@@ -52,6 +53,8 @@ namespace FF
                 WeaponUpgradeType.Pierce => $"Pierce {flatValue} additional enemies.",
                 WeaponUpgradeType.ExtraProjectiles => $"Fire {flatValue} extra bullet{(flatValue == 1 ? string.Empty : "s")}.",
                 WeaponUpgradeType.FireCooldownReduction => $"Reduce weapon cooldown by {coloredPercent}",
+                WeaponUpgradeType.FlamethrowerCooldown => $"Vent heat {coloredPercent} faster.",
+                WeaponUpgradeType.FlamethrowerRange => $"Extend flamethrower range by {coloredPercent}",
                 WeaponUpgradeType.CritChance => $"Increase critical chance by {coloredPercent}",
                 WeaponUpgradeType.CritDamage => $"Increase critical damage by {coloredPercent}",
                 WeaponUpgradeType.Accuracy => $"Improve accuracy by {coloredPercent}",

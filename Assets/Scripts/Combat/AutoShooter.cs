@@ -344,6 +344,9 @@ namespace FF
                 SetGrenadeChargeProgress(0f);
             }
 
+            float rangeMultiplier = UpgradeManager.I != null ? UpgradeManager.I.GetFlamethrowerRangeMultiplier(_weapon) : 1f;
+            _flamethrowerEmitter.SetRangeMultiplier(rangeMultiplier);
+
             bool canFire = _isFireHeld && !_flamethrowerOverheated;
 
             _flamethrowerEmitter.Tick(canFire, damagePerSecond, ResolveOwnerTag());
@@ -374,6 +377,10 @@ namespace FF
             else if (_flamethrowerHeat > 0f)
             {
                 float cooldown = Mathf.Max(0.1f, _weapon.flamethrowerOverheatCooldown);
+                if (UpgradeManager.I != null)
+                {
+                    cooldown *= UpgradeManager.I.GetFlamethrowerCooldownMultiplier(_weapon);
+                }
                 _flamethrowerHeat = Mathf.Max(0f, _flamethrowerHeat - deltaTime / cooldown);
                 if (_flamethrowerOverheated && _flamethrowerHeat <= Mathf.Epsilon)
                 {
