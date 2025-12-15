@@ -152,7 +152,7 @@ namespace FF
 
             if (_flamethrowerEmitter)
             {
-                _flamethrowerEmitter.Tick(false, 0, ResolveOwnerTag());
+                _flamethrowerEmitter.Tick(false, 0, 1f, 0f, 1f, ResolveOwnerTag());
             }
         }
 
@@ -231,7 +231,7 @@ namespace FF
                 StopLoopingFeedback();
                 if (_flamethrowerEmitter)
                 {
-                    _flamethrowerEmitter.Tick(false, 0, ResolveOwnerTag());
+                    _flamethrowerEmitter.Tick(false, 0, 1f, 0f, 1f, ResolveOwnerTag());
                 }
                 return;
             }
