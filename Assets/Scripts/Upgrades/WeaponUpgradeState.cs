@@ -12,7 +12,9 @@ namespace FF
         FireCooldownReduction,
         CritChance,
         CritDamage,
-        Accuracy
+        Accuracy,
+        FlamethrowerCooldown,
+        FlamethrowerRange
     }
 
     [System.Serializable]
@@ -65,6 +67,8 @@ namespace FF
         float critChanceBonus;
         float critDamageBonus;
         float accuracyBonus;
+        float flamethrowerCooldownReduction;
+        float flamethrowerRangeBonus;
 
         public WeaponUpgradeState(Weapon weapon)
         {
@@ -79,6 +83,8 @@ namespace FF
             critChanceBonus = 0f;
             critDamageBonus = 0f;
             accuracyBonus = 0f;
+            flamethrowerCooldownReduction = 0f;
+            flamethrowerRangeBonus = 0f;
         }
 
         public void Apply(WeaponUpgradeOption option)
@@ -115,6 +121,12 @@ namespace FF
                 case WeaponUpgradeType.Accuracy:
                     accuracyBonus += amount;
                     break;
+                case WeaponUpgradeType.FlamethrowerCooldown:
+                    flamethrowerCooldownReduction += amount;
+                    break;
+                case WeaponUpgradeType.FlamethrowerRange:
+                    flamethrowerRangeBonus += amount;
+                    break;
             }
         }
 
@@ -127,5 +139,7 @@ namespace FF
         public float GetCritChanceBonus() => Mathf.Clamp01(critChanceBonus);
         public float GetCritDamageMultiplier() => 1f + critDamageBonus;
         public float GetAccuracyMultiplier() => Mathf.Max(0.1f, 1f - accuracyBonus);
+        public float GetFlamethrowerCooldownMultiplier() => Mathf.Max(0.1f, 1f - flamethrowerCooldownReduction);
+        public float GetFlamethrowerRangeMultiplier() => 1f + flamethrowerRangeBonus;
     }
 }
