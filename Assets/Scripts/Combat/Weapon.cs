@@ -13,7 +13,8 @@ namespace FF
             MG,
             SMG,
             Special,
-            Shotgun
+            Shotgun,
+            Flamethrower
         }
 
         [Header("Name")]

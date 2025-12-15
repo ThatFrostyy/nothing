@@ -84,6 +84,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3766d4ca82c48ab48919eba508444833, type: 2}
   - {fileID: 11400000, guid: ec97107fdd9b51144826ab38dad5ed03, type: 2}
   - {fileID: 11400000, guid: 455f882551ba6be4794c61c9bbfb2a4b, type: 2}
+  - {fileID: 11400000, guid: 96c5569944ee4292bf8161800e0ca989, type: 2}
+  - {fileID: 11400000, guid: 7170378467f34b508b0e7c4d820fea5a, type: 2}
   stats: {fileID: 0}
   wallet: {fileID: 0}
   ui: {fileID: 0}

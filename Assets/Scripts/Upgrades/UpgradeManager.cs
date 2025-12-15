@@ -711,12 +711,22 @@ namespace FF
 
             if (weapon.weaponClass != Weapon.WeaponClass.General)
             {
+                if (weapon.weaponClass == Weapon.WeaponClass.Flamethrower)
+                {
+                    return Weapon.WeaponClass.Flamethrower;
+                }
+
                 if (weapon.weaponClass == Weapon.WeaponClass.Special || weapon.isSpecial)
                 {
                     return Weapon.WeaponClass.Special;
                 }
 
                 return weapon.weaponClass;
+            }
+
+            if (weapon.isFlamethrower)
+            {
+                return Weapon.WeaponClass.Flamethrower;
             }
 
             if (weapon.isSpecial)
@@ -740,6 +750,7 @@ namespace FF
                 Weapon.WeaponClass.MG => WeaponUpgradeCard.WeaponClassFilter.MG,
                 Weapon.WeaponClass.SMG => WeaponUpgradeCard.WeaponClassFilter.SMG,
                 Weapon.WeaponClass.Special => WeaponUpgradeCard.WeaponClassFilter.Special,
+                Weapon.WeaponClass.Flamethrower => WeaponUpgradeCard.WeaponClassFilter.Flamethrower,
                 _ => WeaponUpgradeCard.WeaponClassFilter.General
             };
         }
@@ -924,6 +935,8 @@ namespace FF
                 WeaponUpgradeType.CritChance => "Critical Chance",
                 WeaponUpgradeType.CritDamage => "Critical Damage",
                 WeaponUpgradeType.Accuracy => "Accuracy Boost",
+                WeaponUpgradeType.FlamethrowerCooldown => "Faster Venting",
+                WeaponUpgradeType.FlamethrowerRange => "Longer Flame",
                 _ => "Upgrade"
             };
 
@@ -944,6 +957,8 @@ namespace FF
                 WeaponUpgradeType.CritChance => "Increase critical chance by ",
                 WeaponUpgradeType.CritDamage => "Increase critical damage by ",
                 WeaponUpgradeType.Accuracy => "Improve accuracy by ",
+                WeaponUpgradeType.FlamethrowerCooldown => "Decrease overheat recovery by ",
+                WeaponUpgradeType.FlamethrowerRange => "Increase flamethrower reach by ",
                 _ => "Boost weapon performance by "
             };
 
@@ -959,11 +974,14 @@ namespace FF
                 WeaponUpgradeType.CritChance => "#FF9F1C",
                 WeaponUpgradeType.CritDamage => "#F94144",
                 WeaponUpgradeType.Accuracy => "#4ECDC4",
+                WeaponUpgradeType.FlamethrowerCooldown => "#FF8C42",
+                WeaponUpgradeType.FlamethrowerRange => "#FFA69E",
                 _ => "#FFD966"
             };
 
             // Build the colored % value
-            string percentText = type == WeaponUpgradeType.FireCooldownReduction ? $"{percentage}%" : $"+{percentage}%";
+            bool isCooldownType = type == WeaponUpgradeType.FireCooldownReduction || type == WeaponUpgradeType.FlamethrowerCooldown;
+            string percentText = isCooldownType ? $"{percentage}%" : $"+{percentage}%";
             string coloredPercent = $"<color={percentColor}>{percentText}</color>.";
             string finalDescription = type switch
             {
@@ -1065,6 +1083,16 @@ namespace FF
         public float GetWeaponAccuracyMultiplier(Weapon weapon)
         {
             return TryGetWeaponState(weapon, out var state) ? state.GetAccuracyMultiplier() : 1f;
+        }
+
+        public float GetFlamethrowerCooldownMultiplier(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetFlamethrowerCooldownMultiplier() : 1f;
+        }
+
+        public float GetFlamethrowerRangeMultiplier(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetFlamethrowerRangeMultiplier() : 1f;
         }
 
         public float ClampFireRateMultiplier(float value)

@@ -21,6 +21,7 @@ namespace FF
         private GameObject _activeVfx;
         private AudioSource _loopSource;
         private float _tickTimer;
+        private float _baseRange;
         private float _range;
         private float _coneAngle;
         private float _tickInterval;
@@ -28,13 +29,15 @@ namespace FF
         private string _ownerTag;
         private bool _isFiring;
         private Coroutine _fadeRoutine;
+        private float _rangeMultiplier = 1f;
 
         public void Initialize(Weapon weapon, Transform followTarget, string ownerTag)
         {
             _sourceWeapon = weapon;
             _followTarget = followTarget;
             _ownerTag = ownerTag;
-            _range = weapon ? Mathf.Max(0.1f, weapon.flamethrowerRange) : defaultRange;
+            _baseRange = weapon ? Mathf.Max(0.1f, weapon.flamethrowerRange) : defaultRange;
+            _range = _baseRange;
             _coneAngle = weapon ? Mathf.Clamp(weapon.flamethrowerConeAngle, 1f, 180f) : defaultConeAngle;
             _tickInterval = weapon ? Mathf.Max(0.05f, weapon.flamethrowerTickInterval) : defaultTickInterval;
             _hitMask = weapon && weapon.flamethrowerHitMask != 0 ? weapon.flamethrowerHitMask : defaultHitMask;
@@ -61,6 +64,7 @@ namespace FF
         {
             _ownerTag = ownerTag;
             FollowMuzzleImmediate();
+            UpdateRange();
 
             if (isFiring)
             {
@@ -71,6 +75,18 @@ namespace FF
             {
                 EndFiring();
             }
+        }
+
+        public void SetRangeMultiplier(float multiplier)
+        {
+            _rangeMultiplier = Mathf.Max(0.1f, multiplier);
+            UpdateRange();
+        }
+
+        void UpdateRange()
+        {
+            _range = Mathf.Max(0.1f, _baseRange * _rangeMultiplier);
+            ApplyVfxLengthScale();
         }
 
         private void BeginFiring()
@@ -210,6 +226,8 @@ namespace FF
                     pooled = _activeVfx.AddComponent<PooledParticleSystem>();
                     pooled.OnTakenFromPool();
                 }
+
+                ApplyVfxLengthScale();
             }
         }
 
@@ -300,6 +318,19 @@ namespace FF
             }
         }
 
+        private void ApplyVfxLengthScale()
+        {
+            if (!_activeVfx)
+            {
+                return;
+            }
+
+            float baseRange = Mathf.Max(0.1f, _baseRange);
+            float lengthScale = Mathf.Max(0.1f, _range) / baseRange;
+            Vector3 currentScale = _activeVfx.transform.localScale;
+            _activeVfx.transform.localScale = new Vector3(currentScale.x, lengthScale, currentScale.z);
+        }
+
         private void FollowMuzzleImmediate()
         {
             if (!_followTarget)
@@ -322,8 +353,8 @@ namespace FF
 
         private void OnDrawGizmosSelected()
         {
-            float range = _sourceWeapon ? Mathf.Max(0.1f, _sourceWeapon.flamethrowerRange) : defaultRange;
-            float cone = _sourceWeapon ? Mathf.Clamp(_sourceWeapon.flamethrowerConeAngle, 1f, 180f) : defaultConeAngle;
+            float range = _range > 0f ? _range : (_sourceWeapon ? Mathf.Max(0.1f, _sourceWeapon.flamethrowerRange) : defaultRange);
+            float cone = _coneAngle > 0f ? _coneAngle : (_sourceWeapon ? Mathf.Clamp(_sourceWeapon.flamethrowerConeAngle, 1f, 180f) : defaultConeAngle);
 
             Gizmos.color = new Color(1f, 0.5f, 0f, 0.35f);
 

@@ -22,7 +22,7 @@ MonoBehaviour:
   fireLoopSFX: {fileID: 8300000, guid: be0ced10bafa6894a899f1a7b34cd2fa, type: 3}
   loopingFireVfx: {fileID: 5202666124479915743, guid: 0052d85b91aae67498847a0336eb2aed, type: 3}
   loopingVfxOffset: {x: 0, y: 0, z: 0}
-  weaponClass: 4
+  weaponClass: 6
   isShotgun: 0
   weaponIcon: {fileID: 21300000, guid: 6d2b2313adde5a84ba8d0ca5ab75fbf1, type: 3}
   isSpecial: 1
