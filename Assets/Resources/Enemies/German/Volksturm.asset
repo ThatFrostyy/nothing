@@ -13,9 +13,56 @@ MonoBehaviour:
   m_Name: Volksturm
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
-  - {fileID: 425959831364912862, guid: 36be06b3f2257b746a55f4eb618c5a45, type: 3}
   - {fileID: 425959831364912862, guid: 9c9620954138ff249a8dc80673e9caf4, type: 3}
-  startWave: 15
+  prefabOverrides:
+  - prefab: {fileID: 425959831364912862, guid: 36be06b3f2257b746a55f4eb618c5a45, type: 3}
+    overrideWaveTiming: 1
+    startWave: 20
+    endWave: -1
+    spawnInterval: 2
+    spawnOnlyOnBossWaves: 0
+    overrideSpawnChance: 0
+    spawnChance: 0
+    overrideSpawnCurve: 0
+    spawnCountByWave:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    overrideScaling: 0
+    attributeScalingOverride:
+      healthMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      moveSpeedMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      fireRateMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      damageMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      xpMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+  startWave: 17
   endWave: -1
   spawnInterval: 1
   spawnOnlyOnBossWaves: 0

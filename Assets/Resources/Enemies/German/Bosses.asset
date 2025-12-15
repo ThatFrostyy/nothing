@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Bosses
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
-  - {fileID: 8666605416977421419, guid: 1d643340523cb384d8584e668cbdbbc9, type: 3}
   - {fileID: 3393795199479919163, guid: fb537fc43468d1640bc384d67945e4b6, type: 3}
+  prefabOverrides: []
   startWave: 10
   endWave: -1
   spawnInterval: 10

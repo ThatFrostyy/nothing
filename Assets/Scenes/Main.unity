@@ -5806,7 +5806,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -6141,7 +6141,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.16470589, g: 0.16470589, b: 0.16470589, a: 0.78431374}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -6699,6 +6699,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponManager
   gunPivot: {fileID: 125305192}
   shooter: {fileID: 1207903154}
+  cosmetics: {fileID: 0}
 --- !u!82 &1207903162
 AudioSource:
   m_ObjectHideFlags: 0
@@ -6936,6 +6937,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.PlayerCosmetics
   bodyRenderer: {fileID: 507405424}
   hatAnchor: {fileID: 1819971725}
+  backAnchor: {fileID: 1695561913}
 --- !u!114 &1207903167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8735,7 +8737,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

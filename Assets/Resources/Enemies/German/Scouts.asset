@@ -14,7 +14,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawnDefinition
   prefabs:
   - {fileID: 1684379601896230019, guid: 80fa15ea0cad0cb4aa20e43302f6b828, type: 3}
-  - {fileID: 7012008558008479575, guid: 62b7b49f56a830d4bb4d0ea428f92ec2, type: 3}
+  prefabOverrides:
+  - prefab: {fileID: 7012008558008479575, guid: 62b7b49f56a830d4bb4d0ea428f92ec2, type: 3}
+    overrideWaveTiming: 1
+    startWave: 9
+    endWave: -1
+    spawnInterval: 1
+    spawnOnlyOnBossWaves: 0
+    overrideSpawnChance: 0
+    spawnChance: 0
+    overrideSpawnCurve: 0
+    spawnCountByWave:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 0
+      m_PostInfinity: 0
+      m_RotationOrder: 0
+    overrideScaling: 0
+    attributeScalingOverride:
+      healthMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      moveSpeedMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      fireRateMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      damageMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
+      xpMultiplierByWave:
+        serializedVersion: 2
+        m_Curve: []
+        m_PreInfinity: 0
+        m_PostInfinity: 0
+        m_RotationOrder: 0
   startWave: 7
   endWave: -1
   spawnInterval: 1

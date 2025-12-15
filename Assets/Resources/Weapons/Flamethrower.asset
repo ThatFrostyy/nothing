@@ -24,11 +24,11 @@ MonoBehaviour:
   loopingVfxOffset: {x: 0, y: 0, z: 0}
   weaponClass: 4
   isShotgun: 0
-  weaponIcon: {fileID: 21300004, guid: 7ab74e659e1f0a34d9cfec21c478fc12, type: 3}
+  weaponIcon: {fileID: 21300000, guid: 6d2b2313adde5a84ba8d0ca5ab75fbf1, type: 3}
   isSpecial: 1
   useGrenadeCharging: 0
   bulletPrefab: {fileID: 0}
-  weaponPrefab: {fileID: 7922939727332240829, guid: 88b3a3721e66f0e4894347f48bdb0069, type: 3}
+  weaponPrefab: {fileID: 1242749656058507234, guid: 01504cca9a4ea7b48a837c9bb55da053, type: 3}
   rpm: 420
   damage: 10
   recoilKick: 4
@@ -55,6 +55,7 @@ MonoBehaviour:
   useFlamethrowerBurst: 1
   flamethrowerBurstDuration: 2.5
   flamethrowerOverheatCooldown: 2.5
+  flamethrowerBackpackPrefab: {fileID: 6510946778344642102, guid: 2052f6e96375f214ca3a16881e4a14e4, type: 3}
   baseSpread: 1.5
   maxSpread: 6
   spreadIncreasePerShot: 0.5
