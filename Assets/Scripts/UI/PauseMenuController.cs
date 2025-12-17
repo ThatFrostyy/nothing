@@ -68,16 +68,6 @@ namespace FF
             ApplyVisibility(0f, true);
         }
 
-        private void OnEnable()
-        {
-            SceneManager.sceneLoaded += HandleSceneLoaded;
-        }
-
-        private void OnDisable()
-        {
-            SceneManager.sceneLoaded -= HandleSceneLoaded;
-        }
-
         private void BindButtons()
         {
             if (resumeButton && restartButton && mainMenuButton)
@@ -182,61 +172,7 @@ namespace FF
             KillSlowMotion.EnsureRestoredAfterPause();
         }
 
-        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            if (!sceneFlow) sceneFlow = FindAnyObjectByType<SceneFlowController>();
-
-            // Hide the pause menu immediately on scene load
-            HideInstant();
-
-            // If we just switched to a non-gameplay (menu) scene, aggressively ensure
-            // gameplay-only HUD indicators are not left visible. Some HUD elements
-            // can leak into the menu if they are not properly destroyed or disabled
-            // during the transition (for example when the player died and the
-            // pause/death menu was active). Disable any lingering GameHUD instances.
-            bool isMenuScene = false;
-            if (sceneFlow != null && !string.IsNullOrEmpty(sceneFlow.MainMenuSceneName))
-            {
-                isMenuScene = scene.name.Equals(sceneFlow.MainMenuSceneName, System.StringComparison.OrdinalIgnoreCase);
-            }
-            else
-            {
-                isMenuScene = scene.name.Equals("Main", System.StringComparison.OrdinalIgnoreCase);
-            }
-
-            var huds = FindObjectsOfType<GameHUD>(true);
-            for (int i = 0; i < huds.Length; i++)
-            {
-                var hud = huds[i];
-                if (hud != null)
-                {
-                    // Always let the HUD update its scene visibility so it can
-                    // re-enable itself after returning from the main menu.
-                    hud.ApplySceneVisibilityPublic(scene);
-                }
-            }
-
-            if (isMenuScene)
-            {
-                // Hide any lingering offscreen indicators (boss/pickup/weapon arrows) that
-                // may have been created during gameplay so they do not remain visible on
-                // the main menu after returning from the death screen.
-                var indicators = FindObjectsOfType<OffscreenIndicatorController>(true);
-                for (int i = 0; i < indicators.Length; i++)
-                {
-                    var indicator = indicators[i];
-                    if (indicator != null)
-                    {
-                        indicator.gameObject.SetActive(false);
-                    }
-                }
-
-                // Also ensure cursor is visible and unlocked in menu scenes
-                Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.None;
-            }
-        }
-
+       
         private IEnumerator FadeCanvas(float targetAlpha, System.Action onComplete = null)
         {
             float duration = Mathf.Max(0.01f, fadeDuration);

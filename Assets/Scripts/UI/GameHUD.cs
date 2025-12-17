@@ -11,6 +11,8 @@ namespace FF
 {
     public class GameHUD : MonoBehaviour, ISceneReferenceHandler
     {
+        public static GameHUD Instance { get; private set; }
+
         [Header("Data Sources")]
         [SerializeField] private GameManager gameManager;
         [SerializeField] private Health playerHealth;
@@ -135,6 +137,17 @@ namespace FF
 
         void Awake()
         {
+            // Ensure a single persistent HUD instance so it is not destroyed
+            // or reset when switching to the main menu. Keep references intact.
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+
             SceneReferenceRegistry.Register(this);
 
             if (!gameManager) gameManager = GameManager.I;
@@ -222,15 +235,23 @@ namespace FF
         void OnDestroy()
         {
             SceneReferenceRegistry.Unregister(this);
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
 
         public void ClearSceneReferences()
         {
-            playerHealth = null;
-            wallet = null;
-            weaponManager = null;
-            gameManager = null;
-            upgradeManager = null;
+            // Intentionally do NOT clear references here.
+            // The HUD persists across scene loads and should retain its
+            // references so it can restore itself when returning to gameplay.
+            // SceneReferenceRegistry will still call this method during scene
+            // transitions, but we avoid nulling out references to prevent the
+            // HUD from losing its bindings and becoming unusable after menu
+            // navigation.
+            // (If a full reset is ever required, call RebindSceneReferences())
+            return;
         }
 
         public void RebindSceneReferences()
@@ -328,13 +349,6 @@ namespace FF
             TryBindAll();
             RefreshAll();
             SyncFillImmediately();
-        }
-
-        // Public wrapper so other controllers can request the HUD update its visibility
-        // for a newly-loaded scene without toggling the GameObject active state.
-        public void ApplySceneVisibilityPublic(Scene scene)
-        {
-            ApplySceneVisibility(scene);
         }
 
         private void ApplySceneVisibility(Scene scene)
