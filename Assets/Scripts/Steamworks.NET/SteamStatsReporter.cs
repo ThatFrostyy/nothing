@@ -24,7 +24,7 @@ namespace FF
         [SerializeField] private const string TotalHealingStatName = "total_healing_received";
 
         [Header("Leaderboards")]
-        [SerializeField] private const string KillLeaderboardName = "kills";
+        [SerializeField] private const string KillLeaderboardName = "killers";
 
         [Header("Achievements")]
         [SerializeField] private List<WaveAchievement> waveAchievements = new List<WaveAchievement>()
@@ -138,6 +138,7 @@ namespace FF
         private Callback<UserStatsStored_t> _userStatsStored;
         private CallResult<LeaderboardFindResult_t> _killLeaderboardFindResult;
         private CallResult<LeaderboardScoreUploaded_t> _killScoreUploadedResult;
+        private CallResult<LeaderboardScoresDownloaded_t> _killLeaderboardScoresDownloaded;
         private SteamLeaderboard_t _killLeaderboard;
         private int _lastKillCount;
         private int _killStatBase;
@@ -184,6 +185,8 @@ namespace FF
             WeaponCrate.OnAnyBroken += HandleSupplyCrateBroken;
             Health.OnAnyHealed += HandleAnyHealed;
             Health.OnAnyDamaged += HandleAnyDamaged;
+            _killScoreUploadedResult = CallResult<LeaderboardScoreUploaded_t>.Create(HandleKillScoreUploaded);
+            _killLeaderboardScoresDownloaded = CallResult<LeaderboardScoresDownloaded_t>.Create(HandleUserLeaderboardScoresDownloaded);
         }
 
         private void OnDisable()
@@ -203,6 +206,9 @@ namespace FF
             WeaponCrate.OnAnyBroken -= HandleSupplyCrateBroken;
             Health.OnAnyHealed -= HandleAnyHealed;
             Health.OnAnyDamaged -= HandleAnyDamaged;
+
+            _killScoreUploadedResult = null;
+            _killLeaderboardScoresDownloaded = null;
             foreach (Health health in _trackedPlayerHealth)
             {
                 if (health != null)
@@ -321,6 +327,8 @@ namespace FF
                 return;
             }
 
+            Debug.Log($"[Steam] Leaderboard upload response: attempted={result.m_nScore}, changed={(result.m_bScoreChanged == 1)}, newRank={result.m_nGlobalRankNew}, previousRank={result.m_nGlobalRankPrevious}");
+
             if (result.m_bScoreChanged == 1)
             {
                 Debug.Log($"[Steam] Leaderboard updated!");
@@ -328,6 +336,62 @@ namespace FF
             else
             {
                 Debug.Log("[Steam] Score sent, but existing high score was better.");
+            }
+
+            // Request rows around the current user so we can confirm whether the account has a leaderboard row.
+            RequestKillLeaderboardAroundUser();
+        }
+
+        private void RequestKillLeaderboardAroundUser()
+        {
+            if (_killLeaderboard.m_SteamLeaderboard == 0)
+            {
+                Debug.Log("[Steam] Cannot request around-user entries: leaderboard handle not ready.");
+                return;
+            }
+
+            // Request rows in range [-5, 5] around the current user
+            SteamAPICall_t handle = SteamUserStats.DownloadLeaderboardEntries(
+                _killLeaderboard,
+                ELeaderboardDataRequest.k_ELeaderboardDataRequestGlobalAroundUser,
+                -5,
+                5);
+            _killLeaderboardScoresDownloaded.Set(handle, HandleUserLeaderboardScoresDownloaded);
+            Debug.Log("[Steam] Requested leaderboard entries around user");
+        }
+
+        private void HandleUserLeaderboardScoresDownloaded(LeaderboardScoresDownloaded_t callback, bool failure)
+        {
+            if (failure)
+            {
+                Debug.LogWarning("[Steam] Failed to download leaderboard entries around user");
+                return;
+            }
+
+            if (callback.m_cEntryCount <= 0)
+            {
+                Debug.Log("[Steam] No leaderboard entries returned for around-user request");
+                return;
+            }
+
+            bool foundSelf = false;
+            Debug.Log($"[Steam] Downloaded {callback.m_cEntryCount} entries around user:");
+            for (int i = 0; i < callback.m_cEntryCount; i++)
+            {
+                if (!SteamUserStats.GetDownloadedLeaderboardEntry(callback.m_hSteamLeaderboardEntries, i, out LeaderboardEntry_t entry, null, 0))
+                    continue;
+
+                string name = SteamFriends.GetFriendPersonaName(entry.m_steamIDUser);
+                string meMark = entry.m_steamIDUser == SteamUser.GetSteamID() ? " <-- THIS ACCOUNT" : string.Empty;
+                Debug.Log($"[Steam] {entry.m_nGlobalRank}. {name} (score={entry.m_nScore}){meMark}");
+
+                if (entry.m_steamIDUser == SteamUser.GetSteamID())
+                    foundSelf = true;
+            }
+
+            if (!foundSelf)
+            {
+                Debug.LogWarning("[Steam] Your account was NOT present in the around-user rows. Verify Steam account, AppID, and profile visibility.");
             }
         }
 
@@ -570,16 +634,26 @@ namespace FF
         private void PushKillLeaderboardScore()
         {
             if (!_statsReady)
+            {
+                Debug.Log("[Steam] PushKillLeaderboardScore skipped: stats not ready");
                 return;
+            }
 
+            int score = _killStatBase + _lastKillCount;
             EnsureKillLeaderboard();
+
             if (_killLeaderboard.m_SteamLeaderboard == 0)
+            {
+                Debug.Log($"[Steam] PushKillLeaderboardScore skipped: leaderboard handle not ready (score would be {score})");
                 return;
+            }
+
+            Debug.Log($"[Steam] Uploading kill leaderboard score: {score} to leaderboard '{KillLeaderboardName}' (handle {_killLeaderboard.m_SteamLeaderboard})");
 
             SteamAPICall_t handle = SteamUserStats.UploadLeaderboardScore(
                 _killLeaderboard,
                 ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest,
-                _killStatBase + _lastKillCount,
+                score,
                 null,
                 0);
 
