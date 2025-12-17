@@ -330,6 +330,13 @@ namespace FF
             SyncFillImmediately();
         }
 
+        // Public wrapper so other controllers can request the HUD update its visibility
+        // for a newly-loaded scene without toggling the GameObject active state.
+        public void ApplySceneVisibilityPublic(Scene scene)
+        {
+            ApplySceneVisibility(scene);
+        }
+
         private void ApplySceneVisibility(Scene scene)
         {
             bool isGameplay = IsGameplayScene(scene);

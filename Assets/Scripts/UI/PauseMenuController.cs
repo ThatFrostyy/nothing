@@ -206,13 +206,16 @@ namespace FF
 
             if (isMenuScene)
             {
-                var huds = FindObjectsOfType<GameHUD>();
+                var huds = FindObjectsOfType<GameHUD>(true);
                 for (int i = 0; i < huds.Length; i++)
                 {
                     var hud = huds[i];
                     if (hud != null)
                     {
-                        hud.gameObject.SetActive(false);
+                        // Do not deactivate HUD GameObjects here. Instead, ask each HUD
+                        // to apply scene visibility so persistent HUDs (DontDestroyOnLoad)
+                        // remain enabled and can rebind when returning to gameplay.
+                        hud.ApplySceneVisibilityPublic(scene);
                     }
                 }
 
