@@ -204,21 +204,20 @@ namespace FF
                 isMenuScene = scene.name.Equals("Main", System.StringComparison.OrdinalIgnoreCase);
             }
 
+            var huds = FindObjectsOfType<GameHUD>(true);
+            for (int i = 0; i < huds.Length; i++)
+            {
+                var hud = huds[i];
+                if (hud != null)
+                {
+                    // Always let the HUD update its scene visibility so it can
+                    // re-enable itself after returning from the main menu.
+                    hud.ApplySceneVisibilityPublic(scene);
+                }
+            }
+
             if (isMenuScene)
             {
-                var huds = FindObjectsOfType<GameHUD>(true);
-                for (int i = 0; i < huds.Length; i++)
-                {
-                    var hud = huds[i];
-                    if (hud != null)
-                    {
-                        // Do not deactivate HUD GameObjects here. Instead, ask each HUD
-                        // to apply scene visibility so persistent HUDs (DontDestroyOnLoad)
-                        // remain enabled and can rebind when returning to gameplay.
-                        hud.ApplySceneVisibilityPublic(scene);
-                    }
-                }
-
                 // Hide any lingering offscreen indicators (boss/pickup/weapon arrows) that
                 // may have been created during gameplay so they do not remain visible on
                 // the main menu after returning from the death screen.
