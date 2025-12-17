@@ -137,6 +137,12 @@ namespace FF
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
 
+            var customCursor = FindAnyObjectByType<CursorFollowUI>();
+            if (customCursor)
+            {
+                customCursor.Show();
+            }
+
             HideSettings();
             RefreshSettingsUI();
 
