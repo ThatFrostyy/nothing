@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace FF
 {
@@ -16,6 +18,7 @@ namespace FF
         private readonly Dictionary<Transform, RectTransform> activeIndicators = new();
         private readonly HashSet<Transform> seenThisFrame = new();
         private Canvas parentCanvas;
+        private bool isGameplayScene;
 
         void Awake()
         {
@@ -31,6 +34,15 @@ namespace FF
 
         void LateUpdate()
         {
+            if (!isGameplayScene)
+            {
+                if (activeIndicators.Count > 0)
+                {
+                    ClearAllIndicators();
+                }
+                return;
+            }
+
             if (!targetCamera)
             {
                 ResolveCamera();
@@ -50,6 +62,8 @@ namespace FF
 
         void OnEnable()
         {
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+
             ResolveCamera();
 
             foreach (var kvp in activeIndicators)
@@ -60,18 +74,13 @@ namespace FF
 
             activeIndicators.Clear();
             seenThisFrame.Clear();
+            isGameplayScene = IsGameplayScene(SceneManager.GetActiveScene());
         }
 
         void OnDisable()
         {
-            foreach (var kvp in activeIndicators)
-            {
-                if (kvp.Value)
-                    Destroy(kvp.Value.gameObject);
-            }
-
-            activeIndicators.Clear();
-            seenThisFrame.Clear();
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            ClearAllIndicators();
         }
 
         private void RefreshIndicators(IEnumerable<UpgradePickup> pickups, RectTransform prefab)
@@ -224,6 +233,45 @@ namespace FF
             {
                 targetCamera = Camera.main;
             }
+        }
+
+        private bool IsGameplayScene(Scene scene)
+        {
+            string gameplayName = SceneFlowController.Instance ? SceneFlowController.Instance.GameplaySceneName : string.Empty;
+            string menuName = SceneFlowController.Instance ? SceneFlowController.Instance.MainMenuSceneName : string.Empty;
+
+            if (!string.IsNullOrEmpty(gameplayName) && scene.name.Equals(gameplayName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            if (!string.IsNullOrEmpty(menuName) && scene.name.Equals(menuName, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return scene.name.Equals("Main", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            isGameplayScene = IsGameplayScene(scene);
+            if (!isGameplayScene)
+            {
+                ClearAllIndicators();
+            }
+        }
+
+        private void ClearAllIndicators()
+        {
+            foreach (var kvp in activeIndicators)
+            {
+                if (kvp.Value)
+                    Destroy(kvp.Value.gameObject);
+            }
+
+            activeIndicators.Clear();
+            seenThisFrame.Clear();
         }
     }
 }
