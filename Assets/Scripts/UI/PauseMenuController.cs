@@ -68,6 +68,16 @@ namespace FF
             ApplyVisibility(0f, true);
         }
 
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+        }
+
         private void BindButtons()
         {
             if (resumeButton && restartButton && mainMenuButton)
@@ -222,8 +232,15 @@ namespace FF
 
         private void HideInstant()
         {
+            if (_fadeRoutine != null)
+            {
+                StopCoroutine(_fadeRoutine);
+                _fadeRoutine = null;
+            }
+
             _isVisible = false;
             _isDeathMenu = false;
+            MusicManager.Instance.SetPaused(false);
             HideSettings();
             ApplyVisibility(0f, true);
             RestoreTimeScale();
@@ -337,6 +354,16 @@ namespace FF
         {
             if (deathEffectPrefab) PoolManager.Get(deathEffectPrefab, position, Quaternion.identity);
             if (deathClip) AudioPlaybackPool.PlayOneShot(deathClip, position);
+        }
+
+        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (!_isVisible && !_isDeathMenu && _fadeRoutine == null)
+            {
+                return;
+            }
+
+            HideInstant();
         }
     }
 }
