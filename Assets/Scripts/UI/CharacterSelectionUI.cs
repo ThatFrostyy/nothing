@@ -31,6 +31,9 @@ namespace FF
         [SerializeField] private List<Image> specialItemIcons = new();
         [SerializeField] private PlayerPreview preview;
 
+        [Header("Progression")]
+        [SerializeField] private CharacterLevelBar levelBar;
+
         private int _index;
         private int _hatIndex;
         private int _loadoutViewIndex;
@@ -206,6 +209,8 @@ namespace FF
             {
                 preview.Show(character, hat, weapon, specialWeapon);
             }
+
+            RefreshProgression(character);
         }
 
         private string GetAbilityLabel(string abilityId)
@@ -358,6 +363,14 @@ namespace FF
             {
                 hatIconImage.enabled = hat != null && hat.Icon != null;
                 hatIconImage.sprite = hat != null ? hat.Icon : null;
+            }
+        }
+
+        private void RefreshProgression(CharacterDefinition character)
+        {
+            if (levelBar)
+            {
+                levelBar.Show(character);
             }
         }
 
