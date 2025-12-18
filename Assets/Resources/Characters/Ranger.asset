@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c0bba61e46a472ab37464ca4987f4d4, type: 3}
   m_Name: Ranger
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
+  ProgressionId: Ranger
   DisplayName: US Ranger
   Description: Armed with an BAR and a deadly M2A1 Flamethrower. Steady and reliable,
     can supress many enemies in an area.
@@ -24,3 +25,138 @@ MonoBehaviour:
   StartingWeapon: {fileID: 11400000, guid: 5fdcf8ba9e391ba4f9db389ee623ce59, type: 2}
   WeaponIconOverride: {fileID: 0}
   SpecialWeapon: {fileID: 11400000, guid: 8ca373f03309ee14187cd6891af7ee79, type: 2}
+  Progression:
+    baseXPRequirement: 500
+    xpGrowthPerLevel: 10
+    xpRequirementCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 1
+        value: 500
+        inSlope: 350
+        outSlope: 350
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 2
+        value: 850
+        inSlope: 400
+        outSlope: 400
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 3
+        value: 1300
+        inSlope: 525
+        outSlope: 525
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 4
+        value: 1900
+        inSlope: 650
+        outSlope: 650
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 5
+        value: 2600
+        inSlope: 750
+        outSlope: 750
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 6
+        value: 3400
+        inSlope: 850
+        outSlope: 850
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 7
+        value: 4300
+        inSlope: 950
+        outSlope: 950
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 8
+        value: 5300
+        inSlope: 1100
+        outSlope: 1100
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0.33333334
+      - serializedVersion: 3
+        time: 9
+        value: 6500
+        inSlope: 1200
+        outSlope: 1200
+        tangentMode: 34
+        weightedMode: 0
+        inWeight: 0.33333334
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    xpPerKill: 0.5
+    xpPerWave: 8
+    waveKillBonusMultiplier: 0.05
+    minimumWaveForRewards: 5
+    levels:
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
+      Rewards:
+      - Type: 1
+        Percent: 8
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
+      Rewards:
+      - Type: 0
+        Percent: 5
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
+      Rewards:
+      - Type: 3
+        Percent: 3
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
+      Rewards:
+      - Type: 4
+        Percent: 6
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
+      Rewards:
+      - Type: 1
+        Percent: 12
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
+      Rewards:
+      - Type: 3
+        Percent: 4
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
+      Rewards:
+      - Type: 0
+        Percent: 5
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
+      Rewards:
+      - Type: 4
+        Percent: 6

@@ -140,7 +140,7 @@ namespace FF
             }
         }
 
-        private void TryFinalizeRun()
+        public void TryFinalizeRun()
         {
             if (!_sessionActive || _finalized)
             {

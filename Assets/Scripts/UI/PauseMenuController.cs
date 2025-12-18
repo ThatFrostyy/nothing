@@ -311,12 +311,14 @@ namespace FF
 
         private void RestartScene()
         {
+            CharacterProgressionRuntime.Instance?.TryFinalizeRun();
             if (sceneFlow == null) sceneFlow = FindAnyObjectByType<SceneFlowController>();
             StartCoroutine(LoadWithFade(() => sceneFlow?.ReloadCurrentScene()));
         }
 
         private void ReturnToMainMenu()
         {
+            CharacterProgressionRuntime.Instance?.TryFinalizeRun();
             if (sceneFlow == null) sceneFlow = FindAnyObjectByType<SceneFlowController>();
             StartCoroutine(LoadWithFade(() => sceneFlow?.LoadMainMenuScene()));
         }

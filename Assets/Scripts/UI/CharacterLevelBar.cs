@@ -20,7 +20,7 @@ namespace FF
             if (!character || character.Progression == null || character.Progression.LevelCount == 0)
             {
                 ClearIcons();
-                UpdateLabels(0, 0, 1, 0);
+                UpdateLabels(0, 0, 1, 0, false);
                 SetProgressFill(0f);
                 return;
             }
