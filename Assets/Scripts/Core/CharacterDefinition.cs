@@ -6,6 +6,9 @@ namespace FF
     [CreateAssetMenu(menuName = "FF/Character", fileName = "Character_")]
     public class CharacterDefinition : ScriptableObject
     {
+        [Header("Identity")]
+        [Tooltip("Optional override used to save progression for this character. Defaults to the asset name.")]
+        public string ProgressionId = string.Empty;
         public string DisplayName = "New Character";
         [TextArea] public string Description;
         [Tooltip("Used to hook up unique abilities later.")]
@@ -23,6 +26,14 @@ namespace FF
         public Sprite WeaponIconOverride;
         [Header("Special Weapon")]
         public Weapon SpecialWeapon;
+
+        [Header("Progression")]
+        public CharacterProgressionSettings Progression = new();
+
+        public string GetProgressionKey()
+        {
+            return string.IsNullOrWhiteSpace(ProgressionId) ? name : ProgressionId;
+        }
 
         public Sprite GetWeaponIcon()
         {
@@ -47,6 +58,14 @@ namespace FF
             }
 
             return null;
+        }
+
+        void OnValidate()
+        {
+            if (string.IsNullOrWhiteSpace(ProgressionId))
+            {
+                ProgressionId = name;
+            }
         }
     }
 }

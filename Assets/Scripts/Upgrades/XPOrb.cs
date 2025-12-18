@@ -39,6 +39,8 @@ namespace FF
         private Coroutine releaseRoutine;
         private float lifetimeTimer;
         private float currentLifetime;
+        private static float attractionRadiusMultiplier = 1f;
+        private static float moveSpeedMultiplier = 1f;
 
         void Awake()
         {
@@ -174,7 +176,8 @@ namespace FF
                 return;
             }
 
-            float radiusSqr = attractionRadius * attractionRadius;
+            float radius = attractionRadius * attractionRadiusMultiplier;
+            float radiusSqr = radius * radius;
             if (sqrDistance > radiusSqr)
             {
                 currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, acceleration * deltaTime);
@@ -188,7 +191,8 @@ namespace FF
             }
 
             Vector3 direction = toTarget / distance;
-            currentSpeed = Mathf.MoveTowards(currentSpeed, moveSpeed, acceleration * deltaTime);
+            float targetSpeed = moveSpeed * moveSpeedMultiplier;
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * deltaTime);
             transform.position += currentSpeed * deltaTime * direction;
         }
 
@@ -252,6 +256,12 @@ namespace FF
             pulseScaleRange.y = Mathf.Max(0f, pulseScaleRange.y);
             lifetime = Mathf.Max(0f, lifetime);
             lifetimeVariance = Mathf.Max(0f, lifetimeVariance);
+        }
+
+        public static void SetGlobalAttractionMultipliers(float radiusMultiplier, float speedMultiplier)
+        {
+            attractionRadiusMultiplier = Mathf.Max(0f, radiusMultiplier);
+            moveSpeedMultiplier = Mathf.Max(0f, speedMultiplier);
         }
 
         void ResetPulseTimer()
