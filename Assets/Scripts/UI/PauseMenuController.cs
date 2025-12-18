@@ -35,6 +35,7 @@ namespace FF
         [SerializeField] private GameObject settingsRoot;
         [SerializeField] private MusicSettingsUI musicSettingsUI;
         [SerializeField] private KeybindSettingsUI keybindSettingsUI;
+        [SerializeField] private VideoSettingsUI videoSettingsUI;
 
         [Header("Flow")]
         [SerializeField] private SceneFlowController sceneFlow;
@@ -294,6 +295,11 @@ namespace FF
             if (keybindSettingsUI)
             {
                 keybindSettingsUI.RefreshDisplay();
+            }
+
+            if (videoSettingsUI)
+            {
+                videoSettingsUI.RefreshDisplay();
             }
         }
 
