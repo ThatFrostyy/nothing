@@ -134,6 +134,15 @@ namespace FF
                 Time.timeScale = 0f;
             }
 
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Confined;
+
+            var customCursor = FindAnyObjectByType<CursorFollowUI>();
+            if (customCursor)
+            {
+                customCursor.Show();
+            }
+
             HideSettings();
             RefreshSettingsUI();
 

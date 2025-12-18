@@ -36,6 +36,10 @@ namespace FF
             new WaveAchievement { waveRequired = 50, achievementId = "WAVE_50" }
         };
 
+        [Header("Inventory Drops")]
+        [SerializeField, Min(1)] private int waveDropWaveThreshold = 20;
+        [SerializeField] private int waveDropListDefinitionId = 100;
+
         private const string AchievementRoundsFired = "ROUNDS_5000";
         private const string AchievementFirstHat = "HAT_FIRST";
         private const string AchievementLegendaryHat = "HAT_LEGENDARY";
@@ -152,6 +156,9 @@ namespace FF
         private bool _gameManagerHooked;//
         private bool _statsReady;
         private Rigidbody2D _playerBody;
+        private bool _waveDropTriggered;
+        private SteamInventoryResult_t _waveDropResultHandle = SteamInventoryResult_t.Invalid;
+        private Callback<SteamInventoryResultReady_t> _inventoryResultReady;
         private void Start()
         {
             SteamUserStats.RequestUserStats(SteamUser.GetSteamID());
@@ -187,6 +194,7 @@ namespace FF
             Health.OnAnyDamaged += HandleAnyDamaged;
             _killScoreUploadedResult = CallResult<LeaderboardScoreUploaded_t>.Create(HandleKillScoreUploaded);
             _killLeaderboardScoresDownloaded = CallResult<LeaderboardScoresDownloaded_t>.Create(HandleUserLeaderboardScoresDownloaded);
+            _inventoryResultReady = Callback<SteamInventoryResultReady_t>.Create(HandleInventoryResultReady);
         }
 
         private void OnDisable()
@@ -209,6 +217,9 @@ namespace FF
 
             _killScoreUploadedResult = null;
             _killLeaderboardScoresDownloaded = null;
+            _inventoryResultReady?.Dispose();
+            _inventoryResultReady = null;
+            ReleaseWaveDropHandle();
             foreach (Health health in _trackedPlayerHealth)
             {
                 if (health != null)
@@ -303,6 +314,7 @@ namespace FF
             PushCoreStats();
             PushKillLeaderboardScore();
             TryUnlockWaveAchievements();
+            TryTriggerWaveDrop(wave);
 
             ResetWaveTrackers();
         }
@@ -340,6 +352,66 @@ namespace FF
 
             // Request rows around the current user so we can confirm whether the account has a leaderboard row.
             RequestKillLeaderboardAroundUser();
+        }
+
+        private void TryTriggerWaveDrop(int wave)
+        {
+            if (_waveDropTriggered)
+            {
+                return;
+            }
+
+            if (wave < waveDropWaveThreshold)
+            {
+                return;
+            }
+
+            if (waveDropListDefinitionId <= 0)
+            {
+                Debug.LogWarning("[Steam] Wave drop definition id is not configured.");
+                _waveDropTriggered = true;
+                return;
+            }
+
+            ReleaseWaveDropHandle();
+
+            if (!SteamInventory.TriggerItemDrop(out _waveDropResultHandle, new SteamItemDef_t(waveDropListDefinitionId)))
+            {
+                Debug.LogWarning($"[Steam] Failed to trigger inventory drop for wave {waveDropWaveThreshold} (DefID: {waveDropListDefinitionId}).");
+                _waveDropResultHandle = SteamInventoryResult_t.Invalid;
+                return;
+            }
+
+            _waveDropTriggered = true;
+            Debug.Log($"[Steam] Triggered inventory drop for reaching wave {wave} (DefID: {waveDropListDefinitionId}).");
+        }
+
+        private void HandleInventoryResultReady(SteamInventoryResultReady_t result)
+        {
+            if (result.m_handle != _waveDropResultHandle)
+            {
+                return;
+            }
+
+            if (result.m_result != EResult.k_EResultOK)
+            {
+                Debug.LogWarning($"[Steam] Inventory drop failed: {result.m_result}");
+            }
+            else
+            {
+                Debug.Log("[Steam] Inventory drop result received.");
+            }
+
+            ReleaseWaveDropHandle();
+        }
+
+        private void ReleaseWaveDropHandle()
+        {
+            if (_waveDropResultHandle != SteamInventoryResult_t.Invalid)
+            {
+                SteamInventory.DestroyResult(_waveDropResultHandle);
+                _waveDropResultHandle = SteamInventoryResult_t.Invalid;
+            }
         }
 
         private void RequestKillLeaderboardAroundUser()
@@ -972,4 +1044,3 @@ public class WaveAchievement
     public string achievementId;
     public bool unlocked;
 }
-
