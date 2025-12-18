@@ -24,7 +24,7 @@ namespace FF
         [SerializeField] private const string TotalHealingStatName = "total_healing_received";
 
         [Header("Leaderboards")]
-        [SerializeField] private const string KillLeaderboardName = "killers";
+        [SerializeField] private const string KillLeaderboardName = "kills";
 
         [Header("Achievements")]
         [SerializeField] private List<WaveAchievement> waveAchievements = new List<WaveAchievement>()

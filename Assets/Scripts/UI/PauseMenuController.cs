@@ -134,9 +134,6 @@ namespace FF
                 Time.timeScale = 0f;
             }
 
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Confined;
-
             HideSettings();
             RefreshSettingsUI();
 
