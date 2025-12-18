@@ -12,8 +12,11 @@ namespace FF
         [SerializeField] private TMP_Text xpLabel;
         [SerializeField] private Transform levelIconContainer;
         [SerializeField] private CharacterLevelIcon levelIconPrefab;
+        [SerializeField] private CharacterLevelTooltip levelTooltipPrefab;
+        [SerializeField] private Canvas tooltipCanvas;
 
         private readonly List<CharacterLevelIcon> _spawnedIcons = new();
+        private CharacterLevelTooltip _spawnedTooltip;
 
         public void Show(CharacterDefinition character)
         {
@@ -89,12 +92,15 @@ namespace FF
 
                 bool unlocked = i < unlockedLevels;
                 Sprite sprite = level != null ? level.Icon : null;
-                icon.Configure(sprite, i + 1, unlocked);
+                string tooltip = level != null ? level.Tooltip : string.Empty;
+                icon.Configure(sprite, i + 1, unlocked, tooltip, ShowTooltip, HideTooltip);
             }
         }
 
         private void ClearIcons()
         {
+            HideTooltip();
+
             for (int i = 0; i < _spawnedIcons.Count; i++)
             {
                 if (_spawnedIcons[i])
@@ -104,6 +110,43 @@ namespace FF
             }
 
             _spawnedIcons.Clear();
+        }
+
+        private void ShowTooltip(string text, Vector2 screenPosition)
+        {
+            if (levelTooltipPrefab == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(text))
+            {
+                HideTooltip();
+                return;
+            }
+
+            Canvas targetCanvas = tooltipCanvas != null ? tooltipCanvas : GetComponentInParent<Canvas>();
+
+            if (_spawnedTooltip == null)
+            {
+                if (targetCanvas == null)
+                {
+                    return;
+                }
+
+                _spawnedTooltip = Instantiate(levelTooltipPrefab, targetCanvas.transform);
+            }
+
+            _spawnedTooltip.Show(text, screenPosition, targetCanvas);
+        }
+
+        private void HideTooltip()
+        {
+            if (_spawnedTooltip != null)
+            {
+                Destroy(_spawnedTooltip.gameObject);
+                _spawnedTooltip = null;
+            }
         }
     }
 }

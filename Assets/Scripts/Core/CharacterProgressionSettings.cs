@@ -112,6 +112,9 @@ namespace FF
         [Tooltip("If greater than zero, overrides the XP needed to reach this level.")]
         public int XPOverride = 0;
         public Sprite Icon;
+        [Tooltip("Tooltip text shown when hovering the level icon.")]
+        [TextArea]
+        public string Tooltip = string.Empty;
         public List<CharacterUpgradeReward> Rewards = new();
     }
 
