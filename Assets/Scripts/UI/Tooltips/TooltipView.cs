@@ -7,7 +7,6 @@ namespace FF.UI.Tooltips
     {
         [SerializeField] private RectTransform background;
         [SerializeField] private TextMeshProUGUI label;
-        [SerializeField] private Vector2 padding = new Vector2(12f, 8f);
 
         public void SetText(string text)
         {
@@ -16,15 +15,16 @@ namespace FF.UI.Tooltips
                 return;
             }
 
+            // Let the prefab define sizes. Enable TMP auto-sizing so text scales to fit the prefab's text rect.
+            label.enableAutoSizing = true;
             label.text = text;
-            Canvas.ForceUpdateCanvases();
 
-            Vector2 preferred = label.GetPreferredValues(text, 0f, 0f);
-            label.rectTransform.sizeDelta = preferred;
-            background.sizeDelta = preferred + padding * 2f;
+            // Force updates so layout/mesh is refreshed immediately.
+            label.ForceMeshUpdate();
+            Canvas.ForceUpdateCanvases();
         }
 
-        public void SetPosition(Vector2 screenPosition, Vector2 offset, Canvas canvas)
+        public void SetPosition(Vector2 screenPosition, Canvas canvas)
         {
             if (background == null || canvas == null)
             {
@@ -40,9 +40,15 @@ namespace FF.UI.Tooltips
             Camera camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvasRect,
-                screenPosition + offset,
+                screenPosition,
                 camera,
                 out Vector2 localPoint);
+
+            // Ensure tooltip pivot is bottom-left so the provided screen point maps to the tooltip's bottom-left corner.
+            if (background.pivot != Vector2.zero)
+            {
+                background.pivot = Vector2.zero;
+            }
 
             Vector2 clampedPosition = ClampToCanvas(localPoint, canvasRect);
             background.anchoredPosition = clampedPosition;
@@ -50,9 +56,12 @@ namespace FF.UI.Tooltips
 
         private Vector2 ClampToCanvas(Vector2 position, RectTransform canvasRect)
         {
-            Vector2 halfSize = background.sizeDelta * 0.5f;
-            Vector2 min = canvasRect.rect.min + halfSize;
-            Vector2 max = canvasRect.rect.max - halfSize;
+            // Use the background rect size and pivot to compute valid min/max within the canvas.
+            Vector2 size = background.rect.size;
+            Vector2 pivot = background.pivot;
+
+            Vector2 min = canvasRect.rect.min + size * pivot;
+            Vector2 max = canvasRect.rect.max - size * (Vector2.one - pivot);
 
             return new Vector2(
                 Mathf.Clamp(position.x, min.x, max.x),

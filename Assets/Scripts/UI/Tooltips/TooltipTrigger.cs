@@ -6,7 +6,6 @@ namespace FF.UI.Tooltips
     public class TooltipTrigger : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerMoveHandler
     {
         [SerializeField, TextArea] private string tooltipText;
-        [SerializeField] private Vector2 offset = new Vector2(12f, -12f);
         [SerializeField] private bool followCursor = true;
         [SerializeField] private TooltipSystem tooltipSystemOverride;
 
@@ -18,7 +17,7 @@ namespace FF.UI.Tooltips
                 return;
             }
 
-            system.Show(tooltipText, offset);
+            system.Show(tooltipText);
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -45,7 +44,12 @@ namespace FF.UI.Tooltips
                 return;
             }
 
-            system.UpdatePosition(eventData.position, offset);
+            system.UpdatePosition(eventData.position);
+        }
+
+        public void SetText(string text)
+        {
+            tooltipText = text;
         }
 
         private void OnDisable()

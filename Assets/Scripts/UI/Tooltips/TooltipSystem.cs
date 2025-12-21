@@ -32,7 +32,6 @@ namespace FF.UI.Tooltips
 
         [SerializeField] private TooltipView tooltipPrefab;
         [SerializeField] private Canvas targetCanvas;
-        [SerializeField] private Vector2 defaultOffset = new Vector2(12f, -12f);
 
         private TooltipView activeTooltip;
 
@@ -65,7 +64,7 @@ namespace FF.UI.Tooltips
             }
         }
 
-        public void Show(string text, Vector2? offset = null)
+        public void Show(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
             {
@@ -80,17 +79,17 @@ namespace FF.UI.Tooltips
 
             activeTooltip.SetText(text);
             activeTooltip.gameObject.SetActive(true);
-            UpdatePosition(Input.mousePosition, offset ?? defaultOffset);
+            UpdatePosition(Input.mousePosition);
         }
 
-        public void UpdatePosition(Vector2 screenPosition, Vector2? offset = null)
+        public void UpdatePosition(Vector2 screenPosition)
         {
             if (activeTooltip == null || targetCanvas == null)
             {
                 return;
             }
 
-            activeTooltip.SetPosition(screenPosition, offset ?? defaultOffset, targetCanvas);
+            activeTooltip.SetPosition(screenPosition, targetCanvas);
         }
 
         public void Hide()

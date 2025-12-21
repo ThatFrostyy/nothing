@@ -112,6 +112,7 @@ namespace FF
         [Tooltip("If greater than zero, overrides the XP needed to reach this level.")]
         public int XPOverride = 0;
         public Sprite Icon;
+        public string Description;
         public List<CharacterUpgradeReward> Rewards = new();
     }
 

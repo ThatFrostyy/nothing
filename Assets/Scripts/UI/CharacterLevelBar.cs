@@ -84,12 +84,13 @@ namespace FF
             for (int i = 0; i < levels.Count; i++)
             {
                 CharacterProgressionLevel level = levels[i];
+                string description = level != null ? level.Description : "No Description";
                 CharacterLevelIcon icon = Instantiate(levelIconPrefab, levelIconContainer);
                 _spawnedIcons.Add(icon);
 
                 bool unlocked = i < unlockedLevels;
                 Sprite sprite = level != null ? level.Icon : null;
-                icon.Configure(sprite, i + 1, unlocked);
+                icon.Configure(sprite, i + 1, unlocked, description);
             }
         }
 
