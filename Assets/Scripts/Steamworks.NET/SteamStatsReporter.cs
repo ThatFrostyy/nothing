@@ -22,7 +22,6 @@ namespace FF
         [SerializeField] private const string SupplyCratesOpenedStatName = "supply_crates_opened";
         [SerializeField] private const string UpgradePickupsCollectedStatName = "upgrade_pickups_collected";
         [SerializeField] private const string TotalHealingStatName = "total_healing_received";
-        [SerializeField] private const string BulletTimeStatName = "bullet_time_moments";
 
         [Header("Leaderboards")]
         [SerializeField] private const string KillLeaderboardName = "kills";
@@ -53,7 +52,6 @@ namespace FF
         private const string AchievementTwentyWavesNoDamage = "WAVES_20_NO_DAMAGE";
         private const string AchievementTenBosses = "BOSSES_10";
         private const string AchievementNoMovementWave = "WAVE_NO_MOVE";
-        private const string AchievementBulletTimeMoments = "BULLET_TIME_100";
 
         private readonly struct WeaponAchievementConfig
         {
@@ -128,14 +126,6 @@ namespace FF
                     (500, "BAZOOKA_500"),
                     (1000, "BAZOOKA_1000")
                 })
-            ,
-            ["M24 Grenade"] = new WeaponAchievementConfig(
-                "M24 Grenade",
-                "kills_m24_grenade",
-                new (int, string)[]
-                {
-                    (100, "M24_GRENADE_100")
-                })
         };
 
         private readonly Dictionary<Weapon, int> _weaponKills = new();
@@ -202,7 +192,6 @@ namespace FF
             WeaponCrate.OnAnyBroken += HandleSupplyCrateBroken;
             Health.OnAnyHealed += HandleAnyHealed;
             Health.OnAnyDamaged += HandleAnyDamaged;
-            KillSlowMotion.OnBulletTimeTriggered += HandleBulletTimeTriggered;
             _killScoreUploadedResult = CallResult<LeaderboardScoreUploaded_t>.Create(HandleKillScoreUploaded);
             _killLeaderboardScoresDownloaded = CallResult<LeaderboardScoresDownloaded_t>.Create(HandleUserLeaderboardScoresDownloaded);
             _inventoryResultReady = Callback<SteamInventoryResultReady_t>.Create(HandleInventoryResultReady);
@@ -225,7 +214,6 @@ namespace FF
             WeaponCrate.OnAnyBroken -= HandleSupplyCrateBroken;
             Health.OnAnyHealed -= HandleAnyHealed;
             Health.OnAnyDamaged -= HandleAnyDamaged;
-            KillSlowMotion.OnBulletTimeTriggered -= HandleBulletTimeTriggered;
 
             _killScoreUploadedResult = null;
             _killLeaderboardScoresDownloaded = null;
@@ -771,7 +759,6 @@ namespace FF
             LoadProgressStat(SupplyCratesOpenedStatName);
             LoadProgressStat(UpgradePickupsCollectedStatName);
             LoadProgressStat(TotalHealingStatName);
-            LoadProgressStat(BulletTimeStatName);
 
             FlushPendingProgressStatIncrements();
             EvaluateProgressAchievements();
@@ -888,15 +875,6 @@ namespace FF
             }
         }
 
-        private void HandleBulletTimeTriggered()
-        {
-            IncrementProgressStat(BulletTimeStatName, 1, out int total);
-            if (total >= 100)
-            {
-                TryUnlockAchievement(AchievementBulletTimeMoments);
-            }
-        }
-
         private void EvaluateWaveBasedAchievements(int wave)
         {
             if (!_statsReady)
@@ -982,11 +960,6 @@ namespace FF
             if (GetProgressStat(TotalHealingStatName) >= 500)
             {
                 TryUnlockAchievement(AchievementTotalHealing);
-            }
-
-            if (GetProgressStat(BulletTimeStatName) >= 100)
-            {
-                TryUnlockAchievement(AchievementBulletTimeMoments);
             }
         }
 

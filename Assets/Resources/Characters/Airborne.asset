@@ -25,32 +25,6 @@ MonoBehaviour:
   StartingWeapon: {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
   WeaponIconOverride: {fileID: 0}
   SpecialWeapon: {fileID: 11400000, guid: f4d505e767021a940b03b61c5b3c7431, type: 2}
-  UnlockRequirements:
-  - Type: 2
-    Target: 10
-    RequiredCharacter: {fileID: 11400000, guid: 2a8929ff60f8de8489580f6f4ffd153b, type: 2}
-    RequiredWeapon: {fileID: 0}
-    DescriptionOverride: 
-  - Type: 3
-    Target: 1000
-    RequiredCharacter: {fileID: 0}
-    RequiredWeapon: {fileID: 0}
-    DescriptionOverride: 
-  - Type: 4
-    Target: 100
-    RequiredCharacter: {fileID: 0}
-    RequiredWeapon: {fileID: 11400000, guid: cb51af441ffacbb4d939822a59288411, type: 2}
-    DescriptionOverride: 
-  - Type: 5
-    Target: 180
-    RequiredCharacter: {fileID: 0}
-    RequiredWeapon: {fileID: 0}
-    DescriptionOverride: 
-  - Type: 6
-    Target: 100
-    RequiredCharacter: {fileID: 0}
-    RequiredWeapon: {fileID: 0}
-    DescriptionOverride: 
   Progression:
     baseXPRequirement: 500
     xpGrowthPerLevel: 10

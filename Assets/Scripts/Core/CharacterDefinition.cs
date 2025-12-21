@@ -27,9 +27,6 @@ namespace FF
         [Header("Special Weapon")]
         public Weapon SpecialWeapon;
 
-        [Header("Unlocking")]
-        public List<CharacterUnlockRequirement> UnlockRequirements = new();
-
         [Header("Progression")]
         public CharacterProgressionSettings Progression = new();
 
