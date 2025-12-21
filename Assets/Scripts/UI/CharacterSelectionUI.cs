@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using Steamworks;
 using TMPro;
 using UnityEngine;
@@ -14,6 +15,9 @@ namespace FF
         [SerializeField] private TMP_Text descriptionText;
         [SerializeField] private TMP_Text abilityText;
         [SerializeField] private Image portraitImage;
+        [SerializeField] private TMP_Text lockIconText;
+        [SerializeField] private string lockedNameSuffix = " - Locked";
+        [SerializeField] private string requirementsHeader = "Unlock Requirements:";
 
         [Header("Hat Selection")]
         [SerializeField] private List<HatDefinition> availableHats = new();
@@ -49,6 +53,7 @@ namespace FF
             RequestSteamInventory();
             CacheDefaults();
             CharacterSelectionState.OnSelectedChanged += HandleSelectionChanged;
+            CharacterUnlockProgress.OnProgressUpdated += HandleProgressUpdated;
             SyncIndexWithSelection();
             SyncHatWithSelection();
             Refresh();
@@ -57,6 +62,7 @@ namespace FF
         void OnDisable()
         {
             CharacterSelectionState.OnSelectedChanged -= HandleSelectionChanged;
+            CharacterUnlockProgress.OnProgressUpdated -= HandleProgressUpdated;
 
             if (_inventoryCallback != null)
             {
@@ -83,6 +89,12 @@ namespace FF
             }
 
             CharacterDefinition character = availableCharacters[_index];
+            if (character && !CharacterUnlockProgress.IsUnlocked(character))
+            {
+                Refresh();
+                return;
+            }
+
             HatDefinition hat = ResolveHatSelection(character);
             Weapon weapon = character != null ? character.StartingWeapon : null;
             Weapon specialWeapon = character != null ? character.SpecialWeapon : null;
@@ -138,6 +150,11 @@ namespace FF
             Refresh();
         }
 
+        private void HandleProgressUpdated()
+        {
+            Refresh();
+        }
+
         private void SyncIndexWithSelection()
         {
             if (!CharacterSelectionState.HasSelection || availableCharacters.Count == 0)
@@ -166,13 +183,21 @@ namespace FF
             }
 
             CharacterDefinition character = availableCharacters[_index];
-            if (nameText) nameText.text = character != null ? character.DisplayName : "Unknown";
+            bool isUnlocked = CharacterUnlockProgress.IsUnlocked(character);
+            if (nameText) nameText.text = character != null ? GetDisplayName(character, isUnlocked) : "Unknown";
             if (descriptionText) descriptionText.text = character != null ? character.Description : string.Empty;
-            if (abilityText) abilityText.text = character != null ? GetAbilityLabel(character.AbilityId) : string.Empty;
+            if (abilityText) abilityText.text = character != null
+                ? isUnlocked ? GetAbilityLabel(character.AbilityId) : GetUnlockRequirementsLabel(character)
+                : string.Empty;
             if (portraitImage)
             {
                 portraitImage.enabled = character != null && character.Portrait != null;
                 portraitImage.sprite = character != null ? character.Portrait : null;
+            }
+            EnsureLockIcon();
+            if (lockIconText)
+            {
+                lockIconText.enabled = !isUnlocked;
             }
 
             HatDefinition hat = ResolveHatSelection(character);
@@ -234,6 +259,37 @@ namespace FF
                 default:
                     return $"Ability: {abilityId}";
             }
+        }
+
+        private string GetUnlockRequirementsLabel(CharacterDefinition character)
+        {
+            IReadOnlyList<CharacterUnlockRequirementStatus> statuses = CharacterUnlockProgress.GetRequirementStatuses(character);
+            if (statuses.Count == 0)
+            {
+                return GetAbilityLabel(character.AbilityId);
+            }
+
+            StringBuilder builder = new();
+            builder.AppendLine(requirementsHeader);
+            for (int i = 0; i < statuses.Count; i++)
+            {
+                CharacterUnlockRequirementStatus status = statuses[i];
+                string description = CharacterUnlockProgress.GetRequirementDescription(status.Requirement);
+                string state = status.IsCompleted ? "Completed" : "In Progress";
+                builder.AppendLine($"{description} - {state}");
+            }
+
+            return builder.ToString().TrimEnd();
+        }
+
+        private string GetDisplayName(CharacterDefinition character, bool isUnlocked)
+        {
+            if (!character)
+            {
+                return "Unknown";
+            }
+
+            return isUnlocked ? character.DisplayName : $"{character.DisplayName}{lockedNameSuffix}";
         }
 
         private void StepHat(int delta)
@@ -372,6 +428,34 @@ namespace FF
             {
                 levelBar.Show(character);
             }
+        }
+
+        private void EnsureLockIcon()
+        {
+            if (lockIconText || !portraitImage)
+            {
+                return;
+            }
+
+            GameObject lockObject = new("LockIcon", typeof(RectTransform), typeof(TextMeshProUGUI));
+            lockObject.transform.SetParent(portraitImage.transform, false);
+            RectTransform rect = lockObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = new Vector2(100f, 100f);
+
+            TextMeshProUGUI text = lockObject.GetComponent<TextMeshProUGUI>();
+            text.text = "\ud83d\udd12";
+            text.fontSize = 72f;
+            text.alignment = TextAlignmentOptions.Center;
+            text.raycastTarget = false;
+
+            TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF");
+            if (!font) font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF 2");
+            if (font) text.font = font;
+
+            lockIconText = text;
         }
 
         private void CacheDefaults()

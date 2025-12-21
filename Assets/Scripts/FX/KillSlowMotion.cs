@@ -9,6 +9,7 @@ namespace FF
     {
         private static KillSlowMotion _instance;
         public static KillSlowMotion Instance => _instance;
+        public static event System.Action OnBulletTimeTriggered;
 
         // Required by PauseMenuController
         public bool IsActive => _slowmoRoutine != null;
@@ -118,6 +119,7 @@ namespace FF
             PlaySlowmoStartFx();
             _slowmoRoutine = StartCoroutine(SlowmoRoutine(scale, duration));
             PlayBanner(message);
+            OnBulletTimeTriggered?.Invoke();
         }
 
         private System.Collections.IEnumerator SlowmoRoutine(float scale, float duration)
