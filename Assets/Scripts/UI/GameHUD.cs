@@ -282,6 +282,7 @@ namespace FF
                 gameManager.OnWaveStarted += HandleWaveStarted;
             }
             if (playerHealth != null) playerHealth.OnHealthChanged += HandleHealthChanged;
+            if (playerHealth != null) playerHealth.OnDamaged += HandlePlayerDamaged;
             if (wallet != null) wallet.OnXPChanged += HandleXPChanged;
 
             // FIX: Ensure we are bound to the correct manager on enable//
@@ -305,6 +306,7 @@ namespace FF
                 gameManager.OnWaveStarted -= HandleWaveStarted;
             }
             if (playerHealth != null) playerHealth.OnHealthChanged -= HandleHealthChanged;
+            if (playerHealth != null) playerHealth.OnDamaged -= HandlePlayerDamaged;
             if (wallet != null) wallet.OnXPChanged -= HandleXPChanged;
 
             if (upgradeManager != null) upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
@@ -314,6 +316,12 @@ namespace FF
 
         private void HandlePlayerReady(PlayerController player)
         {
+            if (playerHealth != null)
+            {
+                playerHealth.OnHealthChanged -= HandleHealthChanged;
+                playerHealth.OnDamaged -= HandlePlayerDamaged;
+            }
+
             var playerObject = player.gameObject;
 
             playerHealth = playerObject.GetComponent<Health>();
@@ -321,7 +329,10 @@ namespace FF
             weaponManager = playerObject.GetComponentInChildren<WeaponManager>();
 
             if (playerHealth != null)
+            {
                 playerHealth.OnHealthChanged += HandleHealthChanged;
+                playerHealth.OnDamaged += HandlePlayerDamaged;
+            }
 
             if (wallet != null)
             {
@@ -655,6 +666,11 @@ namespace FF
                 lowHealthHeartbeatTimer = lowHealthHeartbeatDuration;
                 SetHeartbeatActive(true);
             }
+        }
+
+        void HandlePlayerDamaged(int _)
+        {
+            TriggerWaveFlash();
         }
 
         void HandleXPChanged(int level, int current, int next)
