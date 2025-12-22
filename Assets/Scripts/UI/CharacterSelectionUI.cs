@@ -15,7 +15,7 @@ namespace FF
         [SerializeField] private TMP_Text descriptionText;
         [SerializeField] private TMP_Text abilityText;
         [SerializeField] private Image portraitImage;
-        [SerializeField] private TMP_Text lockIconText;
+        [SerializeField] private GameObject lockIconText;
         [SerializeField] private string lockedNameSuffix = " - Locked";
         [SerializeField] private string requirementsHeader = "Unlock Requirements:";
 
@@ -194,10 +194,10 @@ namespace FF
                 portraitImage.enabled = character != null && character.Portrait != null;
                 portraitImage.sprite = character != null ? character.Portrait : null;
             }
-            EnsureLockIcon();
+
             if (lockIconText)
             {
-                lockIconText.enabled = !isUnlocked;
+                lockIconText.SetActive(!isUnlocked);
             }
 
             HatDefinition hat = ResolveHatSelection(character);
@@ -428,34 +428,6 @@ namespace FF
             {
                 levelBar.Show(character);
             }
-        }
-
-        private void EnsureLockIcon()
-        {
-            if (lockIconText || !portraitImage)
-            {
-                return;
-            }
-
-            GameObject lockObject = new("LockIcon", typeof(RectTransform), typeof(TextMeshProUGUI));
-            lockObject.transform.SetParent(portraitImage.transform, false);
-            RectTransform rect = lockObject.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 0.5f);
-            rect.anchorMax = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = Vector2.zero;
-            rect.sizeDelta = new Vector2(100f, 100f);
-
-            TextMeshProUGUI text = lockObject.GetComponent<TextMeshProUGUI>();
-            text.text = "\ud83d\udd12";
-            text.fontSize = 72f;
-            text.alignment = TextAlignmentOptions.Center;
-            text.raycastTarget = false;
-
-            TMP_FontAsset font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF");
-            if (!font) font = Resources.Load<TMP_FontAsset>("Vanilla Caramel SDF 2");
-            if (font) text.font = font;
-
-            lockIconText = text;
         }
 
         private void CacheDefaults()
