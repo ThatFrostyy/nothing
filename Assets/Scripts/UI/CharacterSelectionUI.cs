@@ -185,10 +185,10 @@ namespace FF
             CharacterDefinition character = availableCharacters[_index];
             bool isUnlocked = CharacterUnlockProgress.IsUnlocked(character);
             if (nameText) nameText.text = character != null ? GetDisplayName(character, isUnlocked) : "Unknown";
-            if (descriptionText) descriptionText.text = character != null ? character.Description : string.Empty;
-            if (abilityText) abilityText.text = character != null
-                ? isUnlocked ? GetAbilityLabel(character.AbilityId) : GetUnlockRequirementsLabel(character)
+            if (descriptionText) descriptionText.text = character != null
+                ? isUnlocked ? character.Description : GetUnlockRequirementsLabel(character)
                 : string.Empty;
+            if (abilityText) abilityText.text = character != null ? GetAbilityLabel(character.AbilityId) : string.Empty;
             if (portraitImage)
             {
                 portraitImage.enabled = character != null && character.Portrait != null;

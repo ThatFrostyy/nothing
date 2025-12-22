@@ -81,6 +81,8 @@ namespace FF
                     return $"Reach wave {requirement.Target}";
                 case CharacterUnlockRequirementType.ReachWaveWithCharacter:
                     return $"Reach wave {requirement.Target} with {GetCharacterName(requirement.RequiredCharacter)}";
+                case CharacterUnlockRequirementType.UnlockCharacter:
+                    return $"Unlock {GetCharacterName(requirement.RequiredCharacter)}";
                 case CharacterUnlockRequirementType.TotalKills:
                     return $"Kill {requirement.Target} enemies";
                 case CharacterUnlockRequirementType.WeaponKills:
@@ -263,6 +265,8 @@ namespace FF
                     return _data.HighestWave;
                 case CharacterUnlockRequirementType.ReachWaveWithCharacter:
                     return GetCharacterWaveBest(requirement.RequiredCharacter);
+                case CharacterUnlockRequirementType.UnlockCharacter:
+                    return requirement.RequiredCharacter && IsUnlocked(requirement.RequiredCharacter) ? 1 : 0;
                 case CharacterUnlockRequirementType.TotalKills:
                     return _data.TotalKills;
                 case CharacterUnlockRequirementType.WeaponKills:

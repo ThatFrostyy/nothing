@@ -8,6 +8,7 @@ namespace FF
         StartRun,
         ReachWave,
         ReachWaveWithCharacter,
+        UnlockCharacter,
         TotalKills,
         WeaponKills,
         NoDamageDuration,
