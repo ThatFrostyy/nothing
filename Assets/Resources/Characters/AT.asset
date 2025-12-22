@@ -10,22 +10,36 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6c0bba61e46a472ab37464ca4987f4d4, type: 3}
-  m_Name: Airborne
+  m_Name: AT
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
-  ProgressionId: Airborne
-  DisplayName: US Airman
-  Description: Equipped with a M1 Garand and a automatic M2 Carbine. Bold and aggressive,
-    can deal incredible bonus damage.
-  AbilityId: sharpshooter
-  Portrait: {fileID: 21300000, guid: 957aedc587fd19a49a0689cbfaa3aeb9, type: 3}
-  PlayerSprite: {fileID: 21300000, guid: 957aedc587fd19a49a0689cbfaa3aeb9, type: 3}
-  DefaultHat: {fileID: 11400000, guid: b0c38d26c188c6747b10d403bd016f61, type: 2}
+  ProgressionId: AT
+  DisplayName: US Ant-Tank
+  Description: 'Armed with an M1 Garand and a destuctive M1A1 Bazooka. '
+  AbilityId: at
+  Portrait: {fileID: 21300000, guid: f4665a62fa15fda4281849979c1808f8, type: 3}
+  PlayerSprite: {fileID: 21300000, guid: f4665a62fa15fda4281849979c1808f8, type: 3}
+  DefaultHat: {fileID: 11400000, guid: 832ee9d81913c4e4a931ac0ac6b6cabf, type: 2}
   AvailableHats:
-  - {fileID: 11400000, guid: b0c38d26c188c6747b10d403bd016f61, type: 2}
+  - {fileID: 11400000, guid: 832ee9d81913c4e4a931ac0ac6b6cabf, type: 2}
   StartingWeapon: {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
   WeaponIconOverride: {fileID: 0}
-  SpecialWeapon: {fileID: 11400000, guid: f4d505e767021a940b03b61c5b3c7431, type: 2}
-  UnlockRequirements: []
+  SpecialWeapon: {fileID: 11400000, guid: 35d6b0498af5bc343a8912126c34eee6, type: 2}
+  UnlockRequirements:
+  - Type: 4
+    Target: 100
+    RequiredCharacter: {fileID: 0}
+    RequiredWeapon: {fileID: 11400000, guid: 1d694cc740c04310a81cae732b2c2b3c, type: 2}
+    DescriptionOverride: 
+  - Type: 2
+    Target: 20
+    RequiredCharacter: {fileID: 11400000, guid: 2a8929ff60f8de8489580f6f4ffd153b, type: 2}
+    RequiredWeapon: {fileID: 0}
+    DescriptionOverride: 
+  - Type: 5
+    Target: 120
+    RequiredCharacter: {fileID: 0}
+    RequiredWeapon: {fileID: 0}
+    DescriptionOverride: 
   Progression:
     baseXPRequirement: 500
     xpGrowthPerLevel: 10
@@ -122,50 +136,50 @@ MonoBehaviour:
     minimumWaveForRewards: 5
     levels:
     - XPOverride: 0
+      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
+      Description: +4% max health.
+      Rewards:
+      - Type: 4
+        Percent: 4
+    - XPOverride: 0
       Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +6% orb pickup speed.
+      Description: +5% orb pickup speed.
       Rewards:
       - Type: 0
-        Percent: 6
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
-      Description: +4% movement speed.
-      Rewards:
-      - Type: 2
-        Percent: 4
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
-      Description: +4% attack damage.
-      Rewards:
-      - Type: 3
-        Percent: 4
+        Percent: 5
     - XPOverride: 0
       Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +6% orb pickup radius.
+      Description: +3% orb pickup radius.
       Rewards:
       - Type: 1
-        Percent: 6
+        Percent: 3
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
-      Description: +10% movement speed.
+      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
+      Description: +5% max health.
       Rewards:
-      - Type: 2
-        Percent: 10
+      - Type: 4
+        Percent: 5
     - XPOverride: 0
       Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
-      Description: +4% attack damage.
+      Description: +3% attack damage.
       Rewards:
       - Type: 3
-        Percent: 4
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +7% orb pickup speed.
-      Rewards:
-      - Type: 0
-        Percent: 7
+        Percent: 3
     - XPOverride: 0
       Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
-      Description: +4% movement speed.
+      Description: +3% move speed.
       Rewards:
       - Type: 2
-        Percent: 4
+        Percent: 3
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
+      Description: +5% orb pickup speed.
+      Rewards:
+      - Type: 0
+        Percent: 5
+    - XPOverride: 0
+      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
+      Description: +6% max hp.
+      Rewards:
+      - Type: 4
+        Percent: 6
