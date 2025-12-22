@@ -25,17 +25,17 @@ MonoBehaviour:
   WeaponIconOverride: {fileID: 0}
   SpecialWeapon: {fileID: 11400000, guid: 35d6b0498af5bc343a8912126c34eee6, type: 2}
   UnlockRequirements:
-  - Type: 4
+  - Type: 5
     Target: 100
     RequiredCharacter: {fileID: 0}
     RequiredWeapon: {fileID: 11400000, guid: 1d694cc740c04310a81cae732b2c2b3c, type: 2}
     DescriptionOverride: 
   - Type: 2
-    Target: 20
+    Target: 30
     RequiredCharacter: {fileID: 11400000, guid: 2a8929ff60f8de8489580f6f4ffd153b, type: 2}
     RequiredWeapon: {fileID: 0}
     DescriptionOverride: 
-  - Type: 5
+  - Type: 6
     Target: 120
     RequiredCharacter: {fileID: 0}
     RequiredWeapon: {fileID: 0}

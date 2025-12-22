@@ -76,7 +76,7 @@ namespace FF
             switch (requirement.Type)
             {
                 case CharacterUnlockRequirementType.StartRun:
-                    return "Start a run";
+                    return $"Start {requirement.Target} runs";
                 case CharacterUnlockRequirementType.ReachWave:
                     return $"Reach wave {requirement.Target}";
                 case CharacterUnlockRequirementType.ReachWaveWithCharacter:
@@ -90,7 +90,7 @@ namespace FF
                 case CharacterUnlockRequirementType.NoDamageDuration:
                     return $"Survive without taking damage for {FormatMinutes(requirement.Target)}";
                 case CharacterUnlockRequirementType.BulletTimeMoments:
-                    return $"Enter {requirement.Target} bullet time moments";
+                    return $"Enter {requirement.Target} frenzy moments";
                 default:
                     return "Complete requirement";
             }

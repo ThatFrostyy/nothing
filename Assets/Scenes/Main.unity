@@ -640,6 +640,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ef002ff5cecb8d04d9171f9e7c4650c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CursorFollowUI
+  hideOutsideGameplay: 1
+  fallbackGameplaySceneName: Main
+  fallbackMenuSceneName: MainMenu
 --- !u!114 &178005930
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2628,6 +2631,7 @@ MonoBehaviour:
   settingsRoot: {fileID: 0}
   musicSettingsUI: {fileID: 0}
   keybindSettingsUI: {fileID: 0}
+  videoSettingsUI: {fileID: 0}
   sceneFlow: {fileID: 0}
   deathClip: {fileID: 8300000, guid: 01a717beb0477de48aab9c0ed9bc0552, type: 3}
   deathEffectPrefab: {fileID: 1676495797548180, guid: 895cc39f3dc06f34ab516479c288946c, type: 3}

@@ -270,12 +270,11 @@ namespace FF
             }
 
             StringBuilder builder = new();
-            builder.AppendLine(requirementsHeader);
             for (int i = 0; i < statuses.Count; i++)
             {
                 CharacterUnlockRequirementStatus status = statuses[i];
                 string description = CharacterUnlockProgress.GetRequirementDescription(status.Requirement);
-                string state = status.IsCompleted ? "Completed" : "In Progress";
+                string state = status.IsCompleted ? "<b>Completed</b>" : "<b>In Progress</b>";
                 builder.AppendLine($"{description} - {state}");
             }
 

@@ -154,7 +154,7 @@ namespace FF
 
             if (SteamUserStats.GetStat(KillStatName, out int kills))
             {
-                Debug.Log($"[Steam] Received total kills: {kills}");
+                Debug.Log($"[Steam] MEnu Received total kills: {kills}");
                 UpdateKillsText(kills);
             }
             else
