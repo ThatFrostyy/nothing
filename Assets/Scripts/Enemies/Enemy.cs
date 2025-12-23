@@ -123,6 +123,7 @@ namespace FF
         private GameObject _activeBurningVfx;
         private GameObject _burningVfxPrefab;
         private Vector3 _burningVfxOffset = Vector3.zero;
+        private float _stunTimer;
 
         private static readonly System.Collections.Generic.HashSet<Enemy> activeBosses = new();
 
@@ -353,6 +354,16 @@ namespace FF
             EnsurePlayerReference();
             AimAtPlayer();
             float deltaTime = Time.deltaTime;
+            if (_stunTimer > 0f)
+            {
+                _stunTimer = Mathf.Max(0f, _stunTimer - deltaTime);
+                if (autoShooter)
+                {
+                    autoShooter.SetFireHeld(false);
+                }
+                UpdateBurning(deltaTime);
+                return;
+            }
             if (_attackBehaviour != null)
             {
                 _attackBehaviour.TickAttack(this, _player, _stats, autoShooter, deltaTime);
@@ -382,6 +393,12 @@ namespace FF
                 knockbackTimer -= Time.fixedDeltaTime;
                 _rigidbody.linearVelocity = knockbackVelocity;
                 return;  
+            }
+
+            if (_stunTimer > 0f)
+            {
+                _rigidbody.linearVelocity = Vector2.zero;
+                return;
             }
 
             UpdateMovement();
@@ -420,6 +437,7 @@ namespace FF
 
             _dogAttackCooldownTimer = 0f;
             _dogAttackOffset = Vector3.zero;
+            _stunTimer = 0f;
         }
 
         private void OnDisable()
@@ -795,6 +813,16 @@ namespace FF
         {
             knockbackTimer = duration;
             knockbackVelocity = force;
+        }
+
+        public void ApplyStun(float duration)
+        {
+            if (duration <= 0f)
+            {
+                return;
+            }
+
+            _stunTimer = Mathf.Max(_stunTimer, duration);
         }
 
         #endregion Movement

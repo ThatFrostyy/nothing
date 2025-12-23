@@ -256,6 +256,8 @@ namespace FF
                     return "Ability: Suppression (slows nearby enemies)";
                 case "sharpshooter":
                     return "Ability: Sharpshooter (bonus crits)";
+                case "at":
+                    return "Ability: Shockwave (explosive stun)";
                 default:
                     return $"Ability: {abilityId}";
             }
