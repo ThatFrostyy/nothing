@@ -51,12 +51,20 @@ namespace FF
         private float _audioVolume = 1f;
         private float _audioPitch = 1f;
         private Weapon _sourceWeapon;
+        private bool _shockwaveEnabled;
+        private float _shockwaveStunDuration;
+        private float _shockwaveForce;
+        private float _shockwaveKnockbackDuration;
+        private Color _shockwaveTextColor;
+        private float _shockwaveTextScale;
+        private Transform _shockwaveSource;
         private bool _isArmed;
         private float _currentSpeed;
         private float _activeSlowdown;
         private Vector2 _movementDirection;
         private float _baseLaunchSpeed;
         private AudioSource _flightLoopSource;
+        private readonly System.Collections.Generic.List<Enemy> _shockwaveTargets = new();
 
         public int BaseDamage => baseDamage;
 
@@ -124,6 +132,23 @@ namespace FF
             }
 
             StartFlightLoop();
+        }
+
+        public void ConfigureShockwave(
+            Transform source,
+            float stunDuration,
+            float force,
+            float knockbackDuration,
+            Color textColor,
+            float textScale)
+        {
+            _shockwaveEnabled = stunDuration > 0f || force > 0f;
+            _shockwaveSource = source;
+            _shockwaveStunDuration = Mathf.Max(0f, stunDuration);
+            _shockwaveForce = Mathf.Max(0f, force);
+            _shockwaveKnockbackDuration = Mathf.Max(0f, knockbackDuration);
+            _shockwaveTextColor = textColor;
+            _shockwaveTextScale = textScale;
         }
 
         private void Update()
@@ -292,6 +317,7 @@ namespace FF
             }
 
             ApplyExplosionDamage(position);
+            ApplyShockwaveEffects(position);
             ShockwaveUI.Trigger(position, Mathf.Clamp(explosionRadius / 4f, 0.35f, 1.5f));
 
             float shakeScale = Mathf.InverseLerp(1.5f, 4f, explosionRadius);
@@ -366,6 +392,58 @@ namespace FF
             }
         }
 
+        private void ApplyShockwaveEffects(Vector2 center)
+        {
+            if (!_shockwaveEnabled || explosionRadius <= 0f)
+            {
+                return;
+            }
+
+            int hits = Physics2D.OverlapCircleNonAlloc(center, explosionRadius, OverlapBuffer, damageLayers);
+            if (hits <= 0)
+            {
+                return;
+            }
+
+            _shockwaveTargets.Clear();
+            Vector2 sourcePosition = _shockwaveSource ? (Vector2)_shockwaveSource.position : center;
+
+            for (int i = 0; i < hits; i++)
+            {
+                Collider2D hit = OverlapBuffer[i];
+                if (!hit)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(_ownerTag) && hit.CompareTag(_ownerTag))
+                {
+                    continue;
+                }
+
+                Enemy enemy = hit.GetComponentInParent<Enemy>();
+                if (!enemy || _shockwaveTargets.Contains(enemy))
+                {
+                    continue;
+                }
+
+                _shockwaveTargets.Add(enemy);
+                enemy.ApplyStun(_shockwaveStunDuration);
+                DamageNumberManager.ShowText(enemy.transform.position, "Stunned", _shockwaveTextColor, _shockwaveTextScale);
+
+                Vector2 direction = (Vector2)enemy.transform.position - sourcePosition;
+                if (direction.sqrMagnitude <= Mathf.Epsilon)
+                {
+                    direction = Random.insideUnitCircle;
+                }
+
+                if (_shockwaveForce > 0f)
+                {
+                    enemy.ApplyKnockback(direction.normalized * _shockwaveForce, _shockwaveKnockbackDuration);
+                }
+            }
+        }
+
         public void OnTakenFromPool()
         {
             _fuseTimer = fuseDuration;
@@ -376,6 +454,14 @@ namespace FF
             _currentSpeed = 0f;
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
+            _shockwaveEnabled = false;
+            _shockwaveStunDuration = 0f;
+            _shockwaveForce = 0f;
+            _shockwaveKnockbackDuration = 0f;
+            _shockwaveTextColor = default;
+            _shockwaveTextScale = 0f;
+            _shockwaveSource = null;
+            _shockwaveTargets.Clear();
             StopFlightLoop();
             if (_body)
             {
@@ -397,6 +483,14 @@ namespace FF
             _movementDirection = Vector2.zero;
             _activeSlowdown = 0f;
             _sourceWeapon = null;
+            _shockwaveEnabled = false;
+            _shockwaveStunDuration = 0f;
+            _shockwaveForce = 0f;
+            _shockwaveKnockbackDuration = 0f;
+            _shockwaveTextColor = default;
+            _shockwaveTextScale = 0f;
+            _shockwaveSource = null;
+            _shockwaveTargets.Clear();
             StopFlightLoop();
             if (_body)
             {
