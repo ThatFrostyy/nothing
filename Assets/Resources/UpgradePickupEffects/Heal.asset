@@ -18,3 +18,4 @@ MonoBehaviour:
   Duration: 0
   PickupSound: {fileID: 8300000, guid: ed4e13bee49028c45b83fd218b1b1935, type: 3}
   Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
+  FloatingText: <color=#62BE50>+30 health.

@@ -5100,6 +5100,63 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!1001 &831720616
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5.466696
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.61104256
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5418840439375942701, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
+      propertyPath: m_Name
+      value: FG42Pickup
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
 --- !u!1 &875406328
 GameObject:
   m_ObjectHideFlags: 0
@@ -6806,6 +6863,7 @@ GameObject:
   - component: {fileID: 1207903165}
   - component: {fileID: 1207903166}
   - component: {fileID: 1207903167}
+  - component: {fileID: 1207903168}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -6935,6 +6993,7 @@ MonoBehaviour:
   _weaponManager: {fileID: 1207903161}
   _startingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
   _abilityController: {fileID: 0}
+  _combatEffectController: {fileID: 1207903168}
   _showAimingLine: 1
   _aimLineLength: 2.5
   _aimLineDashLength: 0.2
@@ -7324,6 +7383,44 @@ MonoBehaviour:
   suppressionTextScale: 0.5
   sharpshooterCritBonus: 0.35
   sharpshooterCritDamageMult: 1.5
+--- !u!114 &1207903168
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1207903151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab61f13f420c54f4eb9ff1bcf51272a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.PlayerCombatEffectController
+  weaponManager: {fileID: 1207903161}
+  playerShooter: {fileID: 1207903154}
+  playerStats: {fileID: 1207903155}
+  playerHealth: {fileID: 1207903153}
+  synergyMinInterval: 4
+  synergyMaxInterval: 8
+  synergyFireRateMultiplier: 1.1
+  synergyFireRateDuration: 4
+  synergyDamageResistanceMultiplier: 0.75
+  synergyDamageResistanceDuration: 2
+  synergyOrbVacuumDuration: 1
+  synergyOrbVacuumRadiusMultiplier: 4
+  synergyOrbVacuumSpeedMultiplier: 4
+  synergyTextColor: {r: 0.45, g: 1, b: 0.6, a: 1}
+  synergyTextScale: 0.5
+  synergyFireRateText: 'Synergy: +10% Fire Rate'
+  synergyDamageResistText: 'Synergy: Damage Resistance'
+  synergyOrbVacuumText: 'Synergy: Orb Vacuum'
+  mgSuppressionRadius: 6
+  mgSuppressionThreshold: 10
+  mgSuppressionDecay: 12
+  mgSuppressionMoveSpeedMultiplier: 0.7
+  mgSuppressionFireRateMultiplier: 0.8
+  mgSuppressionDuration: 2.5
+  mgSuppressionTextColor: {r: 1, g: 0.24313726, b: 0, a: 1}
+  mgSuppressionTextScale: 0.5
 --- !u!1 &1262527578
 GameObject:
   m_ObjectHideFlags: 0
@@ -12127,3 +12224,4 @@ SceneRoots:
   - {fileID: 1756355925}
   - {fileID: 497791597}
   - {fileID: 483938635}
+  - {fileID: 831720616}

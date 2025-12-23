@@ -91,7 +91,14 @@ namespace FF
 
         private void UpdateSecondaryUsageState(bool forceReset)
         {
-            bool isSecondary = weaponManager && weaponManager.CurrentWeapon && weaponManager.CurrentWeapon.isSpecial;
+            // NOTE: Synergy should trigger when the player is using the secondary *primary* slot (slot index 1),
+            // not when a special slot weapon (isSpecial) is equipped. Use the weapon manager's current slot index.
+            bool isSecondary = false;
+            if (weaponManager != null && weaponManager.CurrentWeapon != null)
+            {
+                isSecondary = weaponManager.CurrentSlotIndex == 1;
+            }
+
             if (forceReset || isSecondary != _usingSecondary)
             {
                 _usingSecondary = isSecondary;
