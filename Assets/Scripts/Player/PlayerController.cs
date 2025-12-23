@@ -20,6 +20,7 @@ namespace FF
         [SerializeField] private WeaponManager _weaponManager;
         [SerializeField] private Weapon _startingWeapon;
         [SerializeField] private CharacterAbilityController _abilityController;
+        [SerializeField] private PlayerCombatEffectController _combatEffectController;
 
         [Header("Aiming Line")]
         [SerializeField] private bool _showAimingLine = true;
@@ -69,6 +70,12 @@ namespace FF
             if (!_abilityController)
             {
                 _abilityController = gameObject.AddComponent<CharacterAbilityController>();
+            }
+
+            _combatEffectController = _combatEffectController ? _combatEffectController : GetComponent<PlayerCombatEffectController>();
+            if (!_combatEffectController)
+            {
+                _combatEffectController = gameObject.AddComponent<PlayerCombatEffectController>();
             }
 
             if (!_cosmetics && _playerVisual)

@@ -11,6 +11,7 @@ namespace FF
         int hp;
         int baseMaxHP;
         Weapon lastDamageSourceWeapon;
+        readonly System.Collections.Generic.List<TimedDamageModifier> _damageModifiers = new();
 
         public System.Action<int> OnDamaged;
         public System.Action OnDeath;
@@ -33,15 +34,21 @@ namespace FF
         {
             if (amount <= 0) return;
 
+            int adjustedAmount = ApplyDamageModifiers(amount);
+            if (adjustedAmount <= 0)
+            {
+                return;
+            }
+
             int previousHp = hp;
-            hp = Mathf.Max(0, hp - amount);
+            hp = Mathf.Max(0, hp - adjustedAmount);
 
             if (sourceWeapon)
             {
                 lastDamageSourceWeapon = sourceWeapon;
             }
 
-            int damageApplied = Mathf.Min(amount, previousHp);
+            int damageApplied = Mathf.Min(adjustedAmount, previousHp);
             if (damageApplied > 0)
             {
                 OnDamaged?.Invoke(damageApplied);
@@ -51,7 +58,7 @@ namespace FF
                 if (TryGetComponent<Enemy>(out var enemy))
                 {
                     bool emphasize = isCritical || enemy.IsBoss || damageApplied >= Mathf.Max(10, maxHP * 0.35f);
-                    DamageNumberManager.ShowDamage(transform.position, amount, emphasize);
+                    DamageNumberManager.ShowDamage(transform.position, adjustedAmount, emphasize);
                 }
             }
 
@@ -78,6 +85,17 @@ namespace FF
             }
         }
 
+        public void ApplyTemporaryDamageMultiplier(float multiplier, float duration)
+        {
+            if (multiplier <= 0f)
+            {
+                return;
+            }
+
+            float expiry = duration > 0f ? Time.time + duration : float.PositiveInfinity;
+            _damageModifiers.Add(new TimedDamageModifier(multiplier, expiry));
+        }
+
         private void Die()
         {
             OnDeath?.Invoke();
@@ -89,6 +107,68 @@ namespace FF
             else
             {
                 Destroy(gameObject);
+            }
+        }
+
+        private void Update()
+        {
+            UpdateDamageModifiers();
+        }
+
+        private void UpdateDamageModifiers()
+        {
+            if (_damageModifiers.Count == 0)
+            {
+                return;
+            }
+
+            float now = Time.time;
+            for (int i = _damageModifiers.Count - 1; i >= 0; i--)
+            {
+                if (_damageModifiers[i].Expiry <= now)
+                {
+                    _damageModifiers.RemoveAt(i);
+                }
+            }
+        }
+
+        private float GetDamageMultiplier()
+        {
+            if (_damageModifiers.Count == 0)
+            {
+                return 1f;
+            }
+
+            float value = 1f;
+            for (int i = 0; i < _damageModifiers.Count; i++)
+            {
+                value *= _damageModifiers[i].Multiplier;
+            }
+
+            return value;
+        }
+
+        private int ApplyDamageModifiers(int amount)
+        {
+            float multiplier = GetDamageMultiplier();
+            if (Mathf.Approximately(multiplier, 1f))
+            {
+                return amount;
+            }
+
+            int adjusted = Mathf.RoundToInt(amount * multiplier);
+            return Mathf.Max(0, adjusted);
+        }
+
+        private readonly struct TimedDamageModifier
+        {
+            public readonly float Multiplier;
+            public readonly float Expiry;
+
+            public TimedDamageModifier(float multiplier, float expiry)
+            {
+                Multiplier = multiplier;
+                Expiry = expiry;
             }
         }
 
@@ -144,6 +224,7 @@ namespace FF
             }
 
             lastDamageSourceWeapon = null;
+            _damageModifiers.Clear();
 
             if (refill)
             {
