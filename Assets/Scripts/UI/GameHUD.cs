@@ -66,6 +66,7 @@ namespace FF
         [Header("Wave Effects")]
         [SerializeField] private Image waveFlashImage;
         [SerializeField] private Color waveFlashColor = new(1f, 0f, 0f, 0.45f);
+        [SerializeField] private Color hitFlashColor = new(1f, 0f, 0f, 0.15f);
         [SerializeField, Min(0f)] private float waveFlashDuration = 0.6f;
         [SerializeField] private AnimationCurve waveFlashAlphaCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
         [SerializeField] private AudioClip waveMilestoneClip;
@@ -115,6 +116,7 @@ namespace FF
         private float waveBannerTimer;
         private float waveFlashElapsed = float.PositiveInfinity;
         private float waveFlashBaseAlpha = 1f;
+        private Color activeWaveFlashColor;
 
         private Coroutine upgradePromptFadeRoutine;
         private float upgradePromptTimer = 0f;
@@ -670,7 +672,7 @@ namespace FF
 
         void HandlePlayerDamaged(int _)
         {
-            TriggerWaveFlash();
+            TriggerHitFlash();
         }
 
         void HandleXPChanged(int level, int current, int next)
@@ -1229,18 +1231,31 @@ namespace FF
 
         void InitializeWaveFlash()
         {
-            waveFlashBaseAlpha = Mathf.Clamp01(waveFlashColor.a);
+            activeWaveFlashColor = waveFlashColor;
+            waveFlashBaseAlpha = Mathf.Clamp01(activeWaveFlashColor.a);
             waveFlashElapsed = float.PositiveInfinity;
             SetWaveFlashAlpha(0f);
         }
 
         void TriggerWaveFlash()
         {
+            TriggerFlash(waveFlashColor);
+        }
+
+        void TriggerHitFlash()
+        {
+            TriggerFlash(hitFlashColor);
+        }
+
+        void TriggerFlash(Color flashColor)
+        {
             if (!waveFlashImage || waveFlashDuration <= 0f)
             {
                 return;
             }
 
+            activeWaveFlashColor = flashColor;
+            waveFlashBaseAlpha = Mathf.Clamp01(activeWaveFlashColor.a);
             waveFlashElapsed = 0f;
             SetWaveFlashAlpha(EvaluateWaveFlashAlpha(0f));
         }
@@ -1285,7 +1300,7 @@ namespace FF
             }
 
             float alpha = Mathf.Clamp01(normalizedAlpha) * waveFlashBaseAlpha;
-            Color color = waveFlashColor;
+            Color color = activeWaveFlashColor;
             color.a = alpha;
             waveFlashImage.color = color;
         }
@@ -1538,7 +1553,8 @@ namespace FF
             waveFlashDuration = Mathf.Max(0f, waveFlashDuration);
             waveMilestoneInterval = Mathf.Max(1, waveMilestoneInterval);
             waveMilestoneStartingWave = Mathf.Max(1, waveMilestoneStartingWave);
-            waveFlashBaseAlpha = Mathf.Clamp01(waveFlashColor.a);
+            activeWaveFlashColor = waveFlashColor;
+            waveFlashBaseAlpha = Mathf.Clamp01(activeWaveFlashColor.a);
             waveFlashElapsed = float.PositiveInfinity;
             if (waveFlashImage)
             {

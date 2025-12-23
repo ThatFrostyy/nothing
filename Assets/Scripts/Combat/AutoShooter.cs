@@ -45,6 +45,7 @@ namespace FF
         private float _currentSpread;
         private float _currentRecoil;
         private Vector3 _baseLocalPosition;
+        private bool _hasBaseLocalPosition;
         private Transform _gunPivot;
         private float _flamethrowerHeat;
         private bool _flamethrowerOverheated;
@@ -80,6 +81,14 @@ namespace FF
         public void InitializeRecoil(Transform gunPivotTransform)
         {
             _gunPivot = gunPivotTransform;
+            if (_gunPivot)
+            {
+                _baseLocalPosition = _gunPivot.localPosition;
+                _hasBaseLocalPosition = true;
+                _currentRecoil = 0f;
+                _recoilTimer = 0f;
+                _gunPivot.localPosition = _baseLocalPosition;
+            }
         }
 
         public void SetWeapon(Weapon weapon, Transform muzzleTransform, Transform eject)
@@ -102,7 +111,12 @@ namespace FF
 
             if (_gunPivot)
             {
-                _baseLocalPosition = _gunPivot.localPosition;
+                if (!_hasBaseLocalPosition)
+                {
+                    _baseLocalPosition = _gunPivot.localPosition;
+                    _hasBaseLocalPosition = true;
+                }
+
                 _currentRecoil = 0f;
                 _recoilTimer = 0f;
                 _gunPivot.localPosition = _baseLocalPosition;

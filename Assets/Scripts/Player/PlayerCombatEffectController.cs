@@ -39,6 +39,8 @@ namespace FF
 
         private bool _usingSecondary;
         private float _nextSynergyTime;
+        private bool _slot0UsedSinceSynergy;
+        private bool _slot1UsedSinceSynergy;
         private float _suppressionMeter;
         private float _suppressedUntil;
         private Coroutine _orbVacuumRoutine;
@@ -99,6 +101,11 @@ namespace FF
                 isSecondary = weaponManager.CurrentSlotIndex == 1;
             }
 
+            if (forceReset)
+            {
+                ResetSynergyUsage();
+            }
+
             if (forceReset || isSecondary != _usingSecondary)
             {
                 _usingSecondary = isSecondary;
@@ -119,6 +126,20 @@ namespace FF
         private void HandleWeaponEquipped(Weapon weapon)
         {
             UpdateSecondaryUsageState(false);
+
+            if (weaponManager == null)
+            {
+                return;
+            }
+
+            if (weaponManager.CurrentSlotIndex == 0)
+            {
+                _slot0UsedSinceSynergy = false;
+            }
+            else if (weaponManager.CurrentSlotIndex == 1)
+            {
+                _slot1UsedSinceSynergy = false;
+            }
         }
 
         private void HandleRoundsFired(AutoShooter shooter, int count)
@@ -130,6 +151,7 @@ namespace FF
 
             if (shooter == playerShooter)
             {
+                RecordPrimarySlotUsage();
                 TryTriggerSynergy();
                 return;
             }
@@ -144,8 +166,47 @@ namespace FF
                 return;
             }
 
+            if (!HasSynergyLoadout() || !_slot0UsedSinceSynergy || !_slot1UsedSinceSynergy)
+            {
+                return;
+            }
+
             TriggerSynergyEffect();
             ScheduleNextSynergy();
+            ResetSynergyUsage();
+        }
+
+        private void RecordPrimarySlotUsage()
+        {
+            if (weaponManager == null || weaponManager.CurrentWeapon == null)
+            {
+                return;
+            }
+
+            if (weaponManager.CurrentSlotIndex == 0)
+            {
+                _slot0UsedSinceSynergy = true;
+            }
+            else if (weaponManager.CurrentSlotIndex == 1)
+            {
+                _slot1UsedSinceSynergy = true;
+            }
+        }
+
+        private bool HasSynergyLoadout()
+        {
+            if (weaponManager == null)
+            {
+                return false;
+            }
+
+            return weaponManager.GetWeaponInSlot(0) != null && weaponManager.GetWeaponInSlot(1) != null;
+        }
+
+        private void ResetSynergyUsage()
+        {
+            _slot0UsedSinceSynergy = false;
+            _slot1UsedSinceSynergy = false;
         }
 
         private void TriggerSynergyEffect()
