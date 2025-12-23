@@ -62,6 +62,7 @@ namespace FF
 
         public float CooldownProgress => _currentCooldownProgress;
         public float GrenadeChargeProgress => _currentChargeProgress;
+        public Weapon CurrentWeapon => _weapon;
 
         #region Initialization
         private void Awake()

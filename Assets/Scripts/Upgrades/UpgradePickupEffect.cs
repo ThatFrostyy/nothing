@@ -22,5 +22,6 @@ namespace FF
         [Header("Presentation")]
         public AudioClip PickupSound;
         public Sprite Icon;
+        [TextArea] public string FloatingText;
     }
 }

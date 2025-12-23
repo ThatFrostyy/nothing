@@ -173,7 +173,23 @@ namespace FF
                     return false;
             }
 
+            ShowPickupText();
             return true;
+        }
+
+        private void ShowPickupText()
+        {
+            if (effect == null || effect.Duration <= 0f)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(effect.FloatingText))
+            {
+                return;
+            }
+
+            DamageNumberManager.ShowText(transform.position, effect.FloatingText);
         }
 
         private void AnimateIdle()
