@@ -12,7 +12,7 @@ namespace FF
     [RequireComponent(typeof(Rigidbody2D))]
     public class CharacterAbilityController : MonoBehaviour
     {
-        private enum AbilityType { None, Dash, Suppression, Sharpshooter }
+        private enum AbilityType { None, Dash, Suppression, Sharpshooter, AntiTank }
 
         [Header("General")]
         [SerializeField, Tooltip("If left empty we try to infer from the selected character.")]
@@ -37,6 +37,13 @@ namespace FF
         [Header("Sharpshooter")]
         [SerializeField, Range(0f, 1f)] private float sharpshooterCritBonus = 0.35f;
         [SerializeField, Min(1f)] private float sharpshooterCritDamageMult = 1.5f;
+
+        [Header("AT Shockwave")]
+        [SerializeField, Min(0.1f)] private float shockwaveStunDuration = 1.5f;
+        [SerializeField, Min(0f)] private float shockwaveForce = 9f;
+        [SerializeField, Min(0.05f)] private float shockwaveKnockbackDuration = 0.35f;
+        [SerializeField] private Color shockwaveTextColor = new(0.95f, 0.9f, 0.35f);
+        [SerializeField, Min(0.25f)] private float shockwaveTextScale = 0.95f;
 
         private PlayerStats _stats;
         private Rigidbody2D _rigidbody;
@@ -165,8 +172,20 @@ namespace FF
                 || id.Equals("suppresion", StringComparison.OrdinalIgnoreCase))
                 return AbilityType.Suppression;
             if (id.Equals("sharpshooter", StringComparison.OrdinalIgnoreCase)) return AbilityType.Sharpshooter;
+            if (id.Equals("at", StringComparison.OrdinalIgnoreCase)) return AbilityType.AntiTank;
 
             return AbilityType.None;
+        }
+
+        public bool TryApplyShockwave(GrenadeProjectile grenade)
+        {
+            if (_activeAbility != AbilityType.AntiTank || grenade == null)
+            {
+                return false;
+            }
+
+            grenade.ConfigureShockwave(transform, shockwaveStunDuration, shockwaveForce, shockwaveKnockbackDuration, shockwaveTextColor, shockwaveTextScale);
+            return true;
         }
 
         #region Dash
