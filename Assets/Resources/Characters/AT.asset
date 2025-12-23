@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
   ProgressionId: AT
   DisplayName: US Ant-Tank
-  Description: 'Armed with an M1 Garand and a destuctive M1A1 Bazooka. '
+  Description: 'Armed with an <b>M1 Garand</b> and a destuctive <b>M1A1 Bazooka</b>. '
   AbilityId: at
   Portrait: {fileID: 21300000, guid: f4665a62fa15fda4281849979c1808f8, type: 3}
   PlayerSprite: {fileID: 21300000, guid: f4665a62fa15fda4281849979c1808f8, type: 3}

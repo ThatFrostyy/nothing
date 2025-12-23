@@ -44,7 +44,7 @@ MonoBehaviour:
   burnTargetVfx: {fileID: 6294508013172393196, guid: 043176b6a68be2b43b073aaaa4782c7d, type: 3}
   burnImpactVfx: {fileID: 0}
   isFlamethrower: 1
-  flamethrowerRange: 6
+  flamethrowerRange: 8
   flamethrowerConeAngle: 45
   flamethrowerTickInterval: 0.1
   flamethrowerDamagePerSecond: 18

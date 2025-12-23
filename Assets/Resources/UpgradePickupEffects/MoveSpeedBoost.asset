@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Type: 2
   HealAmount: 0
-  Multiplier: 1.2
-  Duration: 12
+  Multiplier: 1.5
+  Duration: 15
   PickupSound: {fileID: 8300000, guid: ed4e13bee49028c45b83fd218b1b1935, type: 3}
   Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}

@@ -24740,7 +24740,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 488.36, y: 75.145}
+  m_AnchoredPosition: {x: 488.36, y: 62}
   m_SizeDelta: {x: 559.403, y: 297.29}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1937666109
@@ -24763,7 +24763,14 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: A very strong and resiliant character.
+  m_text: 'Kill 1000 enemies - <b>In Progress</b>
+
+    Start 15 runs - <b>In Progress</b>
+
+    Kill
+    500 enemies with Gewher 43 - <b>In Progress</b>
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 492ab391ad41b9946a67d20db57e4dfa, type: 2}
   m_sharedMaterial: {fileID: 5599663890423478549, guid: 492ab391ad41b9946a67d20db57e4dfa, type: 2}
@@ -24790,7 +24797,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
+  m_fontSize: 45.15
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -24802,7 +24809,7 @@ MonoBehaviour:
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
-  m_lineSpacing: 0
+  m_lineSpacing: 20
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
