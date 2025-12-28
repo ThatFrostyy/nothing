@@ -45,6 +45,7 @@ namespace FF
             PlayerController.OnPlayerReady += HandlePlayerReady;
             Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
             Enemy.OnAnyEnemyKilledByWeapon += HandleEnemyKilledByWeapon;
+            WeaponCrate.OnAnyBroken += HandleCrateBroken;
             KillSlowMotion.OnBulletTimeTriggered += HandleBulletTimeTriggered;
             SceneReferenceRegistry.Register(this);
         }
@@ -55,6 +56,7 @@ namespace FF
             PlayerController.OnPlayerReady -= HandlePlayerReady;
             Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
             Enemy.OnAnyEnemyKilledByWeapon -= HandleEnemyKilledByWeapon;
+            WeaponCrate.OnAnyBroken -= HandleCrateBroken;
             KillSlowMotion.OnBulletTimeTriggered -= HandleBulletTimeTriggered;
             UnhookGameManager();
             UnsubscribeHealth();
@@ -99,11 +101,24 @@ namespace FF
         private void HandleEnemyKilled(Enemy enemy)
         {
             CharacterUnlockProgress.RecordKill();
+
+            if (enemy != null && enemy.IsBoss)
+            {
+                CharacterUnlockProgress.RecordBossKill();
+            }
         }
 
         private void HandleEnemyKilledByWeapon(Enemy enemy, Weapon weapon)
         {
             CharacterUnlockProgress.RecordWeaponKill(weapon);
+        }
+
+        private void HandleCrateBroken(WeaponCrate crate)
+        {
+            if (crate != null)
+            {
+                CharacterUnlockProgress.RecordCrateDestroyed();
+            }
         }
 
         private void HandleWaveStarted(int wave)
