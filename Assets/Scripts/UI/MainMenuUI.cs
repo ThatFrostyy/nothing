@@ -58,6 +58,9 @@ namespace FF
             _userStatsReceived = Callback<UserStatsReceived_t>.Create(HandleStatsReceived);
             _leaderboardFindResult = CallResult<LeaderboardFindResult_t>.Create(HandleKillLeaderboardFound);
             _leaderboardScoresDownloaded = CallResult<LeaderboardScoresDownloaded_t>.Create(HandleLeaderboardScoresDownloaded);
+
+            // Immediately request the latest stats and leaderboard when the menu appears.
+            RefreshSteamStats();
 #endif
         }
 
