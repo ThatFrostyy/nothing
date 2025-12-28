@@ -42,6 +42,7 @@ namespace FF
         [SerializeField, Min(0.1f)] private float shockwaveStunDuration = 1.5f;
         [SerializeField, Min(0f)] private float shockwaveForce = 9f;
         [SerializeField, Min(0.05f)] private float shockwaveKnockbackDuration = 0.35f;
+        [SerializeField, Min(0.1f)] private float shockwaveRadius = 2.75f; // <--- new: explicit shockwave radius
         [SerializeField] private Color shockwaveTextColor = new(0.95f, 0.9f, 0.35f);
         [SerializeField, Min(0.25f)] private float shockwaveTextScale = 0.95f;
 
@@ -184,7 +185,14 @@ namespace FF
                 return false;
             }
 
-            grenade.ConfigureShockwave(transform, shockwaveStunDuration, shockwaveForce, shockwaveKnockbackDuration, shockwaveTextColor, shockwaveTextScale);
+            grenade.ConfigureShockwave(
+                transform,
+                shockwaveStunDuration,
+                shockwaveForce,
+                shockwaveKnockbackDuration,
+                shockwaveTextColor,
+                shockwaveTextScale,
+                shockwaveRadius); // pass explicit radius
             return true;
         }
 

@@ -24,7 +24,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 832ee9d81913c4e4a931ac0ac6b6cabf, type: 2}
   StartingWeapon: {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
   WeaponIconOverride: {fileID: 0}
-  SpecialWeapon: {fileID: 11400000, guid: 35d6b0498af5bc343a8912126c34eee6, type: 2}
+  SpecialWeapon: {fileID: 11400000, guid: cb51af441ffacbb4d939822a59288411, type: 2}
   UnlockRequirements: []
   Progression:
     baseXPRequirement: 500

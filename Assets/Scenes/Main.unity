@@ -7327,8 +7327,9 @@ MonoBehaviour:
   sharpshooterCritBonus: 0.35
   sharpshooterCritDamageMult: 1.5
   shockwaveStunDuration: 1.5
-  shockwaveForce: 9
+  shockwaveForce: 12
   shockwaveKnockbackDuration: 0.35
+  shockwaveRadius: 8.5
   shockwaveTextColor: {r: 0.95, g: 0.9, b: 0.35, a: 1}
   shockwaveTextScale: 0.95
 --- !u!114 &1207903168
