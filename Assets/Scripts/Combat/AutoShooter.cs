@@ -82,6 +82,19 @@ namespace FF
 
         public void InitializeRecoil(Transform gunPivotTransform)
         {
+            // Fix: Detect if we are re-initializing the same pivot.
+            // If we already have a base position for this pivot, we must NOT 
+            // overwrite it with the current localPosition, because the gun might 
+            // be currently recoiled (moved back) due to firing.
+            if (_hasBaseLocalPosition && _gunPivot == gunPivotTransform)
+            {
+                // Just reset the gun to the known correct base position
+                _gunPivot.localPosition = _baseLocalPosition;
+                _currentRecoil = 0f;
+                _recoilTimer = 0f;
+                return;
+            }
+
             _gunPivot = gunPivotTransform;
             if (_gunPivot)
             {

@@ -14,14 +14,15 @@ namespace FF
         [Header("VFX")]
         [SerializeField] private GameObject areaVfxPrefab;
         [SerializeField] private GameObject healingVfxPrefab;
+        [SerializeField] private float yOffset = 0.5f;
         [SerializeField] private Transform vfxAnchor;
 
         private readonly Collider2D[] _overlapBuffer = new Collider2D[24];
         private readonly List<Health> _targets = new();
+        private readonly Dictionary<Health, GameObject> _healingVfxInstances = new();
         private float _healAccumulator;
         private float _searchTimer;
         private GameObject _areaInstance;
-        private GameObject _activeHealingVfx;
 
         public bool IsHealing { get; private set; }
         public bool HasNearbyAllies { get; private set; }
@@ -133,23 +134,86 @@ namespace FF
 
         private void UpdateHealingVfx(bool shouldBeActive)
         {
-            if (!_activeHealingVfx && shouldBeActive && healingVfxPrefab)
+            if (!shouldBeActive)
             {
-                Transform parent = vfxAnchor ? vfxAnchor : transform;
-                _activeHealingVfx = Instantiate(healingVfxPrefab, parent.position, parent.rotation, parent);
+                // destroy all per-target healing VFX
+                foreach (var kvp in _healingVfxInstances)
+                {
+                    if (kvp.Value)
+                    {
+                        Destroy(kvp.Value);
+                    }
+                }
+                _healingVfxInstances.Clear();
+                return;
             }
 
-            if (_activeHealingVfx)
+            if (_targets.Count == 0)
             {
-                if (shouldBeActive && !_activeHealingVfx.activeSelf)
+                // nothing to spawn
+                return;
+            }
+
+            // Remove instances for targets that are no longer present or were destroyed
+            var toRemove = new List<Health>();
+            foreach (var kvp in _healingVfxInstances)
+            {
+                if (kvp.Key == null || !_targets.Contains(kvp.Key))
                 {
-                    _activeHealingVfx.SetActive(true);
-                }
-                else if (!shouldBeActive && _activeHealingVfx.activeSelf)
-                {
-                    _activeHealingVfx.SetActive(false);
+                    if (kvp.Value)
+                    {
+                        Destroy(kvp.Value);
+                    }
+                    toRemove.Add(kvp.Key);
                 }
             }
+            for (int i = 0; i < toRemove.Count; i++)
+            {
+                _healingVfxInstances.Remove(toRemove[i]);
+            }
+
+            // Create instances for targets that don't have one yet
+            for (int i = 0; i < _targets.Count; i++)
+            {
+                var target = _targets[i];
+                if (target == null)
+                {
+                    continue;
+                }
+
+                if (!_healingVfxInstances.ContainsKey(target))
+                {
+                    if (!healingVfxPrefab)
+                    {
+                        continue;
+                    }
+
+                    // Instantiate the healing VFX above the target and parent it so it follows the target.
+                    Transform targetTransform = target.transform;
+                    var instance = Instantiate(healingVfxPrefab, targetTransform.position, targetTransform.rotation, targetTransform);
+
+                    // Move it slightly above the target so it's visible above the troop (tweak Y value if needed).
+                    instance.transform.localPosition = new Vector3(0f, yOffset, 0f);
+
+                    _healingVfxInstances[target] = instance;
+                }
+                else
+                {
+                    // Ensure instance is active
+                    var inst = _healingVfxInstances[target];
+                    if (inst && !inst.activeSelf)
+                    {
+                        inst.SetActive(true);
+                    }
+                }
+            }
+        }
+
+
+        void OnDrawGizmos()
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, healRadius);
         }
     }
 }

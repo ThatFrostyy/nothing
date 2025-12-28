@@ -5100,63 +5100,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!1001 &831720616
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 5.466696
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.61104256
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1557962664825645153, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5418840439375942701, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
-      propertyPath: m_Name
-      value: FG42Pickup
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 487b6b9b1d1091740938bb26b3a9c62e, type: 3}
 --- !u!1 &875406328
 GameObject:
   m_ObjectHideFlags: 0
@@ -7383,6 +7326,11 @@ MonoBehaviour:
   suppressionTextScale: 0.5
   sharpshooterCritBonus: 0.35
   sharpshooterCritDamageMult: 1.5
+  shockwaveStunDuration: 1.5
+  shockwaveForce: 9
+  shockwaveKnockbackDuration: 0.35
+  shockwaveTextColor: {r: 0.95, g: 0.9, b: 0.35, a: 1}
+  shockwaveTextScale: 0.95
 --- !u!114 &1207903168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8216,6 +8164,7 @@ MonoBehaviour:
   waveBannerFadeTime: 0.5
   waveFlashImage: {fileID: 232487994}
   waveFlashColor: {r: 1, g: 0, b: 0, a: 0.19607843}
+  hitFlashColor: {r: 1, g: 0, b: 0, a: 0.15}
   waveFlashDuration: 0.6
   waveFlashAlphaCurve:
     serializedVersion: 2
@@ -12224,4 +12173,3 @@ SceneRoots:
   - {fileID: 1756355925}
   - {fileID: 497791597}
   - {fileID: 483938635}
-  - {fileID: 831720616}

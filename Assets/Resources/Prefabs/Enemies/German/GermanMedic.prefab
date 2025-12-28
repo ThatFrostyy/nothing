@@ -219,9 +219,10 @@ MonoBehaviour:
   healRadius: 3.5
   healPerSecond: 4
   targetSearchInterval: 0.35
-  areaVfxPrefab: {fileID: 0}
+  areaVfxPrefab: {fileID: 557673421716741881, guid: b78900d922763a54bb9353d99be3b1f6, type: 3}
   healingVfxPrefab: {fileID: 5691030147902170563, guid: 051fd934eff3b06408c99c7b05a9e820, type: 3}
-  vfxAnchor: {fileID: 0}
+  yOffset: 1.5
+  vfxAnchor: {fileID: 7502263187457105614}
 --- !u!114 &317238117283929593
 MonoBehaviour:
   m_ObjectHideFlags: 0
