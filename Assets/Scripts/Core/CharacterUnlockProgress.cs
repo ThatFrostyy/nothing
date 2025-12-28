@@ -142,6 +142,20 @@ namespace FF
             MarkDirty();
         }
 
+        public static void RecordBossKill()
+        {
+            EnsureLoaded();
+            _data.TotalBossesKilled++;
+            MarkDirty();
+        }
+
+        public static void RecordCrateDestroyed()
+        {
+            EnsureLoaded();
+            _data.TotalCratesDestroyed++;
+            MarkDirty();
+        }
+
         public static void RecordWeaponKill(Weapon weapon)
         {
             if (!weapon)
@@ -171,6 +185,53 @@ namespace FF
             EnsureLoaded();
             _data.BulletTimeMoments++;
             MarkDirty();
+        }
+
+        public static int TotalBossesKilled
+        {
+            get
+            {
+                EnsureLoaded();
+                return _data.TotalBossesKilled;
+            }
+        }
+
+        public static int TotalCratesDestroyed
+        {
+            get
+            {
+                EnsureLoaded();
+                return _data.TotalCratesDestroyed;
+            }
+        }
+
+        public static bool TryGetMostUsedWeapon(out string weaponName, out int killCount)
+        {
+            EnsureLoaded();
+            weaponName = null;
+            killCount = 0;
+
+            if (_data.WeaponKills == null || _data.WeaponKills.Count == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _data.WeaponKills.Count; i++)
+            {
+                WeaponKillProgress entry = _data.WeaponKills[i];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.WeaponId))
+                {
+                    continue;
+                }
+
+                if (entry.Kills > killCount || string.IsNullOrWhiteSpace(weaponName))
+                {
+                    weaponName = entry.WeaponId;
+                    killCount = Mathf.Max(0, entry.Kills);
+                }
+            }
+
+            return !string.IsNullOrWhiteSpace(weaponName);
         }
 
         public static void SaveIfDirty()
@@ -406,6 +467,8 @@ namespace FF
         public int TotalRunsStarted;
         public int HighestWave;
         public int TotalKills;
+        public int TotalBossesKilled;
+        public int TotalCratesDestroyed;
         public int BulletTimeMoments;
         public float LongestNoDamageSeconds;
         public List<CharacterWaveProgress> CharacterWaves = new();

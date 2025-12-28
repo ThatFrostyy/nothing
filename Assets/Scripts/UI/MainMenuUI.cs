@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TMPro;
@@ -34,6 +35,8 @@ namespace FF
 #endif
 
         private int _mapIndex;
+        private int? _cachedKills;
+        private int? _cachedTopWave;
 
         void Awake()
         {
@@ -48,6 +51,8 @@ namespace FF
             MapSelectionState.OnMapChanged += HandleMapChanged;
             SyncMapIndexWithSelection();
             RefreshMapText();
+            CharacterUnlockProgress.OnProgressUpdated += HandleProgressUpdated;
+            RefreshLocalStats();
 
 #if !DISABLESTEAMWORKS
             if (!SteamManager.Initialized)
@@ -134,6 +139,7 @@ namespace FF
         void OnDisable()
         {
             MapSelectionState.OnMapChanged -= HandleMapChanged;
+            CharacterUnlockProgress.OnProgressUpdated -= HandleProgressUpdated;
 
 #if !DISABLESTEAMWORKS
             _userStatsReceived = null;
@@ -155,21 +161,25 @@ namespace FF
             if (SteamUserStats.GetStat(KillStatName, out int kills))
             {
                 Debug.Log($"[Steam] MEnu Received total kills: {kills}");
-                UpdateKillsText(kills);
+                _cachedKills = kills;
+                UpdateKillsText(_cachedKills);
             }
             else
             {
-                UpdateKillsText(null);
+                _cachedKills = null;
+                UpdateKillsText(_cachedKills);
             }
 
             if (SteamUserStats.GetStat(TopWaveStatName, out int topWave))
             {
                 Debug.Log($"[Steam] Received top wave survived: {topWave}");
-                UpdateTopWaveText(topWave);
+                _cachedTopWave = topWave;
+                UpdateTopWaveText(_cachedTopWave);
             }
             else
             {
-                UpdateTopWaveText(null);
+                _cachedTopWave = null;
+                UpdateTopWaveText(_cachedTopWave);
             }
         }
 #endif
@@ -242,7 +252,10 @@ namespace FF
         {
             if (killsStatText)
             {
-                killsStatText.text = kills.HasValue ? kills.Value.ToString() : unavailableText;
+                string killLabel = kills.HasValue ? kills.Value.ToString() : unavailableText;
+                int bosses = CharacterUnlockProgress.TotalBossesKilled;
+                int crates = CharacterUnlockProgress.TotalCratesDestroyed;
+                killsStatText.text = $"Kills: {killLabel}\nBosses: {bosses}\nCrates: {crates}";
             }
         }
 
@@ -250,7 +263,10 @@ namespace FF
         {
             if (topWaveStatText)
             {
-                topWaveStatText.text = wave.HasValue ? wave.Value.ToString() : unavailableText;
+                string waveLabel = wave.HasValue ? wave.Value.ToString() : unavailableText;
+                string weaponLabel = GetMostUsedWeaponLabel();
+                string longestTimeLabel = GetLongestTimeLabel();
+                topWaveStatText.text = $"Top Wave: {waveLabel}\nMost Used: {weaponLabel}\nLongest Time: {longestTimeLabel}";
             }
         }
 
@@ -297,20 +313,62 @@ namespace FF
 
         private void ShowUnavailableText()
         {
-            if (killsStatText)
-            {
-                killsStatText.text = unavailableText;
-            }
-
-            if (topWaveStatText)
-            {
-                topWaveStatText.text = unavailableText;
-            }
+            _cachedKills = null;
+            _cachedTopWave = null;
+            RefreshLocalStats();
 
             if (leaderboardText)
             {
                 leaderboardText.text = unavailableText;
             }
+        }
+
+        private void HandleProgressUpdated()
+        {
+            RefreshLocalStats();
+        }
+
+        private void RefreshLocalStats()
+        {
+            UpdateKillsText(_cachedKills);
+            UpdateTopWaveText(_cachedTopWave);
+        }
+
+        private string GetMostUsedWeaponLabel()
+        {
+            if (CharacterUnlockProgress.TryGetMostUsedWeapon(out string weaponName, out int killCount))
+            {
+                return killCount > 0 ? $"{weaponName} ({killCount} kills)" : weaponName;
+            }
+
+            return unavailableText;
+        }
+
+        private string GetLongestTimeLabel()
+        {
+            float longestTime = RunStatsProgress.LongestTimeSurvivedSeconds;
+            if (longestTime <= 0f)
+            {
+                return unavailableText;
+            }
+
+            return FormatTime(longestTime);
+        }
+
+        private static string FormatTime(float seconds)
+        {
+            if (seconds <= 0f)
+            {
+                return "0:00";
+            }
+
+            TimeSpan span = TimeSpan.FromSeconds(seconds);
+            if (span.TotalHours >= 1)
+            {
+                return $"{(int)span.TotalHours}:{span.Minutes:00}:{span.Seconds:00}";
+            }
+
+            return $"{span.Minutes}:{span.Seconds:00}";
         }
     }
 }
