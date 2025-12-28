@@ -335,15 +335,21 @@ namespace FF
         private void RefreshDeathStats()
         {
             int kills = GameManager.I != null ? GameManager.I.KillCount : 0;
+            int bosses = GameManager.I != null ? GameManager.I.BossKillCount : 0;
+            int crates = GameManager.I != null ? GameManager.I.CratesDestroyedCount : 0;
+            float runTime = GameManager.I != null ? GameManager.I.RunTimeSeconds : 0f;
+            RunStatsProgress.RecordRunTime(runTime);
+            float longestTime = RunStatsProgress.LongestTimeSurvivedSeconds;
+            string longestTimeLabel = longestTime > 0f ? FormatTime(longestTime) : unavailableStatText;
             if (roundKillsText)
             {
-                roundKillsText.text = kills.ToString();
+                roundKillsText.text = $"Kills: {kills}\nBosses: {bosses}";
             }
 
             int wave = GameManager.I != null ? GameManager.I.Wave : 0;
             if (lastWaveText)
             {
-                lastWaveText.text = Mathf.Max(0, wave).ToString();
+                lastWaveText.text = $"Last Wave: {Mathf.Max(0, wave)}\nCrates: {crates}";
             }
 
             string weaponLabel = unavailableStatText;
@@ -360,8 +366,24 @@ namespace FF
 
             if (mostUsedWeaponText)
             {
-                mostUsedWeaponText.text = weaponLabel;
+                mostUsedWeaponText.text = $"Most Used: {weaponLabel}\nLongest Time: {longestTimeLabel}";
             }
+        }
+
+        private static string FormatTime(float seconds)
+        {
+            if (seconds <= 0f)
+            {
+                return "0:00";
+            }
+
+            TimeSpan span = TimeSpan.FromSeconds(seconds);
+            if (span.TotalHours >= 1)
+            {
+                return $"{(int)span.TotalHours}:{span.Minutes:00}:{span.Seconds:00}";
+            }
+
+            return $"{span.Minutes}:{span.Seconds:00}";
         }
 
         private void PlayDeathFeedback(Vector3 position)

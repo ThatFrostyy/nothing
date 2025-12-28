@@ -13,6 +13,7 @@ using UnityEngine;
 #if !DISABLESTEAMWORKS
 using System.Collections;
 using Steamworks;
+using FF;
 #endif
 
 //
@@ -126,6 +127,7 @@ public class SteamManager : MonoBehaviour {
 			return;
 		}
 
+		SteamCloudSave.LoadFromCloud();
 		s_EverInitialized = true;
 	}
 

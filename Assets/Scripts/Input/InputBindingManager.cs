@@ -122,6 +122,7 @@ namespace FF
             string json = _asset.SaveBindingOverridesAsJson();
             PlayerPrefs.SetString(PlayerPrefsKey, json);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
         }
 
         private static InputAction ResolveAction(InputActionReference actionReference)
