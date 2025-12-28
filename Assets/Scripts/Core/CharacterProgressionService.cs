@@ -11,6 +11,17 @@ namespace FF
         private static readonly Dictionary<string, CharacterProgressionState> StateByCharacter = new();
         private static bool _loaded;
 
+        /// <summary>
+        /// Forces the system to discard cached data and re-read from PlayerPrefs.
+        /// Call this after applying a Steam Cloud save.
+        /// </summary>
+        public static void Reload()
+        {
+            _loaded = false;
+            StateByCharacter.Clear();
+            EnsureLoaded();
+        }
+
         public static CharacterProgressionSnapshot GetSnapshot(CharacterDefinition character)
         {
             if (!TryResolveProgression(character, out CharacterProgressionSettings progression, out CharacterProgressionState state))

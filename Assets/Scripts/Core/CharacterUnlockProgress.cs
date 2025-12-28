@@ -19,6 +19,17 @@ namespace FF
             }
         }
 
+        /// <summary>
+        /// Forces the system to discard cached data and re-read from PlayerPrefs.
+        /// Call this after applying a Steam Cloud save.
+        /// </summary>
+        public static void Reload()
+        {
+            _data = null;
+            EnsureLoaded();
+            OnProgressUpdated?.Invoke();
+        }
+
         public static bool IsUnlocked(CharacterDefinition character)
         {
             if (!character)

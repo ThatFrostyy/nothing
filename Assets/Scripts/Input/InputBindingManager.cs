@@ -37,6 +37,29 @@ namespace FF
             }
         }
 
+        /// <summary>
+        /// Forces a reload of binding overrides from PlayerPrefs.
+        /// Call this after applying a Steam Cloud save.
+        /// </summary>
+        public static void Reload()
+        {
+            if (_asset == null)
+            {
+                return;
+            }
+
+            // Remove existing overrides so we don't merge old state with new state unexpectedly
+            _asset.RemoveAllBindingOverrides();
+
+            string saved = PlayerPrefs.GetString(PlayerPrefsKey, string.Empty);
+            if (!string.IsNullOrEmpty(saved))
+            {
+                _asset.LoadBindingOverridesFromJson(saved);
+            }
+
+            OnBindingsChanged?.Invoke();
+        }
+
         public static string GetBindingDisplay(InputActionReference actionReference, string bindingId, int fallbackIndex = 0, string defaultLabel = "?")
         {
             InputAction action = ResolveAction(actionReference);

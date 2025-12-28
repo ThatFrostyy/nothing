@@ -167,9 +167,24 @@ namespace FF
             }
 
             PlayerPrefs.Save();
+
+            // Standard Audio/Video Reloads
             GameVideoSettings.ReloadPreferences();
             GameAudioSettings.ReloadPreferences();
             MusicManager.RefreshFromPrefs();
+
+            // -----------------------------------------------------------------------
+            // CRITICAL FIX: Reload cached systems
+            // These systems may have initialized before SteamManager.Awake.
+            // We force them to drop their cache and re-read the updated PlayerPrefs.
+            // -----------------------------------------------------------------------
+
+            // Note: Ensure the following methods exist in your codebase or alias them 
+            // to the appropriate cache-clearing logic.
+            InputBindingManager.Reload();
+            CharacterProgressionService.Reload();
+            CharacterUnlockProgress.Reload();
+            RunStatsProgress.Reload();
 #endif
         }
     }

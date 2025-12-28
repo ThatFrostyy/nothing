@@ -19,6 +19,17 @@ namespace FF
             }
         }
 
+        /// <summary>
+        /// Forces the system to discard cached data and re-read from PlayerPrefs.
+        /// Call this after applying a Steam Cloud save.
+        /// </summary>
+        public static void Reload()
+        {
+            _loaded = false;
+            _data = null;
+            EnsureLoaded();
+        }
+
         public static void RecordRunTime(float seconds)
         {
             if (seconds <= 0f)
