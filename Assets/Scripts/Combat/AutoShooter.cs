@@ -579,6 +579,11 @@ namespace FF
                 return false;
             }
 
+            if (_abilityController == null)
+            {
+                _abilityController = GetComponentInParent<CharacterAbilityController>();
+            }
+
             _abilityController?.TryApplyShockwave(grenade);
 
             float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
