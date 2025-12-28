@@ -178,6 +178,7 @@ namespace FF
             string json = JsonUtility.ToJson(_data);
             PlayerPrefs.SetString(PlayerPrefsKey, json);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
             OnProgressUpdated?.Invoke();
         }
 
@@ -192,6 +193,7 @@ namespace FF
             string json = JsonUtility.ToJson(_data);
             PlayerPrefs.SetString(PlayerPrefsKey, json);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
             OnProgressUpdated?.Invoke();
         }
 

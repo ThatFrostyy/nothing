@@ -58,6 +58,17 @@ namespace FF
                 Instance.ApplyVolume(value, true);
         }
 
+        public static void RefreshFromPrefs()
+        {
+            if (Instance == null)
+            {
+                return;
+            }
+
+            float value = Mathf.Clamp01(PlayerPrefs.GetFloat(VolumePrefKey, DefaultVolume));
+            Instance.ApplyVolume(value, false);
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -482,6 +493,7 @@ namespace FF
             {
                 PlayerPrefs.SetFloat(VolumePrefKey, MusicVolume);
                 PlayerPrefs.Save();
+                SteamCloudSave.SaveToCloud();
             }
         }
     }

@@ -249,6 +249,7 @@ namespace FF
             string json = JsonUtility.ToJson(wrapper);
             PlayerPrefs.SetString(PlayerPrefsKey, json);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
         }
         #endregion
     }

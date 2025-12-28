@@ -24,6 +24,9 @@ namespace FF
 
         public int Wave { get; private set; } = 0;
         public int KillCount { get; private set; } = 0;
+        public int BossKillCount { get; private set; } = 0;
+        public int CratesDestroyedCount { get; private set; } = 0;
+        public float RunTimeSeconds { get; private set; } = 0f;
 
         public event Action<int> OnKillCountChanged;
         public event Action<int> OnWaveStarted;
@@ -57,6 +60,7 @@ namespace FF
         void OnEnable()
         {
             Enemy.OnAnyEnemyKilled += HandleEnemyKilled;
+            WeaponCrate.OnAnyBroken += HandleCrateBroken;
 
             SceneReferenceRegistry.Register(this);
         }
@@ -64,6 +68,7 @@ namespace FF
         void OnDisable()
         {
             Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
+            WeaponCrate.OnAnyBroken -= HandleCrateBroken;
 
             SceneReferenceRegistry.Unregister(this);
         }
@@ -86,6 +91,9 @@ namespace FF
             KillCount = 0;
             Wave = 0;
             timer = 0f;
+            BossKillCount = 0;
+            CratesDestroyedCount = 0;
+            RunTimeSeconds = 0f;
 
             spawningEnabled = true;
 
@@ -99,6 +107,11 @@ namespace FF
 
         void Update()
         {
+            if (spawner != null && spawningEnabled)
+            {
+                RunTimeSeconds += Time.deltaTime;
+            }
+
             if (spawner == null || !spawningEnabled)
                 return;
 
@@ -126,7 +139,18 @@ namespace FF
             KillCount++;
             OnKillCountChanged?.Invoke(KillCount);
 
+            if (enemy != null && enemy.IsBoss)
+            {
+                BossKillCount++;
+            }
+
             SpawnEnemyDeathFx(enemy);
+        }
+
+        private void HandleCrateBroken(WeaponCrate crate)
+        {
+            _ = crate;
+            CratesDestroyedCount++;
         }
 
         private void SpawnEnemyDeathFx(Enemy enemy)

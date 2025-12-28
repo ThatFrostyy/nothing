@@ -64,6 +64,7 @@ namespace FF
             QualitySettings.SetQualityLevel(QualityLevel, true);
             PlayerPrefs.SetInt(QualityPrefKey, QualityLevel);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
         }
 
         public static void SetResolution(Resolution resolution)
@@ -80,6 +81,7 @@ namespace FF
             PlayerPrefs.SetInt(ResolutionHeightPrefKey, resolution.height);
             PlayerPrefs.SetInt(ResolutionRefreshPrefKey, resolution.refreshRate);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
         }
 
         public static void SetVSync(bool enabled)
@@ -94,6 +96,7 @@ namespace FF
             QualitySettings.vSyncCount = enabled ? 1 : 0;
             PlayerPrefs.SetInt(VsyncPrefKey, enabled ? 1 : 0);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
         }
 
         public static void SetPostProcessingEnabled(bool enabled)
@@ -107,6 +110,7 @@ namespace FF
             PostProcessingEnabled = enabled;
             PlayerPrefs.SetInt(PostProcessingPrefKey, enabled ? 1 : 0);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
             ApplyPostProcessingSettings();
         }
 
@@ -122,6 +126,7 @@ namespace FF
             BloomIntensity = clamped;
             PlayerPrefs.SetFloat(BloomPrefKey, BloomIntensity);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
             ApplyPostProcessingSettings();
         }
 
@@ -137,6 +142,15 @@ namespace FF
             MotionBlurIntensity = clamped;
             PlayerPrefs.SetFloat(MotionBlurPrefKey, MotionBlurIntensity);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
+            ApplyPostProcessingSettings();
+        }
+
+        public static void ReloadPreferences()
+        {
+            EnsureInitialized();
+            LoadPreferences();
+            ApplyDisplaySettings();
             ApplyPostProcessingSettings();
         }
 

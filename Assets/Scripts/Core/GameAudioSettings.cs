@@ -33,6 +33,7 @@ namespace FF
             SfxVolume = clamped;
             PlayerPrefs.SetFloat(SfxVolumePrefKey, SfxVolume);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
             OnSfxVolumeChanged?.Invoke(SfxVolume);
         }
 
@@ -47,7 +48,26 @@ namespace FF
             AmbienceVolume = clamped;
             PlayerPrefs.SetFloat(AmbienceVolumePrefKey, AmbienceVolume);
             PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
             OnAmbienceVolumeChanged?.Invoke(AmbienceVolume);
+        }
+
+        public static void ReloadPreferences()
+        {
+            float sfx = Mathf.Clamp01(PlayerPrefs.GetFloat(SfxVolumePrefKey, DefaultSfxVolume));
+            float ambience = Mathf.Clamp01(PlayerPrefs.GetFloat(AmbienceVolumePrefKey, DefaultAmbienceVolume));
+
+            if (!Mathf.Approximately(SfxVolume, sfx))
+            {
+                SfxVolume = sfx;
+                OnSfxVolumeChanged?.Invoke(SfxVolume);
+            }
+
+            if (!Mathf.Approximately(AmbienceVolume, ambience))
+            {
+                AmbienceVolume = ambience;
+                OnAmbienceVolumeChanged?.Invoke(AmbienceVolume);
+            }
         }
 
         private static void LoadPreferences()

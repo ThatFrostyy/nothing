@@ -141,7 +141,7 @@ namespace FF
                 {
                     if (kvp.Value)
                     {
-                        Destroy(kvp.Value);
+                        FadeOutHealingVfx(kvp.Value);
                     }
                 }
                 _healingVfxInstances.Clear();
@@ -162,7 +162,7 @@ namespace FF
                 {
                     if (kvp.Value)
                     {
-                        Destroy(kvp.Value);
+                        FadeOutHealingVfx(kvp.Value);
                     }
                     toRemove.Add(kvp.Key);
                 }
@@ -209,6 +209,33 @@ namespace FF
             }
         }
 
+        private void FadeOutHealingVfx(GameObject instance)
+        {
+            if (!instance)
+            {
+                return;
+            }
+
+            ParticleSystem[] particleSystems = instance.GetComponentsInChildren<ParticleSystem>();
+            if (particleSystems.Length == 0)
+            {
+                Destroy(instance);
+                return;
+            }
+
+            float maxLifetime = 0.1f;
+            for (int i = 0; i < particleSystems.Length; i++)
+            {
+                ParticleSystem.MainModule main = particleSystems[i].main;
+                float delay = main.startDelay.constantMax;
+                float lifetime = main.startLifetime.constantMax;
+                maxLifetime = Mathf.Max(maxLifetime, delay + lifetime);
+                particleSystems[i].Stop(true, ParticleSystemStopBehavior.StopEmitting);
+            }
+
+            Destroy(instance, Mathf.Max(0.01f, maxLifetime));
+        }
+
 
         void OnDrawGizmos()
         {
@@ -217,4 +244,3 @@ namespace FF
         }
     }
 }
-
