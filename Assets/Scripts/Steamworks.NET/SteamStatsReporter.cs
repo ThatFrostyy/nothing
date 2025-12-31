@@ -40,6 +40,9 @@ namespace FF
         [Header("Inventory Drops")]
         [SerializeField, Min(1)] private int waveDropWaveThreshold = 20;
         [SerializeField] private int waveDropListDefinitionId = 100;
+        [Header("Performance")]
+        [SerializeField, Min(0f)] private float statsStoreCooldown = 1.5f;
+        [SerializeField, Min(0f)] private float leaderboardUploadCooldown = 3f;
 
         private const string AchievementRoundsFired = "ROUNDS_5000";
         private const string AchievementFirstHat = "HAT_FIRST";
@@ -148,6 +151,10 @@ namespace FF
         private readonly HashSet<HatDefinition> _equippedHats = new();
         private readonly HashSet<AutoShooter> _playerShooters = new();
         private readonly Queue<float> _recentKillTimestamps = new();
+        private float _nextCoreStatsPushTime;
+        private float _nextLeaderboardPushTime;
+        private bool _pendingCoreStatsPush;
+        private bool _pendingLeaderboardPush;
         private Callback<UserStatsReceived_t> _userStatsReceived;
         private Callback<UserStatsStored_t> _userStatsStored;
         private CallResult<LeaderboardFindResult_t> _killLeaderboardFindResult;
@@ -257,6 +264,10 @@ namespace FF
             _recentKillTimestamps.Clear();
             _bossKills = 0;
             _consecutiveNoDamageWaves = 0;
+            _pendingCoreStatsPush = false;
+            _pendingLeaderboardPush = false;
+            _nextCoreStatsPushTime = 0f;
+            _nextLeaderboardPushTime = 0f;
             ResetWaveTrackers();
             _playerBody = null;
         }
@@ -269,6 +280,7 @@ namespace FF
             }
 
             TrackPlayerMovement();
+            ProcessPendingSteamPushes();
         }
 
         private void HookGameManager()
@@ -323,8 +335,8 @@ namespace FF
             EvaluateWaveBasedAchievements(wave);
             _highestWave = Mathf.Max(_highestWave, wave);
 
-            PushCoreStats();
-            PushKillLeaderboardScore();
+            QueueCoreStatsPush();
+            QueueKillLeaderboardPush();
             TryUnlockWaveAchievements();
             TryTriggerWaveDrop(wave);
 
@@ -340,7 +352,7 @@ namespace FF
             }
 
             _killLeaderboard = result.m_hSteamLeaderboard;
-            PushKillLeaderboardScore();
+            QueueKillLeaderboardPush();
         }
 
         private void HandleKillScoreUploaded(LeaderboardScoreUploaded_t result, bool failure)
@@ -499,8 +511,8 @@ namespace FF
                 SyncProgressStats();
 
                 EnsureKillLeaderboard();
-                PushCoreStats();
-                PushKillLeaderboardScore();
+                QueueCoreStatsPush();
+                QueueKillLeaderboardPush();
             }
             else
             {
@@ -586,8 +598,8 @@ namespace FF
 
         private void HandlePlayerDeath()
         {
-            PushCoreStats();
-            PushKillLeaderboardScore();
+            QueueCoreStatsPush();
+            QueueKillLeaderboardPush();
         }
 
         private void HandlePlayerDamaged(int _)
@@ -604,6 +616,42 @@ namespace FF
             SteamUserStats.SetStat(KillStatName, _killStatBase + _lastKillCount);
             SteamUserStats.SetStat(TopWaveStatName, _highestWave);
             SteamUserStats.StoreStats();
+        }
+
+        private void QueueCoreStatsPush()
+        {
+            _pendingCoreStatsPush = true;
+        }
+
+        private void QueueKillLeaderboardPush()
+        {
+            _pendingLeaderboardPush = true;
+        }
+
+        private void ProcessPendingSteamPushes()
+        {
+            if (!_statsReady)
+            {
+                return;
+            }
+
+            float now = Time.unscaledTime;
+
+            if (_pendingCoreStatsPush && now >= _nextCoreStatsPushTime)
+            {
+                PushCoreStats();
+                _pendingCoreStatsPush = false;
+                _nextCoreStatsPushTime = now + Mathf.Max(0f, statsStoreCooldown);
+            }
+
+            if (_pendingLeaderboardPush && now >= _nextLeaderboardPushTime)
+            {
+                if (TryPushKillLeaderboardScore())
+                {
+                    _pendingLeaderboardPush = false;
+                    _nextLeaderboardPushTime = now + Mathf.Max(0f, leaderboardUploadCooldown);
+                }
+            }
         }
 
         private void SyncWeaponKillStats()
@@ -715,12 +763,12 @@ namespace FF
             return weaponName ?? string.Empty;
         }
 
-        private void PushKillLeaderboardScore()
+        private bool TryPushKillLeaderboardScore()
         {
             if (!_statsReady)
             {
                 Debug.Log("[Steam] PushKillLeaderboardScore skipped: stats not ready");
-                return;
+                return false;
             }
 
             int score = _killStatBase + _lastKillCount;
@@ -729,7 +777,7 @@ namespace FF
             if (_killLeaderboard.m_SteamLeaderboard == 0)
             {
                 Debug.Log($"[Steam] PushKillLeaderboardScore skipped: leaderboard handle not ready (score would be {score})");
-                return;
+                return false;
             }
 
             Debug.Log($"[Steam] Uploading kill leaderboard score: {score} to leaderboard '{KillLeaderboardName}' (handle {_killLeaderboard.m_SteamLeaderboard})");
@@ -742,6 +790,7 @@ namespace FF
                 0);
 
             _killScoreUploadedResult.Set(handle, HandleKillScoreUploaded);
+            return true;
         }
 
         private void TryUnlockWaveAchievements()
