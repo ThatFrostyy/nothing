@@ -27,7 +27,7 @@ namespace FF
         private readonly Dictionary<string, CommandInfo> _commandInfo = new(StringComparer.OrdinalIgnoreCase)
         {
             ["help"] = new CommandInfo("help", "Show available commands."),
-            ["wave"] = new CommandInfo("wave", "Start the next wave."),
+            ["wave"] = new CommandInfo("wave [number]", "Start the next wave or a specific wave."),
             ["god"] = new CommandInfo("god", "Toggle god mode."),
             ["health"] = new CommandInfo("health", "Restore player health to full."),
             ["tp"] = new CommandInfo("tp [x y]", "Teleport to coordinates, or to the mouse position if no coordinates are provided.")
@@ -39,6 +39,7 @@ namespace FF
         private bool _focusInput;
         private Health _playerHealth;
         private bool _godMode;
+        private Vector2 _logScroll;
 
         public static bool IsDebugEnabled
         {
@@ -118,11 +119,12 @@ namespace FF
 
             Rect logRect = new Rect(20f, 40f, width - 20f, 120f);
             GUILayout.BeginArea(logRect);
-            int startIndex = Mathf.Max(0, _logs.Count - 6);
-            for (int i = startIndex; i < _logs.Count; i++)
+            _logScroll = GUILayout.BeginScrollView(_logScroll, GUILayout.Width(logRect.width), GUILayout.Height(logRect.height));
+            for (int i = 0; i < _logs.Count; i++)
             {
                 GUILayout.Label(_logs[i]);
             }
+            GUILayout.EndScrollView();
             GUILayout.EndArea();
 
             Rect inputRect = new Rect(20f, 165f, width - 40f, 25f);
@@ -171,12 +173,21 @@ namespace FF
                     HandleHelp();
                     break;
                 case "wave":
+                    if (parts.Length == 1)
+                    {
+                        HandleWave();
+                        break;
+                    }
+                    if (parts.Length == 2 && int.TryParse(parts[1], out int targetWave) && targetWave > 0)
+                    {
+                        HandleWave(targetWave);
+                        break;
+                    }
                     if (parts.Length > 1)
                     {
                         AppendUsage("wave");
                         break;
                     }
-                    HandleWave();
                     break;
                 case "god":
                     if (parts.Length > 1)
@@ -229,6 +240,18 @@ namespace FF
             }
 
             bool started = GameManager.I.DebugStartNextWave();
+            AppendLog(started ? $"Started wave {GameManager.I.Wave}." : "Unable to start wave.");
+        }
+
+        private void HandleWave(int wave)
+        {
+            if (!GameManager.I)
+            {
+                AppendLog("GameManager not found.");
+                return;
+            }
+
+            bool started = GameManager.I.DebugStartWave(wave);
             AppendLog(started ? $"Started wave {GameManager.I.Wave}." : "Unable to start wave.");
         }
 
@@ -368,6 +391,8 @@ namespace FF
             {
                 _logs.RemoveAt(0);
             }
+
+            _logScroll.y = float.MaxValue;
         }
     }
 }

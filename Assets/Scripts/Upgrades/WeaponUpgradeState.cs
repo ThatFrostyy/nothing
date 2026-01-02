@@ -58,6 +58,8 @@ namespace FF
         public Weapon Weapon { get; }
         public int CardsTaken { get; private set; }
 
+        private readonly System.Collections.Generic.Dictionary<WeaponUpgradeType, int> upgradeCounts = new();
+
         float damageBonus;
         float fireRateBonus;
         float projectileSpeedBonus;
@@ -91,6 +93,7 @@ namespace FF
         {
             CardsTaken++;
             float amount = Mathf.Max(0f, option.Magnitude);
+            IncrementUpgradeCount(option.Type);
 
             switch (option.Type)
             {
@@ -141,5 +144,19 @@ namespace FF
         public float GetAccuracyMultiplier() => Mathf.Max(0.1f, 1f - accuracyBonus);
         public float GetFlamethrowerCooldownMultiplier() => Mathf.Max(0.1f, 1f - flamethrowerCooldownReduction);
         public float GetFlamethrowerRangeMultiplier() => 1f + flamethrowerRangeBonus;
+
+        public System.Collections.Generic.IReadOnlyDictionary<WeaponUpgradeType, int> GetUpgradeCounts() => upgradeCounts;
+
+        private void IncrementUpgradeCount(WeaponUpgradeType type)
+        {
+            if (upgradeCounts.ContainsKey(type))
+            {
+                upgradeCounts[type]++;
+            }
+            else
+            {
+                upgradeCounts.Add(type, 1);
+            }
+        }
     }
 }

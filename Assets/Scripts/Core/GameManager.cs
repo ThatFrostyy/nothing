@@ -217,6 +217,24 @@ namespace FF
             return true;
         }
 
+        public bool DebugStartWave(int wave)
+        {
+            if (spawner == null)
+            {
+                return false;
+            }
+
+            int targetWave = Mathf.Max(1, wave);
+            timer = 0f;
+            Wave = targetWave;
+
+            OnWaveStarted?.Invoke(Wave);
+            spawner.SpawnWave(Wave);
+            AdvanceWaveInterval();
+
+            return true;
+        }
+
         private void EnsureDebugConsole()
         {
             if (!DebugConsole.IsDebugEnabled)
