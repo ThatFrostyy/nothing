@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -42,6 +44,14 @@ namespace FF
         [SerializeField] private string interactBindingId = "1c04ea5f-b012-41d1-a6f7-02e963b52893";
 
         [SerializeField] private string timeFormat = "mm\\:ss";
+
+        [Header("Upgrade Summary")]
+        [SerializeField] private InputActionReference upgradeSummaryAction;
+        [SerializeField] private string upgradeSummaryActionName = "UpgradeSummary";
+        [SerializeField] private string upgradeSummaryBindingId = "";
+        [SerializeField, Min(150f)] private float upgradeSummaryWidth = 360f;
+        [SerializeField, Min(150f)] private float upgradeSummaryHeight = 420f;
+        [SerializeField] private Vector2 upgradeSummaryOffset = new(10f, 10f);
 
         [Header("UI Animation")]
         [SerializeField] private RectTransform healthPulseTarget;
@@ -136,6 +146,9 @@ namespace FF
         private Coroutine getReadyRoutine;
         private bool hasNearbyPickups;
         private WeaponManager boundWeaponManager;
+        private Vector2 upgradeSummaryScroll;
+        private InputAction upgradeSummaryInput;
+        private bool ownsUpgradeSummaryInput;
 
         void Awake()
         {
@@ -234,6 +247,30 @@ namespace FF
             ApplySceneVisibility(SceneManager.GetActiveScene());
         }
 
+        void OnGUI()
+        {
+            if (!ShouldShowUpgradeSummary())
+            {
+                return;
+            }
+
+            float width = Mathf.Min(upgradeSummaryWidth, Screen.width - 20f);
+            float height = Mathf.Min(upgradeSummaryHeight, Screen.height - 20f);
+            float x = Mathf.Max(10f, Screen.width - width - upgradeSummaryOffset.x);
+            float y = Mathf.Max(10f, upgradeSummaryOffset.y);
+            Rect boxRect = new Rect(x, y, width, height);
+            GUI.Box(boxRect, "Upgrades");
+
+            Rect contentRect = new Rect(boxRect.x + 10f, boxRect.y + 25f, boxRect.width - 20f, boxRect.height - 35f);
+            GUILayout.BeginArea(contentRect);
+            upgradeSummaryScroll = GUILayout.BeginScrollView(upgradeSummaryScroll);
+
+            RenderUpgradeSummary();
+
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
+        }
+
         void OnDestroy()
         {
             SceneReferenceRegistry.Unregister(this);
@@ -277,6 +314,7 @@ namespace FF
             InputBindingManager.Initialize(ResolveInputAsset());
             InputBindingManager.OnBindingsChanged += HandleBindingsChanged;
             RefreshKeybindLabels();
+            BindUpgradeSummaryInput();
 
             if (gameManager != null)
             {
@@ -301,6 +339,7 @@ namespace FF
             PlayerController.OnPlayerReady -= HandlePlayerReady;
 
             InputBindingManager.OnBindingsChanged -= HandleBindingsChanged;
+            UnbindUpgradeSummaryInput();
 
             if (gameManager != null)
             {
@@ -573,6 +612,7 @@ namespace FF
 
             upgradeAction = EnsureActionReference(upgradeAction, asset, upgradeBindingId, upgradeActionName);
             interactAction = EnsureActionReference(interactAction, asset, interactBindingId, interactActionName);
+            upgradeSummaryAction = EnsureActionReference(upgradeSummaryAction, asset, upgradeSummaryBindingId, upgradeSummaryActionName);
         }
 
         static InputActionReference EnsureActionReference(InputActionReference reference, InputActionAsset asset, string bindingId, string actionName)
@@ -863,6 +903,186 @@ namespace FF
             upgradePromptGroup.gameObject.SetActive(isVisible);
 
             if (!isVisible && upgradePromptText) upgradePromptText.gameObject.SetActive(false);
+        }
+
+        private void RenderUpgradeSummary()
+        {
+            GUILayout.Label("Player Upgrades");
+            if (upgradeManager == null)
+            {
+                GUILayout.Label("No upgrade data.");
+            }
+            else
+            {
+                IReadOnlyDictionary<Upgrade, int> playerUpgrades = upgradeManager.GetUpgradeCounts();
+                bool hasPlayerUpgrades = false;
+
+                foreach (var entry in playerUpgrades.OrderBy(entry => ResolveUpgradeTitle(entry.Key)))
+                {
+                    if (entry.Key == null || entry.Value <= 0)
+                    {
+                        continue;
+                    }
+
+                    hasPlayerUpgrades = true;
+                    GUILayout.Label($"{ResolveUpgradeTitle(entry.Key)}{FormatUpgradeCount(entry.Value)}");
+                }
+
+                if (!hasPlayerUpgrades)
+                {
+                    GUILayout.Label("None");
+                }
+            }
+
+            GUILayout.Space(8f);
+            GUILayout.Label("Weapon Upgrades");
+
+            if (upgradeManager == null)
+            {
+                GUILayout.Label("No upgrade data.");
+                return;
+            }
+
+            IReadOnlyDictionary<Weapon, WeaponUpgradeState> weaponStates = upgradeManager.GetWeaponUpgradeStates();
+            bool hasWeaponUpgrades = false;
+
+            foreach (var entry in weaponStates.OrderBy(entry => ResolveWeaponName(entry.Key)))
+            {
+                if (entry.Key == null || entry.Value == null)
+                {
+                    continue;
+                }
+
+                IReadOnlyDictionary<WeaponUpgradeType, int> counts = entry.Value.GetUpgradeCounts();
+                if (counts.Count == 0)
+                {
+                    continue;
+                }
+
+                bool hasWeaponLines = false;
+                foreach (var countEntry in counts.OrderBy(countEntry => countEntry.Key))
+                {
+                    if (countEntry.Value <= 0)
+                    {
+                        continue;
+                    }
+
+                    if (!hasWeaponLines)
+                    {
+                        GUILayout.Label(ResolveWeaponName(entry.Key));
+                        hasWeaponLines = true;
+                    }
+
+                    GUILayout.Label($"  {GetWeaponUpgradeLabel(countEntry.Key)}{FormatUpgradeCount(countEntry.Value)}");
+                }
+
+                if (hasWeaponLines)
+                {
+                    hasWeaponUpgrades = true;
+                }
+            }
+
+            if (!hasWeaponUpgrades)
+            {
+                GUILayout.Label("None");
+            }
+        }
+
+        private bool ShouldShowUpgradeSummary()
+        {
+            if (upgradeManager == null || playerHealth == null)
+            {
+                return false;
+            }
+
+            return IsUpgradeSummaryHeld();
+        }
+
+        private bool IsUpgradeSummaryHeld()
+        {
+            return upgradeSummaryInput != null && upgradeSummaryInput.IsPressed();
+        }
+
+        private void BindUpgradeSummaryInput()
+        {
+            if (upgradeSummaryInput != null)
+            {
+                return;
+            }
+
+            upgradeSummaryInput = upgradeSummaryAction != null ? upgradeSummaryAction.action : null;
+            ownsUpgradeSummaryInput = upgradeSummaryInput == null;
+
+            if (upgradeSummaryInput == null)
+            {
+                upgradeSummaryInput = new InputAction("UpgradeSummaryHold", InputActionType.Button, "<Keyboard>/tab");
+            }
+
+            if (!upgradeSummaryInput.enabled)
+            {
+                upgradeSummaryInput.Enable();
+            }
+        }
+
+        private void UnbindUpgradeSummaryInput()
+        {
+            if (upgradeSummaryInput == null)
+            {
+                return;
+            }
+
+            if (ownsUpgradeSummaryInput)
+            {
+                upgradeSummaryInput.Disable();
+                upgradeSummaryInput.Dispose();
+            }
+
+            upgradeSummaryInput = null;
+            ownsUpgradeSummaryInput = false;
+        }
+
+        private static string ResolveUpgradeTitle(Upgrade upgrade)
+        {
+            if (upgrade == null)
+            {
+                return "Upgrade";
+            }
+
+            return string.IsNullOrWhiteSpace(upgrade.Title) ? upgrade.name : upgrade.Title;
+        }
+
+        private static string ResolveWeaponName(Weapon weapon)
+        {
+            if (weapon == null)
+            {
+                return "Weapon";
+            }
+
+            return string.IsNullOrWhiteSpace(weapon.weaponName) ? weapon.name : weapon.weaponName;
+        }
+
+        private static string FormatUpgradeCount(int count)
+        {
+            return count > 1 ? $" x{count}" : string.Empty;
+        }
+
+        private static string GetWeaponUpgradeLabel(WeaponUpgradeType type)
+        {
+            return type switch
+            {
+                WeaponUpgradeType.Damage => "Damage Boost",
+                WeaponUpgradeType.FireRate => "Fire Rate Boost",
+                WeaponUpgradeType.ProjectileSpeed => "Bullet Speed Boost",
+                WeaponUpgradeType.Pierce => "Piercing Rounds",
+                WeaponUpgradeType.ExtraProjectiles => "Multi-Shot",
+                WeaponUpgradeType.FireCooldownReduction => "Cooldown Reduction",
+                WeaponUpgradeType.CritChance => "Critical Chance",
+                WeaponUpgradeType.CritDamage => "Critical Damage",
+                WeaponUpgradeType.Accuracy => "Accuracy Boost",
+                WeaponUpgradeType.FlamethrowerCooldown => "Faster Venting",
+                WeaponUpgradeType.FlamethrowerRange => "Longer Flame",
+                _ => "Upgrade"
+            };
         }
 
         void UpdateWeaponDisplay(Weapon weaponOverride = null)

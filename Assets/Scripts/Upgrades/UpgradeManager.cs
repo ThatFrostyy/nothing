@@ -41,6 +41,8 @@ namespace FF
         public event System.Action<UpgradeUI> OnUIRegistered;
 
         public int GetPendingUpgradeCount() => pendingUpgrades;
+        public System.Collections.Generic.IReadOnlyDictionary<Upgrade, int> GetUpgradeCounts() => upgradeCounts;
+        public System.Collections.Generic.IReadOnlyDictionary<Weapon, WeaponUpgradeState> GetWeaponUpgradeStates() => weaponUpgradeStates;
 
         Upgrade RandomUpgrade(System.Collections.Generic.List<Upgrade> pool)
         {
