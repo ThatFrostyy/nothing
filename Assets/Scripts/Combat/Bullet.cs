@@ -69,7 +69,9 @@ namespace FF
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (other.CompareTag(teamTag)) return;
+            if (!string.IsNullOrEmpty(teamTag) && other.CompareTag(teamTag))
+                return;
+
             if (((1 << other.gameObject.layer) & hitMask) == 0) return;
 
             if (other.TryGetComponent<Health>(out var hp))
