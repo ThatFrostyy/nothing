@@ -143,7 +143,6 @@ namespace FF
             yield return PrewarmFolder<Sprite>("Art");
             yield return PrewarmFolder<AudioClip>("Audio");
 
-            Debug.Log("Prewarming complete!");
         }
 
         IEnumerator PrewarmFolder<T>(string folderPath) where T : Object

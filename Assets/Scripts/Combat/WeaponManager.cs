@@ -291,25 +291,13 @@ namespace FF
             currentWeaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             muzzle = currentWeaponInstance.transform.Find("Muzzle");
-            if (!muzzle)
-            {
-                Debug.LogError("Weapon prefab missing child named 'Muzzle'");
-            }
 
             eject = currentWeaponInstance.transform.Find("Eject");
-            if (!eject)
-            {
-                Debug.LogError("Weapon prefab missing child named 'Eject'");
-            }
 
             if (shooter)
             {
                 shooter.InitializeRecoil(gunPivot);
                 shooter.SetWeapon(currentSO, muzzle, eject);
-            }
-            else
-            {
-                Debug.LogWarning("WeaponManager is missing a shooter reference.");
             }
 
             if (cosmetics)

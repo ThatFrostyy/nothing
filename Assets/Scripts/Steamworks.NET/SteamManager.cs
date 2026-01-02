@@ -48,7 +48,6 @@ public class SteamManager : MonoBehaviour {
 
 	[AOT.MonoPInvokeCallback(typeof(SteamAPIWarningMessageHook_t))]
 	protected static void SteamAPIDebugTextHook(int nSeverity, System.Text.StringBuilder pchDebugText) {
-		Debug.LogWarning(pchDebugText);
 	}
 
 #if UNITY_2019_3_OR_NEWER
@@ -80,13 +79,8 @@ public class SteamManager : MonoBehaviour {
                 // We want our SteamManager Instance to persist across scenes.
                 DontDestroyOnLoad(gameObject);
 
-		if (!Packsize.Test()) {
-			Debug.LogError("[Steamworks.NET] Packsize Test returned false, the wrong version of Steamworks.NET is being run in this platform.", this);
-		}
-
-		if (!DllCheck.Test()) {
-			Debug.LogError("[Steamworks.NET] DllCheck Test returned false, One or more of the Steamworks binaries seems to be the wrong version.", this);
-		}
+		Packsize.Test();
+		DllCheck.Test();
 
 		try {
 			// If Steam is not running or the game wasn't started through Steam, SteamAPI_RestartAppIfNecessary starts the
@@ -98,15 +92,11 @@ public class SteamManager : MonoBehaviour {
 			// remove steam_appid.txt from the game depot. eg: "(AppId_t)480" or "new AppId_t(480)".
 			// See the Valve documentation for more information: https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
 			if (SteamAPI.RestartAppIfNecessary(AppId_t.Invalid)) {
-				Debug.Log("[Steamworks.NET] Shutting down because RestartAppIfNecessary returned true. Steam will restart the application.");
-
 				Application.Quit();
 				return;
 			}
 		}
-		catch (System.DllNotFoundException e) { // We catch this exception here, as it will be the first occurrence of it.
-			Debug.LogError("[Steamworks.NET] Could not load [lib]steam_api.dll/so/dylib. It's likely not in the correct location. Refer to the README for more details.\n" + e, this);
-
+		catch (System.DllNotFoundException) { // We catch this exception here, as it will be the first occurrence of it.
 			Application.Quit();
 			return;
 		}
@@ -122,8 +112,6 @@ public class SteamManager : MonoBehaviour {
 		// https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
 		m_bInitialized = SteamAPI.Init();
 		if (!m_bInitialized) {
-			Debug.LogError("[Steamworks.NET] SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.", this);
-
 			return;
 		}
 

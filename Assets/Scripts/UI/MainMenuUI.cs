@@ -156,14 +156,12 @@ namespace FF
         {
             if (result.m_eResult != EResult.k_EResultOK)
             {
-                Debug.LogWarning($"[Steam] Failed to receive stats: {result.m_eResult}");
                 ShowUnavailableText();
                 return;
             }
 
             if (SteamUserStats.GetStat(KillStatName, out int kills))
             {
-                Debug.Log($"[Steam] MEnu Received total kills: {kills}");
                 _cachedKills = kills;
                 UpdateKillsText(_cachedKills);
             }
@@ -175,7 +173,6 @@ namespace FF
 
             if (SteamUserStats.GetStat(TopWaveStatName, out int topWave))
             {
-                Debug.Log($"[Steam] Received top wave survived: {topWave}");
                 _cachedTopWave = topWave;
                 UpdateTopWaveText(_cachedTopWave);
             }
@@ -203,7 +200,6 @@ namespace FF
         {
             if (failure || result.m_bLeaderboardFound == 0 || result.m_hSteamLeaderboard.m_SteamLeaderboard == 0)
             {
-                Debug.LogWarning("[Steam] Failed to locate kill leaderboard");
                 UpdateLeaderboardText(null);
                 return;
             }

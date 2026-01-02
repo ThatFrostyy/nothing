@@ -523,7 +523,6 @@ namespace FF
         {
             if (!SteamManager.Initialized)
             {
-                Debug.Log("Steam Manager is not initialized.");
                 return;
             }
 
@@ -531,16 +530,11 @@ namespace FF
             if (_inventoryCallback == null)
             {
                 _inventoryCallback = Callback<SteamInventoryResultReady_t>.Create(OnSteamInventoryReady);
-                Debug.Log("[Steam] Created inventory callback.");   
             }
 
             // SteamInventory returns a result handle, NOT an API Call handle.
             // We store this handle to verify the callback later.
-            if (!SteamInventory.GetAllItems(out _currentHandle))
-            {
-                Debug.LogWarning("[Steam] Failed to request inventory.");
-            }
-            Debug.Log("[Steam] Requested inventory.");
+            SteamInventory.GetAllItems(out _currentHandle);
         }
 
         // Note: Callback handlers have a different signature than CallResult handlers
@@ -550,19 +544,16 @@ namespace FF
             // Check if this result matches the request we made
             if (result.m_handle != _currentHandle)
             {
-                Debug.LogWarning("[Steam] Received inventory result for unknown handle.");
                 return;
             }
 
             if (result.m_result != EResult.k_EResultOK)
             {
-                Debug.LogWarning($"[Steam] Inventory request failed ({result.m_result}).");
                 // Even on failure, we must destroy the result to free memory
                 SteamInventory.DestroyResult(result.m_handle);
                 return;
             }
 
-            Debug.Log("[Steam] Inventory request succeeded.");
             UpdateOwnedHatsFromInventory(result.m_handle);
 
             // Clean up memory
@@ -582,14 +573,12 @@ namespace FF
             uint itemCount = 0;
             if (!SteamInventory.GetResultItems(handle, null, ref itemCount) || itemCount == 0)
             {
-                Debug.LogWarning("[Steam] No items found in inventory.");
                 return;
             }
 
             SteamItemDetails_t[] items = new SteamItemDetails_t[itemCount];
             if (!SteamInventory.GetResultItems(handle, items, ref itemCount))
             {
-                Debug.LogWarning("[Steam] No items found in inventory.");
                 return;
             }
 
@@ -600,7 +589,6 @@ namespace FF
 
                 if (_hatsByItemDefinitionId.TryGetValue(definitionId, out HatDefinition hat) && hat && addedHats.Add(hat))
                 {
-                    Debug.Log($"[Steam] Owned hat found: {hat.DisplayName} (DefID: {definitionId})");
                     _ownedSteamHats.Add(hat);
                 }
             }

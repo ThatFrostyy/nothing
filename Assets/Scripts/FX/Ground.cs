@@ -20,11 +20,6 @@ public class Ground : MonoBehaviour
 
     void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Debug.LogWarning("Multiple Ground instances detected in the scene.", this);
-        }
-
         Instance = this;
 
         if (!_spriteRenderer) _spriteRenderer = GetComponent<SpriteRenderer>();

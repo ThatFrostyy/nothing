@@ -78,7 +78,7 @@ namespace FF
                 // Ensure the VFX reference is valid on every tick while firing.
                 // The pooled instance can be returned/reparented externally which
                 // may leave _activeVfx referencing a stale object without the
-                // actual particle systems — detect and recover from that.
+                // actual particle systems â€” detect and recover from that.
                 EnsureVfxActive();
 
                 BeginFiring();
@@ -254,7 +254,6 @@ namespace FF
 
                 ApplyVfxLengthScale();
             }
-            Debug.Log($"Flame VFX spawn: {_activeVfx?.name}, active={_activeVfx?.activeInHierarchy}");
         }
 
         // Defensive check to ensure the _activeVfx reference actually contains
@@ -273,7 +272,6 @@ namespace FF
             // If the referenced object is inactive in hierarchy, try to reacquire
             if (!_activeVfx.activeInHierarchy)
             {
-                Debug.Log("Flame VFX reference inactive in hierarchy — clearing reference so it can be respawned.");
                 _activeVfx = null;
                 return;
             }
@@ -304,7 +302,6 @@ namespace FF
 
                         if (candidate != null)
                         {
-                            Debug.Log($"Flame VFX moved under parent '{root.name}' — switching active vfx to '{candidate.name}'");
                             _activeVfx = candidate;
                             return;
                         }
@@ -312,7 +309,6 @@ namespace FF
                 }
 
                 // Fallback: clear reference so StartLoopingVfx can respawn it.
-                Debug.Log("Flame VFX no longer contains particle systems — clearing reference to force respawn.");
                 _activeVfx = null;
             }
         }
@@ -324,7 +320,6 @@ namespace FF
                 return;
             }
 
-            Debug.Log("Stopping flame VFX");
             _activeVfx.transform.SetParent(null, true);
 
             if (_activeVfx.TryGetComponent<PooledParticleSystem>(out var pooled))

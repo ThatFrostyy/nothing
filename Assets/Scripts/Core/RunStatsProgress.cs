@@ -62,9 +62,9 @@ namespace FF
                 {
                     _data = JsonUtility.FromJson<RunStatsData>(json);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Debug.LogWarning($"Failed to load run stats: {e.Message}");
+                    // Ignore malformed saved data.
                 }
             }
 

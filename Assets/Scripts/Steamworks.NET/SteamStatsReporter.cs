@@ -337,9 +337,6 @@ namespace FF
 
         private void HandleStatsStored(UserStatsStored_t callback)
         {
-            if (callback.m_eResult != EResult.k_EResultOK)
-            {
-            }
         }
 
         private void HandleKillCountChanged(int kills)
@@ -484,7 +481,6 @@ namespace FF
         {
             if (failure)
             {
-
                 return;
             }
 
@@ -499,16 +495,10 @@ namespace FF
                 if (!SteamUserStats.GetDownloadedLeaderboardEntry(callback.m_hSteamLeaderboardEntries, i, out LeaderboardEntry_t entry, null, 0))
                     continue;
 
-                string name = SteamFriends.GetFriendPersonaName(entry.m_steamIDUser);
-                string meMark = entry.m_steamIDUser == SteamUser.GetSteamID() ? " <-- THIS ACCOUNT" : string.Empty;
-
                 if (entry.m_steamIDUser == SteamUser.GetSteamID())
                     foundSelf = true;
             }
 
-            if (!foundSelf)
-            {
-            }
         }
 
         private void HandleStatsReceived(UserStatsReceived_t callback)
@@ -533,9 +523,6 @@ namespace FF
                 EnsureKillLeaderboard();
                 QueueCoreStatsPush();
                 QueueKillLeaderboardPush();
-            }
-            else
-            {
             }
         }
        

@@ -114,7 +114,6 @@ namespace FF
 
             if (applicationId == 0)
             {
-                Debug.LogWarning("DiscordRichPresence: No application ID set.");
                 return;
             }
 
@@ -124,9 +123,8 @@ namespace FF
                 client.SetApplicationId(applicationId);
                 startTimestamp = (ulong)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Debug.LogWarning($"DiscordRichPresence: Failed to initialize Discord client. {ex.Message}");
                 client = null;
             }
         }
@@ -162,7 +160,6 @@ namespace FF
             {
                 if (!hasLoggedMissingGameManager)
                 {
-                    Debug.LogWarning("DiscordRichPresence: GameManager instance not found.");
                     hasLoggedMissingGameManager = true;
                 }
                 return;
@@ -261,7 +258,6 @@ namespace FF
             client.UpdateRichPresence(activity, result =>
             {
                 if (!result.Successful())
-                    Debug.LogWarning("Discord RPC failed: " + result.Error());
             });
         }
 

@@ -245,9 +245,8 @@ namespace FF
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Debug.LogWarning($"Failed to load character progression: {e.Message}");
                 StateByCharacter.Clear();
             }
         }
