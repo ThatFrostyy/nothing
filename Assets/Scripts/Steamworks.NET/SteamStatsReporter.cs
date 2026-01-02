@@ -217,6 +217,8 @@ namespace FF
 
         private void OnDisable()
         {
+            FlushPendingPushes();
+
             if (_gameManagerHooked && GameManager.I != null)
             {
                 GameManager.I.OnKillCountChanged -= HandleKillCountChanged;
@@ -272,6 +274,27 @@ namespace FF
             _playerBody = null;
         }
 
+        private void FlushPendingPushes()
+        {
+            if (!_statsReady) return;
+
+            // Force push core stats regardless of timer
+            if (_pendingCoreStatsPush)
+            {
+                PushCoreStats();
+                _pendingCoreStatsPush = false;
+            }
+
+            // Force push leaderboard regardless of timer
+            if (_pendingLeaderboardPush)
+            {
+                if (TryPushKillLeaderboardScore())
+                {
+                    _pendingLeaderboardPush = false;
+                }
+            }
+        }
+
         private void Update()
         {
             if (!_gameManagerHooked)
@@ -316,7 +339,6 @@ namespace FF
         {
             if (callback.m_eResult != EResult.k_EResultOK)
             {
-                Debug.LogWarning($"[Steam] Failed to store stats: {callback.m_eResult}");
             }
         }
 
@@ -347,7 +369,7 @@ namespace FF
         {
             if (failure || result.m_bLeaderboardFound == 0 || result.m_hSteamLeaderboard.m_SteamLeaderboard == 0)
             {
-                Debug.LogWarning("[Steam] Failed to locate kill leaderboard");
+
                 return;
             }
 
@@ -359,19 +381,21 @@ namespace FF
         {
             if (failure || result.m_bSuccess == 0)
             {
-                Debug.LogWarning("[Steam] Failed to upload kill leaderboard score");
+
                 return;
             }
 
-            Debug.Log($"[Steam] Leaderboard upload response: attempted={result.m_nScore}, changed={(result.m_bScoreChanged == 1)}, newRank={result.m_nGlobalRankNew}, previousRank={result.m_nGlobalRankPrevious}");
+
 
             if (result.m_bScoreChanged == 1)
             {
-                Debug.Log($"[Steam] Leaderboard updated!");
+
             }
             else
             {
-                Debug.Log("[Steam] Score sent, but existing high score was better.");
+
+
+
             }
 
             // Request rows around the current user so we can confirm whether the account has a leaderboard row.
@@ -392,7 +416,7 @@ namespace FF
 
             if (waveDropListDefinitionId <= 0)
             {
-                Debug.LogWarning("[Steam] Wave drop definition id is not configured.");
+
                 _waveDropTriggered = true;
                 return;
             }
@@ -401,13 +425,13 @@ namespace FF
 
             if (!SteamInventory.TriggerItemDrop(out _waveDropResultHandle, new SteamItemDef_t(waveDropListDefinitionId)))
             {
-                Debug.LogWarning($"[Steam] Failed to trigger inventory drop for wave {waveDropWaveThreshold} (DefID: {waveDropListDefinitionId}).");
+
                 _waveDropResultHandle = SteamInventoryResult_t.Invalid;
                 return;
             }
 
             _waveDropTriggered = true;
-            Debug.Log($"[Steam] Triggered inventory drop for reaching wave {wave} (DefID: {waveDropListDefinitionId}).");
+
         }
 
         private void HandleInventoryResultReady(SteamInventoryResultReady_t result)
@@ -419,11 +443,11 @@ namespace FF
 
             if (result.m_result != EResult.k_EResultOK)
             {
-                Debug.LogWarning($"[Steam] Inventory drop failed: {result.m_result}");
+
             }
             else
             {
-                Debug.Log("[Steam] Inventory drop result received.");
+
             }
 
             ReleaseWaveDropHandle();
@@ -442,7 +466,7 @@ namespace FF
         {
             if (_killLeaderboard.m_SteamLeaderboard == 0)
             {
-                Debug.Log("[Steam] Cannot request around-user entries: leaderboard handle not ready.");
+
                 return;
             }
 
@@ -453,25 +477,23 @@ namespace FF
                 -5,
                 5);
             _killLeaderboardScoresDownloaded.Set(handle, HandleUserLeaderboardScoresDownloaded);
-            Debug.Log("[Steam] Requested leaderboard entries around user");
+
         }
 
         private void HandleUserLeaderboardScoresDownloaded(LeaderboardScoresDownloaded_t callback, bool failure)
         {
             if (failure)
             {
-                Debug.LogWarning("[Steam] Failed to download leaderboard entries around user");
+
                 return;
             }
 
             if (callback.m_cEntryCount <= 0)
             {
-                Debug.Log("[Steam] No leaderboard entries returned for around-user request");
                 return;
             }
 
             bool foundSelf = false;
-            Debug.Log($"[Steam] Downloaded {callback.m_cEntryCount} entries around user:");
             for (int i = 0; i < callback.m_cEntryCount; i++)
             {
                 if (!SteamUserStats.GetDownloadedLeaderboardEntry(callback.m_hSteamLeaderboardEntries, i, out LeaderboardEntry_t entry, null, 0))
@@ -479,7 +501,6 @@ namespace FF
 
                 string name = SteamFriends.GetFriendPersonaName(entry.m_steamIDUser);
                 string meMark = entry.m_steamIDUser == SteamUser.GetSteamID() ? " <-- THIS ACCOUNT" : string.Empty;
-                Debug.Log($"[Steam] {entry.m_nGlobalRank}. {name} (score={entry.m_nScore}){meMark}");
 
                 if (entry.m_steamIDUser == SteamUser.GetSteamID())
                     foundSelf = true;
@@ -487,7 +508,6 @@ namespace FF
 
             if (!foundSelf)
             {
-                Debug.LogWarning("[Steam] Your account was NOT present in the around-user rows. Verify Steam account, AppID, and profile visibility.");
             }
         }
 
@@ -516,7 +536,6 @@ namespace FF
             }
             else
             {
-                Debug.LogWarning($"[Steam] Failed to receive stats: {callback.m_eResult}");
             }
         }
        
@@ -721,7 +740,6 @@ namespace FF
                 {
                     _unlockedAchievements.Add(achievementName);
                     statsUpdated = true;
-                    Debug.Log($"[Steam] Unlocked {config.WeaponKey} {threshold} kills achievement");
                 }
             }
         }
@@ -767,7 +785,6 @@ namespace FF
         {
             if (!_statsReady)
             {
-                Debug.Log("[Steam] PushKillLeaderboardScore skipped: stats not ready");
                 return false;
             }
 
@@ -776,11 +793,9 @@ namespace FF
 
             if (_killLeaderboard.m_SteamLeaderboard == 0)
             {
-                Debug.Log($"[Steam] PushKillLeaderboardScore skipped: leaderboard handle not ready (score would be {score})");
                 return false;
             }
 
-            Debug.Log($"[Steam] Uploading kill leaderboard score: {score} to leaderboard '{KillLeaderboardName}' (handle {_killLeaderboard.m_SteamLeaderboard})");
 
             SteamAPICall_t handle = SteamUserStats.UploadLeaderboardScore(
                 _killLeaderboard,
@@ -806,7 +821,6 @@ namespace FF
                     {
                         a.unlocked = true;
                         SteamUserStats.StoreStats();
-                        Debug.Log($"[Steam] Unlocked: {a.achievementId}");
                     }
                 }
             }
@@ -1083,7 +1097,6 @@ namespace FF
             {
                 _unlockedAchievements.Add(achievementId);
                 SteamUserStats.StoreStats();
-                Debug.Log($"[Steam] Unlocked achievement: {achievementId}");
             }
         }
 
@@ -1108,6 +1121,11 @@ namespace FF
             }
 
             SteamUserStats.StoreStats();
+        }
+
+        private void OnApplicationQuit()
+        {
+            FlushPendingPushes();
         }
 #endif
     }

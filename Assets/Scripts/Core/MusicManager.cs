@@ -81,6 +81,9 @@ namespace FF
             DontDestroyOnLoad(gameObject);
             CreateSources();
 
+            // Preload music audio data to avoid runtime decoding I/O when clips are first played.
+            PreloadMusicClips();
+
             LoadSavedVolume();
             _lastAppliedVolume = MusicVolume;
         }
@@ -157,9 +160,34 @@ namespace FF
             _pauseFadeRoutine = StartCoroutine(PauseFadeRoutine(paused));
         }
 
+        private void PreloadMusicClips()
+        {
+            // Try to ask Unity to load audio data ahead of time for each clip.
+            TryPreloadClip(menuMusic);
+            TryPreloadClip(actionMusic);
+            TryPreloadClip(intenseMusic);
+            TryPreloadClip(bossMusic);
+        }
 
+        private void TryPreloadClip(AudioClip clip)
+        {
+            if (clip == null)
+                return;
 
-
+            // If audio is already ready, skip. Otherwise request loading.
+            // LoadAudioData is a no-op if audio data is already loaded.
+            try
+            {
+                if (!clip.isReadyToPlay)
+                {
+                    clip.LoadAudioData();
+                }
+            }
+            catch
+            {
+                // Fail silently if the platform doesn't support explicit preload calls.
+            }
+        }
 
         private IEnumerator PauseFadeRoutine(bool paused)
         {
