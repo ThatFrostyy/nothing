@@ -52,7 +52,7 @@ namespace FF
             }
 
             DontDestroyOnLoad(gameObject);
-            AppendLog("Debug console enabled. Commands: wave, god, health, tp.");
+            AppendLog("Debug console enabled. Use `help` for a list of commands.");
             CachePlayerHealth();
         }
 
