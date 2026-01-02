@@ -258,6 +258,9 @@ namespace FF
             client.UpdateRichPresence(activity, result =>
             {
                 if (!result.Successful())
+                {
+                    Debug.LogError("Failed to update Discord rich presence.");
+                }
             });
         }
 

@@ -8147,6 +8147,12 @@ MonoBehaviour:
   interactActionName: Interact
   interactBindingId: 1c04ea5f-b012-41d1-a6f7-02e963b52893
   timeFormat: mm\:ss
+  upgradeSummaryAction: {fileID: 3315266796022706811, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  upgradeSummaryActionName: UpgradeOverlay
+  upgradeSummaryBindingId: 1
+  upgradeSummaryWidth: 360
+  upgradeSummaryHeight: 420
+  upgradeSummaryOffset: {x: 10, y: 10}
   healthPulseTarget: {fileID: 2001000101}
   xpPulseTarget: {fileID: 1358656901}
   lowHealthThreshold: 0.25
