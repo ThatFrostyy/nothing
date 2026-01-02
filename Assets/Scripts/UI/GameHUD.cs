@@ -49,9 +49,11 @@ namespace FF
         [SerializeField] private InputActionReference upgradeSummaryAction;
         [SerializeField] private string upgradeSummaryActionName = "UpgradeSummary";
         [SerializeField] private string upgradeSummaryBindingId = "";
-        [SerializeField, Min(150f)] private float upgradeSummaryWidth = 360f;
-        [SerializeField, Min(150f)] private float upgradeSummaryHeight = 420f;
-        [SerializeField] private Vector2 upgradeSummaryOffset = new(10f, 10f);
+        [SerializeField] private CanvasGroup upgradeSummaryGroup;
+        [SerializeField] private TMP_Text upgradeSummaryTitleText;
+        [SerializeField] private TMP_Text upgradeSummaryPlayerText;
+        [SerializeField] private TMP_Text upgradeSummaryWeaponText;
+        [SerializeField] private string upgradeSummaryTitle = "Upgrades";
 
         [Header("UI Animation")]
         [SerializeField] private RectTransform healthPulseTarget;
@@ -146,9 +148,9 @@ namespace FF
         private Coroutine getReadyRoutine;
         private bool hasNearbyPickups;
         private WeaponManager boundWeaponManager;
-        private Vector2 upgradeSummaryScroll;
         private InputAction upgradeSummaryInput;
         private bool ownsUpgradeSummaryInput;
+        private bool upgradeSummaryVisible;
 
         void Awake()
         {
@@ -243,32 +245,9 @@ namespace FF
             InitializeGetReady();
             InitializeWaveFlash();
             RefreshUpgradePrompt();
+            ApplyUpgradeSummaryVisibility(false);
 
             ApplySceneVisibility(SceneManager.GetActiveScene());
-        }
-
-        void OnGUI()
-        {
-            if (!ShouldShowUpgradeSummary())
-            {
-                return;
-            }
-
-            float width = Mathf.Min(upgradeSummaryWidth, Screen.width - 20f);
-            float height = Mathf.Min(upgradeSummaryHeight, Screen.height - 20f);
-            float x = Mathf.Max(10f, Screen.width - width - upgradeSummaryOffset.x);
-            float y = Mathf.Max(10f, upgradeSummaryOffset.y);
-            Rect boxRect = new Rect(x, y, width, height);
-            GUI.Box(boxRect, "Upgrades");
-
-            Rect contentRect = new Rect(boxRect.x + 10f, boxRect.y + 25f, boxRect.width - 20f, boxRect.height - 35f);
-            GUILayout.BeginArea(contentRect);
-            upgradeSummaryScroll = GUILayout.BeginScrollView(upgradeSummaryScroll);
-
-            RenderUpgradeSummary();
-
-            GUILayout.EndScrollView();
-            GUILayout.EndArea();
         }
 
         void OnDestroy()
@@ -417,6 +396,7 @@ namespace FF
             if (!isGameplay)
             {
                 upgradePromptTimer = 0f;
+                ApplyUpgradeSummaryVisibility(false);
             }
         }
 
@@ -516,6 +496,7 @@ namespace FF
             UpdateHeartbeatTimer(unscaledDeltaTime);
             UpdateWaveBanner(unscaledDeltaTime);
             UpdateWaveFlash(unscaledDeltaTime);
+            UpdateUpgradeSummaryToggle();
         }
 
         void BindSceneManagers()
@@ -581,6 +562,7 @@ namespace FF
         {
             RefreshKeybindLabels();
             RefreshUpgradePrompt();
+            RefreshUpgradeSummaryText();
         }
 
         void RefreshKeybindLabels()
@@ -844,6 +826,93 @@ namespace FF
             }
         }
 
+        void UpdateUpgradeSummaryToggle()
+        {
+            if (upgradeSummaryInput == null)
+            {
+                return;
+            }
+
+            if (upgradeSummaryInput.WasPressedThisFrame())
+            {
+                upgradeSummaryVisible = !upgradeSummaryVisible;
+                ApplyUpgradeSummaryVisibility(upgradeSummaryVisible);
+                if (upgradeSummaryVisible)
+                {
+                    RefreshUpgradeSummaryText();
+                }
+            }
+        }
+
+        void ApplyUpgradeSummaryVisibility(bool isVisible)
+        {
+            if (upgradeSummaryGroup)
+            {
+                upgradeSummaryGroup.alpha = isVisible ? 1f : 0f;
+                upgradeSummaryGroup.interactable = isVisible;
+                upgradeSummaryGroup.blocksRaycasts = isVisible;
+                upgradeSummaryGroup.gameObject.SetActive(isVisible);
+            }
+
+            if (upgradeSummaryTitleText)
+            {
+                upgradeSummaryTitleText.gameObject.SetActive(isVisible);
+            }
+
+            if (upgradeSummaryPlayerText)
+            {
+                upgradeSummaryPlayerText.gameObject.SetActive(isVisible);
+            }
+
+            if (upgradeSummaryWeaponText)
+            {
+                upgradeSummaryWeaponText.gameObject.SetActive(isVisible);
+            }
+
+            if (!isVisible)
+            {
+                upgradeSummaryVisible = false;
+            }
+        }
+
+        void RefreshUpgradeSummaryText()
+        {
+            if (upgradeSummaryTitleText)
+            {
+                upgradeSummaryTitleText.text = upgradeSummaryTitle;
+            }
+
+            if (!upgradeSummaryPlayerText && !upgradeSummaryWeaponText)
+            {
+                return;
+            }
+
+            if (upgradeManager == null)
+            {
+                if (upgradeSummaryPlayerText)
+                {
+                    upgradeSummaryPlayerText.text = "No upgrade data.";
+                }
+
+                if (upgradeSummaryWeaponText)
+                {
+                    upgradeSummaryWeaponText.text = "No upgrade data.";
+                }
+
+                return;
+            }
+
+            if (upgradeSummaryPlayerText)
+            {
+                upgradeSummaryPlayerText.text = BuildPlayerUpgradeSummary();
+            }
+
+            if (upgradeSummaryWeaponText)
+            {
+                upgradeSummaryWeaponText.text = BuildWeaponUpgradeSummary();
+            }
+        }
+
         void StartUpgradePromptFade(float targetAlpha, bool instant = false)
         {
             if (upgradePromptFadeRoutine != null) StopCoroutine(upgradePromptFadeRoutine);
@@ -905,43 +974,37 @@ namespace FF
             if (!isVisible && upgradePromptText) upgradePromptText.gameObject.SetActive(false);
         }
 
-        private void RenderUpgradeSummary()
+        private string BuildPlayerUpgradeSummary()
         {
-            GUILayout.Label("Player Upgrades");
-            if (upgradeManager == null)
-            {
-                GUILayout.Label("No upgrade data.");
-            }
-            else
-            {
-                IReadOnlyDictionary<Upgrade, int> playerUpgrades = upgradeManager.GetUpgradeCounts();
-                bool hasPlayerUpgrades = false;
+            var builder = new System.Text.StringBuilder();
+            builder.AppendLine("Player Upgrades");
 
-                foreach (var entry in playerUpgrades.OrderBy(entry => ResolveUpgradeTitle(entry.Key)))
+            IReadOnlyDictionary<Upgrade, int> playerUpgrades = upgradeManager.GetUpgradeCounts();
+            bool hasPlayerUpgrades = false;
+
+            foreach (var entry in playerUpgrades.OrderBy(entry => ResolveUpgradeTitle(entry.Key)))
+            {
+                if (entry.Key == null || entry.Value <= 0)
                 {
-                    if (entry.Key == null || entry.Value <= 0)
-                    {
-                        continue;
-                    }
-
-                    hasPlayerUpgrades = true;
-                    GUILayout.Label($"{ResolveUpgradeTitle(entry.Key)}{FormatUpgradeCount(entry.Value)}");
+                    continue;
                 }
 
-                if (!hasPlayerUpgrades)
-                {
-                    GUILayout.Label("None");
-                }
+                hasPlayerUpgrades = true;
+                builder.AppendLine($"{ResolveUpgradeTitle(entry.Key)}{FormatUpgradeCount(entry.Value)}");
             }
 
-            GUILayout.Space(8f);
-            GUILayout.Label("Weapon Upgrades");
-
-            if (upgradeManager == null)
+            if (!hasPlayerUpgrades)
             {
-                GUILayout.Label("No upgrade data.");
-                return;
+                builder.AppendLine("None");
             }
+
+            return builder.ToString().TrimEnd();
+        }
+
+        private string BuildWeaponUpgradeSummary()
+        {
+            var builder = new System.Text.StringBuilder();
+            builder.AppendLine("Weapon Upgrades");
 
             IReadOnlyDictionary<Weapon, WeaponUpgradeState> weaponStates = upgradeManager.GetWeaponUpgradeStates();
             bool hasWeaponUpgrades = false;
@@ -969,11 +1032,11 @@ namespace FF
 
                     if (!hasWeaponLines)
                     {
-                        GUILayout.Label(ResolveWeaponName(entry.Key));
+                        builder.AppendLine(ResolveWeaponName(entry.Key));
                         hasWeaponLines = true;
                     }
 
-                    GUILayout.Label($"  {GetWeaponUpgradeLabel(countEntry.Key)}{FormatUpgradeCount(countEntry.Value)}");
+                    builder.AppendLine($"  {GetWeaponUpgradeLabel(countEntry.Key)}{FormatUpgradeCount(countEntry.Value)}");
                 }
 
                 if (hasWeaponLines)
@@ -984,23 +1047,10 @@ namespace FF
 
             if (!hasWeaponUpgrades)
             {
-                GUILayout.Label("None");
-            }
-        }
-
-        private bool ShouldShowUpgradeSummary()
-        {
-            if (upgradeManager == null || playerHealth == null)
-            {
-                return false;
+                builder.AppendLine("None");
             }
 
-            return IsUpgradeSummaryHeld();
-        }
-
-        private bool IsUpgradeSummaryHeld()
-        {
-            return upgradeSummaryInput != null && upgradeSummaryInput.IsPressed();
+            return builder.ToString().TrimEnd();
         }
 
         private void BindUpgradeSummaryInput()
