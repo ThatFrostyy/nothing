@@ -402,14 +402,12 @@ namespace FF
         {
             if (!_shockwaveEnabled)
             {
-                Debug.Log($"[Grenade] Shockwave skipped: enabled={_shockwaveEnabled}");
                 return;
             }
 
             float effectiveRadius = _shockwaveRadius > 0f ? _shockwaveRadius : explosionRadius;
 
             int hits = Physics2D.OverlapCircleNonAlloc(center, effectiveRadius, OverlapBuffer, damageLayers);
-            Debug.Log($"[Grenade] Shockwave at {center} radius={effectiveRadius} hits={hits} source={_shockwaveSource?.name ?? "null"}");
             if (hits <= 0)
             {
                 return;
@@ -438,7 +436,6 @@ namespace FF
                 }
 
                 _shockwaveTargets.Add(enemy);
-                Debug.Log($"[Grenade] Shockwave -> enemy={enemy.name} at {enemy.transform.position}");
                 enemy.ApplyStun(_shockwaveStunDuration);
                 DamageNumberManager.ShowText(enemy.transform.position, "Stunned", _shockwaveTextColor, _shockwaveTextScale);
 
@@ -451,7 +448,6 @@ namespace FF
                 if (_shockwaveForce > 0f)
                 {
                     Vector2 knock = direction.normalized * _shockwaveForce;
-                    Debug.Log($"[Grenade] Applying knockback to {enemy.name}: {knock} duration={_shockwaveKnockbackDuration}");
                     enemy.ApplyKnockback(knock, _shockwaveKnockbackDuration);
                 }
             }

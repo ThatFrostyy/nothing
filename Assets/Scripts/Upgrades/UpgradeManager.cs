@@ -291,6 +291,11 @@ namespace FF
                 return;
             }
 
+            if (PauseMenuController.IsMenuOpen)
+            {
+                return;
+            }
+
             if (!CanReceiveUpgrades())
             {
                 pendingUpgrades = 0;

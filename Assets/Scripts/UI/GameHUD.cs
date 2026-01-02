@@ -410,11 +410,6 @@ namespace FF
             upgradeManager = UpgradeManager.I;
             if (!upgradeManager) upgradeManager = FindFirstObjectByType<UpgradeManager>();
 
-            if (gameManager == null) Debug.LogWarning("[HUD] Could not find GameManager on bind.");
-            if (playerHealth == null) Debug.LogWarning("[HUD] Could not find Player Health on bind.");
-            if (wallet == null) Debug.LogWarning("[HUD] Could not find XPWallet.");
-            if (weaponManager == null) Debug.LogWarning("[HUD] Could not find WeaponManager.");
-            if (upgradeManager == null) Debug.LogWarning("[HUD] Could not find UpgradeManager.");
 
             RefreshUpgradeManagerReference();
             BindWeaponManager(weaponManager);

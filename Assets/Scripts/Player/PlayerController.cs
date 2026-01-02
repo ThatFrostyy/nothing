@@ -405,6 +405,11 @@ namespace FF
                 return;
             }
 
+            if (_upgradeMenuOpen || PauseMenuController.IsMenuOpen)
+            {
+                return;
+            }
+
             if (_upgradeManager == null)
             {
                 _upgradeManager = UpgradeManager.I;

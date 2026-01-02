@@ -10,7 +10,28 @@ namespace FF
         private const int MaxLogEntries = 50;
         private const string InputControlName = "DebugConsoleInput";
 
+        private readonly struct CommandInfo
+        {
+            public string Usage { get; }
+            public string Description { get; }
+
+            public CommandInfo(string usage, string description)
+            {
+                Usage = usage;
+                Description = description;
+            }
+        }
+
         private static bool? _debugEnabled;
+
+        private readonly Dictionary<string, CommandInfo> _commandInfo = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["help"] = new CommandInfo("help", "Show available commands."),
+            ["wave"] = new CommandInfo("wave", "Start the next wave."),
+            ["god"] = new CommandInfo("god", "Toggle god mode."),
+            ["health"] = new CommandInfo("health", "Restore player health to full."),
+            ["tp"] = new CommandInfo("tp [x y]", "Teleport to coordinates, or to the mouse position if no coordinates are provided.")
+        };
 
         private readonly List<string> _logs = new();
         private string _input = string.Empty;
@@ -146,21 +167,56 @@ namespace FF
 
             switch (command)
             {
+                case "help":
+                    HandleHelp();
+                    break;
                 case "wave":
+                    if (parts.Length > 1)
+                    {
+                        AppendUsage("wave");
+                        break;
+                    }
                     HandleWave();
                     break;
                 case "god":
+                    if (parts.Length > 1)
+                    {
+                        AppendUsage("god");
+                        break;
+                    }
                     ToggleGodMode();
                     break;
                 case "health":
+                    if (parts.Length > 1)
+                    {
+                        AppendUsage("health");
+                        break;
+                    }
                     HandleHealth();
                     break;
                 case "tp":
                     HandleTeleport(parts);
                     break;
                 default:
-                    AppendLog("Unknown command.");
+                    AppendLog("Unknown command. Use `help` to see available commands.");
                     break;
+            }
+        }
+
+        private void HandleHelp()
+        {
+            AppendLog("Available commands:");
+            foreach (CommandInfo info in _commandInfo.Values)
+            {
+                AppendLog($"{info.Usage} - {info.Description}");
+            }
+        }
+
+        private void AppendUsage(string command)
+        {
+            if (_commandInfo.TryGetValue(command, out CommandInfo info))
+            {
+                AppendLog($"Usage: {info.Usage}");
             }
         }
 
@@ -236,13 +292,7 @@ namespace FF
             Transform playerTransform = _playerHealth.transform;
             Vector3 destination;
 
-            if (parts.Length >= 3
-                && float.TryParse(parts[1], out float x)
-                && float.TryParse(parts[2], out float y))
-            {
-                destination = new Vector3(x, y, playerTransform.position.z);
-            }
-            else
+            if (parts.Length == 1)
             {
                 Camera camera = Camera.main;
                 if (!camera)
@@ -254,6 +304,17 @@ namespace FF
                 Vector2 screenPos = Mouse.current != null ? Mouse.current.position.ReadValue() : (Vector2)Input.mousePosition;
                 Vector3 worldPos = camera.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, camera.nearClipPlane));
                 destination = new Vector3(worldPos.x, worldPos.y, playerTransform.position.z);
+            }
+            else if (parts.Length == 3
+                && float.TryParse(parts[1], out float x)
+                && float.TryParse(parts[2], out float y))
+            {
+                destination = new Vector3(x, y, playerTransform.position.z);
+            }
+            else
+            {
+                AppendUsage("tp");
+                return;
             }
 
             if (playerTransform.TryGetComponent(out Rigidbody2D rigidbody))
