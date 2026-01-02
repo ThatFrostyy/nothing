@@ -46,7 +46,9 @@ namespace FF
         [SerializeField] private string timeFormat = "mm\\:ss";
 
         [Header("Upgrade Summary")]
-        [SerializeField] private KeyCode upgradeSummaryKey = KeyCode.Tab;
+        [SerializeField] private InputActionReference upgradeSummaryAction;
+        [SerializeField] private string upgradeSummaryActionName = "UpgradeSummary";
+        [SerializeField] private string upgradeSummaryBindingId = "";
         [SerializeField, Min(150f)] private float upgradeSummaryWidth = 360f;
         [SerializeField, Min(150f)] private float upgradeSummaryHeight = 420f;
         [SerializeField] private Vector2 upgradeSummaryOffset = new(10f, 10f);
@@ -145,6 +147,8 @@ namespace FF
         private bool hasNearbyPickups;
         private WeaponManager boundWeaponManager;
         private Vector2 upgradeSummaryScroll;
+        private InputAction upgradeSummaryInput;
+        private bool ownsUpgradeSummaryInput;
 
         void Awake()
         {
@@ -310,6 +314,7 @@ namespace FF
             InputBindingManager.Initialize(ResolveInputAsset());
             InputBindingManager.OnBindingsChanged += HandleBindingsChanged;
             RefreshKeybindLabels();
+            BindUpgradeSummaryInput();
 
             if (gameManager != null)
             {
@@ -334,6 +339,7 @@ namespace FF
             PlayerController.OnPlayerReady -= HandlePlayerReady;
 
             InputBindingManager.OnBindingsChanged -= HandleBindingsChanged;
+            UnbindUpgradeSummaryInput();
 
             if (gameManager != null)
             {
@@ -606,6 +612,7 @@ namespace FF
 
             upgradeAction = EnsureActionReference(upgradeAction, asset, upgradeBindingId, upgradeActionName);
             interactAction = EnsureActionReference(interactAction, asset, interactBindingId, interactActionName);
+            upgradeSummaryAction = EnsureActionReference(upgradeSummaryAction, asset, upgradeSummaryBindingId, upgradeSummaryActionName);
         }
 
         static InputActionReference EnsureActionReference(InputActionReference reference, InputActionAsset asset, string bindingId, string actionName)
@@ -993,12 +1000,45 @@ namespace FF
 
         private bool IsUpgradeSummaryHeld()
         {
-            if (Input.GetKey(upgradeSummaryKey))
+            return upgradeSummaryInput != null && upgradeSummaryInput.IsPressed();
+        }
+
+        private void BindUpgradeSummaryInput()
+        {
+            if (upgradeSummaryInput != null)
             {
-                return true;
+                return;
             }
 
-            return Keyboard.current != null && Keyboard.current.tabKey.isPressed;
+            upgradeSummaryInput = upgradeSummaryAction != null ? upgradeSummaryAction.action : null;
+            ownsUpgradeSummaryInput = upgradeSummaryInput == null;
+
+            if (upgradeSummaryInput == null)
+            {
+                upgradeSummaryInput = new InputAction("UpgradeSummaryHold", InputActionType.Button, "<Keyboard>/tab");
+            }
+
+            if (!upgradeSummaryInput.enabled)
+            {
+                upgradeSummaryInput.Enable();
+            }
+        }
+
+        private void UnbindUpgradeSummaryInput()
+        {
+            if (upgradeSummaryInput == null)
+            {
+                return;
+            }
+
+            if (ownsUpgradeSummaryInput)
+            {
+                upgradeSummaryInput.Disable();
+                upgradeSummaryInput.Dispose();
+            }
+
+            upgradeSummaryInput = null;
+            ownsUpgradeSummaryInput = false;
         }
 
         private static string ResolveUpgradeTitle(Upgrade upgrade)
