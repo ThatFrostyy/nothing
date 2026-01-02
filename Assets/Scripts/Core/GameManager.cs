@@ -55,6 +55,7 @@ namespace FF
             _instance = this;
             DontDestroyOnLoad(gameObject);
             ResetGameState();
+            EnsureDebugConsole();
         }
 
         void OnEnable()
@@ -197,6 +198,40 @@ namespace FF
                 timer = 0f;
                 spawner?.StopSpawning();
             }
+        }
+
+        public bool DebugStartNextWave()
+        {
+            if (spawner == null)
+            {
+                return false;
+            }
+
+            timer = 0f;
+            Wave++;
+
+            OnWaveStarted?.Invoke(Wave);
+            spawner.SpawnWave(Wave);
+            AdvanceWaveInterval();
+
+            return true;
+        }
+
+        private void EnsureDebugConsole()
+        {
+            if (!DebugConsole.IsDebugEnabled)
+            {
+                return;
+            }
+
+            if (FindFirstObjectByType<DebugConsole>() != null)
+            {
+                return;
+            }
+
+            GameObject consoleObject = new GameObject("DebugConsole");
+            consoleObject.AddComponent<DebugConsole>();
+            DontDestroyOnLoad(consoleObject);
         }
     }
 }
