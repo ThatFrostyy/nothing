@@ -18,27 +18,27 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: b312598f1eedcea46af6f9284bb88a27, type: 2}
     - target: {fileID: 4713104918232830439, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.maxColor.b
-      value: 0.34560978
+      value: 0.1372549
       objectReference: {fileID: 0}
     - target: {fileID: 4713104918232830439, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.maxColor.g
-      value: 0.4076423
+      value: 0.5568628
       objectReference: {fileID: 0}
     - target: {fileID: 4713104918232830439, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.maxColor.r
-      value: 0.545
+      value: 0.4196079
       objectReference: {fileID: 0}
     - target: {fileID: 4713104918232830439, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.minColor.b
-      value: 0.28722224
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4713104918232830439, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.minColor.g
-      value: 0.36033335
+      value: 0.3921569
       objectReference: {fileID: 0}
     - target: {fileID: 4713104918232830439, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.minColor.r
-      value: 0.517
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4713104918232830439, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.gravityModifier.scalar
@@ -46,7 +46,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241496, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: m_Name
-      value: CFXR2 Debris Wood Hit (Unlit)
+      value: CFXR2 Debris Wood Hit (Unlit) Green
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241498, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: m_SortingLayer
@@ -125,48 +125,32 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
-      propertyPath: lengthInSec
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
-      propertyPath: ClampVelocityModule.dampen
-      value: 0.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
-      propertyPath: ClampVelocityModule.enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startLifetime.scalar
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.maxColor.b
-      value: 0.3543252
+      value: 0.1843137
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.maxColor.g
-      value: 0.41874796
+      value: 0.4196079
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.maxColor.r
-      value: 0.566
+      value: 0.3333333
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.minColor.b
-      value: 0.3003
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.minColor.g
-      value: 0.35175002
+      value: 0.3921569
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.startColor.minColor.r
-      value: 0.462
-      objectReference: {fileID: 0}
-    - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
-      propertyPath: ClampVelocityModule.magnitude.scalar
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8268635050969241501, guid: 9e1b7f83783b9e247ba78551172be2da, type: 3}
       propertyPath: InitialModule.gravityModifier.scalar
