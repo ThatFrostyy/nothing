@@ -1132,10 +1132,10 @@ namespace FF
                 WeaponUpgradeType.Pierce => "- Piercing Rounds",
                 WeaponUpgradeType.ExtraProjectiles => "- Multi-Shot",
                 WeaponUpgradeType.FireCooldownReduction => "- Cooldown Reduction",
-                WeaponUpgradeType.CritChance => "- Critical Chance",
-                WeaponUpgradeType.CritDamage => "- Critical Damage",
+                WeaponUpgradeType.CritChance => "- Critical Chance Boost",
+                WeaponUpgradeType.CritDamage => "- Critical Damage Boost",
                 WeaponUpgradeType.Accuracy => "- Accuracy Boost",
-                WeaponUpgradeType.FlamethrowerCooldown => "- Faster Venting",
+                WeaponUpgradeType.FlamethrowerCooldown => "- Flamethrower Venting",
                 WeaponUpgradeType.FlamethrowerRange => "- Longer Flame",
                 _ => "Upgrade"
             };

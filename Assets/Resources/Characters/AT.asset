@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AT
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
   ProgressionId: AT
-  DisplayName: US Ant-Tank
+  DisplayName: US Anti-Tank
   Description: Armed with an <b>M1 Garand</b> and a destuctive <b>M1A1 Bazooka</b>.
     A master with explosives, his attacks <b>stun and throw</b> enemies.
   AbilityId: at
