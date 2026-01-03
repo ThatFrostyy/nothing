@@ -532,7 +532,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""name"": """",
                     ""id"": ""80dfc8c4-394c-4642-9042-4d9517e0d1c5"",
                     ""path"": ""<Keyboard>/h"",
-                    ""interactions"": """",
+                    ""interactions"": ""Hold"",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""UpgradeOverlay"",

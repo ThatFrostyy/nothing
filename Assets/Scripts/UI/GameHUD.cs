@@ -833,14 +833,20 @@ namespace FF
                 return;
             }
 
-            if (upgradeSummaryInput.WasPressedThisFrame())
+            // Changed behavior: show summary only while the key is held (hold-to-view).
+            // Read the button value (0/1) and set visibility while pressed.
+            bool isHeld = upgradeSummaryInput.ReadValue<float>() > 0.5f;
+
+            if (isHeld && !upgradeSummaryVisible)
             {
-                upgradeSummaryVisible = !upgradeSummaryVisible;
-                ApplyUpgradeSummaryVisibility(upgradeSummaryVisible);
-                if (upgradeSummaryVisible)
-                {
-                    RefreshUpgradeSummaryText();
-                }
+                upgradeSummaryVisible = true;
+                ApplyUpgradeSummaryVisibility(true);
+                RefreshUpgradeSummaryText();
+            }
+            else if (!isHeld && upgradeSummaryVisible)
+            {
+                upgradeSummaryVisible = false;
+                ApplyUpgradeSummaryVisibility(false);
             }
         }
 
@@ -977,7 +983,7 @@ namespace FF
         private string BuildPlayerUpgradeSummary()
         {
             var builder = new System.Text.StringBuilder();
-            builder.AppendLine("Player Upgrades");
+            builder.AppendLine("Player Upgrades:");
 
             IReadOnlyDictionary<Upgrade, int> playerUpgrades = upgradeManager.GetUpgradeCounts();
             bool hasPlayerUpgrades = false;
@@ -990,7 +996,7 @@ namespace FF
                 }
 
                 hasPlayerUpgrades = true;
-                builder.AppendLine($"{ResolveUpgradeTitle(entry.Key)}{FormatUpgradeCount(entry.Value)}");
+                builder.AppendLine($"- {ResolveUpgradeTitle(entry.Key)}{FormatUpgradeCount(entry.Value)}");
             }
 
             if (!hasPlayerUpgrades)
@@ -1004,7 +1010,7 @@ namespace FF
         private string BuildWeaponUpgradeSummary()
         {
             var builder = new System.Text.StringBuilder();
-            builder.AppendLine("Weapon Upgrades");
+            builder.AppendLine("Weapon Upgrades:");
 
             IReadOnlyDictionary<Weapon, WeaponUpgradeState> weaponStates = upgradeManager.GetWeaponUpgradeStates();
             bool hasWeaponUpgrades = false;
@@ -1120,17 +1126,17 @@ namespace FF
         {
             return type switch
             {
-                WeaponUpgradeType.Damage => "Damage Boost",
-                WeaponUpgradeType.FireRate => "Fire Rate Boost",
-                WeaponUpgradeType.ProjectileSpeed => "Bullet Speed Boost",
-                WeaponUpgradeType.Pierce => "Piercing Rounds",
-                WeaponUpgradeType.ExtraProjectiles => "Multi-Shot",
-                WeaponUpgradeType.FireCooldownReduction => "Cooldown Reduction",
-                WeaponUpgradeType.CritChance => "Critical Chance",
-                WeaponUpgradeType.CritDamage => "Critical Damage",
-                WeaponUpgradeType.Accuracy => "Accuracy Boost",
-                WeaponUpgradeType.FlamethrowerCooldown => "Faster Venting",
-                WeaponUpgradeType.FlamethrowerRange => "Longer Flame",
+                WeaponUpgradeType.Damage => "- Damage Boost",
+                WeaponUpgradeType.FireRate => "- Fire Rate Boost",
+                WeaponUpgradeType.ProjectileSpeed => "- Bullet Speed Boost",
+                WeaponUpgradeType.Pierce => "- Piercing Rounds",
+                WeaponUpgradeType.ExtraProjectiles => "- Multi-Shot",
+                WeaponUpgradeType.FireCooldownReduction => "- Cooldown Reduction",
+                WeaponUpgradeType.CritChance => "- Critical Chance",
+                WeaponUpgradeType.CritDamage => "- Critical Damage",
+                WeaponUpgradeType.Accuracy => "- Accuracy Boost",
+                WeaponUpgradeType.FlamethrowerCooldown => "- Faster Venting",
+                WeaponUpgradeType.FlamethrowerRange => "- Longer Flame",
                 _ => "Upgrade"
             };
         }
