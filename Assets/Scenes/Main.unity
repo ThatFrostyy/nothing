@@ -12309,6 +12309,8 @@ MonoBehaviour:
     icon: {fileID: 21300000, guid: 0048d22ac86c2ec4999227bd3ff4742c, type: 3}
     fillSprite: {fileID: 21300000, guid: 71bc912493d153a47abac00b38e6ae10, type: 3}
     fillColor: {r: 0.8392157, g: 0.8392157, b: 0.8392157, a: 1}
+  fullScaleMultiplier: 1.12
+  fullScaleDuration: 0.5
 --- !u!114 &2050104292
 MonoBehaviour:
   m_ObjectHideFlags: 0

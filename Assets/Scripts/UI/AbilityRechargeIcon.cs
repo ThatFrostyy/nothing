@@ -28,8 +28,15 @@ namespace FF
         [SerializeField] private Color defaultFillColor = Color.white;
         [SerializeField] private List<AbilityIcon> abilityIcons = new();
 
+        [Header("Full Animation")]
+        [SerializeField, Min(0f)] private float fullScaleMultiplier = 1.12f;
+        [SerializeField, Min(0f)] private float fullScaleDuration = 1f;
+
         private readonly Dictionary<CharacterAbilityController.AbilityType, AbilityIcon> _iconLookup = new();
         private CharacterAbilityController.AbilityType _currentAbility;
+        private Coroutine _fullScaleRoutine;
+        private Vector3 _baseScale;
+        private bool _wasFull;
 
         private void Awake()
         {
@@ -44,6 +51,7 @@ namespace FF
             }
 
             BuildLookup();
+            _baseScale = transform.localScale;
         }
 
         private void OnEnable()
@@ -64,6 +72,16 @@ namespace FF
             {
                 abilityController.OnAbilityRechargeUpdated -= HandleAbilityRechargeUpdated;
             }
+
+            if (_fullScaleRoutine != null)
+            {
+                StopCoroutine(_fullScaleRoutine);
+                _fullScaleRoutine = null;
+            }
+
+            // Ensure transform scale is restored when disabled
+            transform.localScale = _baseScale;
+            _wasFull = false;
         }
 
         private void BuildLookup()
@@ -135,7 +153,68 @@ namespace FF
                 return;
             }
 
-            fillImage.fillAmount = Mathf.Clamp01(progress);
+            float clamped = Mathf.Clamp01(progress);
+            fillImage.fillAmount = clamped;
+
+            // trigger full animation when the fill reaches 1.0 (and wasn't full previously)
+            if (clamped >= 1f)
+            {
+                if (!_wasFull)
+                {
+                    _wasFull = true;
+                    TriggerFullScale();
+                }
+            }
+            else
+            {
+                _wasFull = false;
+            }
+        }
+
+        private void TriggerFullScale()
+        {
+            if (_fullScaleRoutine != null)
+            {
+                StopCoroutine(_fullScaleRoutine);
+            }
+
+            _fullScaleRoutine = StartCoroutine(FullScaleRoutine());
+        }
+
+        private System.Collections.IEnumerator FullScaleRoutine()
+        {
+            float duration = Mathf.Max(0.0001f, fullScaleDuration);
+            float half = duration * 0.5f;
+            Vector3 start = transform.localScale;
+            Vector3 target = _baseScale * Mathf.Max(0f, fullScaleMultiplier);
+
+            // scale up (first half)
+            float t = 0f;
+            while (t < half)
+            {
+                t += Time.unscaledDeltaTime;
+                float p = Mathf.Clamp01(t / half);
+                float smooth = Mathf.SmoothStep(0f, 1f, p);
+                transform.localScale = Vector3.Lerp(start, target, smooth);
+                yield return null;
+            }
+
+            // ensure max
+            transform.localScale = target;
+
+            // scale back down (second half)
+            t = 0f;
+            while (t < half)
+            {
+                t += Time.unscaledDeltaTime;
+                float p = Mathf.Clamp01(t / half);
+                float smooth = Mathf.SmoothStep(0f, 1f, p);
+                transform.localScale = Vector3.Lerp(target, _baseScale, smooth);
+                yield return null;
+            }
+
+            transform.localScale = _baseScale;
+            _fullScaleRoutine = null;
         }
     }
 }
