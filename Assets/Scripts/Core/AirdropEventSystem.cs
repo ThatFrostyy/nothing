@@ -29,17 +29,21 @@ namespace FF
         private PlayerController _player;
         private bool _gameManagerHooked;
         private Coroutine _airdropRoutine;
+        private AudioSource _planeLoopSource;
 
         private void OnEnable()
         {
             PlayerController.OnPlayerReady += HandlePlayerReady;
             TryHookGameManager();
+            GameAudioSettings.OnSfxVolumeChanged += HandleSfxVolumeChanged;
         }
 
         private void OnDisable()
         {
             PlayerController.OnPlayerReady -= HandlePlayerReady;
             UnhookGameManager();
+            GameAudioSettings.OnSfxVolumeChanged -= HandleSfxVolumeChanged;
+            StopPlaneLoop();
 
             if (_airdropRoutine != null)
             {
@@ -54,6 +58,8 @@ namespace FF
             {
                 _player = FindFirstObjectByType<PlayerController>();
             }
+
+            EnsurePlaneLoopSource();
         }
 
         private void Update()
@@ -134,8 +140,9 @@ namespace FF
             }
 
             Vector3 targetPosition = ResolveDropTarget();
-            PlayPlaneSound(targetPosition);
+            StartPlaneLoop(targetPosition);
             yield return DropCrate(targetPosition);
+            StopPlaneLoop();
         }
 
         private void ShowWarningPopup()
@@ -198,7 +205,7 @@ namespace FF
             return position;
         }
 
-        private void PlayPlaneSound(Vector3 position)
+        private void StartPlaneLoop(Vector3 position)
         {
             if (!planeClip)
             {
