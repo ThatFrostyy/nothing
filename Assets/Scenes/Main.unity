@@ -3636,7 +3636,7 @@ MonoBehaviour:
     timeoutSpawnRadius: 10
   player: {fileID: 1207903152}
   offscreenPadding: 2
-  minSpawnRadius: 8
+  minSpawnRadius: 6
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0

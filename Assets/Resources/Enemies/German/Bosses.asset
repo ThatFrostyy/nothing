@@ -18,10 +18,10 @@ MonoBehaviour:
   prefabOverrides:
   - prefab: {fileID: 2122780448097001684, guid: a9fbebf0368fe3048a3b1682f158c21f, type: 3}
     overrideWaveTiming: 1
-    startWave: 25
+    startWave: 20
     endWave: -1
-    spawnInterval: 1
-    spawnOnlyOnBossWaves: 1
+    spawnInterval: 10
+    spawnOnlyOnBossWaves: 0
     overrideSpawnChance: 0
     spawnChance: 0
     overrideSpawnCurve: 1
@@ -92,15 +92,15 @@ MonoBehaviour:
         m_RotationOrder: 0
   startWave: 10
   endWave: -1
-  spawnInterval: 1
-  spawnOnlyOnBossWaves: 1
+  spawnInterval: 10
+  spawnOnlyOnBossWaves: 0
   isBoss: 1
   spawnCountByWave:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 10
-      value: 3
+      value: 2
       inSlope: 0
       outSlope: 0
       tangentMode: 0

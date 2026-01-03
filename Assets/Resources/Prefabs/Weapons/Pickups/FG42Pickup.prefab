@@ -107,7 +107,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponPickup
   weaponData: {fileID: 11400000, guid: 439b8bdbce54a184d83074e226d2981c, type: 2}
-  lifetimeSeconds: 20
+  lifetimeSeconds: 30
   despawnWhenUncollected: 1
   droppedWeaponLifetimeSeconds: 15
   hoverAmplitude: 0.25

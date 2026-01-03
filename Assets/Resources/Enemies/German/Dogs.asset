@@ -15,9 +15,9 @@ MonoBehaviour:
   prefabs:
   - {fileID: 3282402498340923105, guid: 943a250ae05bb894eb865c90f38fa653, type: 3}
   prefabOverrides: []
-  startWave: 8
+  startWave: 5
   endWave: -1
-  spawnInterval: 2
+  spawnInterval: 5
   spawnOnlyOnBossWaves: 0
   isBoss: 0
   spawnCountByWave:
@@ -89,10 +89,10 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  spawnChance: 0.65
-  spawnInPacks: 1
+  spawnChance: 1
+  spawnInPacks: 0
   packRadius: 3
-  poolPrewarmCount: 4
+  poolPrewarmCount: 5
   attributeScalingOverride:
     healthMultiplierByWave:
       serializedVersion: 2
