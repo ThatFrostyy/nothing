@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 namespace FF
@@ -43,7 +44,6 @@ namespace FF
             PlayerController.OnPlayerReady -= HandlePlayerReady;
             UnhookGameManager();
             GameAudioSettings.OnSfxVolumeChanged -= HandleSfxVolumeChanged;
-            StopPlaneLoop();
 
             if (_airdropRoutine != null)
             {
@@ -58,8 +58,6 @@ namespace FF
             {
                 _player = FindFirstObjectByType<PlayerController>();
             }
-
-            EnsurePlaneLoopSource();
         }
 
         private void Update()
@@ -140,9 +138,8 @@ namespace FF
             }
 
             Vector3 targetPosition = ResolveDropTarget();
-            StartPlaneLoop(targetPosition);
+
             yield return DropCrate(targetPosition);
-            StopPlaneLoop();
         }
 
         private void ShowWarningPopup()
@@ -157,6 +154,11 @@ namespace FF
                 "AIRDROP INCOMING!",
                 warningTextColor,
                 warningTextScale);
+
+            if (planeClip)
+            {
+                AudioPlaybackPool.PlayOneShot(planeClip, _player.transform.position, null, planeSpatialBlend, GameAudioSettings.SfxVolume);
+            }
         }
 
         private Vector3 ResolveDropTarget()
@@ -205,14 +207,12 @@ namespace FF
             return position;
         }
 
-        private void StartPlaneLoop(Vector3 position)
+        private void HandleSfxVolumeChanged(float volume)
         {
-            if (!planeClip)
+            if (_planeLoopSource)
             {
-                return;
+                _planeLoopSource.volume = Mathf.Clamp01(volume);
             }
-
-            AudioPlaybackPool.PlayOneShot(planeClip, position, null, planeSpatialBlend, 1f);
         }
 
         private IEnumerator DropCrate(Vector3 targetPosition)
