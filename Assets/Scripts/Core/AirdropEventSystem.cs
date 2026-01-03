@@ -24,7 +24,6 @@ namespace FF
 
         [Header("Audio")]
         [SerializeField] private AudioClip planeClip;
-        [SerializeField, Range(0f, 1f)] private float planeVolume = 1f;
         [SerializeField, Range(0f, 1f)] private float planeSpatialBlend = 0.35f;
 
         private PlayerController _player;
@@ -54,6 +53,16 @@ namespace FF
             if (!_player)
             {
                 _player = FindFirstObjectByType<PlayerController>();
+            }
+        }
+
+        private void Update()
+        {
+            // Retry hooking the GameManager in case this component was enabled
+            // before the singleton was created (avoids silent no-op).
+            if (!_gameManagerHooked)
+            {
+                TryHookGameManager();
             }
         }
 
@@ -196,7 +205,7 @@ namespace FF
                 return;
             }
 
-            AudioPlaybackPool.PlayOneShot(planeClip, position, null, planeSpatialBlend, planeVolume, 1f);
+            AudioPlaybackPool.PlayOneShot(planeClip, position, null, planeSpatialBlend, 1f);
         }
 
         private IEnumerator DropCrate(Vector3 targetPosition)

@@ -7869,6 +7869,63 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1269021519}
   m_CullTransparentMesh: 1
+--- !u!1 &1295425477
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1295425479}
+  - component: {fileID: 1295425478}
+  m_Layer: 0
+  m_Name: Events
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1295425478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295425477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0bc095b98cda40e5b16284b37349894b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FF.AirdropEventSystem
+  startWave: 1
+  waveInterval: 10
+  warningLeadSeconds: 2
+  cratePrefab: {fileID: 2065102623061516545, guid: 32e6ee4e5f020a344ade3fe123e8e845, type: 3}
+  dropHeight: 8
+  dropSpeed: 12
+  spawnRadius: 6
+  minSpawnDistance: 2
+  viewportPadding: 0.1
+  warningTextColor: {r: 1, g: 0.75, b: 0.2, a: 1}
+  warningTextScale: 1.1
+  planeClip: {fileID: 8300000, guid: e74095012c54963458c46d728d06407e, type: 3}
+  planeSpatialBlend: 0.35
+--- !u!4 &1295425479
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1295425477}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1333906375
 GameObject:
   m_ObjectHideFlags: 0
@@ -12682,3 +12739,4 @@ SceneRoots:
   - {fileID: 1756355925}
   - {fileID: 497791597}
   - {fileID: 483938635}
+  - {fileID: 1295425479}
