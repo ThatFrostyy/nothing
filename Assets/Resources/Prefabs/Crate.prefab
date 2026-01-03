@@ -488,7 +488,7 @@ MonoBehaviour:
   - {fileID: 7785297196771200664, guid: 6600a5c3edfd2e24f9869ff09e610790, type: 3}
   - {fileID: 7695581959867539719, guid: 668c7b2d70cfefb40894e93143f680fa, type: 3}
   pickupLifetimeSeconds: 30
-  lifetimeSeconds: 45
+  lifetimeSeconds: 60
   breakFx: {fileID: 363920278307669088, guid: e24dccc0a30b0574c956811d1833180c, type: 3}
   breakSfx: {fileID: 8300000, guid: 4edcebeef040c57458dda659d0ea90c5, type: 3}
   hitSfx: {fileID: 8300000, guid: e375acb7908dc354b88d454e6f37f804, type: 3}

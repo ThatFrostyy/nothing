@@ -3631,7 +3631,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    crateLifetimeSeconds: 45
+    crateLifetimeSeconds: 60
     pickupLifetimeSeconds: 30
     timeoutSpawnRadius: 10
   player: {fileID: 1207903152}
