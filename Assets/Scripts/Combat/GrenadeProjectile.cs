@@ -89,6 +89,16 @@ namespace FF
             _baseLaunchSpeed = Mathf.Max(0.1f, launchSpeed);
         }
 
+        private void OnEnable()
+        {
+            GameAudioSettings.OnSfxVolumeChanged += HandleSfxVolumeChanged;
+        }
+
+        private void OnDisable()
+        {
+            GameAudioSettings.OnSfxVolumeChanged -= HandleSfxVolumeChanged;
+        }
+
         public float BaseLaunchSpeed => _baseLaunchSpeed;
 
         public void Launch(
@@ -519,7 +529,7 @@ namespace FF
             _flightLoopSource.clip = flightLoopSFX;
             _flightLoopSource.loop = true;
             _flightLoopSource.spatialBlend = Mathf.Clamp01(_audioSpatialBlend);
-            _flightLoopSource.volume = Mathf.Clamp01(flightLoopVolume * _audioVolume);
+            UpdateFlightLoopVolume();
             _flightLoopSource.pitch = _audioPitch;
             _flightLoopSource.Play();
         }
@@ -542,7 +552,22 @@ namespace FF
             _flightLoopSource.playOnAwake = false;
             _flightLoopSource.loop = true;
             _flightLoopSource.spatialBlend = 0f;
-            _flightLoopSource.volume = Mathf.Clamp01(flightLoopVolume);
+            UpdateFlightLoopVolume();
+        }
+
+        private void HandleSfxVolumeChanged(float volume)
+        {
+            UpdateFlightLoopVolume();
+        }
+
+        private void UpdateFlightLoopVolume()
+        {
+            if (!_flightLoopSource)
+            {
+                return;
+            }
+
+            _flightLoopSource.volume = Mathf.Clamp01(flightLoopVolume * _audioVolume * GameAudioSettings.SfxVolume);
         }
 
         private static bool IsLayerInMask(int layer, LayerMask mask)

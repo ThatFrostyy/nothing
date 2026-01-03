@@ -30,17 +30,21 @@ namespace FF
         private PlayerController _player;
         private bool _gameManagerHooked;
         private Coroutine _airdropRoutine;
+        private AudioSource _planeLoopSource;
 
         private void OnEnable()
         {
             PlayerController.OnPlayerReady += HandlePlayerReady;
             TryHookGameManager();
+            GameAudioSettings.OnSfxVolumeChanged += HandleSfxVolumeChanged;
         }
 
         private void OnDisable()
         {
             PlayerController.OnPlayerReady -= HandlePlayerReady;
             UnhookGameManager();
+            GameAudioSettings.OnSfxVolumeChanged -= HandleSfxVolumeChanged;
+            StopPlaneLoop();
 
             if (_airdropRoutine != null)
             {
@@ -55,6 +59,8 @@ namespace FF
             {
                 _player = FindFirstObjectByType<PlayerController>();
             }
+
+            EnsurePlaneLoopSource();
         }
 
         private void HandlePlayerReady(PlayerController player)
@@ -125,8 +131,9 @@ namespace FF
             }
 
             Vector3 targetPosition = ResolveDropTarget();
-            PlayPlaneSound(targetPosition);
+            StartPlaneLoop(targetPosition);
             yield return DropCrate(targetPosition);
+            StopPlaneLoop();
         }
 
         private void ShowWarningPopup()
@@ -189,14 +196,68 @@ namespace FF
             return position;
         }
 
-        private void PlayPlaneSound(Vector3 position)
+        private void StartPlaneLoop(Vector3 position)
         {
             if (!planeClip)
             {
                 return;
             }
 
-            AudioPlaybackPool.PlayOneShot(planeClip, position, null, planeSpatialBlend, planeVolume, 1f);
+            EnsurePlaneLoopSource();
+            if (!_planeLoopSource)
+            {
+                return;
+            }
+
+            _planeLoopSource.transform.position = position;
+            _planeLoopSource.clip = planeClip;
+            _planeLoopSource.spatialBlend = planeSpatialBlend;
+            UpdatePlaneLoopVolume();
+            if (!_planeLoopSource.isPlaying)
+            {
+                _planeLoopSource.Play();
+            }
+        }
+
+        private void StopPlaneLoop()
+        {
+            if (_planeLoopSource && _planeLoopSource.isPlaying)
+            {
+                _planeLoopSource.Stop();
+            }
+        }
+
+        private void EnsurePlaneLoopSource()
+        {
+            if (_planeLoopSource)
+            {
+                return;
+            }
+
+            _planeLoopSource = GetComponent<AudioSource>();
+            if (!_planeLoopSource)
+            {
+                _planeLoopSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            _planeLoopSource.playOnAwake = false;
+            _planeLoopSource.loop = true;
+            _planeLoopSource.ignoreListenerPause = true;
+        }
+
+        private void HandleSfxVolumeChanged(float volume)
+        {
+            UpdatePlaneLoopVolume();
+        }
+
+        private void UpdatePlaneLoopVolume()
+        {
+            if (!_planeLoopSource)
+            {
+                return;
+            }
+
+            _planeLoopSource.volume = Mathf.Clamp01(planeVolume * GameAudioSettings.SfxVolume);
         }
 
         private IEnumerator DropCrate(Vector3 targetPosition)
