@@ -12,7 +12,9 @@ namespace FF
     [RequireComponent(typeof(Rigidbody2D))]
     public class CharacterAbilityController : MonoBehaviour
     {
-        private enum AbilityType { None, Dash, Suppression, Sharpshooter, AntiTank }
+        public enum AbilityType { None, Dash, Suppression, Sharpshooter, AntiTank }
+
+        public event Action<AbilityType, float, bool> OnAbilityRechargeUpdated;
 
         [Header("General")]
         [SerializeField, Tooltip("If left empty we try to infer from the selected character.")]
@@ -58,6 +60,13 @@ namespace FF
         private readonly Dictionary<EnemyStats, float> _suppressedEnemies = new();
         private readonly List<EnemyStats> _toRemove = new();
         private bool _sharpshooterApplied;
+        private float _lastAbilityRechargeProgress = -1f;
+        private AbilityType _lastAbilityType = AbilityType.None;
+        private bool _lastAbilityRechargeVisible;
+
+        public AbilityType ActiveAbility => _activeAbility;
+        public float AbilityRechargeProgress => GetAbilityRechargeProgress(_activeAbility);
+        public bool AbilityUsesRecharge => AbilityUsesCooldown(_activeAbility);
 
         private void Awake()
         {
@@ -96,6 +105,8 @@ namespace FF
                     UpdateSuppression();
                     break;
             }
+
+            NotifyAbilityRechargeUpdated(false);
         }
 
         public void UpdateMoveInput(Vector2 moveInput)
@@ -138,6 +149,8 @@ namespace FF
             {
                 ApplySharpshooterBonuses();
             }
+
+            NotifyAbilityRechargeUpdated(true);
         }
 
         private void HandleWeaponEquipped(Weapon weapon)
@@ -176,6 +189,50 @@ namespace FF
             if (id.Equals("at", StringComparison.OrdinalIgnoreCase)) return AbilityType.AntiTank;
 
             return AbilityType.None;
+        }
+
+        private bool AbilityUsesCooldown(AbilityType abilityType)
+        {
+            return abilityType == AbilityType.Dash;
+        }
+
+        private float GetAbilityRechargeProgress(AbilityType abilityType)
+        {
+            if (!AbilityUsesCooldown(abilityType))
+            {
+                return 1f;
+            }
+
+            if (abilityType == AbilityType.Dash)
+            {
+                if (dashCooldown <= 0.001f)
+                {
+                    return 1f;
+                }
+
+                return 1f - Mathf.Clamp01(_dashCooldownTimer / dashCooldown);
+            }
+
+            return 1f;
+        }
+
+        private void NotifyAbilityRechargeUpdated(bool forceNotify)
+        {
+            bool isVisible = AbilityUsesCooldown(_activeAbility);
+            float progress = GetAbilityRechargeProgress(_activeAbility);
+
+            if (!forceNotify
+                && _lastAbilityType == _activeAbility
+                && Mathf.Approximately(_lastAbilityRechargeProgress, progress)
+                && _lastAbilityRechargeVisible == isVisible)
+            {
+                return;
+            }
+
+            _lastAbilityType = _activeAbility;
+            _lastAbilityRechargeProgress = progress;
+            _lastAbilityRechargeVisible = isVisible;
+            OnAbilityRechargeUpdated?.Invoke(_activeAbility, progress, isVisible);
         }
 
         public bool TryApplyShockwave(GrenadeProjectile grenade)
