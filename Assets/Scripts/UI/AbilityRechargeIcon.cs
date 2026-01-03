@@ -11,7 +11,8 @@ namespace FF
         private struct AbilityIcon
         {
             public CharacterAbilityController.AbilityType abilityType;
-            public Sprite icon;
+            public Sprite icon;       // background / static icon
+            public Sprite fillSprite; // sprite used by the fill image (will be tinted & filled)
             public Color fillColor;
         }
 
@@ -23,6 +24,7 @@ namespace FF
 
         [Header("Defaults")]
         [SerializeField] private Sprite defaultIcon;
+        [SerializeField] private Sprite defaultFillSprite;
         [SerializeField] private Color defaultFillColor = Color.white;
         [SerializeField] private List<AbilityIcon> abilityIcons = new();
 
@@ -109,16 +111,19 @@ namespace FF
             bool hasIcon = _iconLookup.TryGetValue(ability, out iconData);
 
             Sprite iconSprite = hasIcon ? iconData.icon : defaultIcon;
+            Sprite fillSprite = hasIcon ? iconData.fillSprite : defaultFillSprite;
             Color fillColor = hasIcon ? iconData.fillColor : defaultFillColor;
 
             if (iconImage)
             {
+                // Icon is treated as the static background image (no fill behavior).
                 iconImage.sprite = iconSprite;
             }
 
             if (fillImage)
             {
-                fillImage.sprite = iconSprite;
+                // Fill image uses its own sprite and is tinted with the chosen color.
+                fillImage.sprite = fillSprite;
                 fillImage.color = fillColor;
             }
         }
