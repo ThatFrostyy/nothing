@@ -605,6 +605,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SteamStats
       objectReference: {fileID: 0}
+    - target: {fileID: 8392762984981039243, guid: 29a58f2ab9e34464daea2847283c32fc, type: 3}
+      propertyPath: waveDropWaveThreshold
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

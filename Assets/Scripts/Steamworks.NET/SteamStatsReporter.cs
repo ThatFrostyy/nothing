@@ -438,13 +438,45 @@ namespace FF
                 return;
             }
 
+            Debug.Log($"[SteamStatsReporter] Inventory result ready: {result.m_result}");
+
             if (result.m_result != EResult.k_EResultOK)
             {
-
+                Debug.LogWarning($"[SteamStatsReporter] Wave drop failed or returned no items: {result.m_result}");
+                ReleaseWaveDropHandle();
+                return;
             }
-            else
-            {
 
+            // First query count
+            uint count = 0;
+            bool countOk = SteamInventory.GetResultItems(_waveDropResultHandle, null, ref count);
+            if (!countOk)
+            {
+                Debug.LogWarning("[SteamStatsReporter] Failed to query result item count.");
+                ReleaseWaveDropHandle();
+                return;
+            }
+
+            if (count == 0)
+            {
+                Debug.Log("[SteamStatsReporter] Wave drop succeeded but returned 0 items.");
+                ReleaseWaveDropHandle();
+                return;
+            }
+
+            // Fetch items
+            SteamItemDetails_t[] items = new SteamItemDetails_t[count];
+            if (!SteamInventory.GetResultItems(_waveDropResultHandle, items, ref count))
+            {
+                Debug.LogWarning("[SteamStatsReporter] Failed to retrieve dropped items.");
+                ReleaseWaveDropHandle();
+                return;
+            }
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                var it = items[i];
+                Debug.Log($"[SteamStatsReporter] Dropped item #{i}: def={it.m_iDefinition}, instanceId={it.m_itemId}, qty={it.m_unQuantity}");
             }
 
             ReleaseWaveDropHandle();
