@@ -2,6 +2,13 @@
 
 This project uses the Discord Social SDK package to broadcast what the player is doing directly to Discord Rich Presence.
 
+## Early-game player hook ideas
+- Start the first wave with a short, celebratory banner or audio sting so new players feel the intensity spike immediately.
+- Give a tiny, guaranteed early upgrade or perk within the first minute to reinforce progression and experimentation.
+- Add a quick "first goal" callout (ex: “Survive wave 1 to unlock your first perk”) to provide immediate direction.
+- Surface a brief, skippable tip about movement/aiming or a signature ability right after the player spawns.
+- Include a small positive feedback loop (coins, XP burst, or a visual flourish) for the first few kills to build momentum.
+
 ## How it is set up
 1. **Discord application**
    - Create a Discord application for the game and copy the **Application ID**.
