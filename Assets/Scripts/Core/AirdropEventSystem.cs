@@ -24,7 +24,6 @@ namespace FF
 
         [Header("Audio")]
         [SerializeField] private AudioClip planeClip;
-        [SerializeField, Range(0f, 1f)] private float planeVolume = 1f;
         [SerializeField, Range(0f, 1f)] private float planeSpatialBlend = 0.35f;
 
         private PlayerController _player;
@@ -61,6 +60,16 @@ namespace FF
             }
 
             EnsurePlaneLoopSource();
+        }
+
+        private void Update()
+        {
+            // Retry hooking the GameManager in case this component was enabled
+            // before the singleton was created (avoids silent no-op).
+            if (!_gameManagerHooked)
+            {
+                TryHookGameManager();
+            }
         }
 
         private void HandlePlayerReady(PlayerController player)
@@ -203,61 +212,7 @@ namespace FF
                 return;
             }
 
-            EnsurePlaneLoopSource();
-            if (!_planeLoopSource)
-            {
-                return;
-            }
-
-            _planeLoopSource.transform.position = position;
-            _planeLoopSource.clip = planeClip;
-            _planeLoopSource.spatialBlend = planeSpatialBlend;
-            UpdatePlaneLoopVolume();
-            if (!_planeLoopSource.isPlaying)
-            {
-                _planeLoopSource.Play();
-            }
-        }
-
-        private void StopPlaneLoop()
-        {
-            if (_planeLoopSource && _planeLoopSource.isPlaying)
-            {
-                _planeLoopSource.Stop();
-            }
-        }
-
-        private void EnsurePlaneLoopSource()
-        {
-            if (_planeLoopSource)
-            {
-                return;
-            }
-
-            _planeLoopSource = GetComponent<AudioSource>();
-            if (!_planeLoopSource)
-            {
-                _planeLoopSource = gameObject.AddComponent<AudioSource>();
-            }
-
-            _planeLoopSource.playOnAwake = false;
-            _planeLoopSource.loop = true;
-            _planeLoopSource.ignoreListenerPause = true;
-        }
-
-        private void HandleSfxVolumeChanged(float volume)
-        {
-            UpdatePlaneLoopVolume();
-        }
-
-        private void UpdatePlaneLoopVolume()
-        {
-            if (!_planeLoopSource)
-            {
-                return;
-            }
-
-            _planeLoopSource.volume = Mathf.Clamp01(planeVolume * GameAudioSettings.SfxVolume);
+            AudioPlaybackPool.PlayOneShot(planeClip, position, null, planeSpatialBlend, 1f);
         }
 
         private IEnumerator DropCrate(Vector3 targetPosition)

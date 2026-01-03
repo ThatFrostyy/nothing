@@ -18,7 +18,7 @@ MonoBehaviour:
   prefabOverrides:
   - prefab: {fileID: 2122780448097001684, guid: a9fbebf0368fe3048a3b1682f158c21f, type: 3}
     overrideWaveTiming: 1
-    startWave: 20
+    startWave: 25
     endWave: -1
     spawnInterval: 10
     spawnOnlyOnBossWaves: 0
