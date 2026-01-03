@@ -33,6 +33,10 @@ namespace FF
         [Header("Progression")]
         public CharacterProgressionSettings Progression = new();
 
+        [Header("Testing")]
+        [Tooltip("When enabled the character will be treated as unlocked regardless of requirements (editor/testing only).")]
+        public bool ForceUnlocked = false;
+
         public string GetProgressionKey()
         {
             return string.IsNullOrWhiteSpace(ProgressionId) ? name : ProgressionId;

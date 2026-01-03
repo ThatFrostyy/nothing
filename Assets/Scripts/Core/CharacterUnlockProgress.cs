@@ -32,6 +32,12 @@ namespace FF
 
         public static bool IsUnlocked(CharacterDefinition character)
         {
+            // Allow quick testing override on the ScriptableObject itself.
+            if (character != null && character.ForceUnlocked)
+            {
+                return true;
+            }
+
             if (!character)
             {
                 return true;
