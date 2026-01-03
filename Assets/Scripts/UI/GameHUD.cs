@@ -74,6 +74,8 @@ namespace FF
         [SerializeField] private CanvasGroup waveBannerGroup;
         [SerializeField, Min(0f)] private float waveBannerDuration = 2.5f;
         [SerializeField, Min(0f)] private float waveBannerFadeTime = 0.5f;
+        [SerializeField] private string waveIntroMessage = "HERE THEY COME";
+        [SerializeField, Min(0f)] private float waveIntroMessageDuration = 2.5f;
 
         [Header("Wave Effects")]
         [SerializeField] private Image waveFlashImage;
@@ -126,6 +128,7 @@ namespace FF
         private int pendingUpgrades;
 
         private float waveBannerTimer;
+        private float waveIntroMessageTimer;
         private float waveFlashElapsed = float.PositiveInfinity;
         private float waveFlashBaseAlpha = 1f;
         private Color activeWaveFlashColor;
@@ -487,6 +490,11 @@ namespace FF
                 }
             }
 
+            if (waveIntroMessageTimer > 0f)
+            {
+                waveIntroMessageTimer = Mathf.Max(0f, waveIntroMessageTimer - unscaledDeltaTime);
+            }
+
             UpdateWaveDisplay();
             UpdateTimeDisplay();
             UpdateHealthFill(deltaTime);
@@ -760,10 +768,16 @@ namespace FF
             int displayWave = Mathf.Max(1, wave);
             if (waveBannerText)
             {
-                waveBannerText.text = $"Wave {displayWave}";
+                waveBannerText.text = wave == 1 && !string.IsNullOrWhiteSpace(waveIntroMessage)
+                    ? waveIntroMessage
+                    : $"Wave {displayWave}";
             }
 
             waveBannerTimer = waveBannerDuration;
+            if (wave == 1)
+            {
+                waveIntroMessageTimer = Mathf.Max(0f, waveIntroMessageDuration);
+            }
             SetWaveBannerVisible(1f);
             TriggerWaveFlash();
             PlayWaveStartSound(wave);
@@ -1325,6 +1339,12 @@ namespace FF
         {
             if (!waveText)
             {
+                return;
+            }
+
+            if (waveIntroMessageTimer > 0f && !string.IsNullOrWhiteSpace(waveIntroMessage))
+            {
+                waveText.text = waveIntroMessage;
                 return;
             }
 

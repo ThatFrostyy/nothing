@@ -37,6 +37,7 @@ namespace FF
         private Coroutine _fullScaleRoutine;
         private Vector3 _baseScale;
         private bool _wasFull;
+        private bool _isSubscribed;
 
         private void Awake()
         {
@@ -56,22 +57,12 @@ namespace FF
 
         private void OnEnable()
         {
-            if (abilityController)
-            {
-                abilityController.OnAbilityRechargeUpdated += HandleAbilityRechargeUpdated;
-                HandleAbilityRechargeUpdated(
-                    abilityController.ActiveAbility,
-                    abilityController.AbilityRechargeProgress,
-                    abilityController.AbilityUsesRecharge);
-            }
+            SetAbilityController(abilityController);
         }
 
         private void OnDisable()
         {
-            if (abilityController)
-            {
-                abilityController.OnAbilityRechargeUpdated -= HandleAbilityRechargeUpdated;
-            }
+            SetAbilityController(null);
 
             if (_fullScaleRoutine != null)
             {
@@ -82,6 +73,44 @@ namespace FF
             // Ensure transform scale is restored when disabled
             transform.localScale = _baseScale;
             _wasFull = false;
+        }
+
+        private void Update()
+        {
+            if (!abilityController)
+            {
+                SetAbilityController(FindObjectOfType<CharacterAbilityController>());
+            }
+        }
+
+        private void SetAbilityController(CharacterAbilityController controller)
+        {
+            if (abilityController == controller && _isSubscribed)
+            {
+                return;
+            }
+
+            if (_isSubscribed && abilityController)
+            {
+                abilityController.OnAbilityRechargeUpdated -= HandleAbilityRechargeUpdated;
+            }
+
+            abilityController = controller;
+            _isSubscribed = false;
+
+            if (abilityController)
+            {
+                abilityController.OnAbilityRechargeUpdated += HandleAbilityRechargeUpdated;
+                _isSubscribed = true;
+                HandleAbilityRechargeUpdated(
+                    abilityController.ActiveAbility,
+                    abilityController.AbilityRechargeProgress,
+                    abilityController.AbilityUsesRecharge);
+            }
+            else
+            {
+                SetVisible(false);
+            }
         }
 
         private void BuildLookup()
