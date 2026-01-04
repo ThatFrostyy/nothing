@@ -380,6 +380,16 @@ namespace FF
                 return;
             }
 
+            // Show the intro message immediately at scene start (second 0)
+            // so players see "HERE THEY COME" for the configured duration.
+            if (!string.IsNullOrWhiteSpace(waveIntroMessage))
+            {
+                waveIntroMessageTimer = Mathf.Max(waveIntroMessageTimer, waveIntroMessageDuration);
+                waveBannerTimer = Mathf.Max(waveBannerTimer, waveBannerDuration);
+                if (waveBannerText) waveBannerText.text = waveIntroMessage;
+                SetWaveBannerVisible(1f);
+            }
+
             TryBindAll();
             RefreshAll();
             SyncFillImmediately();
@@ -536,7 +546,7 @@ namespace FF
         {
 
             // FIX: Robustly switch to Singleton if the current reference is stale or wron
-   
+
             if (upgradeManager != null)
             {
                 upgradeManager.OnPendingUpgradesChanged -= HandlePendingUpgradesChanged;
@@ -768,16 +778,14 @@ namespace FF
             int displayWave = Mathf.Max(1, wave);
             if (waveBannerText)
             {
-                waveBannerText.text = wave == 1 && !string.IsNullOrWhiteSpace(waveIntroMessage)
-                    ? waveIntroMessage
-                    : $"Wave {displayWave}";
+                // Always show the actual wave text when a wave begins.
+                waveBannerText.text = $"Wave {displayWave}";
             }
 
+            // If a wave begins while the intro message is active, clear it so the wave text shows immediately.
+            waveIntroMessageTimer = 0f;
+
             waveBannerTimer = waveBannerDuration;
-            if (wave == 1)
-            {
-                waveIntroMessageTimer = Mathf.Max(0f, waveIntroMessageDuration);
-            }
             SetWaveBannerVisible(1f);
             TriggerWaveFlash();
             PlayWaveStartSound(wave);
@@ -1342,7 +1350,9 @@ namespace FF
                 return;
             }
 
-            if (waveIntroMessageTimer > 0f && !string.IsNullOrWhiteSpace(waveIntroMessage))
+            // If the intro message timer is active AND no wave has started yet, show the intro.
+            // If a wave is already running (gameManager.Wave >= 1) show the actual wave text immediately.
+            if (waveIntroMessageTimer > 0f && !string.IsNullOrWhiteSpace(waveIntroMessage) && (gameManager == null || gameManager.Wave < 1))
             {
                 waveText.text = waveIntroMessage;
                 return;

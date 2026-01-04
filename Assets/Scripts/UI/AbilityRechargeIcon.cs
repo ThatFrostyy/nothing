@@ -85,7 +85,10 @@ namespace FF
 
         private void SetAbilityController(CharacterAbilityController controller)
         {
-            if (abilityController == controller && _isSubscribed)
+            // Only early-out if the controller is the same AND it is a valid (non-null) object
+            // This avoids the case where both abilityController and controller are null but
+            // _isSubscribed is still true (destroyed controller) which would skip the cleanup.
+            if (abilityController == controller && _isSubscribed && controller != null)
             {
                 return;
             }
@@ -109,6 +112,7 @@ namespace FF
             }
             else
             {
+                // No controller -> hide UI and reset state
                 SetVisible(false);
             }
         }

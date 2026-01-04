@@ -8322,6 +8322,8 @@ MonoBehaviour:
   waveBannerGroup: {fileID: 320424108}
   waveBannerDuration: 2.5
   waveBannerFadeTime: 0.5
+  waveIntroMessage: HERE THEY COME
+  waveIntroMessageDuration: 4.5
   waveFlashImage: {fileID: 232487994}
   waveFlashColor: {r: 1, g: 0, b: 0, a: 0.19607843}
   hitFlashColor: {r: 1, g: 0, b: 0, a: 0.15}
