@@ -19,6 +19,7 @@ namespace FF
         [SerializeField] private UpgradeManager _upgradeManager;
         [SerializeField] private WeaponManager _weaponManager;
         [SerializeField] private Weapon _startingWeapon;
+        [SerializeField] private Weapon _secondaryWeapon;
         [SerializeField] private CharacterAbilityController _abilityController;
         [SerializeField] private PlayerCombatEffectController _combatEffectController;
 
@@ -112,6 +113,8 @@ namespace FF
             {
                 _weaponManager.Equip(_startingWeapon);
             }
+
+            ApplySecondaryWeapon(_secondaryWeapon);
 
             OnPlayerReady?.Invoke(this);
         }
@@ -360,6 +363,19 @@ namespace FF
             }
         }
 
+        private void ApplySecondaryWeapon(Weapon secondaryWeapon)
+        {
+            if (!secondaryWeapon)
+            {
+                return;
+            }
+
+            if (_weaponManager)
+            {
+                _weaponManager.TryEquip(secondaryWeapon, out _, selectSlot: false);
+            }
+        }
+
         #region Input System Callbacks
         public void OnMove(InputValue value)
         {
@@ -493,6 +509,8 @@ namespace FF
             CharacterDefinition character = CharacterSelectionState.SelectedCharacter;
             HatDefinition hat = CharacterSelectionState.SelectedHat ?? character?.GetDefaultHat();
             Weapon weapon = CharacterSelectionState.SelectedWeapon ?? character?.StartingWeapon;
+            Weapon secondaryWeapon = CharacterSelectionState.SelectedSecondaryWeapon
+                ?? character?.SecondaryWeapon;
             Weapon specialWeapon = CharacterSelectionState.SelectedSpecialWeapon
                 ?? character?.SpecialWeapon;
 
@@ -510,6 +528,7 @@ namespace FF
                 OverrideStartingWeapon(weapon);
             }
 
+            _secondaryWeapon = secondaryWeapon;
             ApplySpecialWeapon(specialWeapon);
         }
     }
