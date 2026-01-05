@@ -11,6 +11,7 @@ namespace FF
         public static CharacterDefinition SelectedCharacter => Selection.Character;
         public static HatDefinition SelectedHat => Selection.Hat;
         public static Weapon SelectedWeapon => Selection.Weapon;
+        public static Weapon SelectedSecondaryWeapon => Selection.SecondaryWeapon;
         public static Weapon SelectedSpecialWeapon => Selection.SpecialWeapon;
 
         public static bool HasSelection => Selection.Character != null;
@@ -19,13 +20,15 @@ namespace FF
             CharacterDefinition character,
             HatDefinition hat = null,
             Weapon weapon = null,
+            Weapon secondaryWeapon = null,
             Weapon specialWeapon = null)
         {
             HatDefinition resolvedHat = hat ?? character?.GetDefaultHat();
             Weapon resolvedWeapon = weapon ?? character?.StartingWeapon;
+            Weapon resolvedSecondaryWeapon = secondaryWeapon ?? character?.SecondaryWeapon;
             Weapon resolvedSpecialWeapon = specialWeapon ?? character?.SpecialWeapon;
 
-            CharacterLoadout newSelection = new(character, resolvedHat, resolvedWeapon, resolvedSpecialWeapon);
+            CharacterLoadout newSelection = new(character, resolvedHat, resolvedWeapon, resolvedSecondaryWeapon, resolvedSpecialWeapon);
 
             if (newSelection.Equals(Selection))
             {
@@ -39,22 +42,25 @@ namespace FF
 
     public readonly struct CharacterLoadout : IEquatable<CharacterLoadout>
     {
-        public static readonly CharacterLoadout Empty = new(null, null, null, null);
+        public static readonly CharacterLoadout Empty = new(null, null, null, null, null);
 
         public readonly CharacterDefinition Character;
         public readonly HatDefinition Hat;
         public readonly Weapon Weapon;
+        public readonly Weapon SecondaryWeapon;
         public readonly Weapon SpecialWeapon;
 
         public CharacterLoadout(
             CharacterDefinition character,
             HatDefinition hat,
             Weapon weapon,
+            Weapon secondaryWeapon,
             Weapon specialWeapon) // updated parameter type
         {
             Character = character;
             Hat = hat;
             Weapon = weapon;
+            SecondaryWeapon = secondaryWeapon;
             SpecialWeapon = specialWeapon;
         }
 
@@ -63,6 +69,7 @@ namespace FF
             return Character == other.Character
                 && Hat == other.Hat
                 && Weapon == other.Weapon
+                && SecondaryWeapon == other.SecondaryWeapon
                 && SpecialWeapon == other.SpecialWeapon;
         }
 
@@ -78,6 +85,7 @@ namespace FF
                 int hash = Character ? Character.GetHashCode() : 0;
                 hash = (hash * 397) ^ (Hat ? Hat.GetHashCode() : 0);
                 hash = (hash * 397) ^ (Weapon ? Weapon.GetHashCode() : 0);
+                hash = (hash * 397) ^ (SecondaryWeapon ? SecondaryWeapon.GetHashCode() : 0);
                 hash = (hash * 397) ^ (SpecialWeapon ? SpecialWeapon.GetHashCode() : 0);
 
                 return hash;

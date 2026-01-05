@@ -97,9 +97,10 @@ namespace FF
 
             HatDefinition hat = ResolveHatSelection(character);
             Weapon weapon = character != null ? character.StartingWeapon : null;
+            Weapon secondaryWeapon = character != null ? character.SecondaryWeapon : null;
             Weapon specialWeapon = character != null ? character.SpecialWeapon : null;
 
-            CharacterSelectionState.SetSelection(character, hat, weapon, specialWeapon);
+            CharacterSelectionState.SetSelection(character, hat, weapon, secondaryWeapon, specialWeapon);
             Refresh();
         }
 
@@ -138,7 +139,7 @@ namespace FF
 
         private void StepLoadoutDisplay(int delta)
         {
-            const int viewCount = 2;
+            const int viewCount = 3;
             _loadoutViewIndex = Mathf.FloorToInt(Mathf.Repeat(_loadoutViewIndex + delta, viewCount));
             Refresh();
         }
@@ -204,19 +205,22 @@ namespace FF
             UpdateHatDisplay(hat);
 
             Weapon weapon = character != null ? character.StartingWeapon : null;
+            Weapon secondaryWeapon = character != null ? character.SecondaryWeapon : null;
             Weapon specialWeapon = character != null ? character.SpecialWeapon : null;
-            bool showSpecialWeapon = _loadoutViewIndex == 1;
+            bool showSecondaryWeapon = _loadoutViewIndex == 1;
+            bool showSpecialWeapon = _loadoutViewIndex == 2;
+            Weapon displayedWeapon = showSpecialWeapon ? specialWeapon : showSecondaryWeapon ? secondaryWeapon : weapon;
 
             if (weaponNameText)
             {
                 weaponNameText.text = showSpecialWeapon
                     ? GetSpecialWeaponLabel(specialWeapon)
-                    : GetWeaponLabel(weapon);
+                    : showSecondaryWeapon ? GetWeaponLabel(secondaryWeapon) : GetWeaponLabel(weapon);
             }
 
             Sprite weaponIcon = showSpecialWeapon
                 ? GetSpecialWeaponIcon(specialWeapon)
-                : character != null ? character.GetWeaponIcon() : null;
+                : showSecondaryWeapon ? GetWeaponIcon(secondaryWeapon) : character != null ? character.GetWeaponIcon() : null;
             if (weaponIconImage)
             {
                 weaponIconImage.enabled = weaponIcon != null;
@@ -225,14 +229,14 @@ namespace FF
 
             if (specialItemsText)
             {
-                specialItemsText.text = showSpecialWeapon ? "Special Weapon" : "Weapon";
+                specialItemsText.text = showSpecialWeapon ? "Special Weapon" : showSecondaryWeapon ? "Secondary Weapon" : "Weapon";
             }
 
             DisableSpecialItemIcons();
 
             if (preview)
             {
-                preview.Show(character, hat, weapon, specialWeapon);
+                preview.Show(character, hat, displayedWeapon, specialWeapon);
             }
 
             RefreshProgression(character);
@@ -369,6 +373,11 @@ namespace FF
             }
 
             return weapon != null ? weapon.name : "No Weapon";
+        }
+
+        private Sprite GetWeaponIcon(Weapon weapon)
+        {
+            return weapon != null ? weapon.weaponIcon : null;
         }
 
         private string GetSpecialWeaponLabel(Weapon specialWeapon)

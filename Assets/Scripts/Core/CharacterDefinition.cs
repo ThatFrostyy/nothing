@@ -22,6 +22,8 @@ namespace FF
 
         [Header("Loadout")]
         public Weapon StartingWeapon;
+        [Tooltip("Equipped to the secondary slot (slot 2).")]
+        public Weapon SecondaryWeapon;
         [Tooltip("Overrides the icon displayed in the menu. If left empty, the weapon's own icon is used.")]
         public Sprite WeaponIconOverride;
         [Header("Special Weapon")]

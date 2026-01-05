@@ -18,6 +18,7 @@ namespace FF
         [SerializeField] private CharacterDefinition defaultCharacter;
         [SerializeField] private HatDefinition defaultHat;
         [SerializeField] private Weapon defaultWeapon;
+        [SerializeField] private Weapon defaultSecondaryWeapon;
         [SerializeField] private Weapon defaultSpecialWeapon;
         [SerializeField] private MapDefinition defaultMap;
         [SerializeField] private bool applyDefaultSelection = true;
@@ -85,7 +86,7 @@ namespace FF
                 return;
             }
 
-            CharacterSelectionState.SetSelection(defaultCharacter, defaultHat, defaultWeapon, defaultSpecialWeapon);
+            CharacterSelectionState.SetSelection(defaultCharacter, defaultHat, defaultWeapon, defaultSecondaryWeapon, defaultSpecialWeapon);
             ApplyDefaultMap();
         }
 
