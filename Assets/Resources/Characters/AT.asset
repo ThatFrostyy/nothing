@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
   ProgressionId: AT
   DisplayName: US Anti-Tank
-  Description: Armed with an <b>M1 Garand</b> and a destuctive <b>M1A1 Bazooka</b>.
-    A master with explosives, his attacks <b>stun and throw</b> enemies.
+  Description: Armed with an <b>M1 Garand</b> and a destuctive <b>M1A1 Bazooka as
+    a special</b>. A master with explosives, his attacks <b>stun and throw</b> enemies.
   AbilityId: at
   Portrait: {fileID: 21300000, guid: f4665a62fa15fda4281849979c1808f8, type: 3}
   PlayerSprite: {fileID: 21300000, guid: f4665a62fa15fda4281849979c1808f8, type: 3}
@@ -23,6 +23,7 @@ MonoBehaviour:
   AvailableHats:
   - {fileID: 11400000, guid: 832ee9d81913c4e4a931ac0ac6b6cabf, type: 2}
   StartingWeapon: {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
+  SecondaryWeapon: {fileID: 0}
   WeaponIconOverride: {fileID: 0}
   SpecialWeapon: {fileID: 11400000, guid: 35d6b0498af5bc343a8912126c34eee6, type: 2}
   UnlockRequirements:

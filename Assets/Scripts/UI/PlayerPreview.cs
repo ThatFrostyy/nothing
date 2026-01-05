@@ -11,14 +11,17 @@ namespace FF
         private GameObject _weaponInstance;
         private readonly List<GameObject> _specialItemInstances = new();
 
-        public void Show(CharacterDefinition character, HatDefinition hat, Weapon weapon, Weapon specialWeapon)
+        // Added optional flag to control whether the preview should fall back to the character's starting weapon
+        // when the provided weapon is null. Default true preserves existing behavior.
+        public void Show(CharacterDefinition character, HatDefinition hat, Weapon weapon, Weapon specialWeapon, bool allowWeaponFallback = true)
         {
             if (cosmetics)
             {
                 cosmetics.Apply(hat ?? character?.GetDefaultHat(), character ? character.PlayerSprite : null);
             }
 
-            UpdateWeapon(weapon ?? character?.StartingWeapon);
+            // Only fall back to character.StartingWeapon when allowed.
+            UpdateWeapon(allowWeaponFallback ? (weapon ?? character?.StartingWeapon) : weapon);
             UpdateSpecialWeapon(specialWeapon ?? character?.SpecialWeapon);
         }
 

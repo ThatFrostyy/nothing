@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
   ProgressionId: Ranger
   DisplayName: US Ranger
-  Description: Armed with an <b>BAR M-1918</b> and a deadly <b>M2A1 Flamethrower</b>.
-    Steady and reliable, can <b>supress many enemies</b> around him.
+  Description: Armed with an <b>BAR M-1918</b> and a deadly <b>M2A1 Flamethrower
+    as a special</b>. Steady and reliable, can <b>supress many enemies</b> around
+    him.
   AbilityId: suppress
   Portrait: {fileID: 21300000, guid: 74670c89a1f639c45982179bc0df8d1f, type: 3}
   PlayerSprite: {fileID: 21300000, guid: 74670c89a1f639c45982179bc0df8d1f, type: 3}
@@ -23,6 +24,7 @@ MonoBehaviour:
   AvailableHats:
   - {fileID: 11400000, guid: 1d5f8028d62e0544388964a158543185, type: 2}
   StartingWeapon: {fileID: 11400000, guid: 5fdcf8ba9e391ba4f9db389ee623ce59, type: 2}
+  SecondaryWeapon: {fileID: 0}
   WeaponIconOverride: {fileID: 0}
   SpecialWeapon: {fileID: 11400000, guid: 8ca373f03309ee14187cd6891af7ee79, type: 2}
   UnlockRequirements:

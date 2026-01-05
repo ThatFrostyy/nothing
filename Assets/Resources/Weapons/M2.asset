@@ -22,9 +22,10 @@ MonoBehaviour:
   fireLoopSFX: {fileID: 0}
   loopingFireVfx: {fileID: 0}
   loopingVfxOffset: {x: 0, y: 0, z: 0}
-  weaponClass: 4
+  weaponClass: 3
+  isShotgun: 0
   weaponIcon: {fileID: 21300000, guid: 4cd38b4fa594e4f46b4faba7a98111e3, type: 3}
-  isSpecial: 1
+  isSpecial: 0
   useGrenadeCharging: 0
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
   weaponPrefab: {fileID: 2326734106078555472, guid: 5fb562aa350e0404da515a897170d733, type: 3}
@@ -39,9 +40,24 @@ MonoBehaviour:
   burnDuration: 3
   burnDamagePerSecond: 5
   burnTickInterval: 0.35
+  burnTargetVfxOffset: {x: 0, y: 0, z: 0}
   burnTargetVfx: {fileID: 0}
   burnImpactVfx: {fileID: 0}
+  isFlamethrower: 0
+  flamethrowerRange: 5
+  flamethrowerConeAngle: 45
+  flamethrowerTickInterval: 0.1
+  flamethrowerDamagePerSecond: 18
+  flamethrowerHitMask:
+    serializedVersion: 2
+    m_Bits: 0
+  flamethrowerEmitterPrefab: {fileID: 0}
+  useFlamethrowerBurst: 0
+  flamethrowerBurstDuration: 3
+  flamethrowerOverheatCooldown: 2.5
+  flamethrowerBackpackPrefab: {fileID: 0}
   baseSpread: 1.5
   maxSpread: 4
   spreadIncreasePerShot: 0.5
   spreadRecoverySpeed: 2
+  pelletsPerShot: 6

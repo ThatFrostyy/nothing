@@ -236,7 +236,19 @@ namespace FF
 
             if (preview)
             {
-                preview.Show(character, hat, displayedWeapon, specialWeapon);
+                // When viewing secondary or special slots, a null displayedWeapon should NOT fall back to the character's primary.
+                // Pass allowWeaponFallback = false in those cases so the preview shows "no weapon" visually.
+                bool allowWeaponFallback = true;
+                if (showSecondaryWeapon && displayedWeapon == null)
+                {
+                    allowWeaponFallback = false;
+                }
+                else if (showSpecialWeapon && displayedWeapon == null)
+                {
+                    allowWeaponFallback = false;
+                }
+
+                preview.Show(character, hat, displayedWeapon, specialWeapon, allowWeaponFallback);
             }
 
             RefreshProgression(character);
