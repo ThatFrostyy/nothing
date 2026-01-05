@@ -10525,8 +10525,6 @@ MonoBehaviour:
   pickupPool:
   - {fileID: 928517962390292367, guid: 074ab9af08f3b2044b8dce1c28f8c263, type: 3}
   - {fileID: 2273180547129018689, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
-  - {fileID: 2247003472688599848, guid: 6b774529e41da354592aac3a2cff574c, type: 3}
-  - {fileID: 9126595899707076512, guid: 2b7351139fdbe6c4e95d590d3efa1b6c, type: 3}
   pickupLifetimeSeconds: 60
   lifetimeSeconds: 80
   breakFx: {fileID: 0}
