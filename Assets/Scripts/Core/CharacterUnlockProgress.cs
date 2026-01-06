@@ -32,6 +32,11 @@ namespace FF
 
         public static bool IsUnlocked(CharacterDefinition character)
         {
+            if (Data != null && Data.UnlockAllCharacters)
+            {
+                return true;
+            }
+
             // Allow quick testing override on the ScriptableObject itself.
             if (character != null && character.ForceUnlocked)
             {
@@ -191,6 +196,20 @@ namespace FF
             EnsureLoaded();
             _data.BulletTimeMoments++;
             MarkDirty();
+        }
+
+        public static void UnlockAllCharacters()
+        {
+            EnsureLoaded();
+            if (_data.UnlockAllCharacters)
+            {
+                return;
+            }
+
+            _data.UnlockAllCharacters = true;
+            MarkDirty();
+            SaveIfDirty();
+            OnProgressUpdated?.Invoke();
         }
 
         public static int TotalBossesKilled
@@ -477,6 +496,7 @@ namespace FF
         public int TotalCratesDestroyed;
         public int BulletTimeMoments;
         public float LongestNoDamageSeconds;
+        public bool UnlockAllCharacters;
         public List<CharacterWaveProgress> CharacterWaves = new();
         public List<WeaponKillProgress> WeaponKills = new();
         [NonSerialized] public bool IsDirty;

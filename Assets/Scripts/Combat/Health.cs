@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -19,6 +20,7 @@ namespace FF
         public System.Action<int> OnDamaged;
         public System.Action OnDeath;
         public System.Action<int, int> OnHealthChanged;
+        public event Func<Health, bool> OnBeforeDeath;
         public static System.Action<Health, int, Weapon> OnAnyDamaged;
         public static System.Action<Health, int> OnAnyHealed;
 
@@ -101,6 +103,11 @@ namespace FF
 
         private void Die()
         {
+            if (TryPreventDeath())
+            {
+                return;
+            }
+
             OnDeath?.Invoke();
 
             if (TryGetComponent(out PoolToken token) && token.Owner != null)
@@ -111,6 +118,24 @@ namespace FF
             {
                 Destroy(gameObject);
             }
+        }
+
+        private bool TryPreventDeath()
+        {
+            if (OnBeforeDeath == null)
+            {
+                return false;
+            }
+
+            foreach (Func<Health, bool> handler in OnBeforeDeath.GetInvocationList())
+            {
+                if (handler != null && handler(this))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void Update()

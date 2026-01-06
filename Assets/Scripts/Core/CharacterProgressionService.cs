@@ -74,6 +74,11 @@ namespace FF
                 abilityController?.ConfigureDashFireRateBonus(0f, 0f);
                 abilityController?.ConfigureDashImpactBlast(0f, 0f, 0f, 0f);
                 combatEffects?.ConfigureProgressionShortRangeDamage(0f, 0f);
+                combatEffects?.ConfigureProgressionKillMoveSpeed(0f, 0f);
+                combatEffects?.ConfigureProgressionSustainedFireDamage(0f, 0f);
+                combatEffects?.ConfigureProgressionRifleBonuses(0f, 0f, 0f);
+                combatEffects?.ConfigureProgressionRifleMoveBonuses(0f, 0f);
+                combatEffects?.ConfigureProgressionRevive(0f);
                 return;
             }
 
@@ -97,6 +102,17 @@ namespace FF
             float dashImpactRadius = 0f;
             float dashImpactForce = 0f;
             float dashImpactKnockbackDuration = 0f;
+            float startRunMoveBonus = 0f;
+            float rifleDamageBonus = 0f;
+            float killMoveSpeedBonus = 0f;
+            float killMoveSpeedDuration = 0f;
+            float rifleFireRateBonus = 0f;
+            float rifleProjectileSpeedBonus = 0f;
+            float sustainedFireDamageBonus = 0f;
+            float sustainedFireDelay = 0f;
+            float revivePercent = 0f;
+            float rifleMoveDamageBonus = 0f;
+            float rifleMoveSpeedBonus = 0f;
 
             foreach (CharacterUpgradeReward reward in progression.GetUnlockedRewards(state.Level))
             {
@@ -154,6 +170,31 @@ namespace FF
                         dashImpactForce = Mathf.Max(dashImpactForce, reward.KnockbackForce);
                         dashImpactKnockbackDuration = Mathf.Max(dashImpactKnockbackDuration, reward.KnockbackDuration);
                         break;
+                    case CharacterUpgradeType.StartRunMoveSpeed:
+                        startRunMoveBonus += delta;
+                        break;
+                    case CharacterUpgradeType.RifleDamage:
+                        rifleDamageBonus += delta;
+                        break;
+                    case CharacterUpgradeType.KillMoveSpeedBoost:
+                        killMoveSpeedBonus += delta;
+                        killMoveSpeedDuration = Mathf.Max(killMoveSpeedDuration, reward.DurationSeconds);
+                        break;
+                    case CharacterUpgradeType.RifleFireRateAndProjectileSpeed:
+                        rifleFireRateBonus += delta;
+                        rifleProjectileSpeedBonus += reward.GetSecondaryMultiplierDelta();
+                        break;
+                    case CharacterUpgradeType.SustainedFireDamage:
+                        sustainedFireDamageBonus += delta;
+                        sustainedFireDelay = Mathf.Max(sustainedFireDelay, reward.DurationSeconds);
+                        break;
+                    case CharacterUpgradeType.ReviveOnDeath:
+                        revivePercent += delta;
+                        break;
+                    case CharacterUpgradeType.RifleMoveDamageAndSpeed:
+                        rifleMoveDamageBonus += delta;
+                        rifleMoveSpeedBonus += reward.GetSecondaryMultiplierDelta();
+                        break;
                 }
             }
 
@@ -162,6 +203,11 @@ namespace FF
                 if (moveBonus > 0f)
                 {
                     stats.MoveMult += moveBonus;
+                }
+
+                if (startRunMoveBonus > 0f)
+                {
+                    stats.MoveMult += startRunMoveBonus;
                 }
 
                 if (damageBonus > 0f)
@@ -208,6 +254,11 @@ namespace FF
             abilityController?.ConfigureDashFireRateBonus(dashFireRateBonus, dashFireRateDuration);
             abilityController?.ConfigureDashImpactBlast(dashImpactDamageBonus, dashImpactRadius, dashImpactForce, dashImpactKnockbackDuration);
             combatEffects?.ConfigureProgressionShortRangeDamage(shortRangeDamageBonus, shortRangeRadius);
+            combatEffects?.ConfigureProgressionKillMoveSpeed(killMoveSpeedBonus, killMoveSpeedDuration);
+            combatEffects?.ConfigureProgressionSustainedFireDamage(sustainedFireDamageBonus, sustainedFireDelay);
+            combatEffects?.ConfigureProgressionRifleBonuses(rifleDamageBonus, rifleFireRateBonus, rifleProjectileSpeedBonus);
+            combatEffects?.ConfigureProgressionRifleMoveBonuses(rifleMoveDamageBonus, rifleMoveSpeedBonus);
+            combatEffects?.ConfigureProgressionRevive(Mathf.Clamp01(revivePercent));
         }
 
         public static CharacterProgressionState GetState(CharacterDefinition character)

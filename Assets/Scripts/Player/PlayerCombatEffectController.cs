@@ -53,6 +53,20 @@ namespace FF
         private float _progressionShortRangeTimer;
         private readonly Collider2D[] _progressionShortRangeHits = new Collider2D[32];
         private readonly System.Collections.Generic.List<Enemy> _progressionShortRangeTargets = new();
+        private float _progressionKillMoveSpeedBonus;
+        private float _progressionKillMoveSpeedDuration;
+        private float _progressionSustainedDamageBonus;
+        private float _progressionSustainedDamageDelay;
+        private float _progressionSustainedFireTimer;
+        private bool _progressionSustainedFireActive;
+        private float _progressionRifleDamageBonus;
+        private float _progressionRifleFireRateBonus;
+        private float _progressionRifleProjectileSpeedBonus;
+        private float _progressionRifleMoveDamageBonus;
+        private float _progressionRifleMoveSpeedBonus;
+        private float _progressionRevivePercent;
+        private bool _progressionReviveAvailable;
+        private Rigidbody2D _playerBody;
 
         private void Awake()
         {
@@ -60,6 +74,7 @@ namespace FF
             playerShooter = playerShooter ? playerShooter : weaponManager != null ? weaponManager.Shooter : null;
             playerStats = playerStats ? playerStats : GetComponent<PlayerStats>();
             playerHealth = playerHealth ? playerHealth : GetComponent<Health>();
+            _playerBody = GetComponent<Rigidbody2D>();
             if (!playerShooter)
             {
                 playerShooter = GetComponentInChildren<AutoShooter>();
@@ -69,9 +84,15 @@ namespace FF
         private void OnEnable()
         {
             AutoShooter.OnRoundsFired += HandleRoundsFired;
+            Enemy.OnAnyEnemyKilledByWeapon += HandleEnemyKilledByWeapon;
             if (weaponManager)
             {
                 weaponManager.OnWeaponEquipped += HandleWeaponEquipped;
+            }
+
+            if (playerHealth != null)
+            {
+                playerHealth.OnBeforeDeath += HandleBeforeDeath;
             }
 
             UpdateSecondaryUsageState(true);
@@ -80,9 +101,15 @@ namespace FF
         private void OnDisable()
         {
             AutoShooter.OnRoundsFired -= HandleRoundsFired;
+            Enemy.OnAnyEnemyKilledByWeapon -= HandleEnemyKilledByWeapon;
             if (weaponManager)
             {
                 weaponManager.OnWeaponEquipped -= HandleWeaponEquipped;
+            }
+
+            if (playerHealth != null)
+            {
+                playerHealth.OnBeforeDeath -= HandleBeforeDeath;
             }
 
             if (_orbVacuumRoutine != null)
@@ -99,6 +126,7 @@ namespace FF
             UpdateSecondaryUsageState(false);
             UpdateSuppressionMeter(Time.deltaTime);
             UpdateProgressionShortRangeDamage(Time.deltaTime);
+            UpdateProgressionBonuses(Time.deltaTime);
         }
 
         public void ConfigureProgressionShortRangeDamage(float damagePercent, float radius)
@@ -106,6 +134,39 @@ namespace FF
             _progressionShortRangeDamageBonus = Mathf.Max(0f, damagePercent);
             _progressionShortRangeRadius = Mathf.Max(0f, radius);
             _progressionShortRangeTimer = 0f;
+        }
+
+        public void ConfigureProgressionKillMoveSpeed(float moveSpeedPercent, float duration)
+        {
+            _progressionKillMoveSpeedBonus = Mathf.Max(0f, moveSpeedPercent);
+            _progressionKillMoveSpeedDuration = Mathf.Max(0f, duration);
+        }
+
+        public void ConfigureProgressionSustainedFireDamage(float damagePercent, float delaySeconds)
+        {
+            _progressionSustainedDamageBonus = Mathf.Max(0f, damagePercent);
+            _progressionSustainedDamageDelay = Mathf.Max(0f, delaySeconds);
+            _progressionSustainedFireTimer = 0f;
+            _progressionSustainedFireActive = false;
+        }
+
+        public void ConfigureProgressionRifleBonuses(float damagePercent, float fireRatePercent, float projectileSpeedPercent)
+        {
+            _progressionRifleDamageBonus = Mathf.Max(0f, damagePercent);
+            _progressionRifleFireRateBonus = Mathf.Max(0f, fireRatePercent);
+            _progressionRifleProjectileSpeedBonus = Mathf.Max(0f, projectileSpeedPercent);
+        }
+
+        public void ConfigureProgressionRifleMoveBonuses(float damagePercent, float moveSpeedPercent)
+        {
+            _progressionRifleMoveDamageBonus = Mathf.Max(0f, damagePercent);
+            _progressionRifleMoveSpeedBonus = Mathf.Max(0f, moveSpeedPercent);
+        }
+
+        public void ConfigureProgressionRevive(float revivePercent)
+        {
+            _progressionRevivePercent = Mathf.Clamp01(revivePercent);
+            _progressionReviveAvailable = _progressionRevivePercent > 0f;
         }
 
         private void UpdateSecondaryUsageState(bool forceReset)
@@ -174,6 +235,137 @@ namespace FF
             }
 
             TryApplySuppression(shooter, count);
+        }
+
+        private void HandleEnemyKilledByWeapon(Enemy enemy, Weapon weapon)
+        {
+            if (_progressionKillMoveSpeedBonus <= 0f || _progressionKillMoveSpeedDuration <= 0f || playerStats == null)
+            {
+                return;
+            }
+
+            if (!IsPlayerWeapon(weapon))
+            {
+                return;
+            }
+
+            playerStats.ApplyTemporaryMultiplier(
+                PlayerStats.StatType.MoveSpeed,
+                1f + _progressionKillMoveSpeedBonus,
+                _progressionKillMoveSpeedDuration);
+        }
+
+        private bool IsPlayerWeapon(Weapon weapon)
+        {
+            if (weaponManager == null || weapon == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < weaponManager.SlotCount; i++)
+            {
+                if (weaponManager.GetWeaponInSlot(i) == weapon)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool HandleBeforeDeath(Health health)
+        {
+            if (!_progressionReviveAvailable || _progressionRevivePercent <= 0f || health == null)
+            {
+                return false;
+            }
+
+            _progressionReviveAvailable = false;
+            int healAmount = Mathf.Max(1, Mathf.RoundToInt(health.MaxHP * _progressionRevivePercent));
+            health.Heal(healAmount);
+            return true;
+        }
+
+        private void UpdateProgressionBonuses(float deltaTime)
+        {
+            if (playerStats == null)
+            {
+                return;
+            }
+
+            Weapon weapon = weaponManager != null ? weaponManager.CurrentWeapon : null;
+            bool isRifle = weapon != null && weapon.weaponClass == Weapon.WeaponClass.SemiRifle;
+            bool isMoving = _playerBody != null && _playerBody.linearVelocity.sqrMagnitude > 0.01f;
+            bool isFiring = playerShooter != null && playerShooter.IsFireHeld;
+
+            UpdateSustainedFireState(deltaTime, isFiring);
+
+            float damageMultiplier = 1f;
+            if (isRifle && _progressionRifleDamageBonus > 0f)
+            {
+                damageMultiplier *= 1f + _progressionRifleDamageBonus;
+            }
+
+            if (isRifle && isMoving && _progressionRifleMoveDamageBonus > 0f)
+            {
+                damageMultiplier *= 1f + _progressionRifleMoveDamageBonus;
+            }
+
+            if (_progressionSustainedFireActive && _progressionSustainedDamageBonus > 0f)
+            {
+                damageMultiplier *= 1f + _progressionSustainedDamageBonus;
+            }
+
+            float moveMultiplier = 1f;
+            if (isRifle && isMoving && _progressionRifleMoveSpeedBonus > 0f)
+            {
+                moveMultiplier *= 1f + _progressionRifleMoveSpeedBonus;
+            }
+
+            float fireRateMultiplier = 1f;
+            if (isRifle && _progressionRifleFireRateBonus > 0f)
+            {
+                fireRateMultiplier *= 1f + _progressionRifleFireRateBonus;
+            }
+
+            float projectileSpeedMultiplier = 1f;
+            if (isRifle && _progressionRifleProjectileSpeedBonus > 0f)
+            {
+                projectileSpeedMultiplier *= 1f + _progressionRifleProjectileSpeedBonus;
+            }
+
+            playerStats.SetConditionalDamageMultiplier(damageMultiplier);
+            playerStats.SetConditionalMoveMultiplier(moveMultiplier);
+            playerStats.SetConditionalFireRateMultiplier(fireRateMultiplier);
+            playerStats.SetConditionalProjectileSpeedMultiplier(projectileSpeedMultiplier);
+        }
+
+        private void UpdateSustainedFireState(float deltaTime, bool isFiring)
+        {
+            if (_progressionSustainedDamageBonus <= 0f)
+            {
+                _progressionSustainedFireTimer = 0f;
+                _progressionSustainedFireActive = false;
+                return;
+            }
+
+            if (isFiring)
+            {
+                _progressionSustainedFireTimer += deltaTime;
+                if (_progressionSustainedDamageDelay <= 0f)
+                {
+                    _progressionSustainedFireActive = true;
+                }
+                else if (_progressionSustainedFireTimer >= _progressionSustainedDamageDelay)
+                {
+                    _progressionSustainedFireActive = true;
+                }
+            }
+            else
+            {
+                _progressionSustainedFireTimer = 0f;
+                _progressionSustainedFireActive = false;
+            }
         }
 
         private void TryTriggerSynergy()
