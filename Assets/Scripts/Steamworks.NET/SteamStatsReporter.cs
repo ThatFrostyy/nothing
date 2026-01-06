@@ -521,14 +521,10 @@ namespace FF
                 return;
             }
 
-            bool foundSelf = false;
             for (int i = 0; i < callback.m_cEntryCount; i++)
             {
                 if (!SteamUserStats.GetDownloadedLeaderboardEntry(callback.m_hSteamLeaderboardEntries, i, out LeaderboardEntry_t entry, null, 0))
                     continue;
-
-                if (entry.m_steamIDUser == SteamUser.GetSteamID())
-                    foundSelf = true;
             }
 
         }

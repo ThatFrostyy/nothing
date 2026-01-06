@@ -79,7 +79,7 @@ namespace FF
             ApplyResolution(resolution);
             PlayerPrefs.SetInt(ResolutionWidthPrefKey, resolution.width);
             PlayerPrefs.SetInt(ResolutionHeightPrefKey, resolution.height);
-            PlayerPrefs.SetInt(ResolutionRefreshPrefKey, resolution.refreshRate);
+            PlayerPrefs.SetInt(ResolutionRefreshPrefKey, (int)resolution.refreshRateRatio.value);
             PlayerPrefs.Save();
             SteamCloudSave.SaveToCloud();
         }
@@ -177,18 +177,18 @@ namespace FF
 
             int storedWidth = PlayerPrefs.GetInt(ResolutionWidthPrefKey, Screen.currentResolution.width);
             int storedHeight = PlayerPrefs.GetInt(ResolutionHeightPrefKey, Screen.currentResolution.height);
-            int storedRefresh = PlayerPrefs.GetInt(ResolutionRefreshPrefKey, Screen.currentResolution.refreshRate);
+            int storedRefresh = PlayerPrefs.GetInt(ResolutionRefreshPrefKey, (int)Screen.currentResolution.refreshRateRatio.value);
             Resolution = ResolveResolution(storedWidth, storedHeight, storedRefresh);
         }
 
         private static void CacheResolutions()
         {
             _availableResolutions = Screen.resolutions
-                .GroupBy(r => (r.width, r.height, r.refreshRate))
+                .GroupBy(r => (r.width, r.height, r.refreshRateRatio))
                 .Select(g => g.First())
                 .OrderBy(r => r.width)
                 .ThenBy(r => r.height)
-                .ThenBy(r => r.refreshRate)
+                .ThenBy(r => r.refreshRateRatio)
                 .ToList();
 
             if (_availableResolutions.Count == 0)
@@ -203,7 +203,7 @@ namespace FF
 
             foreach (var res in _availableResolutions)
             {
-                if (res.width == width && res.height == height && res.refreshRate == refreshRate)
+                if (res.width == width && res.height == height && res.refreshRateRatio.value == refreshRate)
                 {
                     return res;
                 }
@@ -234,7 +234,7 @@ namespace FF
                 return;
             }
 
-            Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreenMode, resolution.refreshRate);
+            Screen.SetResolution(resolution.width, resolution.height, Screen.fullScreenMode, resolution.refreshRateRatio);
         }
 
         private static void ApplyPostProcessingSettings()

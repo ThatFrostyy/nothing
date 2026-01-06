@@ -64,8 +64,6 @@ namespace FF
                 if (TryGetComponent<Enemy>(out var enemy))
                 {
                     bool emphasize = isCritical || enemy.IsBoss || damageApplied >= Mathf.Max(10, maxHP * 0.35f);
-                    // Debug: show incoming vs adjusted
-                    Debug.Log($"[Health] {gameObject.name} Damage called: incoming={amount}, adjusted={adjustedAmount}, applied={damageApplied}");
                     DamageNumberManager.ShowDamage(transform.position, adjustedAmount, emphasize);
                 }
             }
