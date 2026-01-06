@@ -152,6 +152,9 @@ namespace FF
             _progressionShortRangeDamageBonus = Mathf.Max(0f, damagePercent);
             _progressionShortRangeRadius = Mathf.Max(0f, radius);
             _progressionShortRangeTimer = 0f;
+
+            // Debug: log configuration
+            Debug.Log($"[ProgressionShortRange] Configured: bonus={_progressionShortRangeDamageBonus} radius={_progressionShortRangeRadius}");
         }
 
         public void ConfigureProgressionKillMoveSpeed(float moveSpeedPercent, float duration)
@@ -630,9 +633,11 @@ namespace FF
 
             _progressionShortRangeTimer = Mathf.Max(0.1f, progressionShortRangeInterval);
 
-            int damage = Mathf.RoundToInt(playerStats.GetDamageInt() * _progressionShortRangeDamageBonus);
+            int playerDamage = playerStats.GetDamageInt();
+            int damage = Mathf.RoundToInt(playerDamage * _progressionShortRangeDamageBonus);
             if (damage <= 0)
             {
+                Debug.Log($"[ProgressionShortRange] Computed damage is 0 (playerDamage={playerDamage}, bonus={_progressionShortRangeDamageBonus})");
                 return;
             }
 
@@ -645,6 +650,9 @@ namespace FF
             {
                 return;
             }
+
+            // Debug: log summary of computation and hits
+            Debug.Log($"[ProgressionShortRange] playerDamage={playerDamage} bonus={_progressionShortRangeDamageBonus} -> damage={damage} hits={hits}");
 
             _progressionShortRangeTargets.Clear();
             for (int i = 0; i < hits; i++)
@@ -664,6 +672,7 @@ namespace FF
                 _progressionShortRangeTargets.Add(enemy);
                 if (enemy.TryGetComponent(out Health health))
                 {
+                    Debug.Log($"[ProgressionShortRange] Hitting {enemy.name} with rawDamage={damage} (playerDamage={playerDamage})");
                     health.Damage(damage);
                 }
             }

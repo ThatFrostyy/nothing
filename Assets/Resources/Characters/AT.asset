@@ -165,8 +165,7 @@ MonoBehaviour:
         KnockbackDuration: 0
     - XPOverride: 0
       Icon: {fileID: 0}
-      Description: Enemies hit by explosions take +30% damage from ALL sources for
-        2 seconds
+      Description: Enemies hit by explosions take +30% damage for 2 seconds
       Rewards:
       - Type: 26
         Percent: 30
@@ -260,4 +259,4 @@ MonoBehaviour:
         Radius: 0
         KnockbackForce: 0
         KnockbackDuration: 0
-  ForceUnlocked: 0
+  ForceUnlocked: 1

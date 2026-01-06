@@ -36,14 +36,14 @@ namespace FF
 
             if (trigger)
             {
-                trigger.enabled = icon != null;
-                if (unlocked)
+                // Enable the tooltip when there is useful text to show.
+                bool hasDescription = !string.IsNullOrWhiteSpace(description);
+                trigger.enabled = hasDescription;
+
+                if (hasDescription)
                 {
-                    trigger.SetText($"Level {levelNumber} - Unlocked\n {description}");
-                }
-                else
-                {
-                    trigger.SetText($"Level {levelNumber} - Locked\n {description}");
+                    string state = unlocked ? "Unlocked" : "Locked";
+                    trigger.SetText($"Level {levelNumber} - {state}\n{description}");
                 }
             }
         }

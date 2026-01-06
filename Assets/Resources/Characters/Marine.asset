@@ -137,15 +137,15 @@ MonoBehaviour:
         KnockbackDuration: 0.25
     - XPOverride: 0
       Icon: {fileID: 0}
-      Description: Deal +25% damage to enemies within short range
+      Description: Deal 25% damage to enemies around the player passively
       Rewards:
       - Type: 7
         Percent: 25
-        SecondaryPercent: 15
+        SecondaryPercent: 0
         FlatAmount: 0
         SecondaryFlatAmount: 0
         DurationSeconds: 0
-        Radius: 3
+        Radius: 10
         KnockbackForce: 0
         KnockbackDuration: 0
     - XPOverride: 0
@@ -166,8 +166,8 @@ MonoBehaviour:
       Description: Gain +30 max HP and restore 30 HP on level-up
       Rewards:
       - Type: 9
-        Percent: 30
-        SecondaryPercent: 30
+        Percent: 0
+        SecondaryPercent: 0
         FlatAmount: 30
         SecondaryFlatAmount: 30
         DurationSeconds: 0
@@ -189,7 +189,7 @@ MonoBehaviour:
         KnockbackDuration: 0
     - XPOverride: 0
       Icon: {fileID: 0}
-      Description: Thompson gains +15% fire rate and +15% cooldown speed
+      Description: SMGs gains +15% fire rate and +15% cooldown speed
       Rewards:
       - Type: 11
         Percent: 15
