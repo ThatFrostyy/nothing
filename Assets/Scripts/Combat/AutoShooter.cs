@@ -288,6 +288,10 @@ namespace FF
             _fireTimer += deltaTime;
 
             float rpmMultiplier = _stats != null ? _stats.GetFireRateMultiplier() : 1f;
+            if (_stats != null && _weapon.weaponClass == Weapon.WeaponClass.SMG)
+            {
+                rpmMultiplier *= 1f + _stats.SmgFireRateBonus;
+            }
             if (UpgradeManager.I != null)
             {
                 rpmMultiplier *= UpgradeManager.I.GetWeaponFireRateMultiplier(_weapon);
@@ -304,6 +308,10 @@ namespace FF
             float interval = 60f / rpm;
 
             float cooldownMultiplier = _stats != null ? _stats.GetFireCooldownMultiplier() : 1f;
+            if (_stats != null && _weapon.weaponClass == Weapon.WeaponClass.SMG)
+            {
+                cooldownMultiplier *= Mathf.Max(0.1f, 1f - _stats.SmgCooldownBonus);
+            }
             if (UpgradeManager.I != null)
             {
                 cooldownMultiplier *= UpgradeManager.I.GetWeaponFireCooldownMultiplier(_weapon);
@@ -376,6 +384,25 @@ namespace FF
 
             float rangeMultiplier = UpgradeManager.I != null ? UpgradeManager.I.GetFlamethrowerRangeMultiplier(_weapon) : 1f;
             _flamethrowerEmitter.SetRangeMultiplier(rangeMultiplier);
+            if (_stats != null)
+            {
+                float closeRangeMultiplier = 1f + Mathf.Max(0f, _stats.CloseRangeDamageBonus);
+                if (closeRangeMultiplier > 1f && _stats.CloseRangeDamageRange > 0f)
+                {
+                    _flamethrowerEmitter.SetCloseRangeBonus(
+                        transform.root ? transform.root : transform,
+                        closeRangeMultiplier,
+                        _stats.CloseRangeDamageRange);
+                }
+                else
+                {
+                    _flamethrowerEmitter.SetCloseRangeBonus(null, 1f, 0f);
+                }
+            }
+            else
+            {
+                _flamethrowerEmitter.SetCloseRangeBonus(null, 1f, 0f);
+            }
 
             bool canFire = _isFireHeld && !_flamethrowerOverheated;
 
@@ -458,7 +485,7 @@ namespace FF
             int extraProjectiles = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponExtraProjectiles(_weapon) : 0;
             bool firesLikeShotgun = _weapon.isShotgun || _weapon.weaponClass == Weapon.WeaponClass.Shotgun;
             int pelletCount = firesLikeShotgun
-                ? Mathf.Max(1, _weapon.pelletsPerShot)
+                ? Mathf.Max(1, _weapon.pelletsPerShot + (_stats != null ? _stats.BonusShotgunPellets : 0))
                 : 1;
             int totalProjectiles = Mathf.Max(1, pelletCount + extraProjectiles);
             int pierceCount = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponPierceCount(_weapon) : 0;
@@ -509,6 +536,17 @@ namespace FF
                 bullet.SetDamage(Mathf.RoundToInt(_weapon.damage * damageMultiplier), isCrit);
                 string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
                 bullet.SetOwner(ownerTag);
+                if (_stats != null)
+                {
+                    float closeRangeMultiplier = 1f + Mathf.Max(0f, _stats.CloseRangeDamageBonus);
+                    if (closeRangeMultiplier > 1f && _stats.CloseRangeDamageRange > 0f)
+                    {
+                        bullet.SetCloseRangeBonus(
+                            transform.root ? transform.root : transform,
+                            closeRangeMultiplier,
+                            _stats.CloseRangeDamageRange);
+                    }
+                }
                 float projectileSpeedMultiplier = GetProjectileSpeedMultiplier();
                 bullet.SetSpeed(bullet.BaseSpeed * Mathf.Max(0.01f, projectileSpeedMultiplier));
                 bullet.SetSourceWeapon(_weapon);

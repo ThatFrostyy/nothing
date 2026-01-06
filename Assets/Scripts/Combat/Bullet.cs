@@ -22,6 +22,9 @@ namespace FF
         float baseSpeed;
         Weapon sourceWeapon;
         int pierceRemaining;
+        Transform ownerTransform;
+        float closeRangeMultiplier = 1f;
+        float closeRangeRadius;
 
         public void SetDamage(int d, bool isCritical = false)
         {
@@ -35,6 +38,12 @@ namespace FF
         {
             knockbackStrength = Mathf.Max(0f, strength);
             knockbackDuration = Mathf.Max(0f, duration);
+        }
+        public void SetCloseRangeBonus(Transform owner, float multiplier, float radius)
+        {
+            ownerTransform = owner;
+            closeRangeMultiplier = Mathf.Max(1f, multiplier);
+            closeRangeRadius = Mathf.Max(0f, radius);
         }
         public void SetPierceCount(int count) => pierceRemaining = Mathf.Max(0, count);
         public float BaseSpeed => baseSpeed;
@@ -76,7 +85,17 @@ namespace FF
 
             if (other.TryGetComponent<Health>(out var hp))
             {
-                hp.Damage(damage, sourceWeapon, isCriticalDamage);
+                int adjustedDamage = damage;
+                if (ownerTransform && closeRangeMultiplier > 1f && closeRangeRadius > 0f)
+                {
+                    float distance = Vector2.Distance(ownerTransform.position, other.transform.position);
+                    if (distance <= closeRangeRadius)
+                    {
+                        adjustedDamage = Mathf.Max(1, Mathf.RoundToInt(damage * closeRangeMultiplier));
+                    }
+                }
+
+                hp.Damage(adjustedDamage, sourceWeapon, isCriticalDamage);
 
                 if (knockbackStrength > 0f && other.TryGetComponent<Enemy>(out var enemy) && teamTag == "Player")
                 {
@@ -129,6 +148,9 @@ namespace FF
             knockbackStrength = 0f;
             sourceWeapon = null;
             pierceRemaining = 0;
+            ownerTransform = null;
+            closeRangeMultiplier = 1f;
+            closeRangeRadius = 0f;
         }
         #endregion Pooling
 
