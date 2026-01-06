@@ -18,6 +18,7 @@ namespace FF
         [Header("Data Sources")]
         [SerializeField] private GameManager gameManager;
         [SerializeField] private Health playerHealth;
+        [SerializeField] private PlayerStats playerStats;
         [SerializeField] private XPWallet wallet;
         [SerializeField] private WeaponManager weaponManager;
         [SerializeField] private UpgradeManager upgradeManager;
@@ -188,12 +189,14 @@ namespace FF
                 if (playerObject)
                 {
                     playerHealth = playerObject.GetComponent<Health>();
+                    if (!playerStats) playerStats = playerObject.GetComponent<PlayerStats>();
                     if (!weaponManager) weaponManager = playerObject.GetComponentInChildren<WeaponManager>();
                 }
             }
 
             if (!wallet && playerHealth) wallet = playerHealth.GetComponent<XPWallet>();
             if (!weaponManager && playerHealth) weaponManager = playerHealth.GetComponent<WeaponManager>();
+            if (!playerStats && playerHealth) playerStats = playerHealth.GetComponent<PlayerStats>();
 
             if (!upgradePromptGroup && upgradePromptText)
             {
@@ -932,12 +935,12 @@ namespace FF
 
             if (upgradeSummaryPlayerText)
             {
-                upgradeSummaryPlayerText.text = BuildPlayerUpgradeSummary();
+                upgradeSummaryPlayerText.text = BuildPlayerStatsSummary();
             }
 
             if (upgradeSummaryWeaponText)
             {
-                upgradeSummaryWeaponText.text = BuildWeaponUpgradeSummary();
+                upgradeSummaryWeaponText.text = BuildUpgradeSummary();
             }
         }
 
@@ -1002,10 +1005,124 @@ namespace FF
             if (!isVisible && upgradePromptText) upgradePromptText.gameObject.SetActive(false);
         }
 
-        private string BuildPlayerUpgradeSummary()
+        private string BuildPlayerStatsSummary()
+        {
+            var builder = new System.Text.StringBuilder();
+            builder.AppendLine("Current Stats:");
+
+            bool hasAny = false;
+
+            if (playerHealth != null)
+            {
+                builder.AppendLine($"- Max HP: {playerHealth.MaxHP}");
+                builder.AppendLine($"- Current HP: {playerHealth.CurrentHP}");
+                hasAny = true;
+            }
+
+            if (playerStats != null)
+            {
+                builder.AppendLine($"- Move Speed: {FormatFloat(playerStats.GetMoveSpeed())}");
+                builder.AppendLine($"- Damage Mult: {FormatMultiplier(playerStats.GetDamageMultiplier())}");
+                builder.AppendLine($"- Fire Rate Mult: {FormatMultiplier(playerStats.GetFireRateMultiplier())}");
+                builder.AppendLine($"- Fire Cooldown Mult: {FormatMultiplier(playerStats.GetFireCooldownMultiplier())}");
+                builder.AppendLine($"- Crit Chance: {FormatPercent(playerStats.GetCritChance())}");
+                builder.AppendLine($"- Crit Damage: {FormatMultiplier(playerStats.GetCritDamageMultiplier())}");
+                builder.AppendLine($"- Projectile Speed: {FormatMultiplier(playerStats.GetProjectileSpeedMultiplier())}");
+                builder.AppendLine($"- Accuracy Penalty: {FormatFloat(playerStats.GetMovementAccuracyPenalty())}x");
+                hasAny = true;
+            }
+
+            if (weaponManager != null && weaponManager.CurrentWeapon != null)
+            {
+                Weapon currentWeapon = weaponManager.CurrentWeapon;
+                builder.AppendLine("- - -");
+                builder.AppendLine($"Weapon: {ResolveWeaponName(currentWeapon)}");
+
+                float rpmMultiplier = playerStats != null ? playerStats.GetFireRateMultiplier() : 1f;
+                float cooldownMultiplier = playerStats != null ? playerStats.GetFireCooldownMultiplier() : 1f;
+                float damageMultiplier = playerStats != null ? playerStats.GetDamageMultiplier() : 1f;
+                float critChance = playerStats != null ? playerStats.GetCritChance() : 0f;
+                float critDamageMultiplier = playerStats != null ? playerStats.GetCritDamageMultiplier() : 1f;
+                float projectileSpeedMultiplier = playerStats != null ? playerStats.GetProjectileSpeedMultiplier() : 1f;
+                float accuracyMultiplier = 1f;
+
+                if (upgradeManager != null)
+                {
+                    rpmMultiplier *= upgradeManager.GetWeaponFireRateMultiplier(currentWeapon);
+                    cooldownMultiplier *= upgradeManager.GetWeaponFireCooldownMultiplier(currentWeapon);
+                    damageMultiplier *= upgradeManager.GetWeaponDamageMultiplier(currentWeapon);
+                    critChance += upgradeManager.GetWeaponCritChance(currentWeapon);
+                    critDamageMultiplier *= upgradeManager.GetWeaponCritDamageMultiplier(currentWeapon);
+                    projectileSpeedMultiplier *= upgradeManager.GetWeaponProjectileSpeedMultiplier(currentWeapon);
+                    accuracyMultiplier = upgradeManager.GetWeaponAccuracyMultiplier(currentWeapon);
+                }
+
+                if (upgradeManager != null)
+                {
+                    rpmMultiplier = upgradeManager.ClampFireRateMultiplier(rpmMultiplier);
+                    cooldownMultiplier = upgradeManager.ClampCooldownMultiplier(cooldownMultiplier);
+                }
+
+                float rpm = Mathf.Max(currentWeapon.rpm * rpmMultiplier, 0.01f);
+                if (upgradeManager != null)
+                {
+                    rpm = upgradeManager.ClampFireRateRpm(rpm);
+                }
+
+                float effectiveRpmMultiplier = rpm / Mathf.Max(0.01f, currentWeapon.rpm);
+                float interval = 60f / rpm;
+                interval *= cooldownMultiplier;
+
+                if (!currentWeapon.isAuto && currentWeapon.fireCooldown > 0f)
+                {
+                    interval = currentWeapon.fireCooldown / effectiveRpmMultiplier;
+                    interval *= cooldownMultiplier;
+                }
+
+                if (upgradeManager != null)
+                {
+                    interval = upgradeManager.ClampCooldownSeconds(interval);
+                }
+
+                float totalDamage = currentWeapon.damage * damageMultiplier;
+
+                builder.AppendLine($"- Total Damage: {FormatFloat(totalDamage)}");
+                builder.AppendLine($"- RPM: {FormatFloat(rpm)}");
+                builder.AppendLine($"- Cooldown: {FormatFloat(interval)}s");
+                builder.AppendLine($"- Crit Chance: {FormatPercent(critChance)}");
+                builder.AppendLine($"- Crit Damage: {FormatMultiplier(critDamageMultiplier)}");
+                builder.AppendLine($"- Projectile Speed: {FormatMultiplier(projectileSpeedMultiplier)}");
+                builder.AppendLine($"- Accuracy: {FormatMultiplier(accuracyMultiplier)}");
+
+                if (upgradeManager != null)
+                {
+                    int pierce = upgradeManager.GetWeaponPierceCount(currentWeapon);
+                    int extraProjectiles = upgradeManager.GetWeaponExtraProjectiles(currentWeapon);
+                    if (pierce > 0) builder.AppendLine($"- Pierce: {pierce}");
+                    if (extraProjectiles > 0) builder.AppendLine($"- Extra Projectiles: {extraProjectiles}");
+                }
+
+                hasAny = true;
+            }
+
+            if (!hasAny)
+            {
+                builder.AppendLine("No stats data.");
+            }
+
+            return builder.ToString().TrimEnd();
+        }
+
+        private string BuildUpgradeSummary()
         {
             var builder = new System.Text.StringBuilder();
             builder.AppendLine("Player Upgrades:");
+
+            if (upgradeManager == null)
+            {
+                builder.AppendLine("None");
+                return builder.ToString().TrimEnd();
+            }
 
             IReadOnlyDictionary<Upgrade, int> playerUpgrades = upgradeManager.GetUpgradeCounts();
             bool hasPlayerUpgrades = false;
@@ -1026,12 +1143,7 @@ namespace FF
                 builder.AppendLine("None");
             }
 
-            return builder.ToString().TrimEnd();
-        }
-
-        private string BuildWeaponUpgradeSummary()
-        {
-            var builder = new System.Text.StringBuilder();
+            builder.AppendLine(string.Empty);
             builder.AppendLine("Weapon Upgrades:");
 
             IReadOnlyDictionary<Weapon, WeaponUpgradeState> weaponStates = upgradeManager.GetWeaponUpgradeStates();
@@ -1079,6 +1191,21 @@ namespace FF
             }
 
             return builder.ToString().TrimEnd();
+        }
+
+        private static string FormatFloat(float value)
+        {
+            return value.ToString("0.##");
+        }
+
+        private static string FormatPercent(float value)
+        {
+            return $"{(value * 100f):0.#}%";
+        }
+
+        private static string FormatMultiplier(float value)
+        {
+            return $"{value:0.##}x";
         }
 
         private void BindUpgradeSummaryInput()
