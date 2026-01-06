@@ -28,7 +28,7 @@ MonoBehaviour:
   SpecialWeapon: {fileID: 0}
   UnlockRequirements: []
   Progression:
-    baseXPRequirement: 500
+    baseXPRequirement: 300
     xpGrowthPerLevel: 10
     xpRequirementCurve:
       serializedVersion: 2
@@ -117,8 +117,8 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    xpPerKill: 0.5
-    xpPerWave: 8
+    xpPerKill: 2.5
+    xpPerWave: 25
     waveKillBonusMultiplier: 0.05
     minimumWaveForRewards: 5
     levels:

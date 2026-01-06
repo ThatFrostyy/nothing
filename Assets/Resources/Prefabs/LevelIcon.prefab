@@ -34,8 +34,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -2.4002075, y: 52.73605}
-  m_SizeDelta: {x: 17.449, y: 55.471}
+  m_AnchoredPosition: {x: -2, y: -0.00011992}
+  m_SizeDelta: {x: 17.449, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2047016142501042887
 CanvasRenderer:
@@ -74,8 +74,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4279119420
-  m_fontColor: {r: 0.23529412, g: 0.18039216, b: 0.05490196, a: 1}
+    rgba: 4291019715
+  m_fontColor: {r: 0.764151, g: 0.764151, b: 0.764151, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -92,7 +92,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 43.6
+  m_fontSize: 39.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -229,8 +229,8 @@ MonoBehaviour:
   iconImage: {fileID: 3532455079930589315}
   highlightImage: {fileID: 7698048312466090403}
   levelText: {fileID: 7192184641411833783}
-  lockedColor: {r: 0.34901962, g: 0.3372549, b: 0.33333334, a: 1}
-  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
+  lockedColor: {r: 0.7647059, g: 0.7647059, b: 0.7647059, a: 1}
+  unlockedColor: {r: 1, g: 0.6470588, b: 0, a: 1}
   trigger: {fileID: 5563300059127772678}
 --- !u!1 &4512968419915976559
 GameObject:
@@ -418,7 +418,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4463086652670670520
 RectTransform:
   m_ObjectHideFlags: 0
@@ -489,6 +489,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.UI.Tooltips.TooltipTrigger
   tooltipText: 
-  offset: {x: 12, y: -12}
   followCursor: 1
   tooltipSystemOverride: {fileID: 0}

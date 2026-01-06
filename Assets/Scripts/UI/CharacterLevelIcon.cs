@@ -31,6 +31,7 @@ namespace FF
             if (levelText)
             {
                 levelText.text = levelNumber > 0 ? levelNumber.ToString() : string.Empty;
+                levelText.color = unlocked ? unlockedColor : lockedColor;
             }
 
             if (trigger)
