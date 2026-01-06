@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -30,9 +31,10 @@ namespace FF
 
         int upgradesTaken;
         int pendingUpgrades;
-        readonly System.Collections.Generic.Dictionary<Upgrade, int> upgradeCounts = new();
-        readonly System.Collections.Generic.Dictionary<Weapon, int> weaponKillCounts = new();
-        readonly System.Collections.Generic.Dictionary<Weapon, WeaponUpgradeState> weaponUpgradeStates = new();
+        readonly Dictionary<Upgrade, int> upgradeCounts = new();
+        readonly Dictionary<Weapon, int> weaponKillCounts = new();
+        readonly Dictionary<Weapon, WeaponUpgradeState> weaponUpgradeStates = new();
+        readonly Queue<string> pendingUpgradePopups = new();
         int characterShotgunExtraProjectiles;
         float characterSmgFireRateBonus;
         float characterSmgCooldownReduction;
@@ -164,12 +166,14 @@ namespace FF
         {
             Enemy.OnAnyEnemyKilledByWeapon += HandleWeaponKill;
             SceneReferenceRegistry.Register(this);
+            UpgradeUI.OnVisibilityChanged += HandleUpgradeVisibilityChanged;
         }
 
         void OnDisable()
         {
             Enemy.OnAnyEnemyKilledByWeapon -= HandleWeaponKill;
             SceneReferenceRegistry.Unregister(this);
+            UpgradeUI.OnVisibilityChanged -= HandleUpgradeVisibilityChanged;
         }
 
         void TryAutoFindWallet()
@@ -249,6 +253,7 @@ namespace FF
             upgradeCounts.Clear();
             weaponKillCounts.Clear();
             weaponUpgradeStates.Clear();
+            pendingUpgradePopups.Clear();
 
             NotifyPendingChanged();
         }
@@ -278,7 +283,7 @@ namespace FF
             if (ui == null) return;
 
             u.Apply(stats);
-            ShowUpgradePopup(u);
+            QueueUpgradePopup(u);
             upgradesTaken++;
             IncrementUpgradeCount(u);
             pendingUpgrades = Mathf.Max(0, pendingUpgrades - 1);
@@ -831,7 +836,15 @@ namespace FF
             return currentWave >= unlockWave;
         }
 
-        void ShowUpgradePopup(Upgrade upgrade)
+        void HandleUpgradeVisibilityChanged(bool isVisible)
+        {
+            if (!isVisible)
+            {
+                FlushUpgradePopups();
+            }
+        }
+
+        void QueueUpgradePopup(Upgrade upgrade)
         {
             if (upgrade == null || stats == null)
             {
@@ -844,6 +857,31 @@ namespace FF
                 return;
             }
 
+            if (!UpgradeUI.IsShowing)
+            {
+                ShowUpgradePopupText(text);
+                return;
+            }
+
+            pendingUpgradePopups.Enqueue(text);
+        }
+
+        void FlushUpgradePopups()
+        {
+            if (stats == null)
+            {
+                pendingUpgradePopups.Clear();
+                return;
+            }
+
+            while (pendingUpgradePopups.Count > 0)
+            {
+                ShowUpgradePopupText(pendingUpgradePopups.Dequeue());
+            }
+        }
+
+        void ShowUpgradePopupText(string text)
+        {
             DamageNumberManager.ShowText(stats.transform.position, text);
         }
 

@@ -385,7 +385,7 @@ namespace FF
         private void TriggerDash()
         {
             _currentDashCharges = Mathf.Max(0, _currentDashCharges - 1);
-            if (_currentDashCharges < GetMaxDashCharges())
+            if (_currentDashCharges < GetMaxDashCharges() && _dashCooldownTimer <= 0f)
             {
                 _dashCooldownTimer = dashCooldown;
             }

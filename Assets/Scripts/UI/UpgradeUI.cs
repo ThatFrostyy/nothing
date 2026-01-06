@@ -81,9 +81,9 @@ namespace FF
             bTitle.text = $"{B.Title}\n";
             cTitle.text = $"{C.Title}\n";
 
-            aTxt.text = $"{A.Description}";
-            bTxt.text = $"{B.Description}";
-            cTxt.text = $"{C.Description}";
+            aTxt.text = A.GetDisplayDescription();
+            bTxt.text = B.GetDisplayDescription();
+            cTxt.text = C.GetDisplayDescription();
 
             UpdatePhaseHeader(null);
             UpdateRemainingLabel(pendingUpgrades);
