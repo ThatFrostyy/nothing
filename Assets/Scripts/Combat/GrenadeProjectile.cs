@@ -65,7 +65,16 @@ namespace FF
         private float _baseLaunchSpeed;
         private AudioSource _flightLoopSource;
         private readonly System.Collections.Generic.List<Enemy> _shockwaveTargets = new();
+        private readonly System.Collections.Generic.List<Health> _explosionTargets = new();
         private float _shockwaveRadius = -1f; // <--- new: optional explicit shockwave radius
+        private float _explosionDamageMultiplier = 1f;
+        private float _explosionRadiusMultiplier = 1f;
+        private float _explosionKnockbackMultiplier = 1f;
+        private float _explosionBossDamageMultiplier = 1f;
+        private float _explosionKillExplosionChance;
+        private float _explosionHitDamageBonus;
+        private float _explosionHitDamageDuration;
+        private PlayerCombatEffectController _ownerCombatEffects;
 
         public int BaseDamage => baseDamage;
 
@@ -162,6 +171,26 @@ namespace FF
             _shockwaveTextColor = textColor;
             _shockwaveTextScale = textScale;
             _shockwaveRadius = radius > 0f ? radius : -1f; // keep -1 to fall back to explosionRadius
+        }
+
+        public void ConfigureProgressionExplosion(
+            float damageBonus,
+            float radiusBonus,
+            float bossDamageBonus,
+            float knockbackBonus,
+            float killExplosionChance,
+            float hitDamageBonus,
+            float hitDamageDuration,
+            PlayerCombatEffectController ownerCombatEffects)
+        {
+            _explosionDamageMultiplier = 1f + Mathf.Max(0f, damageBonus);
+            _explosionRadiusMultiplier = 1f + Mathf.Max(0f, radiusBonus);
+            _explosionBossDamageMultiplier = 1f + Mathf.Max(0f, bossDamageBonus);
+            _explosionKnockbackMultiplier = 1f + Mathf.Max(0f, knockbackBonus);
+            _explosionKillExplosionChance = Mathf.Clamp01(killExplosionChance);
+            _explosionHitDamageBonus = Mathf.Max(0f, hitDamageBonus);
+            _explosionHitDamageDuration = Mathf.Max(0f, hitDamageDuration);
+            _ownerCombatEffects = ownerCombatEffects;
         }
 
         private void Update()
@@ -304,6 +333,43 @@ namespace FF
 
             StopFlightLoop();
 
+            SpawnExplosionEffects(position);
+            ApplyExplosionDamage(position, true);
+            ApplyShockwaveEffects(position);
+
+            float visualRadius = GetEffectiveShockwaveRadius();
+            ShockwaveUI.Trigger(position, Mathf.Clamp(visualRadius / 4f, 0.35f, 1.5f));
+
+            float shakeScale = Mathf.InverseLerp(1.5f, 4f, GetEffectiveExplosionRadius());
+            float shakeDuration = Mathf.Lerp(0.15f, 0.32f, shakeScale);
+            float shakeIntensity = Mathf.Lerp(0.2f, 0.45f, shakeScale);
+            CameraShake.Shake(shakeDuration, shakeIntensity);
+
+            _ownerCombatEffects?.ApplyProgressionExplosionDamageReduction();
+
+            if (_poolToken != null)
+            {
+                _poolToken.Release();
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
+        }
+
+        private float GetEffectiveExplosionRadius()
+        {
+            return explosionRadius * Mathf.Max(0.01f, _explosionRadiusMultiplier);
+        }
+
+        private float GetEffectiveShockwaveRadius()
+        {
+            float baseRadius = _shockwaveRadius > 0f ? _shockwaveRadius : explosionRadius;
+            return baseRadius * Mathf.Max(0.01f, _explosionRadiusMultiplier);
+        }
+
+        private void SpawnExplosionEffects(Vector3 position)
+        {
             if (explosionFX)
             {
                 GameObject fx = PoolManager.Get(explosionFX, position, Quaternion.identity);
@@ -328,37 +394,29 @@ namespace FF
             {
                 AudioPlaybackPool.PlayOneShot(explosionSFX, position, _audioMixer, _audioSpatialBlend, _audioVolume, _audioPitch);
             }
-
-            ApplyExplosionDamage(position);
-            ApplyShockwaveEffects(position);
-
-            // Visual shockwave uses the effective radius (explicit shockwave radius if set, otherwise explosionRadius)
-            float visualRadius = _shockwaveRadius > 0f ? _shockwaveRadius : explosionRadius;
-            ShockwaveUI.Trigger(position, Mathf.Clamp(visualRadius / 4f, 0.35f, 1.5f));
-
-            float shakeScale = Mathf.InverseLerp(1.5f, 4f, explosionRadius);
-            float shakeDuration = Mathf.Lerp(0.15f, 0.32f, shakeScale);
-            float shakeIntensity = Mathf.Lerp(0.2f, 0.45f, shakeScale);
-            CameraShake.Shake(shakeDuration, shakeIntensity);
-
-            if (_poolToken != null)
-            {
-                _poolToken.Release();
-            }
-            else
-            {
-                gameObject.SetActive(false);
-            }
         }
 
-        private void ApplyExplosionDamage(Vector2 center)
+        private void TriggerChainExplosion(Vector2 position)
         {
-            if (explosionRadius <= 0f)
+            SpawnExplosionEffects(position);
+            ApplyExplosionDamage(position, false);
+        }
+
+        private void ApplyExplosionDamage(Vector2 center, bool allowChainExplosions)
+        {
+            float effectiveRadius = GetEffectiveExplosionRadius();
+            if (effectiveRadius <= 0f)
             {
                 return;
             }
 
-            int hits = Physics2D.OverlapCircleNonAlloc(center, explosionRadius, OverlapBuffer, damageLayers);
+            int hits = Physics2D.OverlapCircleNonAlloc(center, effectiveRadius, OverlapBuffer, damageLayers);
+            if (hits <= 0)
+            {
+                return;
+            }
+
+            _explosionTargets.Clear();
             for (int i = 0; i < hits; i++)
             {
                 Collider2D hit = OverlapBuffer[i];
@@ -372,9 +430,56 @@ namespace FF
                     continue;
                 }
 
-                if (_pendingDamage > 0 && hit.TryGetComponent<Health>(out var health))
+                if (hit.TryGetComponent<Health>(out var health))
                 {
-                    health.Damage(_pendingDamage, _sourceWeapon, _isCriticalDamage);
+                    int damage = _pendingDamage;
+                    if (_ownerCombatEffects != null)
+                    {
+                        damage = Mathf.RoundToInt(damage * _explosionDamageMultiplier);
+                        if (health.TryGetComponent<Enemy>(out var enemy) && enemy.IsBoss)
+                        {
+                            damage = Mathf.RoundToInt(damage * _explosionBossDamageMultiplier);
+                        }
+                    }
+
+                    PlayerCombatEffectController targetEffects = null;
+                    if (hit.TryGetComponent(out PlayerCombatEffectController directEffects))
+                    {
+                        targetEffects = directEffects;
+                    }
+                    else
+                    {
+                        targetEffects = hit.GetComponentInParent<PlayerCombatEffectController>();
+                    }
+
+                    if (targetEffects != null)
+                    {
+                        damage = Mathf.RoundToInt(damage * targetEffects.GetExplosionResistanceMultiplier());
+                    }
+
+                    int previousHp = health.CurrentHP;
+                    if (damage > 0)
+                    {
+                        health.Damage(damage, _sourceWeapon, _isCriticalDamage);
+                    }
+
+                    if (_ownerCombatEffects != null && !_explosionTargets.Contains(health))
+                    {
+                        _explosionTargets.Add(health);
+                        if (_explosionHitDamageBonus > 0f && _explosionHitDamageDuration > 0f && health.CurrentHP > 0)
+                        {
+                            health.ApplyTemporaryDamageMultiplier(1f + _explosionHitDamageBonus, _explosionHitDamageDuration);
+                        }
+
+                        if (allowChainExplosions
+                            && _explosionKillExplosionChance > 0f
+                            && previousHp > 0
+                            && health.CurrentHP <= 0
+                            && UnityEngine.Random.value <= _explosionKillExplosionChance)
+                        {
+                            TriggerChainExplosion(health.transform.position);
+                        }
+                    }
                 }
 
                 Rigidbody2D hitBody = hit.attachedRigidbody;
@@ -390,15 +495,16 @@ namespace FF
                 }
 
                 float distance = offset.magnitude;
-                float normalized = Mathf.Clamp01(distance / Mathf.Max(0.01f, explosionRadius));
+                float normalized = Mathf.Clamp01(distance / Mathf.Max(0.01f, effectiveRadius));
                 float falloff = forceFalloff != null ? Mathf.Max(0f, forceFalloff.Evaluate(normalized)) : 1f - normalized;
                 if (falloff <= 0f)
                 {
                     continue;
                 }
 
-                Vector2 impulse = offset.normalized * (explosionForce * falloff);
-                impulse.y += explosionForce * 0.15f * falloff;
+                float force = explosionForce * _explosionKnockbackMultiplier;
+                Vector2 impulse = offset.normalized * (force * falloff);
+                impulse.y += force * 0.15f * falloff;
 
                 hitBody.AddForce(impulse * 2f, ForceMode2D.Impulse);
                 if (hit.TryGetComponent<Enemy>(out var enemy))
@@ -415,7 +521,7 @@ namespace FF
                 return;
             }
 
-            float effectiveRadius = _shockwaveRadius > 0f ? _shockwaveRadius : explosionRadius;
+            float effectiveRadius = GetEffectiveShockwaveRadius();
 
             int hits = Physics2D.OverlapCircleNonAlloc(center, effectiveRadius, OverlapBuffer, damageLayers);
             if (hits <= 0)
@@ -481,6 +587,15 @@ namespace FF
             _shockwaveTextScale = 0f;
             _shockwaveSource = null;
             _shockwaveTargets.Clear();
+            _explosionTargets.Clear();
+            _explosionDamageMultiplier = 1f;
+            _explosionRadiusMultiplier = 1f;
+            _explosionKnockbackMultiplier = 1f;
+            _explosionBossDamageMultiplier = 1f;
+            _explosionKillExplosionChance = 0f;
+            _explosionHitDamageBonus = 0f;
+            _explosionHitDamageDuration = 0f;
+            _ownerCombatEffects = null;
             StopFlightLoop();
             if (_body)
             {
@@ -510,6 +625,15 @@ namespace FF
             _shockwaveTextScale = 0f;
             _shockwaveSource = null;
             _shockwaveTargets.Clear();
+            _explosionTargets.Clear();
+            _explosionDamageMultiplier = 1f;
+            _explosionRadiusMultiplier = 1f;
+            _explosionKnockbackMultiplier = 1f;
+            _explosionBossDamageMultiplier = 1f;
+            _explosionKillExplosionChance = 0f;
+            _explosionHitDamageBonus = 0f;
+            _explosionHitDamageDuration = 0f;
+            _ownerCombatEffects = null;
             StopFlightLoop();
             if (_body)
             {
