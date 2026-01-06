@@ -21,7 +21,7 @@ MonoBehaviour:
   MaxStacks: 5
   HealAmount: 25
   startDoubledUntilWave: 1
-  normalizeValueByWave: 7
+  normalizeValueByWave: 5
   unlockWave: 0
   levelUpPopupText: 
   rarity: 1

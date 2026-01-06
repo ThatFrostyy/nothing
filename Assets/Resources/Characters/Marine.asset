@@ -145,7 +145,7 @@ MonoBehaviour:
         FlatAmount: 0
         SecondaryFlatAmount: 0
         DurationSeconds: 0
-        Radius: 10
+        Radius: 7
         KnockbackForce: 0
         KnockbackDuration: 0
     - XPOverride: 0

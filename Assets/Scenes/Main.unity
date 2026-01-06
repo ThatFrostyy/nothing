@@ -1520,9 +1520,9 @@ MonoBehaviour:
   poolParent: {fileID: 1357566016}
   prewarmPoolsOnAwake: 1
   maxActiveNonBosses: 120
-  maxActiveBosses: 6
-  maxActiveTotal: 140
-  cullDistance: 45
+  maxActiveBosses: 120
+  maxActiveTotal: 200
+  cullDistance: 40
   cullInterval: 1
   maxCulledPerPass: 6
   audioSource: {fileID: 322110425}
@@ -7319,8 +7319,12 @@ MonoBehaviour:
   dashSpeedMultiplier: 2.25
   dashDuration: 0.35
   dashCooldown: 2.5
+  dashCharges: 1
   dashSfx: {fileID: 8300000, guid: cc32c3a4eafa3fd47b3993fd77bcbdbb, type: 3}
   dashEffect: {fileID: 6091849738672977877, guid: af7931239aa7b5e479e4e5c2e6b460c3, type: 3}
+  dashImpactLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   suppressionRadius: 6
   suppressionSpeedMultiplier: 0.65
   suppressionDuration: 3.5
@@ -7328,6 +7332,8 @@ MonoBehaviour:
   suppressionFireRateMultiplier: 0.8
   suppressionTextColor: {r: 1, g: 0.24495545, b: 0, a: 1}
   suppressionTextScale: 0.5
+  suppressionPanicTextColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  suppressionPanicTextScale: 0.9
   sharpshooterCritBonus: 0.35
   sharpshooterCritDamageMult: 1.5
   shockwaveStunDuration: 1.5
@@ -7374,6 +7380,10 @@ MonoBehaviour:
   mgSuppressionDuration: 2.5
   mgSuppressionTextColor: {r: 1, g: 0.24313726, b: 0, a: 1}
   mgSuppressionTextScale: 0.5
+  progressionShortRangeInterval: 1
+  progressionShortRangeLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &1219100133
 GameObject:
   m_ObjectHideFlags: 0

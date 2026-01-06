@@ -242,4 +242,4 @@ MonoBehaviour:
         Radius: 0
         KnockbackForce: 0
         KnockbackDuration: 0
-  ForceUnlocked: 1
+  ForceUnlocked: 0

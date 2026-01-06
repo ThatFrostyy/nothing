@@ -16,6 +16,7 @@ namespace FF
         [SerializeField] private TMP_Text killsStatText;
         [SerializeField] private TMP_Text topWaveStatText;
         [SerializeField] private TMP_Text leaderboardText;
+        [SerializeField] private TMP_Text versionText;
         [SerializeField] private string unavailableText = "Unavailable";
         [Header("Map Selection")]
         [SerializeField] private TMP_Text mapNameText;
@@ -44,6 +45,8 @@ namespace FF
             {
                 sceneFlow = FindAnyObjectByType<SceneFlowController>();
             }
+
+            versionText.text = Application.version;
         }
 
         void OnEnable()
@@ -233,7 +236,7 @@ namespace FF
             }
 
             var builder = new StringBuilder();
-            builder.AppendLine("Top 3");
+            builder.AppendLine("<b>Top 3 Players</b>");
             int entryCount = Mathf.Min(3, callback.m_cEntryCount);
             for (int i = 0; i < entryCount; i++)
             {
