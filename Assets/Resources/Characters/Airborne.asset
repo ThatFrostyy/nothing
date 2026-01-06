@@ -23,9 +23,9 @@ MonoBehaviour:
   AvailableHats:
   - {fileID: 11400000, guid: b0c38d26c188c6747b10d403bd016f61, type: 2}
   StartingWeapon: {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
-  SecondaryWeapon: {fileID: 0}
+  SecondaryWeapon: {fileID: 11400000, guid: f4d505e767021a940b03b61c5b3c7431, type: 2}
   WeaponIconOverride: {fileID: 0}
-  SpecialWeapon: {fileID: 11400000, guid: f4d505e767021a940b03b61c5b3c7431, type: 2}
+  SpecialWeapon: {fileID: 0}
   UnlockRequirements:
   - Type: 4
     Target: 1000
