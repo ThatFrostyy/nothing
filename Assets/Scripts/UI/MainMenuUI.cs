@@ -220,7 +220,7 @@ namespace FF
                 _killLeaderboard,
                 ELeaderboardDataRequest.k_ELeaderboardDataRequestGlobal,
                 1,
-                10);
+                3);
             _leaderboardScoresDownloaded.Set(handle, HandleLeaderboardScoresDownloaded);
         }
 
@@ -233,7 +233,9 @@ namespace FF
             }
 
             var builder = new StringBuilder();
-            for (int i = 0; i < callback.m_cEntryCount; i++)
+            builder.AppendLine("Top 3");
+            int entryCount = Mathf.Min(3, callback.m_cEntryCount);
+            for (int i = 0; i < entryCount; i++)
             {
                 if (!SteamUserStats.GetDownloadedLeaderboardEntry(callback.m_hSteamLeaderboardEntries, i, out LeaderboardEntry_t entry, null, 0))
                 {

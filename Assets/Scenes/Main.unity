@@ -1519,9 +1519,12 @@ MonoBehaviour:
   packSpawnBurst: 3
   poolParent: {fileID: 1357566016}
   prewarmPoolsOnAwake: 1
-  maxActiveNonBosses: 0
-  maxActiveBosses: 0
-  maxActiveTotal: 0
+  maxActiveNonBosses: 120
+  maxActiveBosses: 6
+  maxActiveTotal: 140
+  cullDistance: 45
+  cullInterval: 1
+  maxCulledPerPass: 6
   audioSource: {fileID: 322110425}
   fallbackSpawnClip: {fileID: 0}
 --- !u!4 &322110424

@@ -105,16 +105,13 @@ namespace FF
 
         private void TriggerSlowmo(float scale, float duration, string message)
         {
-            if (_slowmoRoutine == null && Time.unscaledTime < _cooldownUntil)
+            if (_slowmoRoutine != null || Time.unscaledTime < _cooldownUntil)
             {
                 return;
             }
 
             scale = Mathf.Clamp(scale, 0.05f, 1f);
             duration = Mathf.Max(0.05f, duration);
-
-            if (_slowmoRoutine != null)
-                StopCoroutine(_slowmoRoutine);
 
             PlaySlowmoStartFx();
             _slowmoRoutine = StartCoroutine(SlowmoRoutine(scale, duration));
