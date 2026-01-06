@@ -35,6 +35,11 @@ namespace FF
         [SerializeField, Min(0)] private int maxActiveBosses = 0;
         [SerializeField, Min(0)] private int maxActiveTotal = 0;
 
+        [Header("Culling")]
+        [SerializeField, Min(0f)] private float cullDistance = 0f;
+        [SerializeField, Min(0f)] private float cullInterval = 1f;
+        [SerializeField, Min(0)] private int maxCulledPerPass = 6;
+
         [Header("Audio")]
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip fallbackSpawnClip;
@@ -42,6 +47,10 @@ namespace FF
         private int _activeBosses;
         private int _activeNonBosses;
         private Coroutine _spawnRoutine;
+        private float _nextCullTime;
+
+        private readonly HashSet<Enemy> _activeEnemies = new();
+        private readonly List<Enemy> _cullBuffer = new();
 
         private void Awake()
         {
@@ -83,6 +92,8 @@ namespace FF
                 StopCoroutine(_spawnRoutine);
                 _spawnRoutine = null;
             }
+
+            _activeEnemies.Clear();
         }
 
         public void SpawnWave(int wave)
@@ -109,6 +120,22 @@ namespace FF
                 StopCoroutine(_spawnRoutine);
                 _spawnRoutine = null;
             }
+        }
+
+        private void Update()
+        {
+            if (cullDistance <= 0f || !player)
+            {
+                return;
+            }
+
+            if (Time.unscaledTime < _nextCullTime)
+            {
+                return;
+            }
+
+            _nextCullTime = Time.unscaledTime + Mathf.Max(0.1f, cullInterval);
+            CullFarEnemies();
         }
 
         private System.Collections.IEnumerator SpawnWaveRoutine(int wave)
@@ -555,6 +582,7 @@ namespace FF
             enemy.Initialize(player);
             enemy.ApplyWaveModifiers(modifiers);
             IncrementSpawnCount(isBoss);
+            _activeEnemies.Add(enemy);
 
             return true;
         }
@@ -641,6 +669,9 @@ namespace FF
             maxActiveBosses = Mathf.Max(0, maxActiveBosses);
             maxActiveNonBosses = Mathf.Max(0, maxActiveNonBosses);
             maxActiveTotal = Mathf.Max(0, maxActiveTotal);
+            cullDistance = Mathf.Max(0f, cullDistance);
+            cullInterval = Mathf.Max(0f, cullInterval);
+            maxCulledPerPass = Mathf.Max(0, maxCulledPerPass);
             initialSpawnInterval = Mathf.Max(0.01f, initialSpawnInterval);
             minimumSpawnInterval = Mathf.Clamp(Mathf.Max(0.01f, minimumSpawnInterval), 0.01f, initialSpawnInterval);
             spawnRampDuration = Mathf.Max(0f, spawnRampDuration);
@@ -714,12 +745,14 @@ namespace FF
             }
 
             DecrementSpawnCount(enemy.IsBoss);
+            _activeEnemies.Remove(enemy);
         }
 
         private void CountExistingEnemies()
         {
             _activeBosses = 0;
             _activeNonBosses = 0;
+            _activeEnemies.Clear();
             Enemy[] existing = Object.FindObjectsByType<Enemy>(FindObjectsSortMode.None);
             for (int i = 0; i < existing.Length; i++)
             {
@@ -730,6 +763,7 @@ namespace FF
                 }
 
                 IncrementSpawnCount(enemy.IsBoss);
+                _activeEnemies.Add(enemy);
             }
         }
 
@@ -745,6 +779,76 @@ namespace FF
                 : Mathf.Max(0, nonBossLimit - _activeNonBosses);
 
             return Mathf.Min(totalRemaining, typeRemaining);
+        }
+
+        private void CullFarEnemies()
+        {
+            if (maxCulledPerPass == 0)
+            {
+                return;
+            }
+
+            float maxDistanceSqr = cullDistance * cullDistance;
+            if (maxDistanceSqr <= 0f)
+            {
+                return;
+            }
+
+            _cullBuffer.Clear();
+            foreach (var enemy in _activeEnemies)
+            {
+                if (!enemy)
+                {
+                    _cullBuffer.Add(enemy);
+                    continue;
+                }
+
+                Vector2 toEnemy = enemy.transform.position - player.position;
+                if (toEnemy.sqrMagnitude > maxDistanceSqr)
+                {
+                    _cullBuffer.Add(enemy);
+                }
+            }
+
+            if (_cullBuffer.Count == 0)
+            {
+                return;
+            }
+
+            int culled = 0;
+            for (int i = 0; i < _cullBuffer.Count && culled < maxCulledPerPass; i++)
+            {
+                Enemy enemy = _cullBuffer[i];
+                if (!enemy)
+                {
+                    _activeEnemies.Remove(enemy);
+                    continue;
+                }
+
+                ForceDespawn(enemy);
+                culled++;
+            }
+        }
+
+        private void ForceDespawn(Enemy enemy)
+        {
+            if (!enemy)
+            {
+                return;
+            }
+
+            bool isBoss = enemy.IsBoss;
+            if (enemy.TryGetComponent(out PoolToken token) && token.Owner != null)
+            {
+                token.Release();
+            }
+            else
+            {
+                Destroy(enemy.gameObject);
+            }
+
+            DecrementSpawnCount(isBoss);
+            _activeEnemies.Remove(enemy);
         }
         #endregion Tracking
 
