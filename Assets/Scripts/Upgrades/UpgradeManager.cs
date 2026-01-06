@@ -273,6 +273,7 @@ namespace FF
             if (ui == null) return;
 
             u.Apply(stats);
+            ShowUpgradePopup(u);
             upgradesTaken++;
             IncrementUpgradeCount(u);
             pendingUpgrades = Mathf.Max(0, pendingUpgrades - 1);
@@ -804,8 +805,41 @@ namespace FF
                 return false;
             }
 
+            if (!IsUpgradeUnlocked(upgrade))
+            {
+                return false;
+            }
+
             int takenCount = upgradeCounts.TryGetValue(upgrade, out int timesTaken) ? timesTaken : 0;
             return upgrade.CanApply(stats, takenCount);
+        }
+
+        bool IsUpgradeUnlocked(Upgrade upgrade)
+        {
+            int unlockWave = upgrade.UnlockWave;
+            if (unlockWave <= 0)
+            {
+                return true;
+            }
+
+            int currentWave = GameManager.I != null ? GameManager.I.Wave : 0;
+            return currentWave >= unlockWave;
+        }
+
+        void ShowUpgradePopup(Upgrade upgrade)
+        {
+            if (upgrade == null || stats == null)
+            {
+                return;
+            }
+
+            string text = upgrade.GetPopupText();
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            DamageNumberManager.ShowText(stats.transform.position, text);
         }
 
         void IncrementUpgradeCount(Upgrade upgrade)
