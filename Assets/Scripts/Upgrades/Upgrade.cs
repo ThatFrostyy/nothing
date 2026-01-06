@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 
@@ -169,6 +170,20 @@ namespace FF
             };
         }
 
+        public string GetDisplayDescription()
+        {
+            if (string.IsNullOrWhiteSpace(Description))
+            {
+                return Description;
+            }
+
+            string replacement = Type == Kind.Heal
+                ? GetScaledHealAmount().ToString()
+                : FormatPercentValue(GetScaledMagnitude() * 100f);
+
+            return ReplaceFirstNumber(Description, replacement);
+        }
+
         float GetScaledMagnitude()
         {
             if (!startDoubledUntilWave)
@@ -217,6 +232,21 @@ namespace FF
         private static bool IsBelowMin(float value, float min)
         {
             return value <= min;
+        }
+
+        static string FormatPercentValue(float percent)
+        {
+            if (Mathf.Approximately(percent, Mathf.Round(percent)))
+            {
+                return Mathf.RoundToInt(percent).ToString();
+            }
+
+            return percent.ToString("0.#");
+        }
+
+        static string ReplaceFirstNumber(string text, string replacement)
+        {
+            return Regex.Replace(text, @"-?\d+(\.\d+)?", replacement, 1);
         }
 
         private static float ApplyCap(float value, float cap)
