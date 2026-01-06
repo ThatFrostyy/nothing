@@ -244,9 +244,40 @@ namespace FF
             return percent.ToString("0.#");
         }
 
+        // Replaces the first numeric token that is not inside an angle-bracketed tag.
+        // This avoids accidentally replacing hex color codes or numbers inside rich-text tags.
         static string ReplaceFirstNumber(string text, string replacement)
         {
-            return Regex.Replace(text, @"-?\d+(\.\d+)?", replacement, 1);
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
+
+            // Find numeric tokens.
+            var regex = new Regex(@"-?\d+(\.\d+)?");
+            var match = regex.Match(text);
+
+            while (match.Success)
+            {
+                int idx = match.Index;
+
+                // Determine if the match is inside a '<...>' tag by checking the last '<' and '>' before the match.
+                int lastOpen = text.LastIndexOf('<', idx);
+                int lastClose = text.LastIndexOf('>', idx);
+
+                // If there is an unmatched '<' (meaning lastOpen > lastClose), the match is inside a tag - skip it.
+                if (lastOpen > lastClose)
+                {
+                    match = match.NextMatch();
+                    continue;
+                }
+
+                // Safe to replace this match.
+                return text.Substring(0, match.Index) + replacement + text.Substring(match.Index + match.Length);
+            }
+
+            // Nothing suitable found; return original text unchanged.
+            return text;
         }
 
         private static float ApplyCap(float value, float cap)
