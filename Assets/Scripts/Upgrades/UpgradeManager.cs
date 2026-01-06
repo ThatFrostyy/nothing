@@ -36,6 +36,8 @@ namespace FF
         int characterShotgunExtraProjectiles;
         float characterSmgFireRateBonus;
         float characterSmgCooldownReduction;
+        float characterFlamethrowerRangeBonus;
+        float characterFlamethrowerBurnDurationBonus;
 
         public System.Action<int> OnPendingUpgradesChanged;
 
@@ -1152,14 +1154,32 @@ namespace FF
 
         public float GetFlamethrowerRangeMultiplier(Weapon weapon)
         {
-            return TryGetWeaponState(weapon, out var state) ? state.GetFlamethrowerRangeMultiplier() : 1f;
+            float multiplier = TryGetWeaponState(weapon, out var state) ? state.GetFlamethrowerRangeMultiplier() : 1f;
+            return multiplier * (1f + characterFlamethrowerRangeBonus);
         }
 
-        public void SetCharacterWeaponClassBonuses(int shotgunExtraProjectiles, float smgFireRateBonus, float smgCooldownReduction)
+        public float GetCharacterFlamethrowerBurnDurationBonus(Weapon weapon)
+        {
+            if (weapon == null || !weapon.isFlamethrower)
+            {
+                return 0f;
+            }
+
+            return Mathf.Max(0f, characterFlamethrowerBurnDurationBonus);
+        }
+
+        public void SetCharacterWeaponClassBonuses(
+            int shotgunExtraProjectiles,
+            float smgFireRateBonus,
+            float smgCooldownReduction,
+            float flamethrowerRangeBonus,
+            float flamethrowerBurnDurationBonus)
         {
             characterShotgunExtraProjectiles = Mathf.Max(0, shotgunExtraProjectiles);
             characterSmgFireRateBonus = Mathf.Max(0f, smgFireRateBonus);
             characterSmgCooldownReduction = Mathf.Clamp01(smgCooldownReduction);
+            characterFlamethrowerRangeBonus = Mathf.Max(0f, flamethrowerRangeBonus);
+            characterFlamethrowerBurnDurationBonus = Mathf.Max(0f, flamethrowerBurnDurationBonus);
         }
 
         public float ClampFireRateMultiplier(float value)

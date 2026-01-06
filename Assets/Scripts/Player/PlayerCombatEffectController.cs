@@ -59,6 +59,10 @@ namespace FF
         private float _progressionSustainedDamageDelay;
         private float _progressionSustainedFireTimer;
         private bool _progressionSustainedFireActive;
+        private float _progressionMgSustainedFireRateBonus;
+        private float _progressionMgSustainedFireRateDelay;
+        private float _progressionMgSustainedFireTimer;
+        private bool _progressionMgSustainedFireActive;
         private float _progressionRifleDamageBonus;
         private float _progressionRifleFireRateBonus;
         private float _progressionRifleProjectileSpeedBonus;
@@ -76,6 +80,10 @@ namespace FF
         private float _progressionExplosionHitDamageDuration;
         private float _progressionExplosionPostDamageReductionBonus;
         private float _progressionExplosionPostDamageReductionDuration;
+        private float _progressionStationaryDamageReduction;
+        private float _progressionStationaryDuration;
+        private float _progressionStationaryTimer;
+        private bool _progressionStationaryActive;
         private Rigidbody2D _playerBody;
 
         private void Awake()
@@ -160,6 +168,14 @@ namespace FF
             _progressionSustainedFireActive = false;
         }
 
+        public void ConfigureProgressionMgSustainedFireRate(float fireRatePercent, float delaySeconds)
+        {
+            _progressionMgSustainedFireRateBonus = Mathf.Max(0f, fireRatePercent);
+            _progressionMgSustainedFireRateDelay = Mathf.Max(0f, delaySeconds);
+            _progressionMgSustainedFireTimer = 0f;
+            _progressionMgSustainedFireActive = false;
+        }
+
         public void ConfigureProgressionRifleBonuses(float damagePercent, float fireRatePercent, float projectileSpeedPercent)
         {
             _progressionRifleDamageBonus = Mathf.Max(0f, damagePercent);
@@ -201,6 +217,18 @@ namespace FF
             _progressionExplosionHitDamageDuration = Mathf.Max(0f, hitDamageDuration);
             _progressionExplosionPostDamageReductionBonus = Mathf.Max(0f, postExplosionDamageReductionPercent);
             _progressionExplosionPostDamageReductionDuration = Mathf.Max(0f, postExplosionDamageReductionDuration);
+        }
+
+        public void ConfigureProgressionStandingStillDamageReduction(float damageReductionPercent, float durationSeconds)
+        {
+            _progressionStationaryDamageReduction = Mathf.Clamp01(damageReductionPercent);
+            _progressionStationaryDuration = Mathf.Max(0f, durationSeconds);
+            _progressionStationaryTimer = 0f;
+            _progressionStationaryActive = false;
+            if (playerHealth != null)
+            {
+                playerHealth.SetConditionalDamageMultiplier(1f);
+            }
         }
 
         public void ApplyProgressionExplosionConfig(GrenadeProjectile grenade)
@@ -369,8 +397,11 @@ namespace FF
             bool isRifle = weapon != null && weapon.weaponClass == Weapon.WeaponClass.SemiRifle;
             bool isMoving = _playerBody != null && _playerBody.linearVelocity.sqrMagnitude > 0.01f;
             bool isFiring = playerShooter != null && playerShooter.IsFireHeld;
+            bool isMg = weapon != null && weapon.weaponClass == Weapon.WeaponClass.MG;
 
             UpdateSustainedFireState(deltaTime, isFiring);
+            UpdateMgSustainedFireState(deltaTime, isMg && isFiring);
+            UpdateStationaryDamageReduction(deltaTime, isMoving);
 
             float damageMultiplier = 1f;
             if (isRifle && _progressionRifleDamageBonus > 0f)
@@ -398,6 +429,11 @@ namespace FF
             if (isRifle && _progressionRifleFireRateBonus > 0f)
             {
                 fireRateMultiplier *= 1f + _progressionRifleFireRateBonus;
+            }
+
+            if (isMg && _progressionMgSustainedFireActive && _progressionMgSustainedFireRateBonus > 0f)
+            {
+                fireRateMultiplier *= 1f + _progressionMgSustainedFireRateBonus;
             }
 
             float projectileSpeedMultiplier = 1f;
@@ -438,6 +474,69 @@ namespace FF
                 _progressionSustainedFireTimer = 0f;
                 _progressionSustainedFireActive = false;
             }
+        }
+
+        private void UpdateMgSustainedFireState(float deltaTime, bool isFiring)
+        {
+            if (_progressionMgSustainedFireRateBonus <= 0f)
+            {
+                _progressionMgSustainedFireTimer = 0f;
+                _progressionMgSustainedFireActive = false;
+                return;
+            }
+
+            if (isFiring)
+            {
+                _progressionMgSustainedFireTimer += deltaTime;
+                if (_progressionMgSustainedFireRateDelay <= 0f)
+                {
+                    _progressionMgSustainedFireActive = true;
+                }
+                else if (_progressionMgSustainedFireTimer >= _progressionMgSustainedFireRateDelay)
+                {
+                    _progressionMgSustainedFireActive = true;
+                }
+            }
+            else
+            {
+                _progressionMgSustainedFireTimer = 0f;
+                _progressionMgSustainedFireActive = false;
+            }
+        }
+
+        private void UpdateStationaryDamageReduction(float deltaTime, bool isMoving)
+        {
+            if (playerHealth == null)
+            {
+                return;
+            }
+
+            if (_progressionStationaryDamageReduction <= 0f || _progressionStationaryDuration <= 0f)
+            {
+                _progressionStationaryTimer = 0f;
+                _progressionStationaryActive = false;
+                playerHealth.SetConditionalDamageMultiplier(1f);
+                return;
+            }
+
+            if (isMoving)
+            {
+                _progressionStationaryTimer = 0f;
+                _progressionStationaryActive = false;
+            }
+            else
+            {
+                _progressionStationaryTimer += deltaTime;
+                if (_progressionStationaryTimer >= _progressionStationaryDuration)
+                {
+                    _progressionStationaryActive = true;
+                }
+            }
+
+            float multiplier = _progressionStationaryActive
+                ? Mathf.Clamp(1f - _progressionStationaryDamageReduction, 0.05f, 1f)
+                : 1f;
+            playerHealth.SetConditionalDamageMultiplier(multiplier);
         }
 
         private void TryTriggerSynergy()

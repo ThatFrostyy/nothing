@@ -69,17 +69,20 @@ namespace FF
             if (!TryResolveProgression(character, out CharacterProgressionSettings progression, out CharacterProgressionState state))
             {
                 XPOrb.SetGlobalAttractionMultipliers(1f, 1f);
-                UpgradeManager.I?.SetCharacterWeaponClassBonuses(0, 0f, 0f);
+                UpgradeManager.I?.SetCharacterWeaponClassBonuses(0, 0f, 0f, 0f, 0f);
                 abilityController?.ConfigureDashChargeBonus(0);
                 abilityController?.ConfigureDashFireRateBonus(0f, 0f);
                 abilityController?.ConfigureDashImpactBlast(0f, 0f, 0f, 0f);
+                abilityController?.ConfigureSuppressionBonuses(0f, 0f, 0f, 0f, 0f);
                 combatEffects?.ConfigureProgressionShortRangeDamage(0f, 0f);
                 combatEffects?.ConfigureProgressionKillMoveSpeed(0f, 0f);
                 combatEffects?.ConfigureProgressionSustainedFireDamage(0f, 0f);
+                combatEffects?.ConfigureProgressionMgSustainedFireRate(0f, 0f);
                 combatEffects?.ConfigureProgressionRifleBonuses(0f, 0f, 0f);
                 combatEffects?.ConfigureProgressionRifleMoveBonuses(0f, 0f);
                 combatEffects?.ConfigureProgressionRevive(0f);
                 combatEffects?.ConfigureProgressionExplosionBonuses(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
+                combatEffects?.ConfigureProgressionStandingStillDamageReduction(0f, 0f);
                 return;
             }
 
@@ -124,6 +127,17 @@ namespace FF
             float explosionHitDamageDuration = 0f;
             float explosionPostDamageReductionBonus = 0f;
             float explosionPostDamageReductionDuration = 0f;
+            float suppressionDamageReductionBonus = 0f;
+            float suppressionExtraSlowBonus = 0f;
+            float suppressionRadiusBonus = 0f;
+            float suppressionPanicChance = 0f;
+            float suppressionPanicDuration = 0f;
+            float mgSustainedFireRateBonus = 0f;
+            float mgSustainedFireRateDelay = 0f;
+            float flamethrowerRangeBonus = 0f;
+            float flamethrowerBurnDurationBonus = 0f;
+            float stationaryDamageReductionBonus = 0f;
+            float stationaryDamageReductionDelay = 0f;
 
             foreach (CharacterUpgradeReward reward in progression.GetUnlockedRewards(state.Level))
             {
@@ -232,6 +246,31 @@ namespace FF
                         explosionPostDamageReductionBonus += delta;
                         explosionPostDamageReductionDuration = Mathf.Max(explosionPostDamageReductionDuration, reward.DurationSeconds);
                         break;
+                    case CharacterUpgradeType.SuppressedEnemyDamageReduction:
+                        suppressionDamageReductionBonus += delta;
+                        break;
+                    case CharacterUpgradeType.SuppressedEnemyExtraSlow:
+                        suppressionExtraSlowBonus += delta;
+                        break;
+                    case CharacterUpgradeType.MgSustainedFireRate:
+                        mgSustainedFireRateBonus += delta;
+                        mgSustainedFireRateDelay = Mathf.Max(mgSustainedFireRateDelay, reward.DurationSeconds);
+                        break;
+                    case CharacterUpgradeType.SuppressionRadius:
+                        suppressionRadiusBonus += delta;
+                        break;
+                    case CharacterUpgradeType.FlamethrowerRangeAndBurnDuration:
+                        flamethrowerRangeBonus += delta;
+                        flamethrowerBurnDurationBonus = Mathf.Max(flamethrowerBurnDurationBonus, reward.DurationSeconds);
+                        break;
+                    case CharacterUpgradeType.StandingStillDamageReduction:
+                        stationaryDamageReductionBonus += delta;
+                        stationaryDamageReductionDelay = Mathf.Max(stationaryDamageReductionDelay, reward.DurationSeconds);
+                        break;
+                    case CharacterUpgradeType.SuppressedEnemyPanic:
+                        suppressionPanicChance += delta;
+                        suppressionPanicDuration = Mathf.Max(suppressionPanicDuration, reward.DurationSeconds);
+                        break;
                 }
             }
 
@@ -286,13 +325,25 @@ namespace FF
             float speedMultiplier = 1f + xpSpeedBonus;
             XPOrb.SetGlobalAttractionMultipliers(radiusMultiplier, speedMultiplier);
 
-            UpgradeManager.I?.SetCharacterWeaponClassBonuses(shotgunPelletBonus, smgFireRateBonus, smgCooldownBonus);
+            UpgradeManager.I?.SetCharacterWeaponClassBonuses(
+                shotgunPelletBonus,
+                smgFireRateBonus,
+                smgCooldownBonus,
+                flamethrowerRangeBonus,
+                flamethrowerBurnDurationBonus);
             abilityController?.ConfigureDashChargeBonus(dashChargeBonus);
             abilityController?.ConfigureDashFireRateBonus(dashFireRateBonus, dashFireRateDuration);
             abilityController?.ConfigureDashImpactBlast(dashImpactDamageBonus, dashImpactRadius, dashImpactForce, dashImpactKnockbackDuration);
+            abilityController?.ConfigureSuppressionBonuses(
+                suppressionDamageReductionBonus,
+                suppressionExtraSlowBonus,
+                suppressionRadiusBonus,
+                suppressionPanicChance,
+                suppressionPanicDuration);
             combatEffects?.ConfigureProgressionShortRangeDamage(shortRangeDamageBonus, shortRangeRadius);
             combatEffects?.ConfigureProgressionKillMoveSpeed(killMoveSpeedBonus, killMoveSpeedDuration);
             combatEffects?.ConfigureProgressionSustainedFireDamage(sustainedFireDamageBonus, sustainedFireDelay);
+            combatEffects?.ConfigureProgressionMgSustainedFireRate(mgSustainedFireRateBonus, mgSustainedFireRateDelay);
             combatEffects?.ConfigureProgressionRifleBonuses(rifleDamageBonus, rifleFireRateBonus, rifleProjectileSpeedBonus);
             combatEffects?.ConfigureProgressionRifleMoveBonuses(rifleMoveDamageBonus, rifleMoveSpeedBonus);
             combatEffects?.ConfigureProgressionRevive(Mathf.Clamp01(revivePercent));
@@ -307,6 +358,9 @@ namespace FF
                 explosionHitDamageDuration,
                 explosionPostDamageReductionBonus,
                 explosionPostDamageReductionDuration);
+            combatEffects?.ConfigureProgressionStandingStillDamageReduction(
+                stationaryDamageReductionBonus,
+                stationaryDamageReductionDelay);
         }
 
         public static CharacterProgressionState GetState(CharacterDefinition character)

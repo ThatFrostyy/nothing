@@ -145,7 +145,14 @@ namespace FF
         ExplosionKillChance,
         ExplosionKnockback,
         ExplosionHitDamageTaken,
-        ExplosionPostDamageReduction
+        ExplosionPostDamageReduction,
+        SuppressedEnemyDamageReduction,
+        SuppressedEnemyExtraSlow,
+        MgSustainedFireRate,
+        SuppressionRadius,
+        FlamethrowerRangeAndBurnDuration,
+        StandingStillDamageReduction,
+        SuppressedEnemyPanic
     }
 
     [Serializable]
