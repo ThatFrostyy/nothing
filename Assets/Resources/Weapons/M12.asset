@@ -29,7 +29,7 @@ MonoBehaviour:
   useGrenadeCharging: 0
   bulletPrefab: {fileID: 4190097093711428713, guid: 49cefd330945eef4aaf88dae0a57a378, type: 3}
   weaponPrefab: {fileID: 6934072785477069155, guid: b493766e185ca3e4f82c2da10bd167cb, type: 3}
-  rpm: 300
+  rpm: 400
   damage: 7
   recoilKick: 3
   isAuto: 0
