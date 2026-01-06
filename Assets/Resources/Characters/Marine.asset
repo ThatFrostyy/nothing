@@ -123,51 +123,117 @@ MonoBehaviour:
     minimumWaveForRewards: 5
     levels:
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +5% orb pickup radius.
+      Icon: {fileID: 0}
+      Description: Start each run with +1 dash charge.
       Rewards:
-      - Type: 1
-        Percent: 5
+      - Type: 6
+        Percent: 0
+        SecondaryPercent: 0
+        FlatAmount: 1
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0.25
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
-      Description: +3% attack damage.
+      Icon: {fileID: 0}
+      Description: Deal +25% damage to enemies within short range
+      Rewards:
+      - Type: 7
+        Percent: 25
+        SecondaryPercent: 15
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 3
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: After dashing, gain +30% fire rate for 3 seconds
+      Rewards:
+      - Type: 8
+        Percent: 30
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 3
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Gain +30 max HP and restore 30 HP on level-up
+      Rewards:
+      - Type: 9
+        Percent: 30
+        SecondaryPercent: 30
+        FlatAmount: 30
+        SecondaryFlatAmount: 30
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Shotguns gain +1 pellet
+      Rewards:
+      - Type: 10
+        Percent: 0
+        SecondaryPercent: 0
+        FlatAmount: 1
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Thompson gains +15% fire rate and +15% cooldown speed
+      Rewards:
+      - Type: 11
+        Percent: 15
+        SecondaryPercent: 15
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Dashing causes an impact blast that deals damage and knocks back
+        enemies.
+      Rewards:
+      - Type: 12
+        Percent: 5
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 3
+        KnockbackForce: 2
+        KnockbackDuration: 0.25
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Gain +15% damage AND +15% fire rate
       Rewards:
       - Type: 3
-        Percent: 3
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +5% orb pickup speed.
-      Rewards:
-      - Type: 0
-        Percent: 5
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
-      Description: +5% max health.
-      Rewards:
-      - Type: 4
-        Percent: 5
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
-      Description: +8% attack damage.
-      Rewards:
-      - Type: 3
-        Percent: 8
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
-      Description: +3% movement speed.
-      Rewards:
-      - Type: 2
-        Percent: 3
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +5% orb pickup radius.
-      Rewards:
-      - Type: 1
-        Percent: 5
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
-      Description: +5% max hp.
-      Rewards:
-      - Type: 4
-        Percent: 5
+        Percent: 15
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+      - Type: 5
+        Percent: 15
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
   ForceUnlocked: 0
