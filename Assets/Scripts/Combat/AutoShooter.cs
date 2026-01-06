@@ -15,6 +15,7 @@ namespace FF
         private AudioSource _audioSource;
         private Rigidbody2D _playerBody;
         private CharacterAbilityController _abilityController;
+        private PlayerCombatEffectController _combatEffects;
         private AudioSource _attackLoopSource;
         private AudioSource _fireLoopSource;
         private GameObject _activeLoopingVfx;
@@ -74,6 +75,7 @@ namespace FF
             _audioSource = GetComponent<AudioSource>();
             _playerBody = GetComponentInParent<Rigidbody2D>();
             _abilityController = GetComponentInParent<CharacterAbilityController>();
+            _combatEffects = GetComponentInParent<PlayerCombatEffectController>();
         }
 
         public void SetStatsProvider(ICombatStats stats)
@@ -586,6 +588,7 @@ namespace FF
             }
 
             _abilityController?.TryApplyShockwave(grenade);
+            _combatEffects?.ApplyProgressionExplosionConfig(grenade);
 
             float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
             Vector2 direction = spreadRotation * Vector3.right;

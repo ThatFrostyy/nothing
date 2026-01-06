@@ -79,6 +79,7 @@ namespace FF
                 combatEffects?.ConfigureProgressionRifleBonuses(0f, 0f, 0f);
                 combatEffects?.ConfigureProgressionRifleMoveBonuses(0f, 0f);
                 combatEffects?.ConfigureProgressionRevive(0f);
+                combatEffects?.ConfigureProgressionExplosionBonuses(0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
                 return;
             }
 
@@ -113,6 +114,16 @@ namespace FF
             float revivePercent = 0f;
             float rifleMoveDamageBonus = 0f;
             float rifleMoveSpeedBonus = 0f;
+            float explosionDamageBonus = 0f;
+            float explosionRadiusBonus = 0f;
+            float explosionResistanceBonus = 0f;
+            float explosionBossDamageBonus = 0f;
+            float explosionKillChance = 0f;
+            float explosionKnockbackBonus = 0f;
+            float explosionHitDamageBonus = 0f;
+            float explosionHitDamageDuration = 0f;
+            float explosionPostDamageReductionBonus = 0f;
+            float explosionPostDamageReductionDuration = 0f;
 
             foreach (CharacterUpgradeReward reward in progression.GetUnlockedRewards(state.Level))
             {
@@ -195,6 +206,32 @@ namespace FF
                         rifleMoveDamageBonus += delta;
                         rifleMoveSpeedBonus += reward.GetSecondaryMultiplierDelta();
                         break;
+                    case CharacterUpgradeType.ExplosionDamage:
+                        explosionDamageBonus += delta;
+                        break;
+                    case CharacterUpgradeType.ExplosionRadius:
+                        explosionRadiusBonus += delta;
+                        break;
+                    case CharacterUpgradeType.ExplosionResistance:
+                        explosionResistanceBonus += delta;
+                        break;
+                    case CharacterUpgradeType.ExplosionBossDamage:
+                        explosionBossDamageBonus += delta;
+                        break;
+                    case CharacterUpgradeType.ExplosionKillChance:
+                        explosionKillChance += delta;
+                        break;
+                    case CharacterUpgradeType.ExplosionKnockback:
+                        explosionKnockbackBonus += delta;
+                        break;
+                    case CharacterUpgradeType.ExplosionHitDamageTaken:
+                        explosionHitDamageBonus += delta;
+                        explosionHitDamageDuration = Mathf.Max(explosionHitDamageDuration, reward.DurationSeconds);
+                        break;
+                    case CharacterUpgradeType.ExplosionPostDamageReduction:
+                        explosionPostDamageReductionBonus += delta;
+                        explosionPostDamageReductionDuration = Mathf.Max(explosionPostDamageReductionDuration, reward.DurationSeconds);
+                        break;
                 }
             }
 
@@ -259,6 +296,17 @@ namespace FF
             combatEffects?.ConfigureProgressionRifleBonuses(rifleDamageBonus, rifleFireRateBonus, rifleProjectileSpeedBonus);
             combatEffects?.ConfigureProgressionRifleMoveBonuses(rifleMoveDamageBonus, rifleMoveSpeedBonus);
             combatEffects?.ConfigureProgressionRevive(Mathf.Clamp01(revivePercent));
+            combatEffects?.ConfigureProgressionExplosionBonuses(
+                explosionDamageBonus,
+                explosionRadiusBonus,
+                explosionResistanceBonus,
+                explosionBossDamageBonus,
+                explosionKillChance,
+                explosionKnockbackBonus,
+                explosionHitDamageBonus,
+                explosionHitDamageDuration,
+                explosionPostDamageReductionBonus,
+                explosionPostDamageReductionDuration);
         }
 
         public static CharacterProgressionState GetState(CharacterDefinition character)
