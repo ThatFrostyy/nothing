@@ -30,7 +30,8 @@ namespace FF
             ["wave"] = new CommandInfo("wave [number]", "Start the next wave or a specific wave."),
             ["god"] = new CommandInfo("god", "Toggle god mode."),
             ["health"] = new CommandInfo("health", "Restore player health to full."),
-            ["tp"] = new CommandInfo("tp [x y]", "Teleport to coordinates, or to the mouse position if no coordinates are provided.")
+            ["tp"] = new CommandInfo("tp [x y]", "Teleport to coordinates, or to the mouse position if no coordinates are provided."),
+            ["unlockallchars"] = new CommandInfo("unlockallchars", "Unlock all characters.")
         };
 
         private readonly List<string> _logs = new();
@@ -208,6 +209,14 @@ namespace FF
                 case "tp":
                     HandleTeleport(parts);
                     break;
+                case "unlockallchars":
+                    if (parts.Length > 1)
+                    {
+                        AppendUsage("unlockallchars");
+                        break;
+                    }
+                    HandleUnlockAllCharacters();
+                    break;
                 default:
                     AppendLog("Unknown command. Use `help` to see available commands.");
                     break;
@@ -350,6 +359,12 @@ namespace FF
             }
 
             AppendLog($"Teleported to {destination.x:0.##}, {destination.y:0.##}.");
+        }
+
+        private void HandleUnlockAllCharacters()
+        {
+            CharacterUnlockProgress.UnlockAllCharacters();
+            AppendLog("All characters unlocked.");
         }
 
         private bool EnsurePlayerHealth()

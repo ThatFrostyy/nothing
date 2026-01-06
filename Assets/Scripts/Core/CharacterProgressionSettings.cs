@@ -130,7 +130,14 @@ namespace FF
         MaxHPOnLevelUp,
         ShotgunPellets,
         SmgFireRateAndCooldown,
-        DashImpactBlast
+        DashImpactBlast,
+        StartRunMoveSpeed,
+        RifleDamage,
+        KillMoveSpeedBoost,
+        RifleFireRateAndProjectileSpeed,
+        SustainedFireDamage,
+        ReviveOnDeath,
+        RifleMoveDamageAndSpeed
     }
 
     [Serializable]

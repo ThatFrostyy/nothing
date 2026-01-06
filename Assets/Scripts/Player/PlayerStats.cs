@@ -28,6 +28,11 @@ namespace FF
         [Range(0f, 1f)] public float CritChance = 0f;
         [Min(1f)] public float CritDamageMult = 1f;
 
+        private float _conditionalMoveMult = 1f;
+        private float _conditionalFireRateMult = 1f;
+        private float _conditionalDamageMult = 1f;
+        private float _conditionalProjectileSpeedMult = 1f;
+
         private readonly System.Collections.Generic.List<TimedModifier> _activeModifiers = new();
 
         void Awake()
@@ -60,14 +65,14 @@ namespace FF
             CritDamageMult = Mathf.Max(1f, CritDamageMult);
         }
 
-        public float GetMoveSpeed() => MoveSpeed * MoveMult * GetActiveMultiplier(StatType.MoveSpeed);
-        public float GetRPM() => FireRateRPM * FireRateMult * GetActiveMultiplier(StatType.FireRate);
-        public int GetDamageInt() => Mathf.RoundToInt(Damage * DamageMult * GetActiveMultiplier(StatType.Damage));
+        public float GetMoveSpeed() => MoveSpeed * MoveMult * _conditionalMoveMult * GetActiveMultiplier(StatType.MoveSpeed);
+        public float GetRPM() => FireRateRPM * FireRateMult * _conditionalFireRateMult * GetActiveMultiplier(StatType.FireRate);
+        public int GetDamageInt() => Mathf.RoundToInt(Damage * DamageMult * _conditionalDamageMult * GetActiveMultiplier(StatType.Damage));
 
-        public float GetDamageMultiplier() => DamageMult * GetActiveMultiplier(StatType.Damage);
-        public float GetFireRateMultiplier() => FireRateMult * GetActiveMultiplier(StatType.FireRate);
+        public float GetDamageMultiplier() => DamageMult * _conditionalDamageMult * GetActiveMultiplier(StatType.Damage);
+        public float GetFireRateMultiplier() => FireRateMult * _conditionalFireRateMult * GetActiveMultiplier(StatType.FireRate);
         public float GetMovementAccuracyPenalty() => MovementAccuracyPenalty;
-        public float GetProjectileSpeedMultiplier() => ProjectileSpeedMult;
+        public float GetProjectileSpeedMultiplier() => ProjectileSpeedMult * _conditionalProjectileSpeedMult;
         public float GetFireCooldownMultiplier() => Mathf.Max(0.1f, FireCooldownMult);
         public float GetCritChance() => Mathf.Clamp01(CritChance);
         public float GetCritDamageMultiplier() => Mathf.Max(1f, CritDamageMult);
@@ -86,6 +91,26 @@ namespace FF
 
             float expiry = duration > 0f ? Time.time + duration : float.PositiveInfinity;
             _activeModifiers.Add(new TimedModifier(stat, multiplier, expiry));
+        }
+
+        public void SetConditionalMoveMultiplier(float multiplier)
+        {
+            _conditionalMoveMult = Mathf.Max(0.01f, multiplier);
+        }
+
+        public void SetConditionalFireRateMultiplier(float multiplier)
+        {
+            _conditionalFireRateMult = Mathf.Max(0.01f, multiplier);
+        }
+
+        public void SetConditionalDamageMultiplier(float multiplier)
+        {
+            _conditionalDamageMult = Mathf.Max(0.01f, multiplier);
+        }
+
+        public void SetConditionalProjectileSpeedMultiplier(float multiplier)
+        {
+            _conditionalProjectileSpeedMult = Mathf.Max(0.01f, multiplier);
         }
 
         private void UpdateActiveModifiers()
