@@ -138,51 +138,126 @@ MonoBehaviour:
     minimumWaveForRewards: 5
     levels:
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
-      Description: +4% max health.
+      Icon: {fileID: 0}
+      Description: Explosions deal +40% damage
       Rewards:
+      - Type: 20
+        Percent: 40
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Explosions gain +25% radius
+      Rewards:
+      - Type: 21
+        Percent: 25
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Enemies hit by explosions take +30% damage from ALL sources for
+        2 seconds
+      Rewards:
+      - Type: 26
+        Percent: 30
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 2
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0.25
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Gain +40 max HP and +20% explosion resistance
+      Rewards:
+      - Type: 22
+        Percent: 20
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
       - Type: 4
-        Percent: 4
+        Percent: 0
+        SecondaryPercent: 0
+        FlatAmount: 40
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +5% orb pickup speed.
+      Icon: {fileID: 0}
+      Description: Explosions deal +100% damage to bosses
       Rewards:
-      - Type: 0
-        Percent: 5
+      - Type: 23
+        Percent: 100
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +3% orb pickup radius.
+      Icon: {fileID: 0}
+      Description: 'After an explosion gain 50% damage reduction for 1.5 seconds '
       Rewards:
-      - Type: 1
-        Percent: 3
+      - Type: 27
+        Percent: 50
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 1.5
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
-      Description: +5% max health.
+      Icon: {fileID: 0}
+      Description: Gain +50% explosion damage AND +30% explosion knockback
       Rewards:
-      - Type: 4
-        Percent: 5
+      - Type: 20
+        Percent: 50
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+      - Type: 25
+        Percent: 30
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
-      Description: +3% attack damage.
+      Icon: {fileID: 0}
+      Description: Enemies killed by explosions have a chance to explode
       Rewards:
-      - Type: 3
-        Percent: 3
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
-      Description: +3% move speed.
-      Rewards:
-      - Type: 2
-        Percent: 3
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +5% orb pickup speed.
-      Rewards:
-      - Type: 0
-        Percent: 5
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 17814d274cb65144f9045f588ada7b2a, type: 3}
-      Description: +6% max hp.
-      Rewards:
-      - Type: 4
-        Percent: 6
+      - Type: 24
+        Percent: 15
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
   ForceUnlocked: 0
