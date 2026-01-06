@@ -30,8 +30,17 @@ namespace FF
         [Min(0f)] public float MinValue = 0f;
         [Min(0)] public int MaxStacks = 0;
         [Min(0)] public int HealAmount = 25;
+        [Header("Wave Scaling")]
+        [SerializeField] private bool startDoubledUntilWave = false;
+        [SerializeField, Min(1)] private int normalizeValueByWave = 5;
+        [SerializeField, Min(0)] private int unlockWave = 0;
+        [Header("Feedback")]
+        [SerializeField] private string levelUpPopupText = "";
         [SerializeField] private Rarity rarity = Rarity.Common;
         [SerializeField, Min(0)] private int rarityWeightOverride = 0;
+
+        public int UnlockWave => unlockWave;
+        public string LevelUpPopupText => levelUpPopupText;
 
 
         public bool CanApply(PlayerStats stats, int timesTaken)
@@ -69,37 +78,40 @@ namespace FF
                 return;
             }
 
+            float appliedMagnitude = GetScaledMagnitude();
+            int appliedHealAmount = GetScaledHealAmount();
+
             switch (Type)
             {
-                case Kind.DamageMult: stats.DamageMult += Magnitude; break;
+                case Kind.DamageMult: stats.DamageMult += appliedMagnitude; break;
                 case Kind.FireRateMult:
-                    stats.FireRateMult += Magnitude;
+                    stats.FireRateMult += appliedMagnitude;
                     if (UpgradeManager.I != null)
                     {
                         stats.FireRateMult = UpgradeManager.I.ClampFireRateMultiplier(stats.FireRateMult);
                     }
                     break;
-                case Kind.MoveMult: stats.MoveMult += Magnitude; break;
+                case Kind.MoveMult: stats.MoveMult += appliedMagnitude; break;
                 case Kind.FireCooldownReduction:
                     float minCooldown = MinValue > 0f ? MinValue : 0.1f;
-                    stats.FireCooldownMult = Mathf.Max(minCooldown, stats.FireCooldownMult - Magnitude);
+                    stats.FireCooldownMult = Mathf.Max(minCooldown, stats.FireCooldownMult - appliedMagnitude);
                     if (UpgradeManager.I != null)
                     {
                         stats.FireCooldownMult = UpgradeManager.I.ClampCooldownMultiplier(stats.FireCooldownMult);
                     }
                     break;
                 case Kind.ProjectileSpeedMult:
-                    stats.ProjectileSpeedMult = ApplyCap(stats.ProjectileSpeedMult + Magnitude, Cap);
+                    stats.ProjectileSpeedMult = ApplyCap(stats.ProjectileSpeedMult + appliedMagnitude, Cap);
                     break;
                 case Kind.CritChance:
-                    float newCritChance = ApplyCap(stats.CritChance + Magnitude, Cap > 0f ? Cap : 1f);
+                    float newCritChance = ApplyCap(stats.CritChance + appliedMagnitude, Cap > 0f ? Cap : 1f);
                     stats.CritChance = Mathf.Clamp01(newCritChance);
                     break;
                 case Kind.CritDamageMult:
-                    stats.CritDamageMult = ApplyCap(stats.CritDamageMult + Magnitude, Cap);
+                    stats.CritDamageMult = ApplyCap(stats.CritDamageMult + appliedMagnitude, Cap);
                     break;
                 case Kind.MaxHealthMult:
-                    float newHealthMult = ApplyCap(stats.MaxHealthMult + Magnitude, Cap);
+                    float newHealthMult = ApplyCap(stats.MaxHealthMult + appliedMagnitude, Cap);
                     stats.MaxHealthMult = Mathf.Max(0f, newHealthMult);
                     if (stats.GetHealth())
                     {
@@ -107,9 +119,9 @@ namespace FF
                     }
                     break;
                 case Kind.Heal:
-                    if (stats.GetHealth() && HealAmount > 0)
+                    if (stats.GetHealth() && appliedHealAmount > 0)
                     {
-                        stats.GetHealth().Heal(Mathf.Max(0, HealAmount));
+                        stats.GetHealth().Heal(Mathf.Max(0, appliedHealAmount));
                     }
                     break;
             }
@@ -134,6 +146,68 @@ namespace FF
         }
 
         public Rarity GetRarity() => rarity;
+
+        public string GetPopupText()
+        {
+            if (!string.IsNullOrWhiteSpace(levelUpPopupText))
+            {
+                return levelUpPopupText;
+            }
+
+            return Type switch
+            {
+                Kind.DamageMult => "DAMAGE ↑",
+                Kind.FireRateMult => "FIRE RATE ↑",
+                Kind.MoveMult => "MOVE SPEED ↑",
+                Kind.FireCooldownReduction => "COOLDOWN ↓",
+                Kind.ProjectileSpeedMult => "PROJECTILE SPEED ↑",
+                Kind.CritChance => "CRIT CHANCE ↑",
+                Kind.CritDamageMult => "CRIT DAMAGE ↑",
+                Kind.MaxHealthMult => "MAX HP ↑",
+                Kind.Heal => "HEAL",
+                _ => "UPGRADE ↑"
+            };
+        }
+
+        float GetScaledMagnitude()
+        {
+            if (!startDoubledUntilWave)
+            {
+                return Magnitude;
+            }
+
+            float multiplier = GetWaveScaleMultiplier();
+            return Magnitude * multiplier;
+        }
+
+        int GetScaledHealAmount()
+        {
+            if (!startDoubledUntilWave)
+            {
+                return HealAmount;
+            }
+
+            float multiplier = GetWaveScaleMultiplier();
+            return Mathf.RoundToInt(HealAmount * multiplier);
+        }
+
+        float GetWaveScaleMultiplier()
+        {
+            if (normalizeValueByWave <= 1)
+            {
+                return 1f;
+            }
+
+            int targetWave = Mathf.Max(1, normalizeValueByWave);
+            int currentWave = 1;
+            if (GameManager.I != null)
+            {
+                currentWave = Mathf.Max(1, GameManager.I.Wave);
+            }
+
+            float t = Mathf.InverseLerp(1f, targetWave, currentWave);
+            return Mathf.Lerp(2f, 1f, t);
+        }
 
         private static bool IsAtOrBeyondCap(float value, float cap)
         {
