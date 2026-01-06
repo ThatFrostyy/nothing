@@ -138,51 +138,116 @@ MonoBehaviour:
     minimumWaveForRewards: 5
     levels:
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +6% orb pickup speed.
+      Icon: {fileID: 0}
+      Description: Start each run with +15% movement speed
       Rewards:
-      - Type: 0
-        Percent: 6
+      - Type: 13
+        Percent: 15
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
     - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
-      Description: +4% movement speed.
+      Icon: {fileID: 0}
+      Description: Rifles deal +25% damage
       Rewards:
+      - Type: 14
+        Percent: 25
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: After a kill, gain +15% move speed for 2s
+      Rewards:
+      - Type: 15
+        Percent: 15
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 2
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Rifles gain +20% fire rate and +20% projectile speed
+      Rewards:
+      - Type: 16
+        Percent: 20
+        SecondaryPercent: 20
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Sustained fire grants bonus damage
+      Rewards:
+      - Type: 17
+        Percent: 30
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 1.5
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: On death revive with 30% of total health instead
+      Rewards:
+      - Type: 18
+        Percent: 30
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0.25
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: While moving, rifles deal +20% damage
+      Rewards:
+      - Type: 19
+        Percent: 20
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+    - XPOverride: 0
+      Icon: {fileID: 0}
+      Description: Gain +20% rifle damage AND +15% movement speed
+      Rewards:
+      - Type: 14
+        Percent: 20
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
       - Type: 2
-        Percent: 4
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
-      Description: +4% attack damage.
-      Rewards:
-      - Type: 3
-        Percent: 4
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +6% orb pickup radius.
-      Rewards:
-      - Type: 1
-        Percent: 6
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
-      Description: +10% movement speed.
-      Rewards:
-      - Type: 2
-        Percent: 10
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 5a0a4acc84379b2488fbd0095a205712, type: 3}
-      Description: +4% attack damage.
-      Rewards:
-      - Type: 3
-        Percent: 4
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: a04d1ed9a65e1394fa7b9a002195c342, type: 3}
-      Description: +7% orb pickup speed.
-      Rewards:
-      - Type: 0
-        Percent: 7
-    - XPOverride: 0
-      Icon: {fileID: 21300000, guid: 3b9901899ca09ae44adbb94d3c39dbb4, type: 3}
-      Description: +4% movement speed.
-      Rewards:
-      - Type: 2
-        Percent: 4
+        Percent: 15
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
   ForceUnlocked: 0
