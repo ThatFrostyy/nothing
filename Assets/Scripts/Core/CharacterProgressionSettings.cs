@@ -122,7 +122,15 @@ namespace FF
         XPPickupRadius,
         MoveSpeed,
         AttackDamage,
-        MaxHP
+        MaxHP,
+        DashCharge,
+        CloseRangeDamage,
+        DashFireRate,
+        MaxHpOnLevelUp,
+        ShotgunPellets,
+        SmgFireRateAndCooldown,
+        FireRate,
+        DashImpactBlast
     }
 
     [Serializable]
@@ -131,10 +139,39 @@ namespace FF
         public CharacterUpgradeType Type;
         [Tooltip("Percent bonus applied permanently to this character (e.g. 5 = +5%).")]
         public float Percent = 5f;
+        [Tooltip("Optional percent value used for secondary bonuses (e.g. cooldown speed).")]
+        public float SecondaryPercent = 0f;
+        [Tooltip("Flat value used for bonuses like pellets or max HP.")]
+        public float FlatAmount = 0f;
+        [Tooltip("Secondary flat value used for paired bonuses like level-up healing.")]
+        public float SecondaryAmount = 0f;
+        [Tooltip("Duration for temporary bonuses, in seconds.")]
+        public float Duration = 0f;
+        [Tooltip("Range used for proximity effects, in world units.")]
+        public float Range = 0f;
+        [Tooltip("Knockback strength for impact effects.")]
+        public float KnockbackStrength = 0f;
+        [Tooltip("Knockback duration for impact effects.")]
+        public float KnockbackDuration = 0.35f;
 
         public float GetMultiplierDelta()
         {
             return Mathf.Max(0f, Percent) / 100f;
+        }
+
+        public float GetSecondaryMultiplierDelta()
+        {
+            return Mathf.Max(0f, SecondaryPercent) / 100f;
+        }
+
+        public int GetFlatAmount()
+        {
+            return Mathf.RoundToInt(FlatAmount);
+        }
+
+        public int GetSecondaryAmount()
+        {
+            return Mathf.RoundToInt(SecondaryAmount);
         }
     }
 

@@ -25,6 +25,15 @@ namespace FF
         public float DamageMult = 1f;
         public float ProjectileSpeedMult = 1f;
         public float FireCooldownMult = 1f;
+        [Tooltip("Bonus fire rate multiplier for SMGs (e.g. 0.15 = +15%).")]
+        [Min(0f)] public float SmgFireRateBonus = 0f;
+        [Tooltip("Cooldown speed bonus for SMGs (e.g. 0.15 = 15% faster cooldowns).")]
+        [Min(0f)] public float SmgCooldownBonus = 0f;
+        [Tooltip("Close range damage bonus (e.g. 0.2 = +20%).")]
+        [Min(0f)] public float CloseRangeDamageBonus = 0f;
+        [Tooltip("Close range bonus radius (world units).")]
+        [Min(0f)] public float CloseRangeDamageRange = 0f;
+        [Min(0)] public int BonusShotgunPellets = 0;
         [Range(0f, 1f)] public float CritChance = 0f;
         [Min(1f)] public float CritDamageMult = 1f;
 
@@ -58,6 +67,11 @@ namespace FF
             FireCooldownMult = Mathf.Max(0.1f, FireCooldownMult);
             CritChance = Mathf.Clamp01(CritChance);
             CritDamageMult = Mathf.Max(1f, CritDamageMult);
+            SmgFireRateBonus = Mathf.Max(0f, SmgFireRateBonus);
+            SmgCooldownBonus = Mathf.Max(0f, SmgCooldownBonus);
+            CloseRangeDamageBonus = Mathf.Max(0f, CloseRangeDamageBonus);
+            CloseRangeDamageRange = Mathf.Max(0f, CloseRangeDamageRange);
+            BonusShotgunPellets = Mathf.Max(0, BonusShotgunPellets);
         }
 
         public float GetMoveSpeed() => MoveSpeed * MoveMult * GetActiveMultiplier(StatType.MoveSpeed);

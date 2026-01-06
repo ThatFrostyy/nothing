@@ -21,6 +21,7 @@ namespace FF
         private string abilityIdOverride;
 
         [Header("Dash")]
+        [SerializeField, Min(1)] private int baseDashCharges = 1;
         [SerializeField, Min(1f)] private float dashSpeedMultiplier = 2.25f;
         [SerializeField, Min(0.05f)] private float dashDuration = 0.35f;
         [SerializeField, Min(0.05f)] private float dashCooldown = 2.5f;
@@ -56,6 +57,14 @@ namespace FF
         private float _dashTimer;
         private Vector2 _lastMoveInput;
         private bool _dashRequested;
+        private int _dashCharges;
+        private int _bonusDashCharges;
+        private float _dashFireRateMultiplier = 1f;
+        private float _dashFireRateDuration;
+        private float _dashImpactDamageMultiplier;
+        private float _dashImpactRadius;
+        private float _dashImpactKnockbackStrength;
+        private float _dashImpactKnockbackDuration;
         private float _suppressionTimer;
         private readonly Dictionary<EnemyStats, float> _suppressedEnemies = new();
         private readonly List<EnemyStats> _toRemove = new();
@@ -136,6 +145,7 @@ namespace FF
                 _dashCooldownTimer = 0f;
                 _dashTimer = 0f;
                 _dashRequested = false;
+                _dashCharges = GetMaxDashCharges();
                 _suppressionTimer = 0f;
                 _suppressedEnemies.Clear();
 
@@ -205,6 +215,11 @@ namespace FF
 
             if (abilityType == AbilityType.Dash)
             {
+                if (_dashCharges >= GetMaxDashCharges())
+                {
+                    return 1f;
+                }
+
                 if (dashCooldown <= 0.001f)
                 {
                     return 1f;
@@ -260,6 +275,14 @@ namespace FF
             if (_dashCooldownTimer > 0f)
             {
                 _dashCooldownTimer = Mathf.Max(0f, _dashCooldownTimer - deltaTime);
+                if (_dashCooldownTimer <= 0f && _dashCharges < GetMaxDashCharges())
+                {
+                    _dashCharges++;
+                    if (_dashCharges < GetMaxDashCharges())
+                    {
+                        _dashCooldownTimer = dashCooldown;
+                    }
+                }
             }
 
             if (_dashTimer > 0f)
@@ -282,7 +305,7 @@ namespace FF
 
         private bool CanDash()
         {
-            if (_dashCooldownTimer > 0f)
+            if (_dashCharges <= 0)
             {
                 return false;
             }
@@ -300,13 +323,50 @@ namespace FF
             _dashRequested = true;
         }
 
+        private int GetMaxDashCharges()
+        {
+            return Mathf.Max(1, baseDashCharges + _bonusDashCharges);
+        }
+
+        public void ConfigureDashRewards(
+            int bonusCharges,
+            float fireRateBonusMultiplier,
+            float fireRateDuration,
+            float impactDamageMultiplier,
+            float impactRadius,
+            float knockbackStrength,
+            float knockbackDuration)
+        {
+            _bonusDashCharges = Mathf.Max(0, bonusCharges);
+            _dashFireRateMultiplier = Mathf.Max(1f, fireRateBonusMultiplier);
+            _dashFireRateDuration = Mathf.Max(0f, fireRateDuration);
+            _dashImpactDamageMultiplier = Mathf.Max(0f, impactDamageMultiplier);
+            _dashImpactRadius = Mathf.Max(0f, impactRadius);
+            _dashImpactKnockbackStrength = Mathf.Max(0f, knockbackStrength);
+            _dashImpactKnockbackDuration = Mathf.Max(0f, knockbackDuration);
+
+            if (_activeAbility == AbilityType.Dash)
+            {
+                _dashCharges = GetMaxDashCharges();
+                _dashCooldownTimer = 0f;
+            }
+        }
+
         private void TriggerDash()
         {
-            _dashCooldownTimer = dashCooldown;
+            _dashCharges = Mathf.Max(0, _dashCharges - 1);
+            if (_dashCharges < GetMaxDashCharges() && _dashCooldownTimer <= 0f)
+            {
+                _dashCooldownTimer = dashCooldown;
+            }
             _dashTimer = dashDuration;
             if (_stats != null)
             {
                 _stats.ApplyTemporaryMultiplier(PlayerStats.StatType.MoveSpeed, dashSpeedMultiplier, dashDuration);
+                if (_dashFireRateMultiplier > 1f && _dashFireRateDuration > 0f)
+                {
+                    _stats.ApplyTemporaryMultiplier(PlayerStats.StatType.FireRate, _dashFireRateMultiplier, _dashFireRateDuration);
+                }
             }
 
             if (_rigidbody)
@@ -322,6 +382,7 @@ namespace FF
             }
 
             PlayDashFeedback();
+            TriggerDashImpactBlast();
         }
         #endregion Dash
 
@@ -335,6 +396,51 @@ namespace FF
             if (dashSfx)
             {
                 AudioPlaybackPool.PlayOneShot(dashSfx, transform.position);
+            }
+        }
+
+        private void TriggerDashImpactBlast()
+        {
+            if (_dashImpactDamageMultiplier <= 0f || _dashImpactRadius <= 0f)
+            {
+                return;
+            }
+
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, _dashImpactRadius);
+            if (hits == null || hits.Length == 0)
+            {
+                return;
+            }
+
+            int baseDamage = _stats != null ? _stats.GetDamageInt() : 0;
+            int impactDamage = Mathf.Max(1, Mathf.RoundToInt(baseDamage * _dashImpactDamageMultiplier));
+
+            foreach (Collider2D hit in hits)
+            {
+                if (!hit)
+                {
+                    continue;
+                }
+
+                if (hit.CompareTag("Player"))
+                {
+                    continue;
+                }
+
+                Health health = hit.GetComponentInParent<Health>();
+                if (health == null || (health.transform.root && health.transform.root.CompareTag("Player")))
+                {
+                    continue;
+                }
+
+                health.Damage(impactDamage);
+
+                Enemy enemy = hit.GetComponentInParent<Enemy>();
+                if (enemy != null && _dashImpactKnockbackStrength > 0f)
+                {
+                    Vector2 direction = (enemy.transform.position - transform.position).normalized;
+                    enemy.ApplyKnockback(direction * _dashImpactKnockbackStrength, _dashImpactKnockbackDuration);
+                }
             }
         }
 

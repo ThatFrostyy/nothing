@@ -31,6 +31,9 @@ namespace FF
         private bool _isFiring;
         private Coroutine _fadeRoutine;
         private float _rangeMultiplier = 1f;
+        private Transform _closeRangeSource;
+        private float _closeRangeMultiplier = 1f;
+        private float _closeRangeRadius;
 
         public void Initialize(Weapon weapon, Transform followTarget, string ownerTag)
         {
@@ -94,6 +97,13 @@ namespace FF
         {
             _rangeMultiplier = Mathf.Max(0.1f, multiplier);
             UpdateRange();
+        }
+
+        public void SetCloseRangeBonus(Transform source, float multiplier, float radius)
+        {
+            _closeRangeSource = source;
+            _closeRangeMultiplier = Mathf.Max(1f, multiplier);
+            _closeRangeRadius = Mathf.Max(0f, radius);
         }
 
         void UpdateRange()
@@ -197,7 +207,17 @@ namespace FF
             {
                 if (enemy && enemy.TryGetComponent(out Health health))
                 {
-                    health.Damage(tickDamage, _sourceWeapon, isCritical);
+                    int finalDamage = tickDamage;
+                    if (_closeRangeSource && _closeRangeMultiplier > 1f && _closeRangeRadius > 0f)
+                    {
+                        float distance = Vector2.Distance(_closeRangeSource.position, enemy.transform.position);
+                        if (distance <= _closeRangeRadius)
+                        {
+                            finalDamage = Mathf.Max(1, Mathf.CeilToInt(tickDamage * _closeRangeMultiplier));
+                        }
+                    }
+
+                    health.Damage(finalDamage, _sourceWeapon, isCritical);
                 }
 
                 TryApplyBurn(enemy);

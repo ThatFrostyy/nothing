@@ -75,6 +75,21 @@ namespace FF
             float maxHpBonus = 0f;
             float xpSpeedBonus = 0f;
             float xpRadiusBonus = 0f;
+            float fireRateBonus = 0f;
+            float closeRangeDamageBonus = 0f;
+            float closeRangeRange = 0f;
+            float dashFireRateBonus = 0f;
+            float dashFireRateDuration = 0f;
+            int bonusDashCharges = 0;
+            int shotgunPelletBonus = 0;
+            float smgFireRateBonus = 0f;
+            float smgCooldownBonus = 0f;
+            int levelUpMaxHpBonus = 0;
+            int levelUpHealBonus = 0;
+            float dashImpactDamageBonus = 0f;
+            float dashImpactRadius = 0f;
+            float dashImpactKnockbackStrength = 0f;
+            float dashImpactKnockbackDuration = 0f;
 
             foreach (CharacterUpgradeReward reward in progression.GetUnlockedRewards(state.Level))
             {
@@ -95,11 +110,42 @@ namespace FF
                     case CharacterUpgradeType.MaxHP:
                         maxHpBonus += delta;
                         break;
+                    case CharacterUpgradeType.FireRate:
+                        fireRateBonus += delta;
+                        break;
                     case CharacterUpgradeType.XPPickupSpeed:
                         xpSpeedBonus += delta;
                         break;
                     case CharacterUpgradeType.XPPickupRadius:
                         xpRadiusBonus += delta;
+                        break;
+                    case CharacterUpgradeType.DashCharge:
+                        bonusDashCharges += reward.GetFlatAmount();
+                        break;
+                    case CharacterUpgradeType.CloseRangeDamage:
+                        closeRangeDamageBonus += delta;
+                        closeRangeRange = Mathf.Max(closeRangeRange, reward.Range);
+                        break;
+                    case CharacterUpgradeType.DashFireRate:
+                        dashFireRateBonus += delta;
+                        dashFireRateDuration = Mathf.Max(dashFireRateDuration, reward.Duration);
+                        break;
+                    case CharacterUpgradeType.MaxHpOnLevelUp:
+                        levelUpMaxHpBonus += reward.GetFlatAmount();
+                        levelUpHealBonus += reward.GetSecondaryAmount();
+                        break;
+                    case CharacterUpgradeType.ShotgunPellets:
+                        shotgunPelletBonus += reward.GetFlatAmount();
+                        break;
+                    case CharacterUpgradeType.SmgFireRateAndCooldown:
+                        smgFireRateBonus += delta;
+                        smgCooldownBonus += reward.GetSecondaryMultiplierDelta();
+                        break;
+                    case CharacterUpgradeType.DashImpactBlast:
+                        dashImpactDamageBonus += delta;
+                        dashImpactRadius = Mathf.Max(dashImpactRadius, reward.Range);
+                        dashImpactKnockbackStrength = Mathf.Max(dashImpactKnockbackStrength, reward.KnockbackStrength);
+                        dashImpactKnockbackDuration = Mathf.Max(dashImpactKnockbackDuration, reward.KnockbackDuration);
                         break;
                 }
             }
@@ -116,6 +162,11 @@ namespace FF
                     stats.DamageMult += damageBonus;
                 }
 
+                if (fireRateBonus > 0f)
+                {
+                    stats.FireRateMult += fireRateBonus;
+                }
+
                 if (maxHpBonus > 0f)
                 {
                     stats.MaxHealthMult += maxHpBonus;
@@ -124,11 +175,45 @@ namespace FF
                         stats.GetHealth().ScaleMaxHP(stats.MaxHealthMult, false);
                     }
                 }
+
+                stats.SmgFireRateBonus = Mathf.Max(0f, smgFireRateBonus);
+                stats.SmgCooldownBonus = Mathf.Max(0f, smgCooldownBonus);
+                stats.CloseRangeDamageBonus = Mathf.Max(0f, closeRangeDamageBonus);
+                stats.CloseRangeDamageRange = Mathf.Max(0f, closeRangeRange);
+                stats.BonusShotgunPellets = Mathf.Max(0, stats.BonusShotgunPellets + shotgunPelletBonus);
             }
 
             float radiusMultiplier = 1f + xpRadiusBonus;
             float speedMultiplier = 1f + xpSpeedBonus;
             XPOrb.SetGlobalAttractionMultipliers(radiusMultiplier, speedMultiplier);
+
+            if (stats)
+            {
+                CharacterAbilityController abilityController = stats.GetComponent<CharacterAbilityController>();
+                if (abilityController != null)
+                {
+                    abilityController.ConfigureDashRewards(
+                        bonusDashCharges,
+                        1f + dashFireRateBonus,
+                        dashFireRateDuration,
+                        dashImpactDamageBonus,
+                        dashImpactRadius,
+                        dashImpactKnockbackStrength,
+                        dashImpactKnockbackDuration);
+                }
+
+                PlayerLevelUpRewardHandler levelUpHandler = stats.GetComponent<PlayerLevelUpRewardHandler>();
+                if (levelUpHandler == null)
+                {
+                    levelUpHandler = stats.gameObject.AddComponent<PlayerLevelUpRewardHandler>();
+                }
+
+                levelUpHandler.Configure(
+                    wallet,
+                    stats.GetHealth(),
+                    levelUpMaxHpBonus,
+                    levelUpHealBonus);
+            }
         }
 
         public static CharacterProgressionState GetState(CharacterDefinition character)
