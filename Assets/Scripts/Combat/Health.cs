@@ -13,6 +13,9 @@ namespace FF
         Weapon lastDamageSourceWeapon;
         readonly System.Collections.Generic.List<TimedDamageModifier> _damageModifiers = new();
 
+        // New: persistent flat bonus to max HP that survives ScaleMaxHP calls.
+        int permanentFlatMaxHP = 0;
+
         public System.Action<int> OnDamaged;
         public System.Action OnDeath;
         public System.Action<int, int> OnHealthChanged;
@@ -188,6 +191,25 @@ namespace FF
             OnHealthChanged?.Invoke(hp, maxHP);
         }
 
+        // New: add a permanent flat max HP bonus that survives subsequent ScaleMaxHP calls.
+        public void AddPermanentMaxHP(int amount, bool refill = true)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            permanentFlatMaxHP = Mathf.Max(0, permanentFlatMaxHP + amount);
+
+            // Use baseMaxHP as the canonical base to apply the flat bonus on top of.
+            if (baseMaxHP <= 0)
+            {
+                CacheBaseValues();
+            }
+
+            SetMaxHP(baseMaxHP + permanentFlatMaxHP, refill);
+        }
+
         public void ScaleMaxHP(float multiplier, bool refill = true)
         {
             if (multiplier <= 0f)
@@ -200,7 +222,8 @@ namespace FF
                 CacheBaseValues();
             }
 
-            int scaled = Mathf.Max(1, Mathf.RoundToInt(baseMaxHP * multiplier));
+            // Include permanent flat bonus when scaling so flat increases aren't lost.
+            int scaled = Mathf.Max(1, Mathf.RoundToInt((baseMaxHP + permanentFlatMaxHP) * multiplier));
             SetMaxHP(scaled, refill);
         }
         #endregion Max HP Management

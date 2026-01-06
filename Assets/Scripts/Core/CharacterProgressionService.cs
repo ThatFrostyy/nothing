@@ -189,7 +189,8 @@ namespace FF
             {
                 if (maxHpFlatBonus > 0)
                 {
-                    health.SetMaxHP(health.MaxHP + maxHpFlatBonus, false);
+                    // Use the new API so the flat bonus survives later ScaleMaxHP calls.
+                    health.AddPermanentMaxHP(maxHpFlatBonus, false);
                 }
 
                 if (maxHpRestore > 0)
