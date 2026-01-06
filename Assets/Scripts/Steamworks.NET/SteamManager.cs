@@ -92,11 +92,13 @@ public class SteamManager : MonoBehaviour {
 			// remove steam_appid.txt from the game depot. eg: "(AppId_t)480" or "new AppId_t(480)".
 			// See the Valve documentation for more information: https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
 			if (SteamAPI.RestartAppIfNecessary(AppId_t.Invalid)) {
+				Debug.Log("[SteamManager] SteamAPI.RestartAppIfNecessary returned true. Quitting to let Steam relaunch.");
 				Application.Quit();
 				return;
 			}
 		}
-		catch (System.DllNotFoundException) { // We catch this exception here, as it will be the first occurrence of it.
+		catch (System.DllNotFoundException ex) { // We catch this exception here, as it will be the first occurrence of it.
+			Debug.LogError($"[SteamManager] Steam native DLL not found: {ex.Message}");
 			Application.Quit();
 			return;
 		}
@@ -110,8 +112,24 @@ public class SteamManager : MonoBehaviour {
 		// [*] Your App ID is not completely set up, i.e. in Release State: Unavailable, or it's missing default packages.
 		// Valve's documentation for this is located here:
 		// https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
-		m_bInitialized = SteamAPI.Init();
-		if (!m_bInitialized) {
+
+		// Use InitEx to get a detailed error message for debugging
+		try {
+			string steamInitError;
+			var initResult = SteamAPI.InitEx(out steamInitError);
+			if (initResult != ESteamAPIInitResult.k_ESteamAPIInitResult_OK) {
+				Debug.LogWarning($"[SteamManager] SteamAPI.InitEx failed: {initResult} - {steamInitError}");
+				m_bInitialized = false;
+				return;
+			}
+
+			// If InitEx returned OK, still set initialized flag and continue.
+			m_bInitialized = true;
+			Debug.Log("[SteamManager] SteamAPI initialized successfully.");
+		}
+		catch (System.Exception ex) {
+			Debug.LogError($"[SteamManager] Exception calling SteamAPI.InitEx: {ex}");
+			m_bInitialized = false;
 			return;
 		}
 

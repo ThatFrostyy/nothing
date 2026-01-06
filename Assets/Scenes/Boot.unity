@@ -185,11 +185,11 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 73ebe158e9c8f9b4ba6d8076e0c0dbbc, type: 2}
     - target: {fileID: 7721843222088791118, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
       propertyPath: waveIntervalIncrease
-      value: 1.5
+      value: 1.2
       objectReference: {fileID: 0}
     - target: {fileID: 7721843222088791118, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
       propertyPath: maximumTimeBetweenWaves
-      value: 17
+      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -12421,7 +12421,6 @@ MonoBehaviour:
   portraitImage: {fileID: 219154102}
   lockIconText: {fileID: 817837505}
   lockedNameSuffix: ' - Locked'
-  requirementsHeader: 
   availableHats: []
   hatNameText: {fileID: 1635056872}
   hatRarityText: {fileID: 461753736}
@@ -12458,7 +12457,7 @@ MonoBehaviour:
   killsStatText: {fileID: 1669997537}
   topWaveStatText: {fileID: 1068932718}
   leaderboardText: {fileID: 2902039}
-  versionText: {fileID: 0}
+  versionText: {fileID: 1121302060}
   unavailableText: N/A
   mapNameText: {fileID: 1125499379}
   mapDescriptionText: {fileID: 1579245332}

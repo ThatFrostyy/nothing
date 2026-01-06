@@ -190,8 +190,21 @@ namespace FF
         {
             if (!SteamManager.Initialized)
             {
+                Debug.LogWarning($"[SteamStatsReporter] SteamManager not initialized. SteamManager.Initialized={SteamManager.Initialized}");
                 enabled = false;
                 return;
+            }
+
+            // Log Steam client connection state for diagnosis
+            try
+            {
+                bool isRunning = SteamAPI.IsSteamRunning();
+                bool loggedOn = SteamUser.BLoggedOn();
+                Debug.Log($"[SteamStatsReporter] OnEnable - SteamManager.Initialized={SteamManager.Initialized}, SteamAPI.IsSteamRunning={isRunning}, SteamUser.BLoggedOn={loggedOn}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[SteamStatsReporter] Exception while querying Steam state: {ex}");
             }
 
             _userStatsReceived = Callback<UserStatsReceived_t>.Create(HandleStatsReceived);
@@ -531,6 +544,8 @@ namespace FF
 
         private void HandleStatsReceived(UserStatsReceived_t callback)
         {
+            Debug.Log($"[SteamStatsReporter] HandleStatsReceived: result={callback.m_eResult}");
+
             if (callback.m_eResult == EResult.k_EResultOK)
             {
                 _statsReady = true;
@@ -551,6 +566,10 @@ namespace FF
                 EnsureKillLeaderboard();
                 QueueCoreStatsPush();
                 QueueKillLeaderboardPush();
+            }
+            else
+            {
+                Debug.LogWarning($"[SteamStatsReporter] Stats request failed: {callback.m_eResult}");
             }
         }
        
