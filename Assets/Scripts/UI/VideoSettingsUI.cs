@@ -259,7 +259,7 @@ namespace FF
             for (int i = 0; i < _resolutions.Count; i++)
             {
                 var res = _resolutions[i];
-                if (res.width == target.width && res.height == target.height && res.refreshRate == target.refreshRate)
+                if (res.width == target.width && res.height == target.height && (int)res.refreshRateRatio.value == (int)target.refreshRateRatio.value)
                 {
                     return i;
                 }
@@ -270,7 +270,7 @@ namespace FF
 
         private string FormatResolutionLabel(Resolution resolution)
         {
-            string refresh = resolution.refreshRate > 0 ? $" @ {resolution.refreshRate}Hz" : string.Empty;
+            string refresh = (int)resolution.refreshRateRatio.value > 0 ? $" @ {(int)resolution.refreshRateRatio.value}Hz" : string.Empty;
             return $"{resolution.width} x {resolution.height}{refresh}";
         }
     }

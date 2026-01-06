@@ -17,7 +17,6 @@ namespace FF
         [SerializeField] private Image portraitImage;
         [SerializeField] private GameObject lockIconText;
         [SerializeField] private string lockedNameSuffix = " - Locked";
-        [SerializeField] private string requirementsHeader = "Unlock Requirements:";
 
         [Header("Hat Selection")]
         [SerializeField] private List<HatDefinition> availableHats = new();

@@ -13,13 +13,13 @@ namespace FF.UI.Tooltips
                 return Instance;
             }
 
-            TooltipSystem existing = FindObjectOfType<TooltipSystem>();
+            TooltipSystem existing = FindAnyObjectByType<TooltipSystem>();
             if (existing != null)
             {
                 return existing;
             }
 
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = FindAnyObjectByType<Canvas>();
             if (canvas == null)
             {
                 return null;
@@ -52,7 +52,7 @@ namespace FF.UI.Tooltips
 
             if (targetCanvas == null)
             {
-                targetCanvas = FindObjectOfType<Canvas>();
+                targetCanvas = FindAnyObjectByType<Canvas>();
             }
         }
 

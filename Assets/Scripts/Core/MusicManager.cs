@@ -178,7 +178,7 @@ namespace FF
             // LoadAudioData is a no-op if audio data is already loaded.
             try
             {
-                if (!clip.isReadyToPlay)
+                if (clip.loadState != AudioDataLoadState.Loaded)
                 {
                     clip.LoadAudioData();
                 }

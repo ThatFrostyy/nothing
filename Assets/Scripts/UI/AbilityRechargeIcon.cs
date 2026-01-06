@@ -43,7 +43,7 @@ namespace FF
         {
             if (!abilityController)
             {
-                abilityController = FindObjectOfType<CharacterAbilityController>();
+                abilityController = FindAnyObjectByType<CharacterAbilityController>();
             }
 
             if (!canvasGroup)
@@ -79,7 +79,7 @@ namespace FF
         {
             if (!abilityController)
             {
-                SetAbilityController(FindObjectOfType<CharacterAbilityController>());
+                SetAbilityController(FindAnyObjectByType<CharacterAbilityController>());
             }
         }
 
