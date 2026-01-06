@@ -334,8 +334,10 @@ namespace FF
 
         private void RefreshLocalStats()
         {
-            UpdateKillsText(_cachedKills);
-            UpdateTopWaveText(_cachedTopWave);
+            int localKills = CharacterUnlockProgress.Data.TotalKills;
+            int localTopWave = CharacterUnlockProgress.Data.HighestWave;
+            UpdateKillsText(_cachedKills ?? localKills);
+            UpdateTopWaveText(_cachedTopWave ?? localTopWave);
         }
 
         private string GetMostUsedWeaponLabel()
