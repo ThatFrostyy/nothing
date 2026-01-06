@@ -13,6 +13,7 @@ namespace FF
         int baseMaxHP;
         Weapon lastDamageSourceWeapon;
         readonly System.Collections.Generic.List<TimedDamageModifier> _damageModifiers = new();
+        float _conditionalDamageMultiplier = 1f;
 
         // New: persistent flat bonus to max HP that survives ScaleMaxHP calls.
         int permanentFlatMaxHP = 0;
@@ -101,6 +102,11 @@ namespace FF
             _damageModifiers.Add(new TimedDamageModifier(multiplier, expiry));
         }
 
+        public void SetConditionalDamageMultiplier(float multiplier)
+        {
+            _conditionalDamageMultiplier = Mathf.Max(0.01f, multiplier);
+        }
+
         private void Die()
         {
             if (TryPreventDeath())
@@ -164,10 +170,10 @@ namespace FF
         {
             if (_damageModifiers.Count == 0)
             {
-                return 1f;
+                return _conditionalDamageMultiplier;
             }
 
-            float value = 1f;
+            float value = _conditionalDamageMultiplier;
             for (int i = 0; i < _damageModifiers.Count; i++)
             {
                 value *= _damageModifiers[i].Multiplier;
