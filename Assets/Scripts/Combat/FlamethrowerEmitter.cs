@@ -217,12 +217,28 @@ namespace FF
             }
 
             enemy.ApplyBurn(
-                Mathf.Max(0f, _sourceWeapon.burnDuration),
+                GetBurnDuration(),
                 Mathf.Max(0, _sourceWeapon.burnDamagePerSecond),
                 Mathf.Max(0.05f, _sourceWeapon.burnTickInterval),
                 _sourceWeapon.burnTargetVfx,
                 _sourceWeapon,
                 _sourceWeapon.burnTargetVfxOffset);
+        }
+
+        private float GetBurnDuration()
+        {
+            if (_sourceWeapon == null)
+            {
+                return 0f;
+            }
+
+            float bonusDuration = 0f;
+            if (_sourceWeapon.isFlamethrower && UpgradeManager.I != null)
+            {
+                bonusDuration = UpgradeManager.I.GetCharacterFlamethrowerBurnDurationBonus(_sourceWeapon);
+            }
+
+            return Mathf.Max(0f, _sourceWeapon.burnDuration + bonusDuration);
         }
 
         private void StartLoopingVfx()

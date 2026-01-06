@@ -37,6 +37,8 @@ namespace FF
         [SerializeField, Range(0.05f, 1f)] private float suppressionFireRateMultiplier = 0.8f;
         [SerializeField] private Color suppressionTextColor = new(0.85f, 0.58f, 1f);
         [SerializeField, Min(0.25f)] private float suppressionTextScale = 0.9f;
+        [SerializeField] private Color suppressionPanicTextColor = new(1f, 0.2f, 0.2f);
+        [SerializeField, Min(0.25f)] private float suppressionPanicTextScale = 0.9f;
 
         [Header("Sharpshooter")]
         [SerializeField, Range(0f, 1f)] private float sharpshooterCritBonus = 0.35f;
@@ -75,6 +77,11 @@ namespace FF
         private float _dashImpactKnockbackDuration;
         private readonly List<Enemy> _dashImpactTargets = new();
         private readonly Collider2D[] _dashImpactHits = new Collider2D[32];
+        private float _suppressionDamageReductionBonus;
+        private float _suppressionExtraSlowBonus;
+        private float _suppressionRadiusBonus;
+        private float _suppressionPanicChance;
+        private float _suppressionPanicDuration;
 
         public AbilityType ActiveAbility => _activeAbility;
         public float AbilityRechargeProgress => GetAbilityRechargeProgress(_activeAbility);
@@ -192,6 +199,20 @@ namespace FF
             _dashImpactRadius = Mathf.Max(0f, radius);
             _dashImpactForce = Mathf.Max(0f, force);
             _dashImpactKnockbackDuration = Mathf.Max(0f, knockbackDuration);
+        }
+
+        public void ConfigureSuppressionBonuses(
+            float damageReductionPercent,
+            float extraSlowPercent,
+            float radiusPercent,
+            float panicChance,
+            float panicDurationSeconds)
+        {
+            _suppressionDamageReductionBonus = Mathf.Clamp01(damageReductionPercent);
+            _suppressionExtraSlowBonus = Mathf.Clamp01(extraSlowPercent);
+            _suppressionRadiusBonus = Mathf.Max(0f, radiusPercent);
+            _suppressionPanicChance = Mathf.Clamp01(panicChance);
+            _suppressionPanicDuration = Mathf.Max(0f, panicDurationSeconds);
         }
 
         private void HandleWeaponEquipped(Weapon weapon)
@@ -487,13 +508,22 @@ namespace FF
 
         private void PulseSuppression()
         {
-            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, suppressionRadius);
+            float radiusMultiplier = 1f + Mathf.Max(0f, _suppressionRadiusBonus);
+            float effectiveRadius = Mathf.Max(0.1f, suppressionRadius * radiusMultiplier);
+            Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, effectiveRadius);
             if (hits == null || hits.Length == 0)
             {
                 return;
             }
 
             float now = Time.time;
+            float extraSlowMultiplier = _suppressionExtraSlowBonus > 0f
+                ? Mathf.Clamp(1f - _suppressionExtraSlowBonus, 0.05f, 1f)
+                : 1f;
+            float effectiveSlowMultiplier = Mathf.Clamp(suppressionSpeedMultiplier * extraSlowMultiplier, 0.05f, 1f);
+            float damageReductionMultiplier = _suppressionDamageReductionBonus > 0f
+                ? Mathf.Clamp(1f - _suppressionDamageReductionBonus, 0.05f, 1f)
+                : 1f;
             foreach (Collider2D hit in hits)
             {
                 if (!hit)
@@ -507,8 +537,12 @@ namespace FF
                     continue;
                 }
 
-                stats.ApplyTemporaryMultiplier(EnemyStats.StatType.MoveSpeed, suppressionSpeedMultiplier, suppressionDuration, true);
+                stats.ApplyTemporaryMultiplier(EnemyStats.StatType.MoveSpeed, effectiveSlowMultiplier, suppressionDuration, true);
                 stats.ApplyTemporaryMultiplier(EnemyStats.StatType.FireRate, suppressionFireRateMultiplier, suppressionDuration, true);
+                if (_suppressionDamageReductionBonus > 0f)
+                {
+                    stats.ApplyTemporaryMultiplier(EnemyStats.StatType.Damage, damageReductionMultiplier, suppressionDuration, true);
+                }
 
                 bool isNewOrRefreshed = !_suppressedEnemies.TryGetValue(stats, out float expiry) || expiry <= now;
                 _suppressedEnemies[stats] = now + suppressionDuration;
@@ -516,8 +550,31 @@ namespace FF
                 if (isNewOrRefreshed)
                 {
                     DamageNumberManager.ShowText(stats.transform.position, "Suppressed", suppressionTextColor, suppressionTextScale);
+                    TryApplyPanic(stats);
                 }
             }
+        }
+
+        private void TryApplyPanic(EnemyStats stats)
+        {
+            if (_suppressionPanicChance <= 0f || _suppressionPanicDuration <= 0f)
+            {
+                return;
+            }
+
+            if (UnityEngine.Random.value > _suppressionPanicChance)
+            {
+                return;
+            }
+
+            Enemy enemy = stats ? stats.GetComponentInParent<Enemy>() : null;
+            if (!enemy)
+            {
+                return;
+            }
+
+            enemy.ApplyStun(_suppressionPanicDuration);
+            DamageNumberManager.ShowText(stats.transform.position, "PANIC", suppressionPanicTextColor, suppressionPanicTextScale);
         }
 
         private void CullExpiredSuppressions()

@@ -150,12 +150,28 @@ namespace FF
             }
 
             enemy.ApplyBurn(
-                Mathf.Max(0f, sourceWeapon.burnDuration),
+                GetBurnDuration(),
                 Mathf.Max(0, sourceWeapon.burnDamagePerSecond),
                 Mathf.Max(0.05f, sourceWeapon.burnTickInterval),
                 sourceWeapon.burnTargetVfx,
                 sourceWeapon,
                 sourceWeapon.burnTargetVfxOffset);
+        }
+
+        private float GetBurnDuration()
+        {
+            if (sourceWeapon == null)
+            {
+                return 0f;
+            }
+
+            float bonusDuration = 0f;
+            if (sourceWeapon.isFlamethrower && UpgradeManager.I != null)
+            {
+                bonusDuration = UpgradeManager.I.GetCharacterFlamethrowerBurnDurationBonus(sourceWeapon);
+            }
+
+            return Mathf.Max(0f, sourceWeapon.burnDuration + bonusDuration);
         }
 
         private void SpawnImpactVfx(GameObject prefab)
