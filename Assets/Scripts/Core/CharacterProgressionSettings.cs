@@ -137,7 +137,15 @@ namespace FF
         RifleFireRateAndProjectileSpeed,
         SustainedFireDamage,
         ReviveOnDeath,
-        RifleMoveDamageAndSpeed
+        RifleMoveDamageAndSpeed,
+        ExplosionDamage,
+        ExplosionRadius,
+        ExplosionResistance,
+        ExplosionBossDamage,
+        ExplosionKillChance,
+        ExplosionKnockback,
+        ExplosionHitDamageTaken,
+        ExplosionPostDamageReduction
     }
 
     [Serializable]

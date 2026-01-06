@@ -66,6 +66,16 @@ namespace FF
         private float _progressionRifleMoveSpeedBonus;
         private float _progressionRevivePercent;
         private bool _progressionReviveAvailable;
+        private float _progressionExplosionDamageBonus;
+        private float _progressionExplosionRadiusBonus;
+        private float _progressionExplosionResistanceBonus;
+        private float _progressionExplosionBossDamageBonus;
+        private float _progressionExplosionKillChance;
+        private float _progressionExplosionKnockbackBonus;
+        private float _progressionExplosionHitDamageBonus;
+        private float _progressionExplosionHitDamageDuration;
+        private float _progressionExplosionPostDamageReductionBonus;
+        private float _progressionExplosionPostDamageReductionDuration;
         private Rigidbody2D _playerBody;
 
         private void Awake()
@@ -167,6 +177,68 @@ namespace FF
         {
             _progressionRevivePercent = Mathf.Clamp01(revivePercent);
             _progressionReviveAvailable = _progressionRevivePercent > 0f;
+        }
+
+        public void ConfigureProgressionExplosionBonuses(
+            float damagePercent,
+            float radiusPercent,
+            float resistancePercent,
+            float bossDamagePercent,
+            float killExplosionChance,
+            float knockbackPercent,
+            float hitDamagePercent,
+            float hitDamageDuration,
+            float postExplosionDamageReductionPercent,
+            float postExplosionDamageReductionDuration)
+        {
+            _progressionExplosionDamageBonus = Mathf.Max(0f, damagePercent);
+            _progressionExplosionRadiusBonus = Mathf.Max(0f, radiusPercent);
+            _progressionExplosionResistanceBonus = Mathf.Max(0f, resistancePercent);
+            _progressionExplosionBossDamageBonus = Mathf.Max(0f, bossDamagePercent);
+            _progressionExplosionKillChance = Mathf.Clamp01(killExplosionChance);
+            _progressionExplosionKnockbackBonus = Mathf.Max(0f, knockbackPercent);
+            _progressionExplosionHitDamageBonus = Mathf.Max(0f, hitDamagePercent);
+            _progressionExplosionHitDamageDuration = Mathf.Max(0f, hitDamageDuration);
+            _progressionExplosionPostDamageReductionBonus = Mathf.Max(0f, postExplosionDamageReductionPercent);
+            _progressionExplosionPostDamageReductionDuration = Mathf.Max(0f, postExplosionDamageReductionDuration);
+        }
+
+        public void ApplyProgressionExplosionConfig(GrenadeProjectile grenade)
+        {
+            if (!grenade)
+            {
+                return;
+            }
+
+            grenade.ConfigureProgressionExplosion(
+                _progressionExplosionDamageBonus,
+                _progressionExplosionRadiusBonus,
+                _progressionExplosionBossDamageBonus,
+                _progressionExplosionKnockbackBonus,
+                _progressionExplosionKillChance,
+                _progressionExplosionHitDamageBonus,
+                _progressionExplosionHitDamageDuration,
+                this);
+        }
+
+        public float GetExplosionResistanceMultiplier()
+        {
+            float multiplier = 1f - Mathf.Clamp01(_progressionExplosionResistanceBonus);
+            return Mathf.Clamp(multiplier, 0.05f, 1f);
+        }
+
+        public void ApplyProgressionExplosionDamageReduction()
+        {
+            if (_progressionExplosionPostDamageReductionBonus <= 0f
+                || _progressionExplosionPostDamageReductionDuration <= 0f
+                || playerHealth == null)
+            {
+                return;
+            }
+
+            float multiplier = 1f - Mathf.Clamp01(_progressionExplosionPostDamageReductionBonus);
+            multiplier = Mathf.Clamp(multiplier, 0.05f, 1f);
+            playerHealth.ApplyTemporaryDamageMultiplier(multiplier, _progressionExplosionPostDamageReductionDuration);
         }
 
         private void UpdateSecondaryUsageState(bool forceReset)
