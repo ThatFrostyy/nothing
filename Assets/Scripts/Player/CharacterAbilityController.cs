@@ -24,8 +24,10 @@ namespace FF
         [SerializeField, Min(1f)] private float dashSpeedMultiplier = 2.25f;
         [SerializeField, Min(0.05f)] private float dashDuration = 0.35f;
         [SerializeField, Min(0.05f)] private float dashCooldown = 2.5f;
+        [SerializeField, Min(1)] private int dashCharges = 1;
         [SerializeField] private AudioClip dashSfx;
         [SerializeField] private GameObject dashEffect;
+        [SerializeField] private LayerMask dashImpactLayers = ~0;
 
         [Header("Suppression Aura")]
         [SerializeField, Min(0.5f)] private float suppressionRadius = 5.5f;
@@ -54,6 +56,8 @@ namespace FF
         private AbilityType _activeAbility = AbilityType.None;
         private float _dashCooldownTimer;
         private float _dashTimer;
+        private int _dashChargeBonus;
+        private int _currentDashCharges;
         private Vector2 _lastMoveInput;
         private bool _dashRequested;
         private float _suppressionTimer;
@@ -63,6 +67,14 @@ namespace FF
         private float _lastAbilityRechargeProgress = -1f;
         private AbilityType _lastAbilityType = AbilityType.None;
         private bool _lastAbilityRechargeVisible;
+        private float _dashFireRateBonus;
+        private float _dashFireRateDuration;
+        private float _dashImpactDamageBonus;
+        private float _dashImpactRadius;
+        private float _dashImpactForce;
+        private float _dashImpactKnockbackDuration;
+        private readonly List<Enemy> _dashImpactTargets = new();
+        private readonly Collider2D[] _dashImpactHits = new Collider2D[32];
 
         public AbilityType ActiveAbility => _activeAbility;
         public float AbilityRechargeProgress => GetAbilityRechargeProgress(_activeAbility);
@@ -73,6 +85,7 @@ namespace FF
             _stats = GetComponent<PlayerStats>();
             _rigidbody = GetComponent<Rigidbody2D>();
             _weaponManager = GetComponentInChildren<WeaponManager>();
+            _currentDashCharges = GetMaxDashCharges();
         }
 
         private void OnEnable()
@@ -136,6 +149,7 @@ namespace FF
                 _dashCooldownTimer = 0f;
                 _dashTimer = 0f;
                 _dashRequested = false;
+                _currentDashCharges = GetMaxDashCharges();
                 _suppressionTimer = 0f;
                 _suppressedEnemies.Clear();
 
@@ -151,6 +165,33 @@ namespace FF
             }
 
             NotifyAbilityRechargeUpdated(true);
+        }
+
+        public void ConfigureDashChargeBonus(int bonusCharges)
+        {
+            _dashChargeBonus = Mathf.Max(0, bonusCharges);
+            _currentDashCharges = Mathf.Min(_currentDashCharges, GetMaxDashCharges());
+            if (_activeAbility == AbilityType.Dash)
+            {
+                _currentDashCharges = GetMaxDashCharges();
+                _dashCooldownTimer = 0f;
+            }
+
+            NotifyAbilityRechargeUpdated(true);
+        }
+
+        public void ConfigureDashFireRateBonus(float bonusPercent, float durationSeconds)
+        {
+            _dashFireRateBonus = Mathf.Max(0f, bonusPercent);
+            _dashFireRateDuration = Mathf.Max(0f, durationSeconds);
+        }
+
+        public void ConfigureDashImpactBlast(float damagePercent, float radius, float force, float knockbackDuration)
+        {
+            _dashImpactDamageBonus = Mathf.Max(0f, damagePercent);
+            _dashImpactRadius = Mathf.Max(0f, radius);
+            _dashImpactForce = Mathf.Max(0f, force);
+            _dashImpactKnockbackDuration = Mathf.Max(0f, knockbackDuration);
         }
 
         private void HandleWeaponEquipped(Weapon weapon)
@@ -207,6 +248,11 @@ namespace FF
             {
                 if (dashCooldown <= 0.001f)
                 {
+                    return _currentDashCharges > 0 ? 1f : 0f;
+                }
+
+                if (_currentDashCharges >= GetMaxDashCharges())
+                {
                     return 1f;
                 }
 
@@ -257,9 +303,24 @@ namespace FF
         private void UpdateDash()
         {
             float deltaTime = Time.deltaTime;
-            if (_dashCooldownTimer > 0f)
+            if (_currentDashCharges < GetMaxDashCharges() && _dashCooldownTimer > 0f)
             {
                 _dashCooldownTimer = Mathf.Max(0f, _dashCooldownTimer - deltaTime);
+            }
+
+            if (_currentDashCharges < GetMaxDashCharges() && dashCooldown <= 0.001f)
+            {
+                _currentDashCharges = GetMaxDashCharges();
+                _dashCooldownTimer = 0f;
+            }
+
+            if (_currentDashCharges < GetMaxDashCharges() && _dashCooldownTimer <= 0f && dashCooldown > 0.001f)
+            {
+                _currentDashCharges++;
+                if (_currentDashCharges < GetMaxDashCharges())
+                {
+                    _dashCooldownTimer = dashCooldown;
+                }
             }
 
             if (_dashTimer > 0f)
@@ -282,7 +343,7 @@ namespace FF
 
         private bool CanDash()
         {
-            if (_dashCooldownTimer > 0f)
+            if (_currentDashCharges <= 0)
             {
                 return false;
             }
@@ -302,7 +363,12 @@ namespace FF
 
         private void TriggerDash()
         {
-            _dashCooldownTimer = dashCooldown;
+            _currentDashCharges = Mathf.Max(0, _currentDashCharges - 1);
+            if (_currentDashCharges < GetMaxDashCharges())
+            {
+                _dashCooldownTimer = dashCooldown;
+            }
+
             _dashTimer = dashDuration;
             if (_stats != null)
             {
@@ -321,7 +387,72 @@ namespace FF
                 }
             }
 
+            ApplyDashCombatBonuses();
             PlayDashFeedback();
+        }
+
+        private int GetMaxDashCharges()
+        {
+            return Mathf.Max(1, dashCharges + _dashChargeBonus);
+        }
+
+        private void ApplyDashCombatBonuses()
+        {
+            if (_stats != null && _dashFireRateBonus > 0f && _dashFireRateDuration > 0f)
+            {
+                _stats.ApplyTemporaryMultiplier(PlayerStats.StatType.FireRate, 1f + _dashFireRateBonus, _dashFireRateDuration);
+            }
+
+            if (_dashImpactRadius <= 0f || (_dashImpactDamageBonus <= 0f && _dashImpactForce <= 0f))
+            {
+                return;
+            }
+
+            int hits = Physics2D.OverlapCircleNonAlloc(transform.position, _dashImpactRadius, _dashImpactHits, dashImpactLayers);
+            if (hits <= 0)
+            {
+                return;
+            }
+
+            int damage = _stats != null ? Mathf.RoundToInt(_stats.GetDamageInt() * _dashImpactDamageBonus) : 0;
+            _dashImpactTargets.Clear();
+            for (int i = 0; i < hits; i++)
+            {
+                Collider2D hit = _dashImpactHits[i];
+                if (!hit)
+                {
+                    continue;
+                }
+
+                Enemy enemy = hit.GetComponentInParent<Enemy>();
+                if (!enemy)
+                {
+                    continue;
+                }
+
+                if (_dashImpactTargets.Contains(enemy))
+                {
+                    continue;
+                }
+
+                _dashImpactTargets.Add(enemy);
+
+                if (damage > 0 && enemy.TryGetComponent(out Health health))
+                {
+                    health.Damage(damage);
+                }
+
+                if (_dashImpactForce > 0f)
+                {
+                    Vector2 direction = (enemy.transform.position - transform.position);
+                    if (direction.sqrMagnitude < 0.0001f)
+                    {
+                        direction = UnityEngine.Random.insideUnitCircle;
+                    }
+
+                    enemy.ApplyKnockback(direction.normalized * _dashImpactForce, _dashImpactKnockbackDuration);
+                }
+            }
         }
         #endregion Dash
 

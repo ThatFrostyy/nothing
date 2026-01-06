@@ -33,6 +33,9 @@ namespace FF
         readonly System.Collections.Generic.Dictionary<Upgrade, int> upgradeCounts = new();
         readonly System.Collections.Generic.Dictionary<Weapon, int> weaponKillCounts = new();
         readonly System.Collections.Generic.Dictionary<Weapon, WeaponUpgradeState> weaponUpgradeStates = new();
+        int characterShotgunExtraProjectiles;
+        float characterSmgFireRateBonus;
+        float characterSmgCooldownReduction;
 
         public System.Action<int> OnPendingUpgradesChanged;
 
@@ -1087,6 +1090,11 @@ namespace FF
         public float GetWeaponFireRateMultiplier(Weapon weapon)
         {
             float value = TryGetWeaponState(weapon, out var state) ? state.GetFireRateMultiplier() : 1f;
+            if (weapon != null && weapon.weaponClass == Weapon.WeaponClass.SMG)
+            {
+                value *= 1f + characterSmgFireRateBonus;
+            }
+
             return ClampFireRateMultiplier(value);
         }
 
@@ -1098,6 +1106,11 @@ namespace FF
         public float GetWeaponFireCooldownMultiplier(Weapon weapon)
         {
             float value = TryGetWeaponState(weapon, out var state) ? state.GetFireCooldownMultiplier() : 1f;
+            if (weapon != null && weapon.weaponClass == Weapon.WeaponClass.SMG)
+            {
+                value *= Mathf.Max(0.01f, 1f - characterSmgCooldownReduction);
+            }
+
             return ClampCooldownMultiplier(value);
         }
 
@@ -1108,7 +1121,13 @@ namespace FF
 
         public int GetWeaponExtraProjectiles(Weapon weapon)
         {
-            return TryGetWeaponState(weapon, out var state) ? state.GetExtraProjectiles() : 0;
+            int extra = TryGetWeaponState(weapon, out var state) ? state.GetExtraProjectiles() : 0;
+            if (weapon != null && (weapon.isShotgun || weapon.weaponClass == Weapon.WeaponClass.Shotgun))
+            {
+                extra += characterShotgunExtraProjectiles;
+            }
+
+            return extra;
         }
 
         public float GetWeaponCritChance(Weapon weapon)
@@ -1134,6 +1153,13 @@ namespace FF
         public float GetFlamethrowerRangeMultiplier(Weapon weapon)
         {
             return TryGetWeaponState(weapon, out var state) ? state.GetFlamethrowerRangeMultiplier() : 1f;
+        }
+
+        public void SetCharacterWeaponClassBonuses(int shotgunExtraProjectiles, float smgFireRateBonus, float smgCooldownReduction)
+        {
+            characterShotgunExtraProjectiles = Mathf.Max(0, shotgunExtraProjectiles);
+            characterSmgFireRateBonus = Mathf.Max(0f, smgFireRateBonus);
+            characterSmgCooldownReduction = Mathf.Clamp01(smgCooldownReduction);
         }
 
         public float ClampFireRateMultiplier(float value)

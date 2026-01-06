@@ -122,7 +122,15 @@ namespace FF
         XPPickupRadius,
         MoveSpeed,
         AttackDamage,
-        MaxHP
+        MaxHP,
+        FireRate,
+        DashCharge,
+        ShortRangeDamage,
+        DashFireRateBoost,
+        MaxHPOnLevelUp,
+        ShotgunPellets,
+        SmgFireRateAndCooldown,
+        DashImpactBlast
     }
 
     [Serializable]
@@ -131,10 +139,29 @@ namespace FF
         public CharacterUpgradeType Type;
         [Tooltip("Percent bonus applied permanently to this character (e.g. 5 = +5%).")]
         public float Percent = 5f;
+        [Tooltip("Secondary percent value for upgrades that need two percentages.")]
+        public float SecondaryPercent = 0f;
+        [Tooltip("Flat value for upgrades that need a fixed amount (e.g. +1 dash charge).")]
+        public int FlatAmount = 0;
+        [Tooltip("Secondary flat value for upgrades that need two fixed amounts (e.g. max HP + heal).")]
+        public int SecondaryFlatAmount = 0;
+        [Tooltip("Duration in seconds for time-based rewards.")]
+        public float DurationSeconds = 0f;
+        [Tooltip("Radius used for area-based rewards.")]
+        public float Radius = 0f;
+        [Tooltip("Knockback force for impact-based rewards.")]
+        public float KnockbackForce = 0f;
+        [Tooltip("Knockback duration for impact-based rewards.")]
+        public float KnockbackDuration = 0.25f;
 
         public float GetMultiplierDelta()
         {
             return Mathf.Max(0f, Percent) / 100f;
+        }
+
+        public float GetSecondaryMultiplierDelta()
+        {
+            return Mathf.Max(0f, SecondaryPercent) / 100f;
         }
     }
 

@@ -107,7 +107,14 @@ namespace FF
             {
                 PlayerStats stats = controller.GetComponent<PlayerStats>();
                 XPWallet wallet = controller.GetComponentInChildren<XPWallet>();
-                CharacterProgressionService.ApplyPermanentUpgrades(CharacterSelectionState.SelectedCharacter, stats, wallet);
+                CharacterAbilityController abilityController = controller.GetComponent<CharacterAbilityController>();
+                PlayerCombatEffectController combatEffects = controller.GetComponent<PlayerCombatEffectController>();
+                CharacterProgressionService.ApplyPermanentUpgrades(
+                    CharacterSelectionState.SelectedCharacter,
+                    stats,
+                    wallet,
+                    abilityController,
+                    combatEffects);
 
                 Health health = controller.GetComponentInChildren<Health>();
                 if (health && _trackedHealth.Add(health))

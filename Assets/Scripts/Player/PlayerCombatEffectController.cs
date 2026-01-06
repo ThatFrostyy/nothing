@@ -37,6 +37,10 @@ namespace FF
         [SerializeField] private Color mgSuppressionTextColor = new(1f, 0.3f, 0.2f);
         [SerializeField, Min(0.25f)] private float mgSuppressionTextScale = 0.9f;
 
+        [Header("Progression Short Range Damage")]
+        [SerializeField, Min(0.1f)] private float progressionShortRangeInterval = 1f;
+        [SerializeField] private LayerMask progressionShortRangeLayers = ~0;
+
         private bool _usingSecondary;
         private float _nextSynergyTime;
         private bool _slot0UsedSinceSynergy;
@@ -44,6 +48,11 @@ namespace FF
         private float _suppressionMeter;
         private float _suppressedUntil;
         private Coroutine _orbVacuumRoutine;
+        private float _progressionShortRangeDamageBonus;
+        private float _progressionShortRangeRadius;
+        private float _progressionShortRangeTimer;
+        private readonly Collider2D[] _progressionShortRangeHits = new Collider2D[32];
+        private readonly System.Collections.Generic.List<Enemy> _progressionShortRangeTargets = new();
 
         private void Awake()
         {
@@ -89,6 +98,14 @@ namespace FF
         {
             UpdateSecondaryUsageState(false);
             UpdateSuppressionMeter(Time.deltaTime);
+            UpdateProgressionShortRangeDamage(Time.deltaTime);
+        }
+
+        public void ConfigureProgressionShortRangeDamage(float damagePercent, float radius)
+        {
+            _progressionShortRangeDamageBonus = Mathf.Max(0f, damagePercent);
+            _progressionShortRangeRadius = Mathf.Max(0f, radius);
+            _progressionShortRangeTimer = 0f;
         }
 
         private void UpdateSecondaryUsageState(bool forceReset)
@@ -232,6 +249,60 @@ namespace FF
                     TriggerOrbVacuum();
                     ShowSynergyText(synergyOrbVacuumText);
                     break;
+            }
+        }
+
+        private void UpdateProgressionShortRangeDamage(float deltaTime)
+        {
+            if (_progressionShortRangeDamageBonus <= 0f || _progressionShortRangeRadius <= 0f || playerStats == null)
+            {
+                return;
+            }
+
+            _progressionShortRangeTimer = Mathf.Max(0f, _progressionShortRangeTimer - deltaTime);
+            if (_progressionShortRangeTimer > 0f)
+            {
+                return;
+            }
+
+            _progressionShortRangeTimer = Mathf.Max(0.1f, progressionShortRangeInterval);
+
+            int damage = Mathf.RoundToInt(playerStats.GetDamageInt() * _progressionShortRangeDamageBonus);
+            if (damage <= 0)
+            {
+                return;
+            }
+
+            int hits = Physics2D.OverlapCircleNonAlloc(
+                transform.position,
+                _progressionShortRangeRadius,
+                _progressionShortRangeHits,
+                progressionShortRangeLayers);
+            if (hits <= 0)
+            {
+                return;
+            }
+
+            _progressionShortRangeTargets.Clear();
+            for (int i = 0; i < hits; i++)
+            {
+                Collider2D hit = _progressionShortRangeHits[i];
+                if (!hit)
+                {
+                    continue;
+                }
+
+                Enemy enemy = hit.GetComponentInParent<Enemy>();
+                if (!enemy || _progressionShortRangeTargets.Contains(enemy))
+                {
+                    continue;
+                }
+
+                _progressionShortRangeTargets.Add(enemy);
+                if (enemy.TryGetComponent(out Health health))
+                {
+                    health.Damage(damage);
+                }
             }
         }
 
