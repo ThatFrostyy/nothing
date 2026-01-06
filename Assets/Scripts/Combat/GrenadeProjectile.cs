@@ -417,6 +417,18 @@ namespace FF
             }
 
             _explosionTargets.Clear();
+
+            // Collect chain explosion positions and invoke them AFTER we finish iterating OverlapBuffer
+            System.Collections.Generic.List<Vector2> pendingChainExplosions = null;
+            bool shouldCollectChains = allowChainExplosions
+                                       && _ownerCombatEffects != null
+                                       && _explosionKillExplosionChance > 0f;
+
+            if (shouldCollectChains)
+            {
+                pendingChainExplosions = new System.Collections.Generic.List<Vector2>();
+            }
+
             for (int i = 0; i < hits; i++)
             {
                 Collider2D hit = OverlapBuffer[i];
@@ -436,7 +448,8 @@ namespace FF
                     if (_ownerCombatEffects != null)
                     {
                         damage = Mathf.RoundToInt(damage * _explosionDamageMultiplier);
-                        if (health.TryGetComponent<Enemy>(out var enemy) && enemy.IsBoss)
+                        // Rename inner variable to 'enemyComponent' to avoid CS0136
+                        if (health.TryGetComponent<Enemy>(out var enemyComponent) && enemyComponent.IsBoss)
                         {
                             damage = Mathf.RoundToInt(damage * _explosionBossDamageMultiplier);
                         }
@@ -471,13 +484,13 @@ namespace FF
                             health.ApplyTemporaryDamageMultiplier(1f + _explosionHitDamageBonus, _explosionHitDamageDuration);
                         }
 
-                        if (allowChainExplosions
-                            && _explosionKillExplosionChance > 0f
+                        if (shouldCollectChains
                             && previousHp > 0
                             && health.CurrentHP <= 0
                             && UnityEngine.Random.value <= _explosionKillExplosionChance)
                         {
-                            TriggerChainExplosion(health.transform.position);
+                            // defer the chain explosion to avoid overwriting OverlapBuffer while iterating
+                            pendingChainExplosions.Add(health.transform.position);
                         }
                     }
                 }
@@ -510,6 +523,16 @@ namespace FF
                 if (hit.TryGetComponent<Enemy>(out var enemy))
                 {
                     enemy.ApplyKnockback(impulse * 2f, 0.35f);
+                }
+            }
+
+            // Now trigger any deferred chain explosions. These will call ApplyExplosionDamage with allowChainExplosions=false,
+            // so they won't recurse further.
+            if (pendingChainExplosions != null && pendingChainExplosions.Count > 0)
+            {
+                for (int i = 0; i < pendingChainExplosions.Count; i++)
+                {
+                    TriggerChainExplosion(pendingChainExplosions[i]);
                 }
             }
         }
