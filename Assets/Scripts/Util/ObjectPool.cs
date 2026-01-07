@@ -215,7 +215,8 @@ namespace FF
         private static void FillPoolableCache(GameObject instance)
         {
             PoolableCache.Clear();
-            instance.GetComponents(PoolableCache);
+            // ⚡ Bolt: Use non-allocating version of GetComponents to avoid GC churn
+            instance.GetComponents<IPoolable>(PoolableCache);
         }
     }
 
