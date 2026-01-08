@@ -55,7 +55,7 @@ namespace FF
                     {
                         float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
                         int finalDamage = Mathf.RoundToInt(_weapon.damage * damageMultiplier);
-                        health.TakeDamage(finalDamage, ownerTag);
+                        health.Damage(finalDamage, _weapon, false);
 
                         if (_weapon.knockbackStrength > 0)
                         {
