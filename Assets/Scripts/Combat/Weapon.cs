@@ -14,7 +14,8 @@ namespace FF
             SMG,
             Special,
             Shotgun,
-            Flamethrower
+            Flamethrower,
+            Melee
         }
 
         [Header("Name")]
@@ -54,6 +55,12 @@ namespace FF
         public float recoilKick = 4f;
         public bool isAuto = true;
         public float fireCooldown = 0.1f; // for semi-auto
+
+        [Header("Melee")]
+        public bool isMelee = false;
+        public float attackRange = 1.5f;
+        public float attackArc = 90f;
+        public GameObject swingPrefab;
 
         [Header("Impact")]
         public float knockbackStrength = 0f;

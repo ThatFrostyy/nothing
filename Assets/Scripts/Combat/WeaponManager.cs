@@ -13,6 +13,7 @@ namespace FF
         [Header("References")]
         [SerializeField] Transform gunPivot;
         [SerializeField] AutoShooter shooter;
+        [SerializeField] MeleeAttacker meleeAttacker;
         [SerializeField] PlayerCosmetics cosmetics;
 
         readonly Weapon[] loadout = new Weapon[3];
@@ -27,6 +28,7 @@ namespace FF
 
         public Transform GunPivot => gunPivot;
         public AutoShooter Shooter => shooter;
+        public MeleeAttacker MeleeAttacker => meleeAttacker;
         public Weapon CurrentWeapon => currentSO;
         public int CurrentSlotIndex => currentSlotIndex;
         public int SlotCount => loadout.Length;
@@ -273,16 +275,9 @@ namespace FF
 
             if (!currentSO)
             {
-                if (shooter)
-                {
-                    shooter.ClearWeapon();
-                }
-
-                if (cosmetics)
-                {
-                    cosmetics.SetBackpack(null);
-                }
-
+                if (shooter) shooter.ClearWeapon();
+                if (meleeAttacker) meleeAttacker.ClearWeapon();
+                if (cosmetics) cosmetics.SetBackpack(null);
                 OnWeaponEquipped?.Invoke(currentSO);
                 return;
             }
@@ -291,13 +286,26 @@ namespace FF
             currentWeaponInstance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
 
             muzzle = currentWeaponInstance.transform.Find("Muzzle");
-
             eject = currentWeaponInstance.transform.Find("Eject");
 
-            if (shooter)
+            if (currentSO.isMelee)
             {
-                shooter.InitializeRecoil(gunPivot);
-                shooter.SetWeapon(currentSO, muzzle, eject);
+                if (shooter) shooter.enabled = false;
+                if (meleeAttacker)
+                {
+                    meleeAttacker.enabled = true;
+                    meleeAttacker.SetWeapon(currentSO, gunPivot);
+                }
+            }
+            else
+            {
+                if (meleeAttacker) meleeAttacker.enabled = false;
+                if (shooter)
+                {
+                    shooter.enabled = true;
+                    shooter.InitializeRecoil(gunPivot);
+                    shooter.SetWeapon(currentSO, muzzle, eject);
+                }
             }
 
             if (cosmetics)
