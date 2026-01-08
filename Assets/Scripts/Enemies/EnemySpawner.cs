@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace FF
 {
-    public class EnemySpawner : MonoBehaviour
+    public class EnemySpawner : NetworkBehaviour
     {
         [Header("Player & Spawn Area")]
         [SerializeField] private Transform player;
@@ -98,7 +99,7 @@ namespace FF
 
         public void SpawnWave(int wave)
         {
-
+            if (!IsServer) return;
             if (!player)
             {
                 return;
@@ -115,6 +116,7 @@ namespace FF
 
         public void StopSpawning()
         {
+            if (!IsServer) return;
             if (_spawnRoutine != null)
             {
                 StopCoroutine(_spawnRoutine);
@@ -124,6 +126,7 @@ namespace FF
 
         private void Update()
         {
+            if (!IsServer) return;
             if (cullDistance <= 0f || !player)
             {
                 return;
@@ -578,8 +581,8 @@ namespace FF
                 return false;
             }
 
+            enemyInstance.GetComponent<NetworkObject>().Spawn(true);
             enemy.SetIsBoss(isBoss);
-            enemy.Initialize(player);
             enemy.ApplyWaveModifiers(modifiers);
             IncrementSpawnCount(isBoss);
             _activeEnemies.Add(enemy);
@@ -601,7 +604,8 @@ namespace FF
 
         private Vector2 FindSpawnPosition(Vector2 direction, float baseRadius)
         {
-            Vector2 origin = player ? (Vector2)player.position : Vector2.zero;
+            Transform closestPlayer = GetClosestPlayer();
+            Vector2 origin = closestPlayer ? (Vector2)closestPlayer.position : Vector2.zero;
             float currentRadius = baseRadius;
             Vector2 candidate = origin + direction * currentRadius;
 
@@ -658,6 +662,26 @@ namespace FF
             float halfHeight = spawnCamera.orthographicSize;
             float halfWidth = halfHeight * spawnCamera.aspect;
             return Mathf.Sqrt(halfWidth * halfWidth + halfHeight * halfHeight);
+        }
+
+        private Transform GetClosestPlayer()
+        {
+            Transform closestPlayer = null;
+            float closestDistance = float.MaxValue;
+
+            foreach (var player in NetworkManager.Singleton.ConnectedClientsList)
+            {
+                if (player.PlayerObject == null) continue;
+
+                float distance = Vector3.Distance(transform.position, player.PlayerObject.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestPlayer = player.PlayerObject.transform;
+                }
+            }
+
+            return closestPlayer;
         }
 
         private void OnValidate()

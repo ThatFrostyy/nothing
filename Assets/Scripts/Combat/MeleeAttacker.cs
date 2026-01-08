@@ -1,8 +1,9 @@
+using Unity.Netcode;
 using UnityEngine;
 
 namespace FF
 {
-    public class MeleeAttacker : MonoBehaviour
+    public class MeleeAttacker : NetworkBehaviour
     {
         private Weapon _weapon;
         private Transform _attackOrigin;
@@ -27,16 +28,18 @@ namespace FF
 
         public void PerformAttack()
         {
+            if (!IsOwner) return;
             if (_weapon == null || !_weapon.isMelee || _attackOrigin == null)
             {
                 return;
             }
 
-            if (_weapon.swingPrefab != null)
-            {
-                Instantiate(_weapon.swingPrefab, _attackOrigin.position, _attackOrigin.rotation);
-            }
+            PerformAttackServerRpc();
+        }
 
+        [ServerRpc]
+        private void PerformAttackServerRpc()
+        {
             string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
 
             Collider2D[] hits = Physics2D.OverlapCircleAll(_attackOrigin.position, _weapon.attackRange);
@@ -55,7 +58,7 @@ namespace FF
                     {
                         float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
                         int finalDamage = Mathf.RoundToInt(_weapon.damage * damageMultiplier);
-                        health.TakeDamage(finalDamage, ownerTag);
+                        health.Damage(finalDamage, gameObject);
 
                         if (_weapon.knockbackStrength > 0)
                         {
@@ -68,6 +71,17 @@ namespace FF
                         }
                     }
                 }
+            }
+
+            PerformAttackClientRpc();
+        }
+
+        [ClientRpc]
+        private void PerformAttackClientRpc()
+        {
+            if (_weapon.swingPrefab != null)
+            {
+                Instantiate(_weapon.swingPrefab, _attackOrigin.position, _attackOrigin.rotation);
             }
         }
     }

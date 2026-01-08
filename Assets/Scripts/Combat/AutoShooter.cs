@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.InputSystem;
 
 namespace FF
 {
-    public class AutoShooter : MonoBehaviour
+    public class AutoShooter : NetworkBehaviour
     {
         private Weapon _weapon;
         private Transform _muzzle;
@@ -249,6 +250,7 @@ namespace FF
 
         private void Update()
         {
+            if (!IsOwner) return;
             if (_weapon == null || _muzzle == null)
             {
                 SetCooldownProgress(1f);
@@ -438,6 +440,8 @@ namespace FF
         #region Recoil & Shooting
         private void Shoot(float? grenadeSpeedOverride = null)
         {
+            if (!IsOwner) return;
+
             float accuracyMultiplier = GetAccuracyMultiplier();
             float spreadIncrease = _weapon.spreadIncreasePerShot * accuracyMultiplier;
             _currentSpread += spreadIncrease;
@@ -456,8 +460,6 @@ namespace FF
             float angleOffset = UnityEngine.Random.Range(-_currentSpread, _currentSpread);
             Quaternion spreadRotation = _muzzle.rotation * Quaternion.AngleAxis(angleOffset, Vector3.forward);
 
-            SpawnEjectParticles();
-
             int extraProjectiles = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponExtraProjectiles(_weapon) : 0;
             bool firesLikeShotgun = _weapon.isShotgun || _weapon.weaponClass == Weapon.WeaponClass.Shotgun;
             int pelletCount = firesLikeShotgun
@@ -466,10 +468,7 @@ namespace FF
             int totalProjectiles = Mathf.Max(1, pelletCount + extraProjectiles);
             int pierceCount = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponPierceCount(_weapon) : 0;
 
-            StartCoroutine(FireProjectilesRoutine(totalProjectiles, spreadRotation, pierceCount, grenadeSpeedOverride));
-
-            PlayFireAudio();
-            SpawnMuzzleFlash();
+            ShootServerRpc(totalProjectiles, spreadRotation, pierceCount, grenadeSpeedOverride);
 
             if (_cameraShakeEnabled)
             {
@@ -480,6 +479,21 @@ namespace FF
             _currentRecoil = _weapon.recoilAmount;
             _recoilTimer = 0f;
             SetCooldownProgress(0f);
+        }
+
+        [ServerRpc]
+        private void ShootServerRpc(int totalProjectiles, Quaternion spreadRotation, int pierceCount, float? grenadeSpeedOverride)
+        {
+            StartCoroutine(FireProjectilesRoutine(totalProjectiles, spreadRotation, pierceCount, grenadeSpeedOverride));
+            ShootClientRpc();
+        }
+
+        [ClientRpc]
+        private void ShootClientRpc()
+        {
+            SpawnEjectParticles();
+            PlayFireAudio();
+            SpawnMuzzleFlash();
         }
 
         private void SpawnEjectParticles()

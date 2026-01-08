@@ -1,15 +1,18 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 
 
 namespace FF
 {
-    public class Health : MonoBehaviour
+    public class Health : NetworkBehaviour
     {
+        public static bool FriendlyFire = false;
+
         [Header("Health Settings")]
         [SerializeField] int maxHP = 50;
 
-        int hp;
+        private NetworkVariable<int> hp = new NetworkVariable<int>();
         int baseMaxHP;
         Weapon lastDamageSourceWeapon;
         readonly System.Collections.Generic.List<TimedDamageModifier> _damageModifiers = new();
@@ -26,19 +29,39 @@ namespace FF
         public static System.Action<Health, int> OnAnyHealed;
 
         public int MaxHP => maxHP;
-        public int CurrentHP => hp;
+        public int CurrentHP => hp.Value;
 
-        void Awake()
+        public override void OnNetworkSpawn()
         {
-            CacheBaseValues();
-            ResetHealth(true);
+            if (IsServer)
+            {
+                CacheBaseValues();
+                ResetHealth(true);
+            }
+            hp.OnValueChanged += OnHpChanged;
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            hp.OnValueChanged -= OnHpChanged;
+        }
+
+        private void OnHpChanged(int previousValue, int newValue)
+        {
+            OnHealthChanged?.Invoke(newValue, maxHP);
         }
 
         public Weapon LastDamageSourceWeapon => lastDamageSourceWeapon;
 
-        public void Damage(int amount, Weapon sourceWeapon = null, bool isCritical = false)
+        public void Damage(int amount, GameObject source = null, Weapon sourceWeapon = null, bool isCritical = false)
         {
+            if (!IsServer) return;
             if (amount <= 0) return;
+
+            if (source != null && source.CompareTag("Player") && !FriendlyFire)
+            {
+                return;
+            }
 
             int adjustedAmount = ApplyDamageModifiers(amount);
             if (adjustedAmount <= 0)
@@ -46,8 +69,8 @@ namespace FF
                 return;
             }
 
-            int previousHp = hp;
-            hp = Mathf.Max(0, hp - adjustedAmount);
+            int previousHp = hp.Value;
+            hp.Value = Mathf.Max(0, hp.Value - adjustedAmount);
 
             if (sourceWeapon)
             {
@@ -68,25 +91,23 @@ namespace FF
                 }
             }
 
-            OnHealthChanged?.Invoke(hp, maxHP);
-
-            if (hp <= 0) Die();
+            if (hp.Value <= 0) Die();
         }
 
         public void Heal(int amount)
         {
+            if (!IsServer) return;
             if (amount <= 0)
             {
                 return;
             }
 
-            int previousHp = hp;
-            hp = Mathf.Min(maxHP, hp + amount);
+            int previousHp = hp.Value;
+            hp.Value = Mathf.Min(maxHP, hp.Value + amount);
 
-            if (hp != previousHp)
+            if (hp.Value != previousHp)
             {
-                int healedAmount = hp - previousHp;
-                OnHealthChanged?.Invoke(hp, maxHP);
+                int healedAmount = hp.Value - previousHp;
                 OnAnyHealed?.Invoke(this, healedAmount);
             }
         }
@@ -209,22 +230,23 @@ namespace FF
         #region Max HP Management
         public void SetMaxHP(int amount, bool refill = true)
         {
+            if (!IsServer) return;
             amount = Mathf.Max(1, amount);
             maxHP = amount;
             if (refill)
             {
-                hp = maxHP;
+                hp.Value = maxHP;
             }
             else
             {
-                hp = Mathf.Clamp(hp, 0, maxHP);
+                hp.Value = Mathf.Clamp(hp.Value, 0, maxHP);
             }
-            OnHealthChanged?.Invoke(hp, maxHP);
         }
 
         // New: add a permanent flat max HP bonus that survives subsequent ScaleMaxHP calls.
         public void AddPermanentMaxHP(int amount, bool refill = true)
         {
+            if (!IsServer) return;
             if (amount <= 0)
             {
                 return;
@@ -282,13 +304,12 @@ namespace FF
 
             if (refill)
             {
-                hp = Mathf.Max(1, baseMaxHP);
+                hp.Value = Mathf.Max(1, baseMaxHP);
             }
             else
             {
-                hp = Mathf.Clamp(hp, 0, baseMaxHP);
+                hp.Value = Mathf.Clamp(hp.Value, 0, baseMaxHP);
             }
-            OnHealthChanged?.Invoke(hp, maxHP);
         }
         #endregion Resetting
 
@@ -299,6 +320,12 @@ namespace FF
             {
                 baseMaxHP = maxHP;
             }
+        }
+
+        public void Revive()
+        {
+            if (!IsServer) return;
+            hp.Value = maxHP / 2;
         }
     }
 }

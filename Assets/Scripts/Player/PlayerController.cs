@@ -1,4 +1,5 @@
 using System;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Playables;
@@ -6,7 +7,7 @@ using UnityEngine.Playables;
 namespace FF
 {
     [RequireComponent(typeof(Rigidbody2D))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : NetworkBehaviour
     {
         public static event Action<PlayerController> OnPlayerReady;
 
@@ -93,7 +94,7 @@ namespace FF
                     _cosmetics.SetRenderTargets(renderer, _playerVisual);
                 }
             }
-
+            if (!IsOwner) return;
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Confined;
 
@@ -107,6 +108,7 @@ namespace FF
 
         private void Start()
         {
+            if (!IsOwner) return;
             ApplyCharacterSelection();
 
             if (_startingWeapon && _weaponManager)
@@ -131,6 +133,7 @@ namespace FF
 
         private void Update()
         {
+            if (!IsOwner) return;
             AimGunAtPointer();
         }
 
@@ -379,12 +382,14 @@ namespace FF
         #region Input System Callbacks
         public void OnMove(InputValue value)
         {
+            if (!IsOwner) return;
             _moveInput = value.Get<Vector2>();
             _abilityController?.UpdateMoveInput(_moveInput);
         }
 
         public void OnAttack(InputValue value)
         {
+            if (!IsOwner) return;
             if (_upgradeMenuOpen || PauseMenuController.IsMenuOpen)
             {
                 if (_autoShooter != null) _autoShooter.SetFireHeld(false);
@@ -410,6 +415,7 @@ namespace FF
 
         public void OnDash(InputValue value)
         {
+            if (!IsOwner) return;
             if (!value.isPressed || _abilityController == null)
             {
                 return;
@@ -425,6 +431,7 @@ namespace FF
 
         public void OnUpgrade(InputValue value)
         {
+            if (!IsOwner) return;
             if (!value.isPressed)
             {
                 return;
@@ -445,6 +452,7 @@ namespace FF
 
         public void OnPrevious(InputValue value)
         {
+            if (!IsOwner) return;
             if (!value.isPressed || _weaponManager == null)
             {
                 return;
@@ -455,6 +463,7 @@ namespace FF
 
         public void OnNext(InputValue value)
         {
+            if (!IsOwner) return;
             if (!value.isPressed || _weaponManager == null)
             {
                 return;
@@ -465,6 +474,7 @@ namespace FF
 
         public void OnSelectSpecial(InputValue value)
         {
+            if (!IsOwner) return;
             if (!value.isPressed || _weaponManager == null)
             {
                 return;
@@ -475,6 +485,7 @@ namespace FF
 
         public void OnInteract(InputValue value)
         {
+            if (!IsOwner) return;
             if (!value.isPressed || _weaponManager == null)
             {
                 return;
@@ -490,6 +501,7 @@ namespace FF
 
         public void OnPause(InputValue value)
         {
+            if (!IsOwner) return;
             if (!value.isPressed)
             {
                 return;

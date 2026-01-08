@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace FF
@@ -7,7 +8,7 @@ namespace FF
     [RequireComponent(typeof(Rigidbody2D))]
     [RequireComponent(typeof(EnemyStats))]
     [RequireComponent(typeof(Health))]
-    public class Enemy : MonoBehaviour, IPoolable
+    public class Enemy : NetworkBehaviour, IPoolable
     {
         public static event Action<Enemy> OnAnyEnemyKilled;
         public static event Action<Enemy, Weapon> OnAnyEnemyKilledByWeapon;
@@ -134,13 +135,6 @@ namespace FF
         public static System.Collections.Generic.IReadOnlyCollection<Enemy> ActiveBosses => activeBosses;
 
         private Vector3 _lastPos;
-
-
-        public void Initialize(Transform player)
-        {
-            _player = player;
-            CachePlayerHealth();
-        }
 
         public void SetIsBoss(bool value)
         {
@@ -342,6 +336,7 @@ namespace FF
 
         private void Update()
         {
+            if (!IsServer) return;
             if (Time.timeScale <= Mathf.Epsilon)
             {
                 if (autoShooter)
@@ -351,6 +346,7 @@ namespace FF
                 return;
             }
 
+            FindClosestPlayer();
             EnsurePlayerReference();
             AimAtPlayer();
             float deltaTime = Time.deltaTime;
@@ -382,6 +378,7 @@ namespace FF
 
         private void FixedUpdate()
         {
+            if (!IsServer) return;
             if (simpleFollowTest)
             {
                 SimpleFollowMovement();
@@ -464,6 +461,23 @@ namespace FF
         void OnDestroy()
         {
             activeBosses.Remove(this);
+        }
+
+        private void FindClosestPlayer()
+        {
+            float closestDistance = float.MaxValue;
+            Transform closestPlayer = null;
+            foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+            {
+                if (client.PlayerObject == null) continue;
+                float distance = Vector3.Distance(transform.position, client.PlayerObject.transform.position);
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestPlayer = client.PlayerObject.transform;
+                }
+            }
+            _player = closestPlayer;
         }
 
         #region Movement

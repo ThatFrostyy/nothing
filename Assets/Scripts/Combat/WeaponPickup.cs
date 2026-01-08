@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using System.Collections;
+using Unity.Netcode;
 
 namespace FF
 {
-    public class WeaponPickup : MonoBehaviour
+    public class WeaponPickup : NetworkBehaviour
     {
         [Header("Weapon Data")]
         [SerializeField] Weapon weaponData;
@@ -45,6 +46,8 @@ namespace FF
         public event System.Action<WeaponPickup> OnCollected;
         public event System.Action<WeaponPickup> OnExpired;
 
+        private NetworkVariable<ulong> collectedBy = new NetworkVariable<ulong>(0);
+
         public void SetWeaponData(Weapon weapon)
         {
             weaponData = weapon;
@@ -56,10 +59,13 @@ namespace FF
             lifetimeSeconds = Mathf.Max(0f, seconds);
         }
 
-        void Awake()
+        public override void OnNetworkSpawn()
         {
-            startPos = transform.localPosition;
-            startScale = transform.localScale;
+            if (IsServer)
+            {
+                startPos = transform.localPosition;
+                startScale = transform.localScale;
+            }
             sr = GetComponent<SpriteRenderer>();
             glow = GetComponentInChildren<Light2D>();
             pickupCollider = GetComponent<Collider2D>();
@@ -174,7 +180,7 @@ namespace FF
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (isDespawning)
+            if (isDespawning || (collectedBy.Value & (1UL << NetworkManager.Singleton.LocalClientId)) != 0)
             {
                 return;
             }
@@ -207,9 +213,21 @@ namespace FF
                 return false;
             }
 
+            TryCollectServerRpc(wm.NetworkObjectId);
+            return true;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void TryCollectServerRpc(ulong collectorId)
+        {
+            if ((collectedBy.Value & (1UL << collectorId)) != 0) return;
+
+            var collector = NetworkManager.Singleton.SpawnManager.SpawnedObjects[collectorId];
+            var wm = collector.GetComponent<WeaponManager>();
+
             if (!wm.TryEquip(weaponData, out Weapon droppedWeapon))
             {
-                return false;
+                return;
             }
 
             if (droppedWeapon)
@@ -217,14 +235,22 @@ namespace FF
                 SpawnDroppedPickup(droppedWeapon);
             }
 
-            wm.UnregisterNearbyPickup(this);
-            nearbyManager = null;
+            collectedBy.Value |= (1UL << collectorId);
 
             PlayPickupSound();
             SpawnPickupFx();
-            TriggerPickupAnimation(true);
             OnCollected?.Invoke(this);
-            return true;
+
+            HideForCollectorClientRpc(collectorId);
+        }
+
+        [ClientRpc]
+        private void HideForCollectorClientRpc(ulong collectorId)
+        {
+            if (NetworkManager.Singleton.LocalClientId == collectorId)
+            {
+                TriggerPickupAnimation(true);
+            }
         }
 
         private void HandleLifetime()
