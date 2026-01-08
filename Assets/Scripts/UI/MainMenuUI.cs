@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using Unity.Netcode;
 
 #if !DISABLESTEAMWORKS
 using Steamworks;
@@ -19,7 +19,10 @@ namespace FF
         [SerializeField] private TMP_Text leaderboardText;
         [SerializeField] private TMP_Text versionText;
         [SerializeField] private string unavailableText = "Unavailable";
-        [SerializeField] private string lobbySceneName = "Lobby";
+        [Header("UI Panels")]
+        [SerializeField] private GameObject gameModePanel;
+        [SerializeField] private GameObject mapSelectionPanel;
+        [SerializeField] private GameObject playerListPanel;
         [Header("Map Selection")]
         [SerializeField] private TMP_Text mapNameText;
         [SerializeField] private TMP_Text mapDescriptionText;
@@ -40,6 +43,7 @@ namespace FF
         private int _mapIndex;
         private int? _cachedKills;
         private int? _cachedTopWave;
+        private bool isCoOp = false;
 
         void Awake()
         {
@@ -58,6 +62,7 @@ namespace FF
             RefreshMapText();
             CharacterUnlockProgress.OnProgressUpdated += HandleProgressUpdated;
             RefreshLocalStats();
+            LobbyManager.OnClientJoinedLobby += ShowLobbyPanel;
 
 #if !DISABLESTEAMWORKS
             if (!SteamManager.Initialized)
@@ -74,32 +79,52 @@ namespace FF
 #endif
         }
 
-        public void StartSinglePlayer()
+        public void ShowGameModePanel()
         {
-            MapDefinition selectedMap = ResolveSelectedMap();
-            if (selectedMap != null)
-            {
-                MapSelectionState.SetSelection(selectedMap);
-            }
-
-            GameLauncher.Instance.LaunchSinglePlayer();
+            gameModePanel.SetActive(true);
+            mapSelectionPanel.SetActive(false);
+            playerListPanel.SetActive(false);
         }
 
-        public void StartHost()
+        public void SelectSinglePlayer()
         {
-            MapDefinition selectedMap = ResolveSelectedMap();
-            if (selectedMap != null)
-            {
-                MapSelectionState.SetSelection(selectedMap);
-            }
+            isCoOp = false;
+            gameModePanel.SetActive(false);
+            mapSelectionPanel.SetActive(true);
+            playerListPanel.SetActive(false);
+        }
 
+        public void SelectCoOp()
+        {
+            isCoOp = true;
             LobbyManager.Instance.HostLobby();
-            SceneManager.LoadScene(lobbySceneName);
+            ShowLobbyPanel();
         }
 
-        public void StartClient()
+        private void ShowLobbyPanel()
         {
-            GameLauncher.Instance.LaunchClient();
+            isCoOp = true;
+            gameModePanel.SetActive(false);
+            mapSelectionPanel.SetActive(true);
+            playerListPanel.SetActive(true);
+        }
+
+        public void StartGame()
+        {
+            MapDefinition selectedMap = ResolveSelectedMap();
+            if (selectedMap != null)
+            {
+                MapSelectionState.SetSelection(selectedMap);
+            }
+
+            if (isCoOp)
+            {
+                LobbyManager.Instance.StartGame();
+            }
+            else
+            {
+                GameLauncher.Instance.LaunchSinglePlayer();
+            }
         }
 
         public void NextMap()
@@ -162,6 +187,7 @@ namespace FF
         {
             MapSelectionState.OnMapChanged -= HandleMapChanged;
             CharacterUnlockProgress.OnProgressUpdated -= HandleProgressUpdated;
+            LobbyManager.OnClientJoinedLobby -= ShowLobbyPanel;
 
 #if !DISABLESTEAMWORKS
             _userStatsReceived = null;

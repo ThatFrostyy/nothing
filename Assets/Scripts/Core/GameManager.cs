@@ -37,7 +37,7 @@ namespace FF
 
         public event Action<EnemySpawner> OnSpawnerRegistered;
 
-        private bool IsAuthority => IsServer || !NetworkManager.Singleton.IsListening;
+        private bool IsAuthority => IsServer || (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening);
 
         private static GameManager _instance;
         public static GameManager I
@@ -101,8 +101,6 @@ namespace FF
         {
             spawner = null;
         }
-
-        
 
         public void ResetGameState()
         {

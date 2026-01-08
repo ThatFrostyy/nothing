@@ -2,16 +2,16 @@ using Steamworks;
 using UnityEngine;
 using Unity.Netcode;
 using Netcode.Transports;
-using UnityEngine.SceneManagement;
+using System;
 
 namespace FF
 {
     public class LobbyManager : MonoBehaviour
     {
         public static LobbyManager Instance { get; private set; }
+        public static event Action OnClientJoinedLobby;
 
         private const string HostAddressKey = "HostAddress";
-        [SerializeField] private string gameplayScene = "Main";
 
         private void Awake()
         {
@@ -33,7 +33,7 @@ namespace FF
         {
             if (NetworkManager.Singleton.IsHost)
             {
-                NetworkManager.Singleton.SceneManager.LoadScene(gameplayScene, LoadSceneMode.Single);
+                NetworkManager.Singleton.SceneManager.LoadScene("Main", UnityEngine.SceneManagement.LoadSceneMode.Single);
             }
         }
 
@@ -44,12 +44,12 @@ namespace FF
                 return;
             }
 
+            NetworkManager.Singleton.StartHost();
+
             SteamMatchmaking.SetLobbyData(
                 new CSteamID(callback.m_ulSteamIDLobby),
                 HostAddressKey,
                 SteamUser.GetSteamID().ToString());
-
-            NetworkManager.Singleton.StartHost();
         }
 
         private void OnGameLobbyJoinRequested(GameLobbyJoinRequested_t callback)
@@ -60,6 +60,8 @@ namespace FF
         private void OnLobbyEntered(LobbyEnter_t callback)
         {
             if (NetworkManager.Singleton.IsHost) return;
+
+            OnClientJoinedLobby?.Invoke();
 
             string hostAddress = SteamMatchmaking.GetLobbyData(
                 new CSteamID(callback.m_ulSteamIDLobby),
