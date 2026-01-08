@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52ae7106ce920064fb8f21a991dc4923, type: 3}
   m_Name: M1Knife
   m_EditorClassIdentifier: Assembly-CSharp::FF.Weapon
-  weaponName: M24 Grenade
+  weaponName: M1 Bayonet
   fireSFX: {fileID: 0}
   muzzleFlash: {fileID: 0}
   ejectParticles: {fileID: 0}
@@ -25,7 +25,7 @@ MonoBehaviour:
   weaponClass: 7
   isShotgun: 0
   weaponIcon: {fileID: 21300000, guid: 8639e47f2cdf9db418d702f1d7ad7be5, type: 3}
-  isSpecial: 0
+  isSpecial: 1
   useGrenadeCharging: 1
   bulletPrefab: {fileID: 0}
   weaponPrefab: {fileID: 6569312594523270899, guid: 18722c2bc1f82bc4bb9bcaf760c2731b, type: 3}
@@ -37,7 +37,7 @@ MonoBehaviour:
   isMelee: 1
   attackRange: 1.5
   attackArc: 90
-  swingPrefab: {fileID: 0}
+  swingSpeed: 360
   knockbackStrength: 0
   knockbackDuration: 0.2
   appliesBurn: 0

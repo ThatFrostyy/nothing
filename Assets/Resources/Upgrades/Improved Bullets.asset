@@ -18,8 +18,8 @@ MonoBehaviour:
   Magnitude: 0.1
   Cap: 0
   MinValue: 0
-  MaxStacks: 8
-  HealAmount: 25
+  MaxStacks: 0
+  HealAmount: 0
   startDoubledUntilWave: 0
   normalizeValueByWave: 1
   unlockWave: 5

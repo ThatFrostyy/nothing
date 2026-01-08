@@ -147,7 +147,7 @@ namespace FF
                     }
                     break;
                 case Kind.Collector:
-                    stats.XPGatherRadius += 0.5f;
+                    stats.XPGatherRadius += appliedMagnitude;
                     break;
             }
         }

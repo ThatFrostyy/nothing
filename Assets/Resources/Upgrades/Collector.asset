@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98be82d2fe4824c4fae56dac9cacea6b, type: 3}
-  m_Name: Greased Mechanism
+  m_Name: Collector
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
-  Title: Greased Mechanism
-  Description: Your weapons fire <color=#D17A22>+10%</color> faster.
-  Type: 1
+  Title: Stopping Power
+  Description: Your orb pickup radius is increased by <color=#DBBE50>+10%</color>.
+  Type: 13
   Magnitude: 0.1
   Cap: 0
   MinValue: 0
@@ -23,6 +23,6 @@ MonoBehaviour:
   startDoubledUntilWave: 1
   normalizeValueByWave: 5
   unlockWave: 0
-  levelUpPopupText: 
-  rarity: 1
+  levelUpPopupText: "PICKUP RADIUS \u2191"
+  rarity: 2
   rarityWeightOverride: 0

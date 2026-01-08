@@ -172,6 +172,14 @@ PrefabInstance:
       value: GameManager
       objectReference: {fileID: 0}
     - target: {fileID: 5457090804296160985, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
+      propertyPath: all.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5457090804296160985, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
+      propertyPath: 'all.Array.data[9]'
+      value: 
+      objectReference: {fileID: 11400000, guid: ae6039bc253de77468959b1e57be9ae5, type: 2}
+    - target: {fileID: 5457090804296160985, guid: 51cb667f21959cc43b687646f9da2698, type: 3}
       propertyPath: maxUpgradeSelections
       value: 999
       objectReference: {fileID: 0}
