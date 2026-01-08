@@ -2,7 +2,7 @@ using Steamworks;
 using Steamworks.Data; 
 using UnityEngine;
 using Unity.Netcode;
-using Netcode.Transports.Facepunch;
+using Netcode.Transports;
 
 namespace FF
 {
@@ -43,8 +43,8 @@ namespace FF
                 new CSteamID(callback.m_ulSteamIDLobby),
                 HostAddressKey);
 
-            var transport = NetworkManager.Singleton.GetComponent<FacepunchTransport>();
-            transport.targetSteamId = ulong.Parse(hostAddress);
+            var transport = NetworkManager.Singleton.GetComponent<SteamNetworkingSocketsTransport>();
+            transport.ConnectToSteamID = ulong.Parse(hostAddress);
             NetworkManager.Singleton.StartClient();
         }
 
