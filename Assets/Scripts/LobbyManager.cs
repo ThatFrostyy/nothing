@@ -35,7 +35,7 @@ namespace FF
             SteamMatchmaking.JoinLobby(callback.m_steamIDLobby);
         }
 
-        private void OnLobbyEntered(LobbyEntered_t callback)
+        private void OnLobbyEntered(LobbyEnter_t callback)
         {
             if (NetworkManager.Singleton.IsHost) return;
 
@@ -50,7 +50,7 @@ namespace FF
 
         protected Callback<LobbyCreated_t> LobbyCreated;
         protected Callback<GameLobbyJoinRequested_t> GameLobbyJoinRequested;
-        protected Callback<LobbyEntered_t> LobbyEntered;
+        protected Callback<LobbyEnter_t> LobbyEntered;
 
         private void Start()
         {
@@ -58,7 +58,7 @@ namespace FF
 
             LobbyCreated = Callback<LobbyCreated_t>.Create(OnLobbyCreated);
             GameLobbyJoinRequested = Callback<GameLobbyJoinRequested_t>.Create(OnGameLobbyJoinRequested);
-            LobbyEntered = Callback<LobbyEntered_t>.Create(OnLobbyEntered);
+            LobbyEntered = Callback<LobbyEnter_t>.Create(OnLobbyEntered);
         }
     }
 }
