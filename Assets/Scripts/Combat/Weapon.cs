@@ -60,7 +60,7 @@ namespace FF
         public bool isMelee = false;
         public float attackRange = 1.5f;
         public float attackArc = 90f;
-        public GameObject swingPrefab;
+        public float swingSpeed = 360f;
 
         [Header("Impact")]
         public float knockbackStrength = 0f;

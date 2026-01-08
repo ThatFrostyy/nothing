@@ -17,9 +17,11 @@ namespace FF
         private const string PostProcessingPrefKey = "Video.PostProcessing";
         private const string BloomPrefKey = "Video.Bloom";
         private const string MotionBlurPrefKey = "Video.MotionBlur";
+        private const string ScreenShakeIntensityPrefKey = "Video.ScreenShakeIntensity";
 
         private const float DefaultBloomIntensity = 1f;
         private const float DefaultMotionBlurIntensity = 0f;
+        private const float DefaultScreenShakeIntensity = 1f;
 
         private static readonly Dictionary<int, bool> _originalVolumeStates = new();
 
@@ -32,6 +34,7 @@ namespace FF
         public static bool PostProcessingEnabled { get; private set; }
         public static float BloomIntensity { get; private set; }
         public static float MotionBlurIntensity { get; private set; }
+        public static float ScreenShakeIntensity { get; private set; }
 
         public static IReadOnlyList<Resolution> AvailableResolutions => _availableResolutions;
 
@@ -114,6 +117,21 @@ namespace FF
             ApplyPostProcessingSettings();
         }
 
+        public static void SetScreenShakeIntensity(float value)
+        {
+            EnsureInitialized();
+            float clamped = Mathf.Clamp01(value);
+            if (Mathf.Approximately(ScreenShakeIntensity, clamped))
+            {
+                return;
+            }
+
+            ScreenShakeIntensity = clamped;
+            PlayerPrefs.SetFloat(ScreenShakeIntensityPrefKey, ScreenShakeIntensity);
+            PlayerPrefs.Save();
+            SteamCloudSave.SaveToCloud();
+        }
+
         public static void SetBloomIntensity(float value)
         {
             EnsureInitialized();
@@ -174,6 +192,7 @@ namespace FF
             PostProcessingEnabled = PlayerPrefs.GetInt(PostProcessingPrefKey, 1) == 1;
             BloomIntensity = Mathf.Max(0f, PlayerPrefs.GetFloat(BloomPrefKey, DefaultBloomIntensity));
             MotionBlurIntensity = Mathf.Max(0f, PlayerPrefs.GetFloat(MotionBlurPrefKey, DefaultMotionBlurIntensity));
+            ScreenShakeIntensity = Mathf.Clamp01(PlayerPrefs.GetFloat(ScreenShakeIntensityPrefKey, DefaultScreenShakeIntensity));
 
             int storedWidth = PlayerPrefs.GetInt(ResolutionWidthPrefKey, Screen.currentResolution.width);
             int storedHeight = PlayerPrefs.GetInt(ResolutionHeightPrefKey, Screen.currentResolution.height);

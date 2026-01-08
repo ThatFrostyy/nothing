@@ -21,6 +21,9 @@ namespace FF
         [SerializeField] private Slider motionBlurSlider;
         [SerializeField] private TMP_Text motionBlurValueLabel;
         [SerializeField, Min(0f)] private float motionBlurValueScale = 100f;
+        [SerializeField] private Slider screenShakeSlider;
+        [SerializeField] private TMP_Text screenShakeValueLabel;
+        [SerializeField, Min(0f)] private float screenShakeValueScale = 100f;
 
         private readonly List<Resolution> _resolutions = new();
         private bool _suppressCallbacks;
@@ -70,6 +73,11 @@ namespace FF
             {
                 motionBlurSlider.onValueChanged.RemoveListener(HandleMotionBlurChanged);
             }
+
+            if (screenShakeSlider != null)
+            {
+                screenShakeSlider.onValueChanged.RemoveListener(HandleScreenShakeChanged);
+            }
         }
 
         public void RefreshDisplay()
@@ -109,6 +117,12 @@ namespace FF
             }
             UpdateScaledLabel(motionBlurValueLabel, GameVideoSettings.MotionBlurIntensity, motionBlurValueScale);
 
+            if (screenShakeSlider != null)
+            {
+                screenShakeSlider.SetValueWithoutNotify(GameVideoSettings.ScreenShakeIntensity);
+            }
+            UpdateScaledLabel(screenShakeValueLabel, GameVideoSettings.ScreenShakeIntensity, screenShakeValueScale);
+
             _suppressCallbacks = false;
         }
 
@@ -134,6 +148,7 @@ namespace FF
         {
             ConfigureSlider(bloomSlider, 0f, 5f);
             ConfigureSlider(motionBlurSlider, 0f, 1f);
+            ConfigureSlider(screenShakeSlider, 0f, 1f);
         }
 
         private void BindListeners()
@@ -166,6 +181,11 @@ namespace FF
             if (motionBlurSlider)
             {
                 motionBlurSlider.onValueChanged.AddListener(HandleMotionBlurChanged);
+            }
+
+            if (screenShakeSlider)
+            {
+                screenShakeSlider.onValueChanged.AddListener(HandleScreenShakeChanged);
             }
         }
 
@@ -229,6 +249,17 @@ namespace FF
             }
 
             GameVideoSettings.SetMotionBlurIntensity(value);
+        }
+
+        private void HandleScreenShakeChanged(float value)
+        {
+            UpdateScaledLabel(screenShakeValueLabel, value, screenShakeValueScale);
+            if (_suppressCallbacks)
+            {
+                return;
+            }
+
+            GameVideoSettings.SetScreenShakeIntensity(value);
         }
 
         private void UpdateScaledLabel(TMP_Text label, float value, float scale)

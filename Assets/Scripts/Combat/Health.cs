@@ -24,6 +24,7 @@ namespace FF
         public event Func<Health, bool> OnBeforeDeath;
         public static System.Action<Health, int, Weapon> OnAnyDamaged;
         public static System.Action<Health, int> OnAnyHealed;
+        public static System.Action<int> OnDamageDealt;
 
         public int MaxHP => maxHP;
         public int CurrentHP => hp;
@@ -60,6 +61,8 @@ namespace FF
                 OnDamaged?.Invoke(damageApplied);
 
                 OnAnyDamaged?.Invoke(this, damageApplied, sourceWeapon);
+
+                OnDamageDealt?.Invoke(damageApplied);
 
                 if (TryGetComponent<Enemy>(out var enemy))
                 {
