@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 #if !DISABLESTEAMWORKS
 using Steamworks;
@@ -18,6 +19,7 @@ namespace FF
         [SerializeField] private TMP_Text leaderboardText;
         [SerializeField] private TMP_Text versionText;
         [SerializeField] private string unavailableText = "Unavailable";
+        [SerializeField] private string lobbySceneName = "Lobby";
         [Header("Map Selection")]
         [SerializeField] private TMP_Text mapNameText;
         [SerializeField] private TMP_Text mapDescriptionText;
@@ -72,7 +74,7 @@ namespace FF
 #endif
         }
 
-        public void StartGame()
+        public void StartSinglePlayer()
         {
             MapDefinition selectedMap = ResolveSelectedMap();
             if (selectedMap != null)
@@ -80,10 +82,24 @@ namespace FF
                 MapSelectionState.SetSelection(selectedMap);
             }
 
-            if (sceneFlow)
+            GameLauncher.Instance.LaunchSinglePlayer();
+        }
+
+        public void StartHost()
+        {
+            MapDefinition selectedMap = ResolveSelectedMap();
+            if (selectedMap != null)
             {
-                sceneFlow.LoadGameplayScene();
+                MapSelectionState.SetSelection(selectedMap);
             }
+
+            LobbyManager.Instance.HostLobby();
+            SceneManager.LoadScene(lobbySceneName);
+        }
+
+        public void StartClient()
+        {
+            GameLauncher.Instance.LaunchClient();
         }
 
         public void NextMap()
