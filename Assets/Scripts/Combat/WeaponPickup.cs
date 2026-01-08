@@ -180,7 +180,7 @@ namespace FF
 
         void OnTriggerEnter2D(Collider2D other)
         {
-            if (isDespawning || (collectedBy.Value & (1UL << NetworkManager.Singleton.LocalClientId)) != 0)
+            if (isDespawning || (collectedBy.Value & (1UL << (int)NetworkManager.Singleton.LocalClientId)) != 0)
             {
                 return;
             }
@@ -212,15 +212,18 @@ namespace FF
             {
                 return false;
             }
-
-            TryCollectServerRpc(wm.NetworkObjectId);
-            return true;
+            if (wm.TryGetComponent<NetworkObject>(out var networkObject))
+            {
+                TryCollectServerRpc(networkObject.NetworkObjectId);
+                return true;
+            }
+            return false;
         }
 
         [ServerRpc(RequireOwnership = false)]
         private void TryCollectServerRpc(ulong collectorId)
         {
-            if ((collectedBy.Value & (1UL << collectorId)) != 0) return;
+            if ((collectedBy.Value & (1UL << (int)collectorId)) != 0) return;
 
             var collector = NetworkManager.Singleton.SpawnManager.SpawnedObjects[collectorId];
             var wm = collector.GetComponent<WeaponManager>();

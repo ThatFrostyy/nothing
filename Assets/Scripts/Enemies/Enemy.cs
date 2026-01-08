@@ -749,7 +749,7 @@ namespace FF
             int damage = GetDogAttackDamage();
             if (damage > 0 && _playerHealth)
             {
-                _playerHealth.Damage(damage);
+                _playerHealth.Damage(damage, gameObject);
             }
 
             PlayDogAttackSound();
@@ -1014,7 +1014,7 @@ namespace FF
             {
                 int damage = Mathf.Max(1, Mathf.CeilToInt(_burnDamagePerSecond * _burnTickInterval));
                 _burnTickTimer += _burnTickInterval;
-                _health.Damage(damage, _burnSourceWeapon);
+                _health.Damage(damage, gameObject, _burnSourceWeapon);
             }
 
             if (_burnTimer <= 0f)

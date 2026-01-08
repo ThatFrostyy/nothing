@@ -481,7 +481,7 @@ namespace FF
             SetCooldownProgress(0f);
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void ShootServerRpc(int totalProjectiles, Quaternion spreadRotation, int pierceCount, float? grenadeSpeedOverride)
         {
             StartCoroutine(FireProjectilesRoutine(totalProjectiles, spreadRotation, pierceCount, grenadeSpeedOverride));

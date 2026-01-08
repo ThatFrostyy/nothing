@@ -37,7 +37,7 @@ namespace FF
             PerformAttackServerRpc();
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void PerformAttackServerRpc()
         {
             string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
@@ -58,7 +58,7 @@ namespace FF
                     {
                         float damageMultiplier = _stats != null ? _stats.GetDamageMultiplier() : 1f;
                         int finalDamage = Mathf.RoundToInt(_weapon.damage * damageMultiplier);
-                        health.Damage(finalDamage, _weapon, false);
+                        health.Damage(finalDamage, _attackOrigin.gameObject, _weapon, false);
 
                         if (_weapon.knockbackStrength > 0)
                         {

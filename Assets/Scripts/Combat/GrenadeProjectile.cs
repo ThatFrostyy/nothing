@@ -473,7 +473,7 @@ namespace FF
                     int previousHp = health.CurrentHP;
                     if (damage > 0)
                     {
-                        health.Damage(damage, _sourceWeapon, _isCriticalDamage);
+                        health.Damage(damage, gameObject, _sourceWeapon, _isCriticalDamage);
                     }
 
                     if (_ownerCombatEffects != null && !_explosionTargets.Contains(health))
