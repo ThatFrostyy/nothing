@@ -235,7 +235,7 @@ namespace FF
         {
             string id = !string.IsNullOrWhiteSpace(abilityIdOverride)
                 ? abilityIdOverride
-                : character?.AbilityId;
+                : character != null ? character.AbilityId : null;
 
             if (string.IsNullOrWhiteSpace(id))
             {

@@ -231,7 +231,7 @@ namespace FF
             {
                 _currentSpeed = Mathf.Max(0f, _currentSpeed - _activeSlowdown * deltaTime);
                 float compensation = Time.timeScale < 0.999f ? 1f / Mathf.Max(0.01f, Time.timeScale) : 1f;
-                _body.linearVelocity = _movementDirection * _currentSpeed * compensation;
+                _body.linearVelocity = _currentSpeed * compensation * _movementDirection;
                 if (_currentSpeed <= Mathf.Epsilon)
                 {
                     _body.linearVelocity = Vector2.zero;
