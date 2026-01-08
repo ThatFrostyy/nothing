@@ -220,7 +220,7 @@ namespace FF
             return false;
         }
 
-        [ServerRpc(RequireOwnership = false)]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void TryCollectServerRpc(ulong collectorId)
         {
             if ((collectedBy.Value & (1UL << (int)collectorId)) != 0) return;
@@ -238,7 +238,7 @@ namespace FF
                 SpawnDroppedPickup(droppedWeapon);
             }
 
-            collectedBy.Value |= (1UL << collectorId);
+            collectedBy.Value |= (1UL << (int)collectorId);
 
             PlayPickupSound();
             SpawnPickupFx();

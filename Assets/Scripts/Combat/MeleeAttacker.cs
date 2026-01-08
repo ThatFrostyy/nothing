@@ -37,9 +37,11 @@ namespace FF
             PerformAttackServerRpc();
         }
 
-        [ServerRpc(RequireOwnership = false)]
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         private void PerformAttackServerRpc()
         {
+            if (!IsServer) return;
+
             string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
 
             Collider2D[] hits = Physics2D.OverlapCircleAll(_attackOrigin.position, _weapon.attackRange);

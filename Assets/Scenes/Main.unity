@@ -1286,6 +1286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c7e66d14a923b5647a74ad45d1ae9101, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.EnemySpawner
+  ShowTopMostFoldoutHeaderGroup: 1
   player: {fileID: 1207903152}
   spawnRadius: 20
   spawnBuffer: 2
@@ -6850,6 +6851,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98d3a625de20a5a4e964bb3d8eb1c036, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.Health
+  ShowTopMostFoldoutHeaderGroup: 1
   maxHP: 100
 --- !u!114 &1207903154
 MonoBehaviour:
@@ -6863,6 +6865,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d221d6788c88f149a3c30cdd493439e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.AutoShooter
+  ShowTopMostFoldoutHeaderGroup: 1
   extraProjectileDelay: 0.05
   _slowmoProjectileSpeedMultiplier: 1.5
   grenadeMinThrowSpeed: 8
@@ -6931,6 +6934,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 177b38f2421594247b8461786e492303, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.PlayerController
+  ShowTopMostFoldoutHeaderGroup: 1
   _camera: {fileID: 1147590089}
   _autoShooter: {fileID: 1207903154}
   _gunPivot: {fileID: 125305192}
@@ -7065,6 +7069,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponManager
   gunPivot: {fileID: 125305192}
   shooter: {fileID: 1207903154}
+  meleeAttacker: {fileID: 0}
   cosmetics: {fileID: 0}
 --- !u!82 &1207903162
 AudioSource:

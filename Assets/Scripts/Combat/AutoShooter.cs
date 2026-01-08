@@ -190,8 +190,9 @@ namespace FF
             }
         }
 
-        private void OnDestroy()
+        public override void OnDestroy()
         {
+            base.OnDestroy();
             CleanupFlamethrowerEmitter();
         }
 
@@ -468,7 +469,8 @@ namespace FF
             int totalProjectiles = Mathf.Max(1, pelletCount + extraProjectiles);
             int pierceCount = UpgradeManager.I != null ? UpgradeManager.I.GetWeaponPierceCount(_weapon) : 0;
 
-            ShootServerRpc(totalProjectiles, spreadRotation, pierceCount, grenadeSpeedOverride);
+            float speedValue = grenadeSpeedOverride ?? -1f; // Use -1f as a flag for "no override"
+            ShootRpc(totalProjectiles, spreadRotation, pierceCount, speedValue);
 
             if (_cameraShakeEnabled)
             {
@@ -481,9 +483,10 @@ namespace FF
             SetCooldownProgress(0f);
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        private void ShootServerRpc(int totalProjectiles, Quaternion spreadRotation, int pierceCount, float? grenadeSpeedOverride)
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        private void ShootRpc(int totalProjectiles, Quaternion spreadRotation, int pierceCount, float grenadeSpeedOverride)
         {
+            if (!IsServer) return;
             StartCoroutine(FireProjectilesRoutine(totalProjectiles, spreadRotation, pierceCount, grenadeSpeedOverride));
             ShootClientRpc();
         }
@@ -614,7 +617,7 @@ namespace FF
 
             float projectileSpeedMultiplier = GetProjectileSpeedMultiplier();
             float baseLaunchSpeed = grenade.BaseLaunchSpeed;
-            float finalLaunchSpeed = speedOverride.HasValue
+            float finalLaunchSpeed = (speedOverride > 0f)
                 ? Mathf.Max(0.1f, speedOverride.Value * projectileSpeedMultiplier)
                 : Mathf.Max(0.1f, baseLaunchSpeed * projectileSpeedMultiplier);
 
