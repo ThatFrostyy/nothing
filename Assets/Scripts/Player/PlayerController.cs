@@ -385,18 +385,27 @@ namespace FF
 
         public void OnAttack(InputValue value)
         {
-            if (_autoShooter == null)
-            {
-                return;
-            }
-
             if (_upgradeMenuOpen || PauseMenuController.IsMenuOpen)
             {
-                _autoShooter.SetFireHeld(false);
+                if (_autoShooter != null) _autoShooter.SetFireHeld(false);
                 return;
             }
 
-            _autoShooter.OnFire(value);
+            Weapon currentWeapon = _weaponManager.CurrentWeapon;
+            if (currentWeapon != null && currentWeapon.isMelee)
+            {
+                if (value.isPressed)
+                {
+                    _weaponManager.MeleeAttacker.PerformAttack();
+                }
+            }
+            else
+            {
+                if (_autoShooter != null)
+                {
+                    _autoShooter.OnFire(value);
+                }
+            }
         }
 
         public void OnDash(InputValue value)
