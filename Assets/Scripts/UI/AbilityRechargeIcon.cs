@@ -146,7 +146,6 @@ namespace FF
             if (dashCounterText != null)
             {
                 dashCounterText.text = charges.ToString();
-                dashCounterText.gameObject.SetActive(charges > 1);
             }
         }
 
