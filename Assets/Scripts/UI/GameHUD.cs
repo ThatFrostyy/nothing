@@ -942,6 +942,20 @@ namespace FF
             {
                 upgradeSummaryWeaponText.text = BuildUpgradeSummary();
             }
+
+            if (upgradeSummaryGroup != null && upgradeSummaryPlayerText != null)
+            {
+                var rectTransform = upgradeSummaryGroup.GetComponent<RectTransform>();
+                if (rectTransform != null)
+                {
+                    float playerTextHeight = upgradeSummaryPlayerText.GetPreferredValues().y;
+                    float weaponTextHeight = upgradeSummaryWeaponText.GetPreferredValues().y;
+                    float titleTextHeight = upgradeSummaryTitleText.GetPreferredValues().y;
+                    float totalHeight = playerTextHeight + weaponTextHeight + titleTextHeight + 60;
+
+                    rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, Mathf.Min(totalHeight, 800));
+                }
+            }
         }
 
         void StartUpgradePromptFade(float targetAlpha, bool instant = false)

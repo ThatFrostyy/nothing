@@ -105,8 +105,39 @@ namespace FF
                 if (pierceRemaining > 0)
                 {
                     pierceRemaining--;
+                    return;
                 }
-                else if (poolToken != null)
+
+                var player = GameObject.FindWithTag("Player");
+                if (player != null && player.TryGetComponent<PlayerStats>(out var playerStats) && playerStats.RicochetRounds && Random.value < playerStats.RicochetChance)
+                {
+                    var colliders = Physics2D.OverlapCircleAll(transform.position, 10f);
+                    Collider2D closest = null;
+                    float closestDist = float.MaxValue;
+                    foreach (var col in colliders)
+                    {
+                        if (col != other && col.CompareTag("Enemy"))
+                        {
+                            float dist = Vector2.Distance(transform.position, col.transform.position);
+                            if (dist < closestDist)
+                            {
+                                closest = col;
+                                closestDist = dist;
+                            }
+                        }
+                    }
+
+                    if (closest != null)
+                    {
+                        Vector2 direction = (closest.transform.position - transform.position).normalized;
+                        transform.right = direction;
+                        t = 0;
+                        pierceRemaining = 0;
+                        return;
+                    }
+                }
+
+                if (poolToken != null)
                 {
                     poolToken.Release();
                 }

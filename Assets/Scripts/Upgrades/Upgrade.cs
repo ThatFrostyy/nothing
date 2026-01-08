@@ -20,7 +20,12 @@ namespace FF
             CritChance,
             CritDamageMult,
             MaxHealthMult,
-            Heal
+            Heal,
+            AdrenalineRush,
+            VampiricStrikes,
+            RicochetRounds,
+            GlassCannon,
+            Collector
         }
 
         public enum Rarity { Common, Uncommon, Rare, Epic, Legendary }
@@ -68,6 +73,11 @@ namespace FF
                 case Kind.MaxHealthMult: return stats.GetHealth() && !IsAtOrBeyondCap(stats.MaxHealthMult, Cap);
                 case Kind.Heal:
                     return stats.GetHealth() && HealAmount > 0 && stats.GetHealth().CurrentHP < stats.GetHealth().MaxHP;
+                case Kind.AdrenalineRush: return !stats.AdrenalineRush;
+                case Kind.VampiricStrikes: return !stats.VampiricStrikes;
+                case Kind.RicochetRounds: return !stats.RicochetRounds;
+                case Kind.GlassCannon: return timesTaken < 1;
+                case Kind.Collector: return true;
                 default: return true;
             }
         }
@@ -124,6 +134,20 @@ namespace FF
                     {
                         stats.GetHealth().Heal(Mathf.Max(0, appliedHealAmount));
                     }
+                    break;
+                case Kind.AdrenalineRush: stats.AdrenalineRush = true; break;
+                case Kind.VampiricStrikes: stats.VampiricStrikes = true; break;
+                case Kind.RicochetRounds: stats.RicochetRounds = true; break;
+                case Kind.GlassCannon:
+                    stats.DamageMult += 0.25f;
+                    stats.MaxHealthMult -= 0.3f;
+                    if (stats.GetHealth())
+                    {
+                        stats.GetHealth().ScaleMaxHP(stats.MaxHealthMult, false);
+                    }
+                    break;
+                case Kind.Collector:
+                    stats.XPGatherRadius += 0.5f;
                     break;
             }
         }

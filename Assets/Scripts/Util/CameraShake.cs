@@ -46,7 +46,7 @@ namespace FF
         {
             if (!I) return;
             I.duration = dur;
-            I.intensity = inten;
+            I.intensity = inten * GameVideoSettings.ScreenShakeIntensity;
             I.time = 0f;
         }
     }

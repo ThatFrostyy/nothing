@@ -27,6 +27,11 @@ namespace FF
         public float FireCooldownMult = 1f;
         [Range(0f, 1f)] public float CritChance = 0f;
         [Min(1f)] public float CritDamageMult = 1f;
+        public float XPGatherRadius = 1f;
+        public bool AdrenalineRush = false;
+        public bool VampiricStrikes = false;
+        public bool RicochetRounds = false;
+        [Range(0f, 1f)] public float RicochetChance = 0.25f;
 
         private float _conditionalMoveMult = 1f;
         private float _conditionalFireRateMult = 1f;
@@ -63,6 +68,8 @@ namespace FF
             FireCooldownMult = Mathf.Max(0.1f, FireCooldownMult);
             CritChance = Mathf.Clamp01(CritChance);
             CritDamageMult = Mathf.Max(1f, CritDamageMult);
+            XPGatherRadius = Mathf.Max(0f, XPGatherRadius);
+            RicochetChance = Mathf.Clamp01(RicochetChance);
         }
 
         public float GetMoveSpeed() => MoveSpeed * MoveMult * _conditionalMoveMult * GetActiveMultiplier(StatType.MoveSpeed);
@@ -76,6 +83,7 @@ namespace FF
         public float GetFireCooldownMultiplier() => Mathf.Max(0.1f, FireCooldownMult);
         public float GetCritChance() => Mathf.Clamp01(CritChance);
         public float GetCritDamageMultiplier() => Mathf.Max(1f, CritDamageMult);
+        public float GetXPGatherRadius() => XPGatherRadius;
 
         void Update()
         {

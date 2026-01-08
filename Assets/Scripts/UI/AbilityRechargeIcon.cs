@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,6 +22,7 @@ namespace FF
         [SerializeField] private Image fillImage;
         [SerializeField] private Image iconImage;
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private TMP_Text dashCounterText;
 
         [Header("Defaults")]
         [SerializeField] private Sprite defaultIcon;
@@ -96,6 +98,7 @@ namespace FF
             if (_isSubscribed && abilityController)
             {
                 abilityController.OnAbilityRechargeUpdated -= HandleAbilityRechargeUpdated;
+                abilityController.OnDashChargesChanged -= HandleDashChargesChanged;
             }
 
             abilityController = controller;
@@ -104,6 +107,7 @@ namespace FF
             if (abilityController)
             {
                 abilityController.OnAbilityRechargeUpdated += HandleAbilityRechargeUpdated;
+                abilityController.OnDashChargesChanged += HandleDashChargesChanged;
                 _isSubscribed = true;
                 HandleAbilityRechargeUpdated(
                     abilityController.ActiveAbility,
@@ -135,6 +139,15 @@ namespace FF
             SetVisible(isVisible);
             UpdateIcon(ability);
             UpdateFill(progress);
+        }
+
+        private void HandleDashChargesChanged(int charges)
+        {
+            if (dashCounterText != null)
+            {
+                dashCounterText.text = charges.ToString();
+                dashCounterText.gameObject.SetActive(charges > 1);
+            }
         }
 
         private void SetVisible(bool isVisible)

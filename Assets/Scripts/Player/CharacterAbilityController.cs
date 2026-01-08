@@ -15,6 +15,7 @@ namespace FF
         public enum AbilityType { None, Dash, Suppression, Sharpshooter, AntiTank }
 
         public event Action<AbilityType, float, bool> OnAbilityRechargeUpdated;
+        public event Action<int> OnDashChargesChanged;
 
         [Header("General")]
         [SerializeField, Tooltip("If left empty we try to infer from the selected character.")]
@@ -156,7 +157,7 @@ namespace FF
                 _dashCooldownTimer = 0f;
                 _dashTimer = 0f;
                 _dashRequested = false;
-                _currentDashCharges = GetMaxDashCharges();
+                SetDashCharges(GetMaxDashCharges());
                 _suppressionTimer = 0f;
                 _suppressedEnemies.Clear();
 
@@ -180,7 +181,7 @@ namespace FF
             _currentDashCharges = Mathf.Min(_currentDashCharges, GetMaxDashCharges());
             if (_activeAbility == AbilityType.Dash)
             {
-                _currentDashCharges = GetMaxDashCharges();
+                SetDashCharges(GetMaxDashCharges());
                 _dashCooldownTimer = 0f;
             }
 
@@ -331,13 +332,13 @@ namespace FF
 
             if (_currentDashCharges < GetMaxDashCharges() && dashCooldown <= 0.001f)
             {
-                _currentDashCharges = GetMaxDashCharges();
+                SetDashCharges(GetMaxDashCharges());
                 _dashCooldownTimer = 0f;
             }
 
             if (_currentDashCharges < GetMaxDashCharges() && _dashCooldownTimer <= 0f && dashCooldown > 0.001f)
             {
-                _currentDashCharges++;
+                SetDashCharges(_currentDashCharges + 1);
                 if (_currentDashCharges < GetMaxDashCharges())
                 {
                     _dashCooldownTimer = dashCooldown;
@@ -384,7 +385,7 @@ namespace FF
 
         private void TriggerDash()
         {
-            _currentDashCharges = Mathf.Max(0, _currentDashCharges - 1);
+            SetDashCharges(Mathf.Max(0, _currentDashCharges - 1));
             if (_currentDashCharges < GetMaxDashCharges() && _dashCooldownTimer <= 0f)
             {
                 _dashCooldownTimer = dashCooldown;
@@ -415,6 +416,16 @@ namespace FF
         private int GetMaxDashCharges()
         {
             return Mathf.Max(1, dashCharges + _dashChargeBonus);
+        }
+
+        private void SetDashCharges(int newCharges)
+        {
+            int clampedCharges = Mathf.Clamp(newCharges, 0, GetMaxDashCharges());
+            if (_currentDashCharges != clampedCharges)
+            {
+                _currentDashCharges = clampedCharges;
+                OnDashChargesChanged?.Invoke(_currentDashCharges);
+            }
         }
 
         private void ApplyDashCombatBonuses()
