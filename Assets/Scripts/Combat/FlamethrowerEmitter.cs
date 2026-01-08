@@ -197,7 +197,7 @@ namespace FF
             {
                 if (enemy && enemy.TryGetComponent(out Health health))
                 {
-                    health.Damage(tickDamage, _sourceWeapon, isCritical);
+                    health.Damage(tickDamage, gameObject, _sourceWeapon, isCritical);
                 }
 
                 TryApplyBurn(enemy);

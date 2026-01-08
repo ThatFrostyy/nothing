@@ -76,7 +76,7 @@ namespace FF
 
             if (other.TryGetComponent<Health>(out var hp))
             {
-                hp.Damage(damage, sourceWeapon, isCriticalDamage);
+                hp.Damage(damage, gameObject, sourceWeapon, isCriticalDamage);
 
                 if (knockbackStrength > 0f && other.TryGetComponent<Enemy>(out var enemy) && teamTag == "Player")
                 {
