@@ -12,6 +12,7 @@ namespace FF
     [DisallowMultipleComponent]
     public class SteamStatsReporter : MonoBehaviour
     {
+        public static SteamStatsReporter Instance { get; private set; }
 #if !DISABLESTEAMWORKS
         [Header ("Stats")]
         [SerializeField] private const string KillStatName = "total_kills";
@@ -23,6 +24,8 @@ namespace FF
         [SerializeField] private const string UpgradePickupsCollectedStatName = "upgrade_pickups_collected";
         [SerializeField] private const string TotalHealingStatName = "total_healing_received";
         [SerializeField] private const string BulletTimeStatName = "bullet_time_moments";
+        [SerializeField] private const string scrapStatName = "scrap";
+        [SerializeField] private const string totalScrapStatName = "total_scrap";
 
         [Header("Leaderboards")]
         [SerializeField] private const string KillLeaderboardName = "kills";
@@ -184,6 +187,12 @@ namespace FF
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
             DontDestroyOnLoad(gameObject);
         }
 
@@ -1168,6 +1177,32 @@ namespace FF
         private void OnApplicationQuit()
         {
             FlushPendingPushes();
+        }
+
+        public void AddScrap(int amount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            IncrementProgressStat(scrapStatName, amount, out _);
+            IncrementProgressStat(totalScrapStatName, amount, out _);
+        }
+
+        public void SpendScrap(int amount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            IncrementProgressStat(scrapStatName, -amount, out _);
+        }
+
+        public int GetScrap()
+        {
+            return GetProgressStat(scrapStatName);
         }
 #endif
     }

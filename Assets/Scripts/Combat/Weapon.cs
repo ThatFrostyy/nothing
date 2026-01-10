@@ -20,6 +20,15 @@ namespace FF
 
         [Header("Name")]
         public string weaponName;
+        public string guid;
+
+        private void OnValidate()
+        {
+            if (string.IsNullOrEmpty(guid))
+            {
+                guid = System.Guid.NewGuid().ToString();
+            }
+        }
 
         [Header("Audio & Visual")]
         public AudioClip fireSFX;
@@ -51,6 +60,7 @@ namespace FF
 
         [Header("Stats")]
         [Min(0)] public int maxUses = 0; // 0 = Infinite
+        public int scrapCost = 10;
         public float rpm = 420f;
         public int damage = 10;
         public float recoilKick = 4f;

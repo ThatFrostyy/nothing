@@ -43,6 +43,7 @@ namespace FF
         public bool VampiricStrikes = false;
         public bool RicochetRounds = false;
         [Range(0f, 1f)] public float RicochetChance = 0.25f;
+        public bool removesMaxWeaponUseRestriction = false;
 
         private float _conditionalMoveMult = 1f;
         private float _conditionalFireRateMult = 1f;

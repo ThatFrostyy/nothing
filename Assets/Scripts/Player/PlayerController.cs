@@ -497,6 +497,17 @@ namespace FF
 
             PauseMenuController.TogglePause();
         }
+
+        public void OnOpenShop(InputValue value)
+        {
+            if (!value.isPressed)
+            {
+                return;
+            }
+
+            // Here you would toggle the shop UI. For now, we'll just log a message.
+            Debug.Log("Shop opened!");
+        }
         #endregion Input System Callbacks
 
         private void HandleUpgradeVisibilityChanged(bool isVisible)
