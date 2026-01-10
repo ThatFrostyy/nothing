@@ -320,7 +320,9 @@ namespace FF
 
             if (currentSO)
             {
-                GameHUD.Instance?.UpdateWeaponAmmo(slotAmmo[currentSlotIndex], currentSO.maxUses);
+                var playerStats = GetComponentInParent<PlayerStats>();
+                bool unlimited = playerStats && playerStats.HasUnlimitedUses;
+                GameHUD.Instance?.UpdateWeaponAmmo(slotAmmo[currentSlotIndex], unlimited ? 0 : currentSO.maxUses);
             }
         }
 

@@ -271,6 +271,9 @@ namespace FF
                         suppressionPanicChance += delta;
                         suppressionPanicDuration = Mathf.Max(suppressionPanicDuration, reward.DurationSeconds);
                         break;
+                    case CharacterUpgradeType.UnlimitedUses:
+                        stats.HasUnlimitedUses = true;
+                        break;
                 }
             }
 

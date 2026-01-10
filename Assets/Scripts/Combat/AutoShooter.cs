@@ -70,7 +70,7 @@ namespace FF
         public float GrenadeChargeProgress => _currentChargeProgress;
         public Weapon CurrentWeapon => _weapon;
         public bool IsFireHeld => _isFireHeld;
-        public bool HasInfiniteAmmo => _maxAmmo <= 0;
+        public bool HasInfiniteAmmo => _maxAmmo <= 0 || (_stats is PlayerStats playerStats && playerStats.HasUnlimitedUses);
         public int CurrentAmmo => _currentAmmo;
         public int MaxAmmo => _maxAmmo;
 
