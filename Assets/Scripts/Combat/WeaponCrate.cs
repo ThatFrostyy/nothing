@@ -17,6 +17,8 @@ namespace FF
         [SerializeField, Min(0f)] private float lifetimeSeconds = 30f;
 
         [Header("Effects")]
+        [SerializeField] private int minScrapDrop = 1;
+        [SerializeField] private int maxScrapDrop = 5;
         [SerializeField] private GameObject breakFx;
         [SerializeField] private AudioClip breakSfx;
         [SerializeField] private AudioClip hitSfx;
@@ -119,6 +121,12 @@ namespace FF
             }
 
             _isBroken = true;
+
+            int scrapAmount = Random.Range(minScrapDrop, maxScrapDrop + 1);
+            if (scrapAmount > 0)
+            {
+                SteamStatsReporter.Instance.AddScrap(scrapAmount);
+            }
 
             SpawnWeaponPickup();
             PlayBreakFx();

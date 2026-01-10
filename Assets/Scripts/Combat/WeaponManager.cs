@@ -15,6 +15,7 @@ namespace FF
         [SerializeField] AutoShooter shooter;
         [SerializeField] MeleeAttacker meleeAttacker;
         [SerializeField] PlayerCosmetics cosmetics;
+        [SerializeField] PlayerStats playerStats;
 
         readonly Weapon[] loadout = new Weapon[3];
         readonly int[] slotAmmo = new int[3];
@@ -281,6 +282,7 @@ namespace FF
                 if (meleeAttacker) meleeAttacker.ClearWeapon();
                 if (cosmetics) cosmetics.SetBackpack(null);
                 OnWeaponEquipped?.Invoke(currentSO);
+                GameHUD.Instance?.UpdateWeaponAmmo(0, 0);
                 return;
             }
 
@@ -297,6 +299,7 @@ namespace FF
                 {
                     meleeAttacker.enabled = true;
                     meleeAttacker.SetWeapon(currentSO, gunPivot);
+                    GameHUD.Instance?.UpdateWeaponAmmo(0, 0);
                 }
             }
             else
@@ -306,7 +309,18 @@ namespace FF
                 {
                     shooter.enabled = true;
                     shooter.InitializeRecoil(gunPivot);
-                    shooter.SetWeapon(currentSO, muzzle, eject, slotAmmo[currentSlotIndex]);
+                    var ammo = playerStats.removesMaxWeaponUseRestriction ? -1 : slotAmmo[currentSlotIndex];
+                    shooter.SetWeapon(currentSO, muzzle, eject, ammo);
+
+                    bool hasUnlimitedUses = playerStats.removesMaxWeaponUseRestriction || currentSO.maxUses <= 0;
+                    if (hasUnlimitedUses)
+                    {
+                        GameHUD.Instance?.UpdateWeaponAmmo(0, 0);
+                    }
+                    else
+                    {
+                        GameHUD.Instance?.UpdateWeaponAmmo(slotAmmo[currentSlotIndex], currentSO.maxUses);
+                    }
                 }
             }
 
@@ -317,11 +331,6 @@ namespace FF
             }
 
             OnWeaponEquipped?.Invoke(currentSO);
-
-            if (currentSO)
-            {
-                GameHUD.Instance?.UpdateWeaponAmmo(slotAmmo[currentSlotIndex], currentSO.maxUses);
-            }
         }
 
         void Awake()
@@ -346,6 +355,19 @@ namespace FF
         {
             slotAmmo[currentSlotIndex] = current;
             GameHUD.Instance?.UpdateWeaponAmmo(current, max);
+        }
+
+        public void ReplaceWeapon(Weapon weaponToDrop, Weapon weaponToEquip)
+        {
+            for (int i = 0; i < loadout.Length; i++)
+            {
+                if (loadout[i] == weaponToDrop)
+                {
+                    AssignWeaponToSlot(i, weaponToEquip);
+                    SelectSlot(i);
+                    return;
+                }
+            }
         }
     }
 }

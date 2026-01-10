@@ -126,6 +126,20 @@ namespace FF
             SceneFlowController.QuitGame();
         }
 
+        public void UnlockWeaponPermanently(Weapon weapon)
+        {
+            if (weapon == null) return;
+
+            int currentScrap = SteamStatsReporter.Instance.GetScrap();
+            if (currentScrap < weapon.scrapCost)
+            {
+                return;
+            }
+
+            SteamStatsReporter.Instance.SpendScrap(weapon.scrapCost);
+            PermanentUnlocks.Instance.UnlockWeapon(weapon);
+        }
+
         public void RefreshSteamStats()
         {
 #if !DISABLESTEAMWORKS
