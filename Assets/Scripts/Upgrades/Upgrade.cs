@@ -21,9 +21,6 @@ namespace FF
             CritDamageMult,
             MaxHealthMult,
             Heal,
-            AdrenalineRush,
-            VampiricStrikes,
-            RicochetRounds,
             GlassCannon,
             Collector
         }
@@ -32,6 +29,8 @@ namespace FF
 
         public Kind Type;
         public float Magnitude = 0.15f; // +15%
+        public float SecondaryMagnitude = 0.3f;
+        public bool IsWildcard = false;
         [Min(0f)] public float Cap = 0f;
         [Min(0f)] public float MinValue = 0f;
         [Min(0)] public int MaxStacks = 0;
@@ -73,9 +72,6 @@ namespace FF
                 case Kind.MaxHealthMult: return stats.GetHealth() && !IsAtOrBeyondCap(stats.MaxHealthMult, Cap);
                 case Kind.Heal:
                     return stats.GetHealth() && HealAmount > 0 && stats.GetHealth().CurrentHP < stats.GetHealth().MaxHP;
-                case Kind.AdrenalineRush: return !stats.AdrenalineRush;
-                case Kind.VampiricStrikes: return !stats.VampiricStrikes;
-                case Kind.RicochetRounds: return !stats.RicochetRounds;
                 case Kind.GlassCannon: return timesTaken < 1;
                 case Kind.Collector: return true;
                 default: return true;
@@ -94,40 +90,29 @@ namespace FF
 
             switch (Type)
             {
-                case Kind.DamageMult: stats.DamageMult += appliedMagnitude; break;
-                case Kind.FireRateMult:
-                    stats.FireRateMult += appliedMagnitude;
-                    if (UpgradeManager.I != null)
-                    {
-                        stats.FireRateMult = UpgradeManager.I.ClampFireRateMultiplier(stats.FireRateMult);
-                    }
+                case Kind.DamageMult: 
+                    stats.AddModifier(PlayerStats.StatType.Damage, appliedMagnitude, Cap); 
                     break;
-                case Kind.MoveMult: stats.MoveMult += appliedMagnitude; break;
+                case Kind.FireRateMult:
+                    stats.AddModifier(PlayerStats.StatType.FireRate, appliedMagnitude, Cap);
+                    break;
+                case Kind.MoveMult: 
+                    stats.AddModifier(PlayerStats.StatType.MoveSpeed, appliedMagnitude, Cap); 
+                    break;
                 case Kind.FireCooldownReduction:
-                    float minCooldown = MinValue > 0f ? MinValue : 0.1f;
-                    stats.FireCooldownMult = Mathf.Max(minCooldown, stats.FireCooldownMult - appliedMagnitude);
-                    if (UpgradeManager.I != null)
-                    {
-                        stats.FireCooldownMult = UpgradeManager.I.ClampCooldownMultiplier(stats.FireCooldownMult);
-                    }
+                    stats.AddModifier(PlayerStats.StatType.FireCooldown, appliedMagnitude, MinValue);
                     break;
                 case Kind.ProjectileSpeedMult:
-                    stats.ProjectileSpeedMult = ApplyCap(stats.ProjectileSpeedMult + appliedMagnitude, Cap);
+                    stats.AddModifier(PlayerStats.StatType.ProjectileSpeed, appliedMagnitude, Cap);
                     break;
                 case Kind.CritChance:
-                    float newCritChance = ApplyCap(stats.CritChance + appliedMagnitude, Cap > 0f ? Cap : 1f);
-                    stats.CritChance = Mathf.Clamp01(newCritChance);
+                    stats.AddModifier(PlayerStats.StatType.CritChance, appliedMagnitude, Cap);
                     break;
                 case Kind.CritDamageMult:
-                    stats.CritDamageMult = ApplyCap(stats.CritDamageMult + appliedMagnitude, Cap);
+                    stats.AddModifier(PlayerStats.StatType.CritDamage, appliedMagnitude, Cap);
                     break;
                 case Kind.MaxHealthMult:
-                    float newHealthMult = ApplyCap(stats.MaxHealthMult + appliedMagnitude, Cap);
-                    stats.MaxHealthMult = Mathf.Max(0f, newHealthMult);
-                    if (stats.GetHealth())
-                    {
-                        stats.GetHealth().ScaleMaxHP(stats.MaxHealthMult, false);
-                    }
+                    stats.AddModifier(PlayerStats.StatType.MaxHealth, appliedMagnitude, Cap);
                     break;
                 case Kind.Heal:
                     if (stats.GetHealth() && appliedHealAmount > 0)
@@ -135,19 +120,12 @@ namespace FF
                         stats.GetHealth().Heal(Mathf.Max(0, appliedHealAmount));
                     }
                     break;
-                case Kind.AdrenalineRush: stats.AdrenalineRush = true; break;
-                case Kind.VampiricStrikes: stats.VampiricStrikes = true; break;
-                case Kind.RicochetRounds: stats.RicochetRounds = true; break;
                 case Kind.GlassCannon:
-                    stats.DamageMult += 0.25f;
-                    stats.MaxHealthMult -= 0.3f;
-                    if (stats.GetHealth())
-                    {
-                        stats.GetHealth().ScaleMaxHP(stats.MaxHealthMult, false);
-                    }
+                    stats.AddModifier(PlayerStats.StatType.Damage, appliedMagnitude);
+                    stats.AddModifier(PlayerStats.StatType.MaxHealth, -SecondaryMagnitude);
                     break;
                 case Kind.Collector:
-                    stats.XPGatherRadius += appliedMagnitude;
+                    stats.AddModifier(PlayerStats.StatType.XPGatherRadius, appliedMagnitude);
                     break;
             }
         }
@@ -205,7 +183,24 @@ namespace FF
                 ? GetScaledHealAmount().ToString()
                 : FormatPercentValue(GetScaledMagnitude() * 100f);
 
-            return ReplaceFirstNumber(Description, replacement);
+            string finalDescription = Description;
+
+            if (finalDescription.Contains("{value}"))
+            {
+                finalDescription = finalDescription.Replace("{value}", replacement);
+            }
+            else
+            {
+                finalDescription = ReplaceFirstNumber(finalDescription, replacement);
+            }
+
+            if (finalDescription.Contains("{value2}"))
+            {
+                string replacement2 = FormatPercentValue(SecondaryMagnitude * 100f);
+                finalDescription = finalDescription.Replace("{value2}", replacement2);
+            }
+
+            return finalDescription;
         }
 
         float GetScaledMagnitude()

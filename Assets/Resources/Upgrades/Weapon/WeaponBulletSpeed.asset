@@ -20,3 +20,4 @@ MonoBehaviour:
   percentColor: '#DBBE50'
   allowedClasses: 31
   onlyForSemiAuto: 0
+  excludeMelee: 1

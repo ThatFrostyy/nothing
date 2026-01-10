@@ -414,7 +414,9 @@ namespace FF
 
         System.Collections.Generic.List<Upgrade> BuildUpgradeOptions(int count)
         {
-            var available = new System.Collections.Generic.List<Upgrade>();
+            var normalPool = new System.Collections.Generic.List<Upgrade>();
+            var wildcardPool = new System.Collections.Generic.List<Upgrade>();
+
             if (all != null)
             {
                 for (int i = 0; i < all.Length; i++)
@@ -422,21 +424,45 @@ namespace FF
                     Upgrade upgrade = all[i];
                     if (IsUpgradeAvailable(upgrade))
                     {
-                        available.Add(upgrade);
+                        if (upgrade.IsWildcard)
+                        {
+                            wildcardPool.Add(upgrade);
+                        }
+                        else
+                        {
+                            normalPool.Add(upgrade);
+                        }
                     }
                 }
             }
 
             var selections = new System.Collections.Generic.List<Upgrade>();
-            if (available.Count == 0 || count <= 0)
+            if (count <= 0)
             {
                 return selections;
             }
 
-            var workingPool = new System.Collections.Generic.List<Upgrade>(available);
-            for (int i = 0; i < count; i++)
+            // Strategy: Try to pick 1 Wildcard and (count-1) Normals.
+            // If we run out of one type, fill with the other.
+
+            int wildcardsToPick = (wildcardPool.Count > 0) ? 1 : 0;
+            int normalsToPick = count - wildcardsToPick;
+
+            // 1. Pick Wildcards
+            for (int i = 0; i < wildcardsToPick; i++)
             {
-                Upgrade pick = RandomUpgrade(workingPool);
+                Upgrade pick = RandomUpgrade(wildcardPool);
+                if (pick != null)
+                {
+                    selections.Add(pick);
+                    wildcardPool.Remove(pick);
+                }
+            }
+
+            // 2. Pick Normals
+            for (int i = 0; i < normalsToPick; i++)
+            {
+                Upgrade pick = RandomUpgrade(normalPool);
                 if (pick == null)
                 {
                     break;
@@ -444,9 +470,26 @@ namespace FF
 
                 selections.Add(pick);
 
-                if (workingPool.Count > 1)
+                if (normalPool.Count > 0)
                 {
-                    workingPool.Remove(pick);
+                    normalPool.Remove(pick);
+                }
+            }
+
+            // 3. Fill any remaining slots (if we ran out of normals but have wildcards left, or vice versa)
+            while (selections.Count < count)
+            {
+                var combinedPool = new System.Collections.Generic.List<Upgrade>(normalPool);
+                combinedPool.AddRange(wildcardPool);
+
+                if (combinedPool.Count == 0) break;
+
+                Upgrade pick = RandomUpgrade(combinedPool);
+                if (pick != null)
+                {
+                    selections.Add(pick);
+                    if (normalPool.Contains(pick)) normalPool.Remove(pick);
+                    if (wildcardPool.Contains(pick)) wildcardPool.Remove(pick);
                 }
             }
 
@@ -703,6 +746,11 @@ namespace FF
                 return false;
             }
 
+            if (card.ExcludeMelee && weapon.isMelee)
+            {
+                return false;
+            }
+
             if (card.OnlyForSemiAuto && weapon.isAuto)
             {
                 return false;
@@ -779,6 +827,7 @@ namespace FF
             {
                 WeaponUpgradeType.Pierce => Mathf.Max(1f, Mathf.Round(magnitude)),
                 WeaponUpgradeType.ExtraProjectiles => Mathf.Max(1f, Mathf.Round(magnitude)),
+                WeaponUpgradeType.Ricochet => Mathf.Max(1f, Mathf.Round(magnitude)),
                 _ => magnitude
             };
         }
@@ -1021,6 +1070,7 @@ namespace FF
                 WeaponUpgradeType.Accuracy => "Accuracy Boost",
                 WeaponUpgradeType.FlamethrowerCooldown => "Faster Venting",
                 WeaponUpgradeType.FlamethrowerRange => "Longer Flame",
+                WeaponUpgradeType.Ricochet => "Ricochet",
                 _ => "Upgrade"
             };
 
@@ -1043,6 +1093,7 @@ namespace FF
                 WeaponUpgradeType.Accuracy => "Improve accuracy by ",
                 WeaponUpgradeType.FlamethrowerCooldown => "Decrease overheat recovery by ",
                 WeaponUpgradeType.FlamethrowerRange => "Increase flamethrower reach by ",
+                WeaponUpgradeType.Ricochet => $"Bullets ricochet {flatAmount} time{(flatAmount == 1 ? string.Empty : "s")}.",
                 _ => "Boost weapon performance by "
             };
 
@@ -1060,6 +1111,7 @@ namespace FF
                 WeaponUpgradeType.Accuracy => "#4ECDC4",
                 WeaponUpgradeType.FlamethrowerCooldown => "#FF8C42",
                 WeaponUpgradeType.FlamethrowerRange => "#FFA69E",
+                WeaponUpgradeType.Ricochet => "#7EE38D",
                 _ => "#FFD966"
             };
 
@@ -1071,6 +1123,7 @@ namespace FF
             {
                 WeaponUpgradeType.Pierce => baseDescription,
                 WeaponUpgradeType.ExtraProjectiles => baseDescription,
+                WeaponUpgradeType.Ricochet => baseDescription,
                 _ => baseDescription + coloredPercent
             };
 
@@ -1157,6 +1210,11 @@ namespace FF
         public int GetWeaponPierceCount(Weapon weapon)
         {
             return TryGetWeaponState(weapon, out var state) ? state.GetPierceCount() : 0;
+        }
+
+        public int GetWeaponRicochetCount(Weapon weapon)
+        {
+            return TryGetWeaponState(weapon, out var state) ? state.GetRicochetCount() : 0;
         }
 
         public int GetWeaponExtraProjectiles(Weapon weapon)

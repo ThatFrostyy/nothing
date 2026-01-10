@@ -14,8 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FF.CharacterDefinition
   ProgressionId: Marine
   DisplayName: US Marine
-  Description: Armed with a <b>M1A1 Thompson</b> and an <b>M12 Shotgun as a secondary</b>.
-    Fast and agile able to perform a <b>short combat dash</b>.
+  Description: 'Primary Weapon: M1 Thompson
+
+    Secondary Weapon: None
+
+    Special
+    Weapon: None
+
+    Ability: Can perform a short dash.  '
   AbilityId: dash
   Portrait: {fileID: 21300000, guid: f51a1b388c3ea624cb8c9dbb1ff67954, type: 3}
   PlayerSprite: {fileID: 21300000, guid: f51a1b388c3ea624cb8c9dbb1ff67954, type: 3}
@@ -23,9 +29,9 @@ MonoBehaviour:
   AvailableHats:
   - {fileID: 11400000, guid: 7c602c035e5d66a47986c048a5184dd1, type: 2}
   StartingWeapon: {fileID: 11400000, guid: 43f90a4c7e372a34db3ad4c19cbf82fa, type: 2}
-  SecondaryWeapon: {fileID: 11400000, guid: 73ebe158e9c8f9b4ba6d8076e0c0dbbc, type: 2}
+  SecondaryWeapon: {fileID: 0}
   WeaponIconOverride: {fileID: 0}
-  SpecialWeapon: {fileID: 11400000, guid: 2d0dabad2b9ec2d4b8b3e79d71d7aa74, type: 2}
+  SpecialWeapon: {fileID: 11400000, guid: 35d6b0498af5bc343a8912126c34eee6, type: 2}
   UnlockRequirements: []
   Progression:
     baseXPRequirement: 300

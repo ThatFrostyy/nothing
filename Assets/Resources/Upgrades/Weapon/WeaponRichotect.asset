@@ -10,14 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 639b2135e5fe44a489165be878c19319, type: 3}
-  m_Name: WeaponPierce
+  m_Name: WeaponRichotect
   m_EditorClassIdentifier: Assembly-CSharp::FF.WeaponUpgradeCard
-  Title: Pierce Upgrade<br>
-  DescriptionPrefix: 'Increase weapon pierce count by '
-  rarity: 3
+  Title: Ricochet Upgrade<br>
+  DescriptionPrefix: 
+  rarity: 2
   rarityWeightOverride: 0
-  Type: 3
-  percentColor: '#0060BC'
-  allowedClasses: 31
+  Type: 11
+  percentColor: '#D17A22'
+  allowedClasses: 15
   onlyForSemiAuto: 0
   excludeMelee: 1

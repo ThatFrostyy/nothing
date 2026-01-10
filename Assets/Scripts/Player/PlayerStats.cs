@@ -5,7 +5,18 @@ namespace FF
 {
     public class PlayerStats : MonoBehaviour, ICombatStats
     {
-        public enum StatType { MoveSpeed, FireRate, Damage }
+        public enum StatType 
+        { 
+            MoveSpeed, 
+            FireRate, 
+            Damage,
+            ProjectileSpeed,
+            FireCooldown,
+            CritChance,
+            CritDamage,
+            MaxHealth,
+            XPGatherRadius
+        }
 
         [Header("Base Stats")]
         public float MoveSpeed = 6f;
@@ -121,6 +132,47 @@ namespace FF
             _conditionalProjectileSpeedMult = Mathf.Max(0.01f, multiplier);
         }
 
+        public void AddModifier(StatType type, float amount, float cap = 0f)
+        {
+            switch (type)
+            {
+                case StatType.MoveSpeed:
+                    MoveMult = ApplyCap(MoveMult + amount, cap);
+                    break;
+                case StatType.FireRate:
+                    FireRateMult = ApplyCap(FireRateMult + amount, cap);
+                    if (UpgradeManager.I != null) FireRateMult = UpgradeManager.I.ClampFireRateMultiplier(FireRateMult);
+                    break;
+                case StatType.Damage:
+                    DamageMult = ApplyCap(DamageMult + amount, cap);
+                    break;
+                case StatType.ProjectileSpeed:
+                    ProjectileSpeedMult = ApplyCap(ProjectileSpeedMult + amount, cap);
+                    break;
+                case StatType.FireCooldown:
+                    // For cooldown, 'amount' is typically positive reduction, so we subtract.
+                    FireCooldownMult -= amount;
+                    // Apply min cap (0.1f or custom)
+                    float min = cap > 0f ? cap : 0.1f;
+                    FireCooldownMult = Mathf.Max(min, FireCooldownMult);
+                    if (UpgradeManager.I != null) FireCooldownMult = UpgradeManager.I.ClampCooldownMultiplier(FireCooldownMult);
+                    break;
+                case StatType.CritChance:
+                    CritChance = ApplyCap(CritChance + amount, cap > 0f ? cap : 1f);
+                    break;
+                case StatType.CritDamage:
+                    CritDamageMult = ApplyCap(CritDamageMult + amount, cap);
+                    break;
+                case StatType.MaxHealth:
+                    MaxHealthMult = ApplyCap(MaxHealthMult + amount, cap);
+                    if (health) health.ScaleMaxHP(MaxHealthMult, false);
+                    break;
+                case StatType.XPGatherRadius:
+                    XPGatherRadius += amount;
+                    break;
+            }
+        }
+
         private void UpdateActiveModifiers()
         {
             if (_activeModifiers.Count == 0)
@@ -167,5 +219,10 @@ namespace FF
         }
 
         public Health GetHealth() => health;
+
+        private static float ApplyCap(float value, float cap)
+        {
+            return cap > 0f ? Mathf.Min(value, cap) : value;
+        }
     }
 }

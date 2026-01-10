@@ -30,14 +30,14 @@ MonoBehaviour:
   bulletPrefab: {fileID: 0}
   weaponPrefab: {fileID: 6569312594523270899, guid: 18722c2bc1f82bc4bb9bcaf760c2731b, type: 3}
   rpm: 400
-  damage: 20
+  damage: 25
   recoilKick: 4
   isAuto: 0
   fireCooldown: 2
   isMelee: 1
-  attackRange: 1.5
+  attackRange: 4
   attackArc: 90
-  swingSpeed: 360
+  swingSpeed: 600
   knockbackStrength: 0
   knockbackDuration: 0.2
   appliesBurn: 0

@@ -57,16 +57,22 @@ namespace FF
         private bool _isGrenadeWeapon;
         private bool _isChargingGrenade;
         private bool _useGrenadeCharging;
+        private int _currentAmmo;
+        private int _maxAmmo;
 
         public static event Action<AutoShooter, int> OnRoundsFired;
 
         public event Action<float> OnCooldownChanged;
         public event Action<float> OnGrenadeChargeChanged;
+        public event Action<int, int> OnAmmoChanged;
 
         public float CooldownProgress => _currentCooldownProgress;
         public float GrenadeChargeProgress => _currentChargeProgress;
         public Weapon CurrentWeapon => _weapon;
         public bool IsFireHeld => _isFireHeld;
+        public bool HasInfiniteAmmo => _maxAmmo <= 0;
+        public int CurrentAmmo => _currentAmmo;
+        public int MaxAmmo => _maxAmmo;
 
         #region Initialization
         private void Awake()
@@ -109,7 +115,7 @@ namespace FF
             }
         }
 
-        public void SetWeapon(Weapon weapon, Transform muzzleTransform, Transform eject)
+        public void SetWeapon(Weapon weapon, Transform muzzleTransform, Transform eject, int currentAmmo = -1)
         {
             StopLoopingFeedback();
             _weapon = weapon;
@@ -122,6 +128,9 @@ namespace FF
             _flamethrowerHeat = 0f;
             _flamethrowerOverheated = false;
             _isChargingGrenade = false;
+            
+            _maxAmmo = _weapon ? _weapon.maxUses : 0;
+            _currentAmmo = currentAmmo >= 0 ? currentAmmo : _maxAmmo;
 
             SetCooldownProgress(1f);
 
@@ -154,6 +163,8 @@ namespace FF
             _isChargingGrenade = false;
             _flamethrowerHeat = 0f;
             _flamethrowerOverheated = false;
+            _maxAmmo = 0;
+            _currentAmmo = 0;
             SetCooldownProgress(1f);
             SetGrenadeChargeProgress(0f);
             CleanupFlamethrowerEmitter();
@@ -438,6 +449,12 @@ namespace FF
         #region Recoil & Shooting
         private void Shoot(float? grenadeSpeedOverride = null)
         {
+            if (!HasInfiniteAmmo && _currentAmmo <= 0)
+            {
+                GameHUD.Instance?.TriggerWeaponExhausted();
+                return;
+            }
+
             float accuracyMultiplier = GetAccuracyMultiplier();
             float spreadIncrease = _weapon.spreadIncreasePerShot * accuracyMultiplier;
             _currentSpread += spreadIncrease;
@@ -480,6 +497,12 @@ namespace FF
             _currentRecoil = _weapon.recoilAmount;
             _recoilTimer = 0f;
             SetCooldownProgress(0f);
+
+            if (!HasInfiniteAmmo)
+            {
+                _currentAmmo--;
+                OnAmmoChanged?.Invoke(_currentAmmo, _maxAmmo);
+            }
         }
 
         private void SpawnEjectParticles()
@@ -759,6 +782,13 @@ namespace FF
 
             if (_isFireHeld)
             {
+                if (!HasInfiniteAmmo && _currentAmmo <= 0)
+                {
+                    SetGrenadeChargeProgress(0f);
+                    _isChargingGrenade = false;
+                    return;
+                }
+
                 if (!_isChargingGrenade)
                 {
                     _isChargingGrenade = true;

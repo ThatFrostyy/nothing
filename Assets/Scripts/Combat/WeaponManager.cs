@@ -17,6 +17,7 @@ namespace FF
         [SerializeField] PlayerCosmetics cosmetics;
 
         readonly Weapon[] loadout = new Weapon[3];
+        readonly int[] slotAmmo = new int[3];
         readonly List<WeaponPickup> nearbyPickups = new();
         Weapon currentSO;
         GameObject currentWeaponInstance;
@@ -261,6 +262,7 @@ namespace FF
         void AssignWeaponToSlot(int slotIndex, Weapon weapon)
         {
             loadout[slotIndex] = weapon;
+            slotAmmo[slotIndex] = weapon ? weapon.maxUses : 0;
             OnInventoryChanged?.Invoke();
         }
 
@@ -304,7 +306,7 @@ namespace FF
                 {
                     shooter.enabled = true;
                     shooter.InitializeRecoil(gunPivot);
-                    shooter.SetWeapon(currentSO, muzzle, eject);
+                    shooter.SetWeapon(currentSO, muzzle, eject, slotAmmo[currentSlotIndex]);
                 }
             }
 
@@ -315,6 +317,11 @@ namespace FF
             }
 
             OnWeaponEquipped?.Invoke(currentSO);
+
+            if (currentSO)
+            {
+                GameHUD.Instance?.UpdateWeaponAmmo(slotAmmo[currentSlotIndex], currentSO.maxUses);
+            }
         }
 
         void Awake()
@@ -323,6 +330,22 @@ namespace FF
             {
                 cosmetics = GetComponentInParent<PlayerCosmetics>();
             }
+        }
+
+        void OnEnable()
+        {
+            if (shooter) shooter.OnAmmoChanged += HandleAmmoChanged;
+        }
+
+        void OnDisable()
+        {
+            if (shooter) shooter.OnAmmoChanged -= HandleAmmoChanged;
+        }
+
+        void HandleAmmoChanged(int current, int max)
+        {
+            slotAmmo[currentSlotIndex] = current;
+            GameHUD.Instance?.UpdateWeaponAmmo(current, max);
         }
     }
 }

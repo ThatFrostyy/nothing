@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: Greased Mechanism
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Greased Mechanism
-  Description: Your weapons fire <color=#D17A22>+10%</color> faster.
+  Description: Your weapons fire <color=#D17A22>+{value}%</color> faster.
   Type: 1
   Magnitude: 0.1
+  SecondaryMagnitude: 0
+  IsWildcard: 0
   Cap: 0
   MinValue: 0
   MaxStacks: 0

@@ -14,7 +14,8 @@ namespace FF
         CritDamage,
         Accuracy,
         FlamethrowerCooldown,
-        FlamethrowerRange
+        FlamethrowerRange,
+        Ricochet
     }
 
     [System.Serializable]
@@ -71,6 +72,7 @@ namespace FF
         float accuracyBonus;
         float flamethrowerCooldownReduction;
         float flamethrowerRangeBonus;
+        int ricochetCount;
 
         public WeaponUpgradeState(Weapon weapon)
         {
@@ -87,6 +89,7 @@ namespace FF
             accuracyBonus = 0f;
             flamethrowerCooldownReduction = 0f;
             flamethrowerRangeBonus = 0f;
+            ricochetCount = 0;
         }
 
         public void Apply(WeaponUpgradeOption option)
@@ -130,6 +133,9 @@ namespace FF
                 case WeaponUpgradeType.FlamethrowerRange:
                     flamethrowerRangeBonus += amount;
                     break;
+                case WeaponUpgradeType.Ricochet:
+                    ricochetCount += Mathf.RoundToInt(amount);
+                    break;
             }
         }
 
@@ -144,6 +150,7 @@ namespace FF
         public float GetAccuracyMultiplier() => Mathf.Max(0.1f, 1f - accuracyBonus);
         public float GetFlamethrowerCooldownMultiplier() => Mathf.Max(0.1f, 1f - flamethrowerCooldownReduction);
         public float GetFlamethrowerRangeMultiplier() => 1f + flamethrowerRangeBonus;
+        public int GetRicochetCount() => ricochetCount;
 
         public System.Collections.Generic.IReadOnlyDictionary<WeaponUpgradeType, int> GetUpgradeCounts() => upgradeCounts;
 

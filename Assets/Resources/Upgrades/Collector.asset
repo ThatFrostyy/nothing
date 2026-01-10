@@ -12,10 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98be82d2fe4824c4fae56dac9cacea6b, type: 3}
   m_Name: Collector
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
-  Title: Stopping Power
-  Description: Your orb pickup radius is increased by <color=#DBBE50>+10%</color>.
-  Type: 13
+  Title: Collector
+  Description: Your orb pickup radius is increased by <color=#DBBE50>+{value}%</color>.
+  Type: 10
   Magnitude: 0.1
+  SecondaryMagnitude: 0
+  IsWildcard: 0
   Cap: 0
   MinValue: 0
   MaxStacks: 0

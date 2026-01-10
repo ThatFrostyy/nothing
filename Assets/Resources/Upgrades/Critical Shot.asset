@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: Critical Shot
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
   Title: Critical Shot
-  Description: Your bullets have <color=#FF4040>+10%</color> chance to deal critical
-    damage.
+  Description: Your bullets have <color=#FF4040>+{value}%</color> chance to deal
+    critical damage.
   Type: 5
   Magnitude: 0.1
+  SecondaryMagnitude: 0
+  IsWildcard: 0
   Cap: 0
   MinValue: 0
   MaxStacks: 0

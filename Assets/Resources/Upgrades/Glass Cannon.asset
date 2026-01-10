@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 98be82d2fe4824c4fae56dac9cacea6b, type: 3}
-  m_Name: Stopping Power
+  m_Name: Glass Cannon
   m_EditorClassIdentifier: Assembly-CSharp::FF.Upgrade
-  Title: Stopping Power
-  Description: Your weapons deal <color=#FF4040>+{value}%</color> more damage.
-  Type: 0
-  Magnitude: 0.1
-  SecondaryMagnitude: 0
+  Title: Glass Cannon
+  Description: Increases damage by {value}% but reduces max health by {value2}%.
+  Type: 9
+  Magnitude: 0.25
+  SecondaryMagnitude: 0.35
   IsWildcard: 0
   Cap: 0
   MinValue: 0
   MaxStacks: 0
   HealAmount: 0
-  startDoubledUntilWave: 1
+  startDoubledUntilWave: 0
   normalizeValueByWave: 5
   unlockWave: 0
-  levelUpPopupText: 
+  levelUpPopupText: GLASS CANNON
   rarity: 0
   rarityWeightOverride: 0

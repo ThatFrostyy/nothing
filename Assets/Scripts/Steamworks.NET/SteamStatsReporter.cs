@@ -164,6 +164,7 @@ namespace FF
         private int _lastKillCount;
         private int _killStatBase;
         private int _highestWave;
+        private int _internalKillCount;
         private int _shotsThisWave;
         private int _hitsThisWave;
         private int _consecutiveNoDamageWaves;
@@ -284,6 +285,7 @@ namespace FF
             _nextCoreStatsPushTime = 0f;
             _nextLeaderboardPushTime = 0f;
             ResetWaveTrackers();
+            _internalKillCount = 0;
             _playerBody = null;
         }
 
@@ -356,7 +358,8 @@ namespace FF
         {
             if (kills < _lastKillCount)
             {
-                _killStatBase += _lastKillCount;
+                _killStatBase += _internalKillCount;
+                _internalKillCount = 0;
             }
 
             _lastKillCount = kills;
@@ -366,6 +369,7 @@ namespace FF
         {
             EvaluateWaveBasedAchievements(wave);
             _highestWave = Mathf.Max(_highestWave, wave);
+            SteamUserStats.SetStat(TopWaveStatName, _highestWave);
 
             QueueCoreStatsPush();
             QueueKillLeaderboardPush();
@@ -393,19 +397,6 @@ namespace FF
             {
 
                 return;
-            }
-
-
-
-            if (result.m_bScoreChanged == 1)
-            {
-
-            }
-            else
-            {
-
-
-
             }
 
             // Request rows around the current user so we can confirm whether the account has a leaderboard row.
@@ -601,6 +592,14 @@ namespace FF
                 return;
             }
 
+            _internalKillCount++;
+            if (SteamUserStats.GetStat(KillStatName, out int currentKills))
+            {
+                SteamUserStats.SetStat(KillStatName, currentKills + 1);
+            }
+            
+            QueueCoreStatsPush();
+
             _recentKillTimestamps.Enqueue(Time.time);
             float cutoff = Time.time - 60f;
             while (_recentKillTimestamps.Count > 0 && _recentKillTimestamps.Peek() < cutoff)
@@ -666,8 +665,6 @@ namespace FF
             if (!_statsReady)
                 return;
 
-            SteamUserStats.SetStat(KillStatName, _killStatBase + _lastKillCount);
-            SteamUserStats.SetStat(TopWaveStatName, _highestWave);
             SteamUserStats.StoreStats();
         }
 
@@ -750,15 +747,19 @@ namespace FF
                 return;
             }
 
-            int newTotal = (_weaponKillTotals.TryGetValue(config.StatName, out int current) ? current : 0) + 1;
+            int newTotal = 1;
+            if (SteamUserStats.GetStat(config.StatName, out int current))
+            {
+                newTotal = current + 1;
+            }
+            
             _weaponKillTotals[config.StatName] = newTotal;
-
             SteamUserStats.SetStat(config.StatName, newTotal);
 
             bool statsUpdated = false;
             EvaluateWeaponAchievements(config, newTotal, ref statsUpdated);
 
-            SteamUserStats.StoreStats();
+            QueueCoreStatsPush();
         }
 
         private void EvaluateWeaponAchievements(WeaponAchievementConfig config, int total, ref bool statsUpdated)
@@ -822,7 +823,10 @@ namespace FF
                 return false;
             }
 
-            int score = _killStatBase + _lastKillCount;
+            if (!SteamUserStats.GetStat(KillStatName, out int score))
+            {
+                score = _killStatBase + _internalKillCount;
+            }
             EnsureKillLeaderboard();
 
             if (_killLeaderboard.m_SteamLeaderboard == 0)
@@ -1094,7 +1098,12 @@ namespace FF
 
         private void IncrementProgressStat(string statName, int amount, out int newTotal)
         {
-            newTotal = GetProgressStat(statName);
+            newTotal = amount;
+            if (SteamUserStats.GetStat(statName, out int current))
+            {
+                newTotal = current + amount;
+            }
+
             if (amount <= 0)
             {
                 return;
@@ -1114,10 +1123,9 @@ namespace FF
                 return;
             }
 
-            newTotal += amount;
             _progressStats[statName] = newTotal;
             SteamUserStats.SetStat(statName, newTotal);
-            SteamUserStats.StoreStats();
+            QueueCoreStatsPush();
         }
 
         private void TryUnlockAchievement(string achievementId)
@@ -1154,7 +1162,7 @@ namespace FF
                 kills[i] = ranked[i].Value;
             }
 
-            SteamUserStats.StoreStats();
+            QueueCoreStatsPush();
         }
 
         private void OnApplicationQuit()

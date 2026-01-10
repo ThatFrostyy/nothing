@@ -29,9 +29,11 @@ namespace FF
         [SerializeField] string percentColor = "#FFD966";
         [SerializeField] WeaponClassFilter allowedClasses = WeaponClassFilter.All;
         [SerializeField] bool onlyForSemiAuto = false;
+        [SerializeField] bool excludeMelee = false;
 
         public WeaponClassFilter AllowedClasses => allowedClasses;
         public bool OnlyForSemiAuto => onlyForSemiAuto;
+        public bool ExcludeMelee => excludeMelee;
         public Upgrade.Rarity Rarity => rarity;
 
         public WeaponUpgradeOption BuildOption(Weapon weapon, float magnitude, int killCount, int cardsTaken)
@@ -58,6 +60,7 @@ namespace FF
                 WeaponUpgradeType.CritChance => $"Increase critical chance by {coloredPercent}",
                 WeaponUpgradeType.CritDamage => $"Increase critical damage by {coloredPercent}",
                 WeaponUpgradeType.Accuracy => $"Improve accuracy by {coloredPercent}",
+                WeaponUpgradeType.Ricochet => $"Bullets ricochet {flatValue} time{(flatValue == 1 ? string.Empty : "s")}.",
                 _ => $"{DescriptionPrefix}{coloredPercent}",
             };
 

@@ -246,18 +246,21 @@ namespace FF
 
         public void ScaleMaxHP(float multiplier, bool refill = true)
         {
-            if (multiplier <= 0f)
-            {
-                return;
-            }
-
             if (baseMaxHP <= 0)
             {
                 CacheBaseValues();
             }
 
             // Include permanent flat bonus when scaling so flat increases aren't lost.
-            int scaled = Mathf.Max(1, Mathf.RoundToInt((baseMaxHP + permanentFlatMaxHP) * multiplier));
+            int scaled = Mathf.RoundToInt((baseMaxHP + permanentFlatMaxHP) * multiplier);
+
+            if (scaled < 1)
+            {
+                hp = 0;
+                Die();
+                return;
+            }
+
             SetMaxHP(scaled, refill);
         }
         #endregion Max HP Management

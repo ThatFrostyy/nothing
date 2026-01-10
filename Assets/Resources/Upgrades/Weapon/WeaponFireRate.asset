@@ -20,3 +20,4 @@ MonoBehaviour:
   percentColor: '#D17A22'
   allowedClasses: 31
   onlyForSemiAuto: 0
+  excludeMelee: 1

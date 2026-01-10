@@ -10526,6 +10526,7 @@ MonoBehaviour:
   - {fileID: 928517962390292367, guid: 074ab9af08f3b2044b8dce1c28f8c263, type: 3}
   - {fileID: 2273180547129018689, guid: c63b281069e8c3849a9e3995aa2dd1f1, type: 3}
   - {fileID: 3745811930975059760, guid: 4d1a5653d7708d94f9f5416561ff3a7b, type: 3}
+  - {fileID: 7664722055709997033, guid: f67451fccf5663347a1948a357532b99, type: 3}
   pickupLifetimeSeconds: 60
   lifetimeSeconds: 80
   breakFx: {fileID: 0}

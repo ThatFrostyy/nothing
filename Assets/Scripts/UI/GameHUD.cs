@@ -29,6 +29,7 @@ namespace FF
         [SerializeField] private Image healthFillImage;
         [SerializeField] private TMP_Text killCountText;
         [SerializeField] private TMP_Text weaponNameText;
+        [SerializeField] private TMP_Text weaponAmmoText;
         [SerializeField] private TMP_Text waveText;
         [SerializeField] private TMP_Text timeText;
         [SerializeField] private TMP_Text xpText;
@@ -55,6 +56,7 @@ namespace FF
         [SerializeField] private TMP_Text upgradeSummaryPlayerText;
         [SerializeField] private TMP_Text upgradeSummaryWeaponText;
         [SerializeField] private string upgradeSummaryTitle = "Upgrades";
+        [SerializeField, Min(0f)] private float maxUpgradeSummaryHeight = 800f;
 
         [Header("UI Animation")]
         [SerializeField] private RectTransform healthPulseTarget;
@@ -98,6 +100,8 @@ namespace FF
         [SerializeField] private AudioClip waveStartClip;
         [SerializeField] private AudioClip heartbeatClip;
         [SerializeField] private AudioClip xpFillLoopClip;
+        [SerializeField] private AudioClip weaponExhaustedClip;
+        [SerializeField] private string weaponExhaustedMessage = "WEAPON EXHAUSTED";
 
         [Header("Weapon Hotbar")]
         [SerializeField] private Image[] weaponSlotIcons = new Image[3];
@@ -948,12 +952,12 @@ namespace FF
                 var rectTransform = upgradeSummaryGroup.GetComponent<RectTransform>();
                 if (rectTransform != null)
                 {
-                    float playerTextHeight = upgradeSummaryPlayerText.GetPreferredValues().y;
-                    float weaponTextHeight = upgradeSummaryWeaponText.GetPreferredValues().y;
-                    float titleTextHeight = upgradeSummaryTitleText.GetPreferredValues().y;
+                    float playerTextHeight = upgradeSummaryPlayerText ? upgradeSummaryPlayerText.GetPreferredValues().y : 0f;
+                    float weaponTextHeight = upgradeSummaryWeaponText ? upgradeSummaryWeaponText.GetPreferredValues().y : 0f;
+                    float titleTextHeight = upgradeSummaryTitleText ? upgradeSummaryTitleText.GetPreferredValues().y : 0f;
                     float totalHeight = playerTextHeight + weaponTextHeight + titleTextHeight + 60;
 
-                    rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, Mathf.Min(totalHeight, 800));
+                    rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, Mathf.Min(totalHeight, maxUpgradeSummaryHeight));
                 }
             }
         }
@@ -1314,6 +1318,11 @@ namespace FF
             if (weaponNameText)
             {
                 StartWeaponNameFade(weaponLabel);
+            }
+
+            if (weaponAmmoText)
+            {
+                weaponAmmoText.text = "";
             }
 
             UpdateWeaponHotbar();
@@ -2039,6 +2048,36 @@ namespace FF
             }
 
             return null;
+        }
+
+        public void UpdateWeaponAmmo(int current, int max)
+        {
+            if (!weaponAmmoText)
+            {
+                return;
+            }
+
+            if (max <= 0)
+            {
+                weaponAmmoText.text = "";
+            }
+            else
+            {
+                weaponAmmoText.text = $"{current}/{max}";
+            }
+        }
+
+        public void TriggerWeaponExhausted()
+        {
+            if (playerHealth)
+            {
+                DamageNumberManager.ShowText(playerHealth.transform.position, weaponExhaustedMessage);
+            }
+
+            if (uiAudioSource && weaponExhaustedClip)
+            {
+                uiAudioSource.PlayOneShot(weaponExhaustedClip, GameAudioSettings.SfxVolume);
+            }
         }
     }
 }

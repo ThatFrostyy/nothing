@@ -50,6 +50,7 @@ namespace FF
         public GameObject weaponPrefab;
 
         [Header("Stats")]
+        [Min(0)] public int maxUses = 0; // 0 = Infinite
         public float rpm = 420f;
         public int damage = 10;
         public float recoilKick = 4f;
