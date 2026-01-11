@@ -29,11 +29,16 @@ MonoBehaviour:
   useGrenadeCharging: 0
   bulletPrefab: {fileID: 0}
   weaponPrefab: {fileID: 1242749656058507234, guid: 01504cca9a4ea7b48a837c9bb55da053, type: 3}
+  maxUses: 3
   rpm: 420
   damage: 10
   recoilKick: 4
   isAuto: 1
   fireCooldown: 0.1
+  isMelee: 0
+  attackRange: 1.5
+  attackArc: 90
+  swingSpeed: 360
   knockbackStrength: 0
   knockbackDuration: 0.2
   appliesBurn: 1

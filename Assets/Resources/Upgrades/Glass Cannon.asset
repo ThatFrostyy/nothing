@@ -17,7 +17,7 @@ MonoBehaviour:
   Type: 9
   Magnitude: 0.25
   SecondaryMagnitude: 0.35
-  IsWildcard: 0
+  IsWildcard: 1
   Cap: 0
   MinValue: 0
   MaxStacks: 0

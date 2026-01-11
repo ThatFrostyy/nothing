@@ -19,7 +19,7 @@ MonoBehaviour:
     Secondary Weapon: None
 
     Special
-    Weapon: None
+    Weapon: M1A1 Bazooka
 
     Ability: Explosions stun and throw enemies.'
   AbilityId: at
@@ -31,7 +31,7 @@ MonoBehaviour:
   StartingWeapon: {fileID: 11400000, guid: febdac9e3cf58414ebd6566887c2ac03, type: 2}
   SecondaryWeapon: {fileID: 0}
   WeaponIconOverride: {fileID: 0}
-  SpecialWeapon: {fileID: 0}
+  SpecialWeapon: {fileID: 11400000, guid: 35d6b0498af5bc343a8912126c34eee6, type: 2}
   UnlockRequirements:
   - Type: 5
     Target: 100
@@ -254,10 +254,20 @@ MonoBehaviour:
         KnockbackDuration: 0
     - XPOverride: 0
       Icon: {fileID: 0}
-      Description: Enemies killed by explosions have a chance to explode
+      Description: Enemies killed by explosions have a chance to explode AND your
+        special weapons have unlimited uses
       Rewards:
       - Type: 24
         Percent: 15
+        SecondaryPercent: 0
+        FlatAmount: 0
+        SecondaryFlatAmount: 0
+        DurationSeconds: 0
+        Radius: 0
+        KnockbackForce: 0
+        KnockbackDuration: 0
+      - Type: 35
+        Percent: 0
         SecondaryPercent: 0
         FlatAmount: 0
         SecondaryFlatAmount: 0

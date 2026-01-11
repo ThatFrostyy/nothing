@@ -7197,6 +7197,7 @@ MonoBehaviour:
   VampiricStrikes: 0
   RicochetRounds: 0
   RicochetChance: 0.25
+  HasUnlimitedUses: 0
 --- !u!114 &1207903156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8296,8 +8297,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0bc095b98cda40e5b16284b37349894b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FF.AirdropEventSystem
-  startWave: 15
-  waveInterval: 10
+  startWave: 10
+  waveInterval: 5
   warningLeadSeconds: 2
   cratePrefab: {fileID: 2065102623061516545, guid: 32e6ee4e5f020a344ade3fe123e8e845, type: 3}
   dropHeight: 8
@@ -12832,8 +12833,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -10, y: 63.9985}
-  m_SizeDelta: {x: 561.6636, y: 642.9927}
+  m_AnchoredPosition: {x: -10, y: 0}
+  m_SizeDelta: {x: 560, y: 640}
   m_Pivot: {x: 1, y: 0.5}
 --- !u!225 &2100000002
 CanvasGroup:
