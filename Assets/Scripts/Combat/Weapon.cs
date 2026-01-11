@@ -98,5 +98,20 @@ namespace FF
 
         [Header("Shotgun")]
         [Min(1)] public int pelletsPerShot = 6;
+
+        [Header("Mortar")]
+        public bool isMortar = false;
+        public float mortarMinRange = 5f;
+        public float mortarMaxRange = 20f;
+        public float mortarShellFallSpeed = 10f;
+
+        [Header("Artillery Strike")]
+        public bool isArtilleryStrike = false;
+        public float artilleryCircleSize = 5f;
+        public int artilleryShellAmount = 10;
+        public float artilleryShellDelay = 0.2f;
+        public AudioClip artillerySFX;
+        public GameObject artilleryCircleVFX;
+        public LayerMask groundLayerMask;
     }
 }
