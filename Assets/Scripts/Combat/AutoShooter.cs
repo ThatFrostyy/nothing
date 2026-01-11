@@ -286,6 +286,8 @@ namespace FF
 
             float deltaTime = Time.timeScale < 0.999f ? Time.unscaledDeltaTime : Time.deltaTime;
 
+            _fireTimer += deltaTime;
+
             if (_weapon.isFlamethrower)
             {
                 HandleFlamethrower(deltaTime);
@@ -316,8 +318,6 @@ namespace FF
                 sustainedFireTime -= deltaTime * 1.5f;
                 sustainedFireTime = Mathf.Clamp(sustainedFireTime, 0f, 1f);
             }
-
-            _fireTimer += deltaTime;
 
             float rpmMultiplier = _stats != null ? _stats.GetFireRateMultiplier() : 1f;
             if (UpgradeManager.I != null)
