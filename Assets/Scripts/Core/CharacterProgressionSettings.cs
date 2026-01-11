@@ -152,7 +152,8 @@ namespace FF
         SuppressionRadius,
         FlamethrowerRangeAndBurnDuration,
         StandingStillDamageReduction,
-        SuppressedEnemyPanic
+        SuppressedEnemyPanic,
+        UnlimitedUses
     }
 
     [Serializable]
