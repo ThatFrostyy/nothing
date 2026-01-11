@@ -51,6 +51,8 @@ namespace FF
         private Transform _gunPivot;
         private float _flamethrowerHeat;
         private bool _flamethrowerOverheated;
+        private bool _isFlamethrowerBursting;
+        private Transform _currentTarget;
 
         private float _currentCooldownProgress = 1f;
         private float _currentChargeProgress;
@@ -65,6 +67,8 @@ namespace FF
         public event Action<float> OnCooldownChanged;
         public event Action<float> OnGrenadeChargeChanged;
         public event Action<int, int> OnAmmoChanged;
+
+        private static Transform _playerTransformCache;
 
         public float CooldownProgress => _currentCooldownProgress;
         public float GrenadeChargeProgress => _currentChargeProgress;
@@ -288,6 +292,20 @@ namespace FF
                 return;
             }
 
+            if (_weapon.isMortar)
+            {
+                float interval = 60f / _weapon.rpm;
+                HandleMortar(interval);
+                return;
+            }
+
+            if (_weapon.isArtilleryStrike)
+            {
+                float interval = 60f / _weapon.rpm;
+                HandleArtilleryStrike(interval);
+                return;
+            }
+
             if (_isFireHeld && _weapon.isAuto)
             {
                 sustainedFireTime += deltaTime;
@@ -391,7 +409,21 @@ namespace FF
             float rangeMultiplier = UpgradeManager.I != null ? UpgradeManager.I.GetFlamethrowerRangeMultiplier(_weapon) : 1f;
             _flamethrowerEmitter.SetRangeMultiplier(rangeMultiplier);
 
-            bool canFire = _isFireHeld && !_flamethrowerOverheated;
+            bool canFire = _isFireHeld && !_flamethrowerOverheated && (HasInfiniteAmmo || _currentAmmo > 0);
+
+            if (canFire && !_isFlamethrowerBursting)
+            {
+                _isFlamethrowerBursting = true;
+                if (!HasInfiniteAmmo)
+                {
+                    _currentAmmo--;
+                    OnAmmoChanged?.Invoke(_currentAmmo, _maxAmmo);
+                }
+            }
+            else if (!canFire && _isFlamethrowerBursting)
+            {
+                _isFlamethrowerBursting = false;
+            }
 
             _flamethrowerEmitter.Tick(
                 canFire,
@@ -1021,5 +1053,104 @@ namespace FF
             source.Play();
         }
         #endregion Cooldown
+
+        private void HandleMortar(float interval)
+        {
+            if (_fireTimer < interval)
+            {
+                return;
+            }
+
+            if (_currentTarget == null)
+            {
+                _currentTarget = FindTarget();
+                if (_currentTarget == null) return;
+            }
+
+            float distance = Vector3.Distance(transform.position, _currentTarget.position);
+            if (distance >= _weapon.mortarMinRange && distance <= _weapon.mortarMaxRange)
+            {
+                if (!HasInfiniteAmmo && _currentAmmo <= 0)
+                {
+                    GameHUD.Instance?.TriggerWeaponExhausted();
+                    return;
+                }
+
+                if (!_weapon.bulletPrefab)
+                {
+                    return;
+                }
+
+                GameObject shellInstance = Instantiate(_weapon.bulletPrefab, _muzzle.position, Quaternion.identity);
+                if (shellInstance.TryGetComponent<MortarShell>(out var mortarShell))
+                {
+                    float damageMultiplier = GetFinalDamageMultiplier(out bool isCrit);
+                    int damage = Mathf.RoundToInt(_weapon.damage * damageMultiplier);
+                    string ownerTag = transform.root ? transform.root.tag : gameObject.tag;
+                    mortarShell.Launch(_currentTarget.position, _weapon.mortarShellFallSpeed, damage, ownerTag, _weapon, isCrit);
+                }
+
+                PlayFireAudio();
+                SpawnMuzzleFlash();
+
+                _fireTimer = 0f;
+
+                if (!HasInfiniteAmmo)
+                {
+                    _currentAmmo--;
+                    OnAmmoChanged?.Invoke(_currentAmmo, _maxAmmo);
+                }
+            }
+        }
+
+        private Transform FindTarget()
+        {
+            if (_playerTransformCache != null)
+            {
+                return _playerTransformCache;
+            }
+
+            PlayerController player = FindObjectOfType<PlayerController>();
+            if (player != null)
+            {
+                _playerTransformCache = player.transform;
+            }
+
+            return _playerTransformCache;
+        }
+
+        private void HandleArtilleryStrike(float interval)
+        {
+            if (_fireTimer < interval)
+            {
+                return;
+            }
+
+            if (_isFirePressed)
+            {
+                if (!HasInfiniteAmmo && _currentAmmo <= 0)
+                {
+                    GameHUD.Instance?.TriggerWeaponExhausted();
+                    return;
+                }
+
+                Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+                if (Physics.Raycast(ray, out RaycastHit hit, 1000f, _weapon.groundLayerMask))
+                {
+                    GameObject controllerGO = new GameObject("ArtilleryStrikeController");
+                    ArtilleryStrikeController controller = controllerGO.AddComponent<ArtilleryStrikeController>();
+                    controller.BeginStrike(_weapon, hit.point);
+
+                    _fireTimer = 0f;
+                    _isFirePressed = false;
+
+                    if (!HasInfiniteAmmo)
+                    {
+                        _currentAmmo--;
+                        OnAmmoChanged?.Invoke(_currentAmmo, _maxAmmo);
+                    }
+                }
+            }
+        }
     }
 }
